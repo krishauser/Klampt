@@ -14,6 +14,6 @@
     }
     fjs.parentNode.insertBefore(js, fjs);
   }
-  addScript("three_js_load","http://motion.cs.illinois.edu/klampt/three.min.js",function() {
-    addScript("klampt_load","http://motion.cs.illinois.edu/klampt/KlamptFrontend.js",null);
+  addScript("three_js_load","https://motion.cs.illinois.edu/klampt/three.min.js",function() {
+    addScript("klampt_load","https://motion.cs.illinois.edu/klampt/KlamptFrontend.js",null);
   });

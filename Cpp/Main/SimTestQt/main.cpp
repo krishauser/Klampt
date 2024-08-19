@@ -5,11 +5,6 @@
 #include "QDebug"
 #include <QSettings>
 
-string toStdString(const QString& s)
-{
-	QByteArray arr = s.toUtf8();
-	return string(arr.data());
-}
 
 int main(int argc, char *argv[])
 {
@@ -34,12 +29,11 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.ini=&ini;
     if(argc==1){
-		QString openDir = ini.value("last_open_scenario_directory", ".").toString();
-		filename = QFileDialog::getOpenFileName(0, "Open Scenario", openDir, "Scenario (*.xml);;Robot (*.rob *.urdf);;Rigid Object (*.obj);;All Files (*)");
-		if (filename.isNull()) return 0;
-		ini.setValue("last_open_scenario_directory", QFileInfo(filename).absolutePath());
-		//workaround for Qt 4.8.x crash on Windows
-		string s = toStdString(filename);
+      QString openDir = ini.value("last_open_scenario_directory", ".").toString();
+      filename = QFileDialog::getOpenFileName(0, "Open Scenario", openDir, "Scenario (*.xml);;Robot (*.rob *.urdf);;Rigid Object (*.obj);;All Files (*)");
+      if (filename.isNull()) return 0;
+      ini.setValue("last_open_scenario_directory", QFileInfo(filename).absolutePath());
+      string s = filename.toStdString();
       const char* args[3] = {"SimTest",s.c_str(),""};
       if(!w.Initialize(2,(const char**)args)) return 1;
     }

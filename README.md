@@ -6,42 +6,45 @@
 
 Klamp't (Kris' Locomotion and Manipulation Planning Toolbox) is an open-source, cross-platform software package for robot modeling, simulating, planning, optimization, and visualization. It aims to provide an accessible, wide range of programming tools for learning robotics, analyzing robots, developing algorithms, and prototyping intelligent behaviors. It has particular strengths in robot manipulation and locomotion.
 
-Historically, it began development at Indiana University since 2009 primarily as a research platform. Beginning in 2013 it has been used in education at Indiana University and Duke University. Since then, it has been adopted by other labs around the world.
+Historically, it began development at Indiana University since 2009 primarily as a research platform.  Since then, it has been adopted in education and research labs around the world.
 
 More information can be found on the Klamp't website (http://klampt.org)
 
-- [Features](#features)
-- [Installation](#installation)
-- [Documentation](#documentation)
-- [Version history](#version-history)
-- [Who uses Klamp't?](#who-uses-klampt)
-- [Comparison to related packages](#comparison-to-related-packages)
-- [Contributors](#contributors)
+- [Klamp't ](#klampt-)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Documentation](#documentation)
+  - [Reporting bugs and getting help](#reporting-bugs-and-getting-help)
+  - [Version history](#version-history)
+  - [Who uses Klamp't?](#who-uses-klampt)
+  - [Comparison to related packages](#comparison-to-related-packages)
+  - [Contributors](#contributors)
 
 
 ## Features
 
 - Unified C++ and Python package for robot modeling, kinematics, dynamics, control, motion planning, simulation, and visualization.
-- Supports legged and fixed-based robots.
-- Interoperable with [Robot Operating System](http://ros.org) (ROS) and [Open Motion Planning Library](https://ompl.kavrakilab.org/) (OMPL).
-- Many sampling-based motion planners implemented.
+- Interoperable with [Robot Operating System](http://ros.org) (ROS 1) and [Open Motion Planning Library](https://ompl.kavrakilab.org/) (OMPL).
+- Stable file formats and tooling to save, load, and visualize robots (URDF), meshes, configurations, trajectories, poses, and more. 
+- Built-in conversions to and from Numpy, JSON, ROS 1, Open3D, trimesh, PyTorch, and Sympy objects (in the Python API).
+- Many geometry types implemented, including meshes, point clouds, signed distance functions, occupancy grids, geometric primitives, and convex polytopes.  Collision, distance, and ray-casting queries are available between most pairs of geometry types.
+- Many sampling-based motion planners implemented (RRT, EST, SBL, RRT*, Lazy-RRG*, Lazy-PRM*, and more).
 - Fast trajectory optimization routines.
 - Real-time motion planning routines.
-- Forward and inverse kinematics, forward and inverse dynamics
-- Contact mechanics computations (force closure, support polygons, stability of rigid bodies and actuated robots)
+- Forward and inverse kinematics, forward and inverse dynamics.
+- Contact mechanics computations (force closure, support polygons, stability of rigid bodies and actuated robots).
 - Planning models are fully decoupled from simulation models. This helps simulate uncertainty and modeling errors.
-- Robust rigid body simulation with triangle mesh / triangle mesh collisions.
+- Robust rigid body simulation supporting triangle-soup and point cloud collisions.  No need to create convex decompositions!
 - Simulation of PID controlled, torque controlled, and velocity controlled motors.
 - Simulation of various sensors including cameras, depth sensors, laser range finders, gyroscopes, force/torque sensors, and accelerometers.
 - Works on several platforms:
-    - \*nux environments
+    - \*nux environments (x86_64, i686, Aarch64)
     - Windows
-    - MacOS up to 10.14 (Mohave)
+    - MacOS up to 11+
     - Google Colab
 
-Note: newer versions of MacOS (11+) dropped OpenGL 2.0 support, so Klampt will not build. We're currently looking for alternative cross-platform graphics engines.
 
-Note: We are encountering problems with Ubuntu 22.04 and Python 3.10+ causing an OpenGL library to throw an exception. We're looking into fixes for this problem.
+Note: newer versions of MacOS (11+) dropped OpenGL 2.0 support, so Klampt may not build. We're currently looking for alternative cross-platform graphics engines.
 
 (Please let us know if you are able to compile on other platforms in order to help us support them in the future.)
 
@@ -84,11 +87,25 @@ API documentation is available here
 
 ## Reporting bugs and getting help
 
-If you identify a programming bug or issue, please raise them on this Github site.
+If you identify a programming bug or issue, please [raise them on this Github site](https://github.com/krishauser/Klampt/issues).
 If you have general questions installing or programming with Klamp't, please ask them on the Klamp't forum, which
 is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/krishauser/Klampt). 
 
 ## Version history
+
+**master** (8/13/2024)
+
+Note: If you have a `pip` installed Klampt at version `0.9.2`, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
+
+**0.9.2** (8/13/2024)
+
+-   Python API: pip packages now built with Numpy 2+.
+-   Python API: Improved calibration routines in `klampt.model.calibrate`.
+-   Python API: Added surface sampling and vertex normals to `klampt.model.geometry`.
+-   Python API: Added visibility fraction determination to `klampt.model.sensing`.
+-   Python API: Added conversions of meshes to/from the ``trimesh`` library in `klampt.io.trimesh_convert`.
+-   Python API: Fixed bug in SO3/SE3 Hermite velocity interpolation.  Now using extrinsic angular velocity representation as tangent vectors.
+-   Python API: Mouse wheel events can now be captured in visualization (Qt and GLUT backends).
 
 **0.9.1** (10/30/2023)
 -   Removed GLUI dependency in default build mode.
@@ -117,23 +134,18 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   Python API: ``klampt_resource`` script added which allows transfer and conversions of resources from the command line.  ``klampt_thumbnails`` has been removed since all thumbnail functionality has been moved into ``klampt_resource``.
 -   Python API: new system integration utilities, such as calibration (`klampt.model.calibrate`) and workspace calculation (`klampt.model.workspace`).
 -   Python API: textures on Appearances now fully supported.
+-   Python API: fixed bug with setBackgroundImage(None)
 -   C++ API: Everything added to the ``Klampt`` namespace. **(API-breaking change!)**
 -   C++ API: Main modeling classes renamed to align with Python API, e.g. Robot->RobotModel, RobotWorld->WorldModel, WorldSimulation->Simulator, etc. **(API-breaking change!)**
+-   Fixed bug saving/restoring simulation states.
 -   Some geometries support slicing and ROI (region of interest) calculations.  Slicing takes a slice of a geometry with a plane, and ROI calculations determine a region of interest of the geometry.  Meshes and point clouds are supported.
 -   Polygon and ConvexHull geometries now support ray casting.
 -   Projection-mapping for Appearances now supported.
-
-**master** (6/1/2021)
-Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
-
--   Fixed bug saving/restoring simulation states.
--   Python API: fixed bug with setBackgroundImage(None)
 
 
 **0.8.7** (5/25/2021)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   URDF import can now import multiple collision and visual geometries.
->>>>>>> master
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
 -   Python API: bug fixes for motion planning with affine drivers.
 -   Python API: Added a function `klampt.model.types.transfer()` which transfers objects from one robot to another.
@@ -155,7 +167,7 @@ Note: If you have a `pip` installed Klampt, you may get these updates by cloning
 -   Python API: More thorough bounds checking in core C++ interface.
 -   Python API: Used Pylance to squash lots of small bugs in infrequently used branches of the code.
 
-**0.8.5  Bugfix version** (12/7/2020)
+**0.8.5** (12/7/2020)
 -   Fixed a few bad bugs in the pip release (klampt_browser crash; resource editor crash; HTML output with no animation; HTML output with custom entities).
 -   More thorough integration of custom joints into the simulation, including reading from XML world files (see [Klampt-examples/data/simulation_test_worlds/jointtest.xml](https://github.com/krishauser/Klampt-examples/blob/master/data/simulation_test_worlds/jointtest.xml).
 -   XML world files' simulation tags can now refer to named robots, rigid objects, and terrains.

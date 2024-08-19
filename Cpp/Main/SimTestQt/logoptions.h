@@ -18,7 +18,7 @@ class LogOptions : public QDialog
     
 public:
     explicit LogOptions(QWidget *parent=0);
-    ~LogOptions();
+    virtual ~LogOptions();
     
     void addrows(std::vector<bool> drawMeasurement);
     int selected_measurement;

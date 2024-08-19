@@ -852,7 +852,8 @@ class ADFunctionCall:
                 try:
                     ddf = self.func.gen_derivative([i,j],*eval_args)
                 except NotImplementedError:
-                    return finite_differences()
+                    raise NotImplementedError("Can't compute hessian of function %s with respect to %s and %s, differencing not available yet"%(str(self.func),darg1,darg2))
+                    #return finite_differences()
                 #print("d^2/d",i,j,"of func",self.func,"is",ddf)
                 if ddf is 0:
                     continue

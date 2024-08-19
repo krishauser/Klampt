@@ -115,7 +115,7 @@ def _from_rotation_vector_jvp(dw,w):
     if length < 1e-7: return so3.cross_product(dw)
     axis = w/length
     daxis = math_ad._unit_jvp(dw,w)
-    return _from_axis_angle_jvp_axis(daxis,axis,length) + _from_axis_angle_jvp_angle(dlength,length)
+    return _from_axis_angle_jvp_axis(daxis,axis,length) + _from_axis_angle_jvp_angle(dlength,axis,length)
 from_rotation_vector = function(so3.from_rotation_vector,'so3.from_rotation_vector',(3,),9,
     jvp = [_from_rotation_vector_jvp])
 """Autodiff'ed version of so3.from_rotation_vector. First derivatives are

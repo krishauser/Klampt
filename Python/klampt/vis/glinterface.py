@@ -41,6 +41,8 @@ class GLPluginInterface:
         return False
     def motionfunc(self,x,y,dx,dy) -> bool:
         return False
+    def mousewheelfunc(self,dhorizontal,dvertical,x,y) -> bool:
+        return False
     def idle(self) -> bool:
         return True
     def eventfunc(self,type,args="") -> bool:

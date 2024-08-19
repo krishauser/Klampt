@@ -94,11 +94,15 @@ bool parseMaterial(Material &material, TiXmlElement *config)
       }
     }
   }
-
-  if (!has_rgb && !has_filename) {
-    if (!has_rgb) LOG4CXX_INFO(GET_LOGGER(URDFParser), "Material ["<<material.name<<"] color has no rgba");
-    if (!has_filename) LOG4CXX_INFO(GET_LOGGER(URDFParser),"Material ["<<material.name<<"] not defined in file");
-    return false;
+  if(!c && !t) {
+    LOG4CXX_INFO(GET_LOGGER(URDFParser),"Material [" << material.name <<"] needs to be looked up in <material> definition");
+  }
+  else {
+    if (!has_rgb && !has_filename) {
+      if (!has_rgb) LOG4CXX_INFO(GET_LOGGER(URDFParser), "Material ["<<material.name<<"] color rgba not present");
+      if (!has_filename) LOG4CXX_INFO(GET_LOGGER(URDFParser),"Material ["<<material.name<<"] texture filename not present");
+      return false;
+    }
   }
   return true;
 }
@@ -350,7 +354,7 @@ bool parseVisual(Visual &vis, TiXmlElement *config)
     {
       //vis.material.reset();
       //return false;
-      LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "material has only name, actual material definition may be in the model");
+      LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "material ["<<vis.material_name<<"] could not be parsed");
     }
   }
   

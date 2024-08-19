@@ -32,7 +32,10 @@ The :func:`camera_to_intrinsics` and :func:`intrinsics_to_camera` functions
 convert between intrinsics definitions.
 
 :func:`camera_ray`, and :func:`camera_project` convert to/from image points.
+
 :func:`visible` determines whether a point or object is visible from a camera.
+:func:`visible_fraction` determines the fraction of a point or object visible
+from a camera.
 
 :func:`projection_map_texture` maps a texture from a camera into an OpenGL
 appearance.
@@ -44,8 +47,9 @@ from ..robotsim import Geometry3D
 from ..io import loader
 from ..vis.glviewport import GLViewport
 from ..model.typing import RigidTransform,Vector3
+from ..model.collide import bb_create,bb_intersect
 from . import coordinates
-from typing import Union,Tuple,Any
+from typing import Union,Tuple,List,Any,Optional
 import math
 import sys
 from ..math import vectorops,so3,se3
@@ -55,6 +59,8 @@ import numpy as np
 _has_scipy = False
 _tried_scipy_import = False
 sp = None
+
+ImageLike = Union[np.ndarray,List[List]]
 
 def _try_scipy_import():
     global _has_scipy,_tried_scipy_import
@@ -72,7 +78,7 @@ def _try_scipy_import():
         _has_scipy = False
     return _has_scipy
 
-def get_sensor_xform(sensor : SimRobotSensor, robot : RobotModel = None) -> RigidTransform:
+def get_sensor_xform(sensor : SimRobotSensor, robot : Optional[RobotModel] = None) -> RigidTransform:
     """Extracts the transform of a SimRobotSensor.  The sensor must be
     of a link-mounted type, e.g., a CameraSensor or ForceSensor.
 
@@ -89,16 +95,16 @@ def get_sensor_xform(sensor : SimRobotSensor, robot : RobotModel = None) -> Rigi
         return sensor.getTransform()
     else:
         return sensor.getTransformWorld()
-    s = sensor.getSetting("Tsensor")
-    Tsensor = loader.read_se3(s)
-    if robot is not None:
-        link = int(sensor.getSetting("link"))
-        if link >= 0:
-            return se3.mul(robot.link(link).getTransform(),Tsensor)
-    return Tsensor
+    # s = sensor.getSetting("Tsensor")
+    # Tsensor = loader.read_se3(s)
+    # if robot is not None:
+    #     link = int(sensor.getSetting("link"))
+    #     if link >= 0:
+    #         return se3.mul(robot.link(link).getTransform(),Tsensor)
+    # return Tsensor
 
 
-def set_sensor_xform(sensor : SimRobotSensor, T : RigidTransform, link : RobotModelLink = None):
+def set_sensor_xform(sensor : SimRobotSensor, T : RigidTransform, link : Optional[RobotModelLink] = None):
     """Given a link-mounted sensor (e.g., CameraSensor or ForceSensor), sets 
     its link-local transform to T.
 
@@ -132,7 +138,7 @@ def set_sensor_xform(sensor : SimRobotSensor, T : RigidTransform, link : RobotMo
         sensor.setLink(link)
 
 
-def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format='channels') -> Tuple[Any,Any]:
+def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format='channels') -> Union[np.ndarray,Tuple[np.ndarray,np.ndarray]]:
     """Given a SimRobotSensor that is a CameraSensor, returns either the RGB
     image, the depth image, or both.
 
@@ -216,8 +222,10 @@ def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format=
     return None
 
 
-def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None,color_format='auto',points_format='numpy',all_points=False):
-    """Given a depth and optionally color image, returns a point cloud
+def image_to_points(depth : ImageLike, color : ImageLike, xfov : float, yfov: Optional[float]=None,
+                    depth_scale : Optional[float] = None, depth_range : Optional[Tuple[float,float]]=None,
+                    color_format='auto',points_format='numpy',all_points=False):
+    r"""Given a depth and optionally color image, returns a point cloud
     representing the depth or RGB-D scene.
 
     Optimal performance is obtained with ``points_format='PointCloud'`` or
@@ -414,7 +422,7 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
 def camera_to_points(camera : SimRobotSensor,
                      points_format='numpy',
                      all_points=False,
-                     color_format='channels') -> Union['ndarray',PointCloud,Geometry3D]:
+                     color_format='channels') -> Union[np.ndarray,PointCloud,Geometry3D]:
     """Given a SimRobotSensor that is a CameraSensor, returns a point cloud
     associated with the current measurements.
 
@@ -572,13 +580,12 @@ def camera_to_points(camera : SimRobotSensor,
         return res
     else:
         raise ValueError("Invalid points_format "+points_format)
-    return None
 
 
 def camera_to_points_world(camera : SimRobotSensor,
                            robot : RobotModel,
                            points_format='numpy',
-                           color_format='channels') -> Union['ndarray',PointCloud,Geometry3D]:
+                           color_format='channels') -> Union[np.ndarray,PointCloud,Geometry3D]:
     """Same as :meth:`camera_to_points`, but converts to the world coordinate
     system given the robot to which the camera is attached.  
 
@@ -784,7 +791,8 @@ def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
     all distortions are dropped.
 
     Args:
-        data: the file or data to set. Interpretation varies depending on format.
+        data: the filename or data to set. Interpretation varies depending on
+            the format.
         camera (SimRobotSensor): the viewport will be output to this sensor
         format (str): either 'opencv', 'numpy', 'ros', or 'json'
 
@@ -792,6 +800,7 @@ def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
     if isinstance(data,str):
+        #it's a filename
         with open(data,'r') as f:
             if format == 'opencv':
                 raise NotImplementedError("TODO: read from OpenCV calibrations")
@@ -832,8 +841,8 @@ def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
         raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
     w = int(cx*2)
     h = int(cy*2)
-    xfov = math.atan(fx/(w*2))*2
-    yfov = math.atan(fy/(h*2))*2
+    xfov = math.atan(w/(fx*2))*2
+    yfov = math.atan(h/(fy*2))*2
     camera.setSetting('xres',str(w))
     camera.setSetting('yres',str(h))
     camera.setSetting('xfov',str(xfov))
@@ -890,7 +899,8 @@ def visible(camera : Union[SimRobotSensor,GLViewport], object, full=True, robot=
     """Tests whether the given object is visible in a SimRobotSensor or a
     GLViewport. 
 
-    If you are doing this multiple times, first convert to GLViewport.
+    If you are doing this multiple times, it's marginally faster to first 
+    convert camera to GLViewport.
 
     Args:
         camera (SimRobotSensor or GLViewport): the camera.
@@ -983,6 +993,148 @@ def visible(camera : Union[SimRobotSensor,GLViewport], object, full=True, robot=
     if not isinstance(object,Geometry3D):
         raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
     return visible(camera,object.getBB(),full,robot)
+
+
+def occluded(origin : Vector3, point : Vector3, occluders : Union[WorldModel,List], tol=1e-3) -> bool:
+    """Returns whether the ray from origin to point is occluded by any of the
+    objects in occluders.
+    
+    .. versionadded:: 0.9.2
+    """
+    if not occluders:
+        return False
+    if isinstance(occluders, WorldModel):
+        entities = []
+        for i in range(occluders.numRobots()):
+            for j in range(occluders.robot(i).numLinks()):
+                entities.append(occluders.robot(i).link(j))
+        for i in range(occluders.numRigidObjects()):
+            entities.append(occluders.rigidObject(i))
+        if i in range(occluders.numTerrains()):
+            entities.append(occluders.terrain(i))
+        return occluded(origin,point,entities)
+    d = vectorops.sub(point,origin)
+    dp = vectorops.dot(d,d)
+    sbmin,sbmax = bb_create(point,origin)
+    for o in occluders:
+        if hasattr(o,'geometry'):
+            o = o.geometry()
+        if not isinstance(o,Geometry3D):
+            raise ValueError("Occluders must be a list of Geometry3D objects or entities")
+        #quick BB rejection test
+        bmin,bmax = o.getBB()
+        if not bb_intersect((sbmin,sbmax),(bmin,bmax)):
+            continue
+        hit,pt = o.rayCast(origin,point)
+        if hit and vectorops.dot(vectorops.sub(pt,origin),d) < dp-tol:
+            return True
+    return False
+
+
+def sample_visible_surface(origin : Vector3, object : Geometry3D, num_samples : int) -> List[Vector3]:
+    """Samples the visible surface of an object.
+
+    .. versionadded:: 0.9.2
+    """
+    from . import geometry
+    pn = geometry.sample_surface(object,num_samples*2.5, want_normals=True)
+    pts = pn[:,:3]
+    normals = pn[:,:6]
+    forward_pts = []
+    for p,n in zip(pts,normals):
+        if vectorops.dot(vectorops.sub(p,origin),n) < 0:
+            #back facing
+            pass
+        else:
+            forward_pts.append(p)
+    if num_samples < len(forward_pts):
+        return forward_pts[:num_samples]
+    return forward_pts
+
+
+def visible_fraction(camera : Union[SimRobotSensor,GLViewport], object, num_samples=100,
+                     robot : Optional[RobotModel]=None,
+                     occluders : Optional[Union[WorldModel,List]] = None,
+                     self_occlusion = False) -> float:
+    """Estimates how much of the given object would be visible in a
+    SimRobotSensor or a GLViewport, if the sensor were to have infinite field
+    of view.
+
+    Returns a fraction from 0 to 1.
+
+    If you are doing this multiple times, it's marginally faster to first 
+    convert camera to GLViewport.
+
+    .. versionadded:: 0.9.2
+
+    Args:
+        camera (SimRobotSensor or GLViewport): the camera.
+        object: a 3-vector, a (center,radius) pair indicating a sphere, an
+            axis-aligned bounding box (bmin,bmax), a Geometry3D, or an object
+            that has a geometry() method, e.g., RigidObjectModel, RobotModelLink.
+        full (bool, optional): if True, the entire object must be in the
+            viewing frustum for it to be considered visible.  If False, any
+            part of the object can be in the viewing frustum.
+        robot (RobotModel): if camera is a SimRobotSensor, this will be used to
+            derive the transform.
+        occluders (list of world objects or Geometry3D, optional): if given,
+            these objects will be ray-casted to determine if they occlude the
+            object.
+        self_occlusion (bool, optional): if True, the object will be tested for
+            self-occlusion.  This is only meaningful if the object is non-convex.
+    """
+    if isinstance(camera,SimRobotSensor):
+        camera = camera_to_viewport(camera,robot)
+    R,origin = camera.get_transform()
+    if isinstance(occluders,WorldModel):
+        entities = []
+        for i in range(occluders.numRobots()):
+            for j in range(occluders.robot(i).numLinks()):
+                entities.append(occluders.robot(i).link(j))
+        for i in range(occluders.numRigidObjects()):
+            entities.append(occluders.rigidObject(i))
+        if i in range(occluders.numTerrains()):
+            entities.append(occluders.terrain(i))
+        occluders = entities
+
+    if hasattr(object,'geometry'):
+        return visible_fraction(camera,object.geometry(),num_samples,robot,occluders,self_occlusion)
+    if hasattr(object,'__iter__'):
+        if not hasattr(object[0],'__iter__'):
+            #vector
+            if len(object) != 3:
+                raise ValueError("Object must be a 3-vector")
+            pts = [object]
+        elif hasattr(object[1],'__iter__'):
+            if len(object[0]) != 3 or len(object[1]) != 3:
+                raise ValueError("Object must be a bounding box")
+            bmin,bmax = object
+            prim = GeometricPrimitive()
+            prim.setAABB(bmin,bmax)
+            pts = sample_visible_surface(origin, Geometry3D(prim), num_samples)
+        else:
+            #sphere
+            if len(object[0]) != 3:
+                raise ValueError("Object must be a sphere")
+            prim = GeometricPrimitive()
+            prim.setSphere(object[0],object[1])
+            pts = sample_visible_surface(origin, Geometry3D(prim), num_samples)
+    elif isinstance(object,Geometry3D):
+        if self_occlusion and object.type() not in ['TriangleMesh','VolumeGrid']:
+            self_occlusion = False
+        pts = sample_visible_surface(origin, object, num_samples)
+    else:
+        raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
+    #test whether these are out of frame or occluded rays
+    nocc = 0
+    for pt in pts:
+        if camera.project(pt) == None or occluded(origin,pt,occluders):
+            nocc += 1
+        if self_occlusion and occluded(origin,pt,[object]):  #do we want a different tolerance for self-occlusion?
+            nocc += 1
+    return 1.0 - nocc/len(pts)
+
+
 
 
 def laser_to_points(sensor, robot=None, scan=None):

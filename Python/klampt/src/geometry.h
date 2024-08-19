@@ -237,7 +237,7 @@ struct PointCloud
   ///    ndarray: an n-D Numpy array.
   ///
   void getProperties(int pindex,double** np_out,int* m) const;
-  ///Returns property named pindex of all points as an array
+  ///Returns property named pname of all points as an array
   ///
   ///Returns:
   ///

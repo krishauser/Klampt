@@ -665,7 +665,7 @@ class WorldCollider:
 
     def objectObjectCollisions(self,
             object: Union[RigidObjectModel,int],
-            object2: Union[RigidObjectModel,int,None]
+            object2: Union[RigidObjectModel,int,None]=None
         ) -> Iterator[Tuple[RigidObjectModel,RigidObjectModel]]:
         """Yields an iterator over object-terrain collision pairs.
 

@@ -2,8 +2,11 @@ from .cspace import CSpace
 from .. import robotsim
 from ..model import collide
 from .cspaceutils import EmbeddedCSpace
+from ..robotsim import RobotModel,IKObjective
 import math
 import random
+from ..model.typing import Config,Configs
+from typing import Optional,Union,List,Callable
 
 class RobotCSpace(CSpace):
     """A basic robot cspace that allows collision free motion.
@@ -25,7 +28,7 @@ class RobotCSpace(CSpace):
         assumes that everything with unbounded limits is a rotational joint.
         
     """
-    def __init__(self,robot,collider=None):
+    def __init__(self,robot : RobotModel, collider : Optional[collide.WorldCollider]=None):
         CSpace.__init__(self)
         self.robot = robot
         self.setBounds(list(zip(*robot.getJointLimits())))
@@ -71,10 +74,10 @@ class RobotCSpace(CSpace):
         self.joint_limit_failures = [0]*len(self.bound)
         self.properties['geodesic'] = 1
 
-    def addConstraint(self,checker,name=None):
+    def addConstraint(self, checker : Callable, name=None):
         self.addFeasibilityTest(checker,name)
 
-    def sample(self):
+    def sample(self) -> Config:
         """Overload this to implement custom sampling strategies or to handle
         non-standard joints.  This one will handle spin joints and
         rotational axes of floating bases."""
@@ -84,7 +87,7 @@ class RobotCSpace(CSpace):
                 res[i] = random.uniform(0,math.pi*2.0)
         return res
 
-    def inJointLimits(self,x):
+    def inJointLimits(self,x : Config) -> bool:
         """Checks joint limits of the configuration x"""
         for i,(xi,bi) in enumerate(zip(x,self.bound)):
             if xi < bi[0] or xi > bi[1]:
@@ -92,7 +95,7 @@ class RobotCSpace(CSpace):
                 return False
         return True
 
-    def selfCollision(self,x=None):
+    def selfCollision(self, x : Optional[Config]=None) -> bool:
         """Checks whether the robot at its current configuration is in
         self collision"""
         #This should be faster than going through the collider... 
@@ -101,7 +104,7 @@ class RobotCSpace(CSpace):
         #if not self.collider: return False
         #return any(self.collider.robotSelfCollisions(self.robot.index))
 
-    def envCollision(self,x=None):
+    def envCollision(self,x : Optional[Config]=None) -> bool:
         """Checks whether the robot at its current configuration is in
         collision with the environment."""
         if not self.collider: return False
@@ -120,13 +123,11 @@ class RobotCSpace(CSpace):
     def distance(self,a,b):
         return self.robot.distance(a,b)
 
-    def sendPathToController(self,path,controller):
-        """Given a planned CSpace path 'path' and a SimRobotController 'controller',
-        sends the path so that it is executed correctly by the controller (this assumes
-        a fully actuated robot)."""
-        controller.setMilestone(path[0])
-        for q in path[1:]:
-            controller.appendMilestoneLinear(q)
+    def executablePath(self,path : Configs) -> Configs:
+        """Given a planned CSpace path, returns a path that can be executed using
+        klampt.model.trajectory.execute_path.
+        """
+        return path
 
 
 class ClosedLoopRobotCSpace(RobotCSpace):
@@ -145,7 +146,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
     create edges between samples a and b, the straight line path a and b is
     projected to the manifold via an IK solve.
     """
-    def __init__(self,robot,iks,collider=None):
+    def __init__(self,robot: RobotModel, iks : List[IKObjective], collider : Optional[collide.WorldCollider]=None):
         RobotCSpace.__init__(self,robot,collider)
         self.solver = robotsim.IKSolver(robot)
         if hasattr(iks,'__iter__'):
@@ -159,7 +160,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         self.tol = 1e-3
         self.addFeasibilityTest((lambda x: self.closedLoop(x)),'closed loop constraint')
 
-    def setIKActiveDofs(self,activeSet):
+    def setIKActiveDofs(self,activeSet : List[int]):
         """Marks that only a subset of the DOFs of the robot are to be used for
         solving the IK constraint.
 
@@ -168,7 +169,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         """
         self.solver.setActiveDofs(activeSet)
 
-    def sample(self):
+    def sample(self) -> Config:
         """Samples directly on the contact manifold.  The basic method samples
         arbitrarily in the configuration space and then solves IK constraints. 
 
@@ -181,14 +182,14 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         res = self.solveConstraints(x)
         return res
 
-    def sampleneighborhood(self,c,r):
+    def sampleneighborhood(self,c : Config, r : float) -> Config:
         """Samples a neighborhood in ambient space and then projects onto the
         contact manifold.
         """
         x = RobotCSpace.sampleneighborhood(self,c,r)
         return self.solveConstraints(x)
 
-    def solveConstraints(self,x):
+    def solveConstraints(self,x : Config) -> Config:
         """Given an initial configuration of the robot x, attempts to solve the
         IK constraints given in this space.  Return value is the best
         configuration found via local optimization.
@@ -199,15 +200,15 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         res = self.solver.solve()
         return self.robot.getConfig()
 
-    def closedLoop(self,config=None,tol=None):
+    def closedLoop(self,config : Optional[Config] = None, tol : Optional[float]=None) -> bool:
         """Returns true if the closed loop constraint has been met at config,
         or if config==None, the robot's current configuration."""
         if config is not None: self.robot.setConfig(config)
         e = self.solver.getResidual()
-        if tol==None: tol = self.tol
+        if tol is None: tol = self.tol
         return max(abs(ei) for ei in e) <= tol
 
-    def interpolate(self,a,b,u):
+    def interpolate(self,a,b,u) -> Config:
         """Interpolates on the manifold.  Used by edge collision checking"""
         x = RobotCSpace.interpolate(self,a,b,u)
         return self.solveConstraints(x)
@@ -226,7 +227,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         res.append(b)
         return res
 
-    def discretizePath(self,path,epsilon=1e-2):
+    def discretizePath(self, path : Configs, epsilon : float = 1e-2) -> Configs:
         """Given a :class:`CSpace` path ``path``, generates a path that
         satisfies closed-loop constraints up to the given distance between
         milestones.
@@ -238,12 +239,11 @@ class ClosedLoopRobotCSpace(RobotCSpace):
             respath += self.interpolationPath(a,b,epsilon)[1:]
         return respath
 
-    def sendPathToController(self,path,controller,epsilon=1e-2):
-        """Given a :class:`CSpace` path ``path``, sends the path to be executed
-        to the :class:`SimRobotController` ``controller``.
-
-        This discretizes the path and sends it as a piecewise linear curve,
-        limited in speed by the robot's maximum velocity.
+    def executablePath(self,path : Configs, epsilon : float = 1e-2) -> Configs:
+        """Given a :class:`CSpace` path, returns a path that can be executed
+        using klampt.model.trajectory.execute_path.  This is the same as
+        discretizePath, but is provided for compatibility with the RobotCSpace
+        interface.
 
         .. note::
             This isn't the best thing to do for robots with slow acceleration
@@ -251,19 +251,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
             better solution can be found in the MInTOS package or the C++ code
             in Klampt/Cpp/Planning/RobotTimeScaling.h.
         """
-        dpath = self.discretizePath(path,epsilon)
-        vmax = controller.model().getVelocityLimits()
-        assert len(dpath[0]) == len(vmax)
-        controller.setMilestone(dpath[0])
-        for a,b in zip(dpath[:-1],dpath[1:]):
-            dt = 0.0
-            for i in range(len(a)):
-                if vmax[i] == 0:
-                    if a[i] != b[i]: print("ClosedLoopRobotCSpace.sendPathToController(): Warning, path moves on DOF %d with maximum velocity 0"%(i,))
-                else:
-                    dt = max(dt,abs(a[i]-b[i])/vmax[i])
-            #this does a piecewise lienar interpolation
-            controller.appendLinear(dt,b)
+        return self.discretizePath(path,epsilon)
 
 
 class ImplicitManifoldRobotCSpace(RobotCSpace):
@@ -275,8 +263,8 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
 
     See :class:`ClosedLoopRobotCSpace`.
     """
-    def __init__(self,robot,implicitConstraint,collider=None):
-        RobotCSpace.__init__self(robot,collider)
+    def __init__(self,robot : RobotModel, implicitConstraint : Callable, collider=None):
+        RobotCSpace.__init__(self,robot,collider)
         self.implicitConstraint = implicitConstraint
 
         #root finding iterations
@@ -285,24 +273,24 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
 
         self.addFeasibilityTest((lambda x: self.onManifold(x)),'implicit manifold constraint')
 
-    def sample(self):
+    def sample(self) -> Config:
         """Samples directly on the contact manifold"""
         x = RobotCSpace.sample()
         return self.solveManifold(x)
 
-    def onManifold(self,x,tol=None):
+    def onManifold(self,x : Config, tol : Optional[float] = None) -> bool:
         """Returns true if the manifold constraint has been met at x."""
         e = self.implicitConstraint.eval(x)
-        if tol==None: tol = self.tol
+        if tol is None: tol = self.tol
         return max(abs(ei) for ei in e) <= tol
 
-    def solveManifold(self,x,tol=None,maxIters=None):
+    def solveManifold(self,x : Config, tol : Optional[float]=None, maxIters : Optional[int]=None):
         """Solves the manifold constraint starting from x, to the given
         tolerance and with the given maximum iteration count.  Default
         uses the values set as attributes of this class.
         """
-        if tol==None: tol = self.tol
-        if maxIters==None: maxIters = self.maxIters
+        if tol is None: tol = self.tol
+        if maxIters is None: maxIters = self.maxIters
         from klampt import rootfind
         rootfind.setXTolerance(1e-8)
         rootfind.setFTolerance(tol)
@@ -328,7 +316,7 @@ class EmbeddedRobotCSpace(EmbeddedCSpace):
         xinit (configuration, optional): the reference configuration, or None
             to use the robot's current configuration as the reference.
     """
-    def __init__(self,ambientspace,subset,xinit=None):
+    def __init__(self,ambientspace : RobotCSpace, subset : List[int], xinit : Optional[Config] = None):
         self.robot = ambientspace.robot
         if xinit is None:
             xinit = self.robot.getConfig()
@@ -399,14 +387,14 @@ class EmbeddedRobotCSpace(EmbeddedCSpace):
                     newmask.add(rindices[j])
             collider.mask[rindex] = newmask
 
-    def discretizePath(self,path,epsilon=1e-2):
+    def discretizePath(self,path : Configs, epsilon=1e-2):
         """Only useful for ClosedLoopRobotCSpace"""
         if hasattr(self.ambientspace,'discretizePath'):
             return self.ambientspace.discretizePath(self.liftPath(path),epsilon)
         else:
             return self.liftPath(path)
 
-    def sendPathToController(self,path,controller):
+    def executablePath(self,path : Configs) -> Configs:
         """Sends a planned path so that it is executed correctly by the
         controller (assumes a fully actuated robot).
 
@@ -417,9 +405,9 @@ class EmbeddedRobotCSpace(EmbeddedCSpace):
         """
         if len(path[0]) == len(self.mapping):
             path = self.liftPath(path)
-        if hasattr(self.ambientspace,'discretizePath'):
-            path = self.ambientspace.discretizePath(path)
-        self.ambientspace.sendPathToController(path,controller)
+        if hasattr(self.ambientspace,'executablePath'):
+            path = self.ambientspace.executablePath(path)
+        return path
 
 
 
@@ -459,7 +447,7 @@ class RobotSubsetCSpace(EmbeddedCSpace):
         ``space.disableInactiveCollisions()``
 
     """
-    def __init__(self,robot,subset,collider=None):
+    def __init__(self,robot : RobotModel, subset : List[int], collider : Optional[collide.WorldCollider]=None):
         EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
         self.collider = collider
         if self.collider:
@@ -483,10 +471,9 @@ class RobotSubsetCSpace(EmbeddedCSpace):
                             newmask.add(rindices[j])
                     self.collider.mask[rindex] = newmask
 
-    def sendPathToController(self,path,controller):
-        """Given a planned :class:`CSpace` path ``path`` and a
-        :class:`SimRobotController` ``controller``, sends the path so that it
-        is executed correctly by the controller.
+    def executablePath(self,path : Configs) -> Configs:
+        """Given a planned CSpace path, returns a path that can be executed using
+        klampt.model.trajectory.execute_path.
 
         .. note:
             This assumes a fully actuated robot.  It won't work for robots with
@@ -494,6 +481,4 @@ class RobotSubsetCSpace(EmbeddedCSpace):
 
         """
         lpath = self.liftPath(path)
-        controller.setMilestone(lpath[0])
-        for q in lpath[1:]:
-            controller.appendMilestoneLinear(q)
+        return lpath

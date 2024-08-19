@@ -158,9 +158,9 @@
         animationIndex = 0;
       if(ind > animationIndex) {
         //move rpcs forward
-        for(i = animationIndex+1;i<=ind;i++) {
+        for(let i = animationIndex+1;i<=ind;i++) {
           if(rpcs[i]) {
-            for(j=0;j<rpcs[i].length;j++)
+            for(let j=0;j<rpcs[i].length;j++)
               klampt_frontend.rpc(rpcs[i][j]);
           }
         }
@@ -168,9 +168,9 @@
       else {
         klampt_frontend.rpc({type:'clear_extras'});
         klampt_frontend.rpc({type:'add_text',name:'time_display',text:"Time "+(animationTime*0.001).toFixed(2),x:5,y:5});
-        for(i = 0;i<=ind;i++) {
+        for(let i = 0;i<=ind;i++) {
           if(rpcs[i]) {
-            for(j=0;j<rpcs[i].length;j++)
+            for(let j=0;j<rpcs[i].length;j++)
               klampt_frontend.rpc(rpcs[i][j]);
           }
         }
@@ -211,7 +211,7 @@
         <canvas id="reset" width="50" height="50" class="button" onclick="resetplay()"> </canvas> 
         <canvas id="play_pause" width="50" height="50" class="button" onclick="toggleplaypause()">  </canvas>
         <input id="slider" class="slider" type="range" name="duration" min="0" max="100" step="0.1" style="float:left; width:60%; height:40px; margin-top:20px; margin-left:10px;" onchange="sliderdrag()" oninput="sliderdrag()"/>
-        <a href="http://klampt.org"><img src="http://motion.cs.illinois.edu/klampt/powered_by_klampt_transparent.png" class="logo"></a>
+        <a href="https://klampt.org"><img src="https://motion.cs.illinois.edu/klampt/powered_by_klampt_transparent.png" class="logo"></a>
 
       </div>
       <div id="canvas" style="position:relative; display:block; width:100%; height:90%; margin:0px; padding:0px;"></div>

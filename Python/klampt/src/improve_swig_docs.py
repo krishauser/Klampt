@@ -286,7 +286,7 @@ def print_signature(siglist,indent0,docstring):
                     print(indent0+indentstr,aname,'(%s)'%(to_type_doc(atype),))
                 else:
                     print(indent0+indentstr,aname,'(%s, optional): default value %s'%(to_type_doc(atype),adef))
-        if ret[0] is not 'None' and fn != '__init__'and print_return:
+        if ret[0] != 'None' and fn != '__init__'and print_return:
             pass  #The type hints will already document the type
             #print(indent0+"Returns:")
             #print(indent0+indentstr,"%s:"%(to_type_doc(ret[0])))

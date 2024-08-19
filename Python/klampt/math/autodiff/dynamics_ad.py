@@ -365,7 +365,7 @@ class FullDynamics(ADFunctionInterface):
                     tfull[j] = v
             else:
                 tfull[links[0]] = 1
-        t - G
+        t -= G
         if len(f) > 0:
             for i,(link,pt) in enumerate(zip(self.links,self.localpts)):
                 t += np.dot(np.array(link.getPositionJacobian(pt)).T,f[i*3,i*3+3])

@@ -18,7 +18,7 @@ class QtGUIBase : public QObject,public GenericGUIBase
 public:
     QTimer* idle_timer;
     QtGUIBase(GenericBackendBase* _backend);
-    ~QtGUIBase();
+    virtual ~QtGUIBase();
     void ShowHelp();
     void ShowAbout();
 public slots:

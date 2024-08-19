@@ -117,6 +117,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.view.setModel(self.model)
         #nicer size for columns
         self.view.header().resizeSection(0, 200)
+        self.view.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.view.header().resizeSection(1, 75)
         self.view.header().resizeSection(2, 75)
         self.view.header().resizeSection(3, 150)
@@ -690,8 +691,8 @@ where the items are world, robot, terrain, object, or geometry files.
         browser = ResourceBrowser(gl_backend)
         g_browser = browser
         dw = QtWidgets.QDesktopWidget()
-        x=dw.width()*0.8
-        y=dw.height()*0.8
+        x=int(dw.width()*0.8)
+        y=int(dw.height()*0.8)
         browser.setFixedSize(x,y)
         for fn in sys.argv[1:]:
             res = browser.world.readFile(fn)

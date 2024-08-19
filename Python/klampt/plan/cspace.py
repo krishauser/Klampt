@@ -6,6 +6,8 @@ classes.
 from . import motionplanning
 import random
 import warnings
+from ..model.typing import Config
+from typing import List, Tuple, Union, Optional, Callable
 
 class CSpace:
     """Used alongside :class:`MotionPlan` to define a configuration space for
@@ -76,11 +78,11 @@ class CSpace:
         self.feasibilityTests = None
         self.feasibilityTestNames = None
         self.feasibilityTestDependencies = None
-        self.eps = 1e-3
-        self.bound = [(0,1)]
-        self.properties = {}
+        self.eps = 1e-3                     # type: float
+        self.bound = [(0,1)]                # type: List[Tuple[float,float]]
+        self.properties = {}                # type: dict
 
-    def setBounds(self,bound):
+    def setBounds(self,bound: List[Tuple[float,float]]):
         """Convenience function: sets the sampling bound and the
         space properties in one line."""
         self.bound = bound
@@ -137,7 +139,7 @@ class CSpace:
             else:
                 self.cspace.setProperty(k,str(v))
 
-    def sample(self):
+    def sample(self) -> Config:
         """Overload this to define a nonuniform sampler.
         By default, it will sample from the axis-aligned bounding box
         defined by self.bound. To define a different domain, set self.bound
@@ -145,14 +147,14 @@ class CSpace:
         """
         return [random.uniform(*b) for b in self.bound]
 
-    def sampleneighborhood(self,c,r):
+    def sampleneighborhood(self, c : Config, r : float) -> Config:
         """Overload this to define a nonuniform sampler.
         By default, it will sample from the axis-aligned box of radius r
         around c, but clamped to the bound.
         """
         return [random.uniform(max(b[0],ci-r),min(b[1],ci+r)) for ci,b in zip(c,self.bound)]
 
-    def addFeasibilityTest(self,func,name=None,dependencies=None):
+    def addFeasibilityTest(self,func : Callable, name : Optional[str] = None, dependencies : Optional[Union[str,List[str]]]=None):
         """Adds a new feasibility test with the given function func(x) and the specified name.
         If name is not provided (default) a default name is generated.
 
@@ -176,11 +178,11 @@ class CSpace:
             else:
                 self.feasibilityTestDependencies.append((name,dependencies))
 
-    def inBounds(self,x):
+    def inBounds(self, x : Config) -> bool:
         """Returns true if x is within the given bounds"""
         return all(a<=xi<=b for (xi,(a,b)) in zip(x,self.bound))
 
-    def feasible(self,x):
+    def feasible(self, x : Config) -> bool:
         """Overload this to define your new feasibility test.
         By default the implementation simply tests the bounds constraint, or if self.feasibilityTests
         is not empty, tests each function in self.feasibilityTests."""
@@ -191,19 +193,19 @@ class CSpace:
                 if not test(x): return False
             return True
 
-    def isFeasible(self,x):
+    def isFeasible(self, x : Config) -> bool:
         """An overload for self.cspace.isFeasible.  Use this to test feasibility of a configuration
         (rather than feasible()) if you wish to take advantage of adaptive feasibility testing and
         constraint testing statistics."""
         return self.cspace.isFeasible(x)
 
-    def isVisible(self,x,y):
+    def isVisible(self, x : Config, y : Config) -> bool:
         """An overload for self.cspace.isVisible.  Use this to test visibility of a line
         (rather than visible()) if you want to use the natural visibility tester, wish to take
         advantage of adaptive visibility testing, or want to use constraint testing statistics."""
         return self.cspace.isVisible(x,y)
 
-    def getStats(self):
+    def getStats(self) -> dict:
         """Returns a dictionary mapping statistic names to values.  Result contains 
         fraction of feasible configurations, edges, etc.  If feasibility tests are
         individually specified, returns stats for individual tests as well. """
@@ -236,7 +238,7 @@ class MotionPlan:
     length, and the result may not be asymptotically optimal for other cost
     functions.
     """
-    def __init__(self,space,type=None,**options):
+    def __init__(self, space : CSpace, type : Optional[str]=None, **options):
         """Initializes a plan with a given CSpace and a given type.
         Optionally, planner options can be set via keyword arguments.
         
@@ -317,7 +319,7 @@ class MotionPlan:
             else:
                 motionplanning.set_plan_setting(a,float(b))
 
-    def setEndpoints(self,start,goal):
+    def setEndpoints(self,start : Config, goal : Union[Config,Callable,Tuple[Callable,Callable]]):
         """Sets the start and goal configuration or goal condition. 
 
         Args:
@@ -341,7 +343,7 @@ class MotionPlan:
         else:
             self.planner.setEndpoints(start,goal)
 
-    def setCostFunction(self,edgeCost=None,terminalCost=None):
+    def setCostFunction(self,edgeCost:Optional[Callable]=None,terminalCost:Optional[Callable]=None):
         """Sets a cost function to be used when retrieving a solution
         path.  Some planners cannot accept objective functions.
 
@@ -363,19 +365,19 @@ class MotionPlan:
         self.terminalCost = terminalCost
         self.planner.setCostFunction(edgeCost,terminalCost)
 
-    def addMilestone(self,x):
+    def addMilestone(self, x : Config):
         """Manually adds a milestone at configuration x and returns its index"""
         return self.planner.addMilestone(x)
 
-    def getClosestMilestone(self,x):
+    def getClosestMilestone(self, x: Config) -> int:
         """Returns the index of the closest milestone to configuration x"""
         return self.planner.getClosestMilestone(x)
     
-    def planMore(self,iterations):
+    def planMore(self, iterations : int):
         """Performs a given number of iterations of planning."""
         self.planner.planMore(iterations)
 
-    def getPath(self,milestone1=None,milestone2=None):
+    def getPath(self, milestone1:Optional[int]=None, milestone2:Optional[int]=None) -> List[Config]:
         """Returns the path between the two milestones.  If no
         arguments are provided, this returns the optimal path between
         the start and goal.
@@ -399,7 +401,7 @@ class MotionPlan:
         else:
             return self.planner.getPath(milestone1,milestone2)
 
-    def getRoadmap(self):
+    def getRoadmap(self) -> Tuple[List[Config],List[Tuple[int,int]]]:
         """Returns a graph (V,E) containing the planner's roadmap.
 
         V is a list of configurations (each configuration is a list of floats)
@@ -407,12 +409,12 @@ class MotionPlan:
         """
         return self.planner.getRoadmap()
 
-    def getStats(self):
+    def getStats(self) -> dict:
         """Returns a dictionary mapping statistic names to values.  Result is
         planner-dependent """
         return self.planner.getStats()
 
-    def pathCost(self,path):
+    def pathCost(self,path : List[Config]) -> float:
         """Helper function to calculate the cost of a path.  If no cost
         function was previously set with setCostFunction, this is just the CSpace
         length.
@@ -440,10 +442,11 @@ def configurePlanner(*args,**kwargs):
     warnings.warn("configurePlanner will be renamed configure_planner in a future version of Klampt",DeprecationWarning)
     return configure_planner(*args,**kwargs)
 
-def configure_planner(space,start,goal,edgeCost=None,terminalCost=None,optimizing=True,
-    type='auto',stepsize=None,knn=10,
-    shortcut='auto',restart='auto',restartIters=1000,pointLocation='auto',
-    **otherSettings):
+def configure_planner(space : CSpace, start : Config, goal : Union[Config,Tuple[Callable,Callable]],
+                      edgeCost : Optional[Callable]=None , terminalCost : Optional[Callable]=None, optimizing=True,
+                      type='auto',stepsize=None,knn=10,
+                      shortcut='auto',restart='auto',restartIters=1000,pointLocation='auto',
+                      **otherSettings) -> Tuple[MotionPlan,dict]:
     """Automatically sets up a MotionPlan with reasonable options, double
     checking if the options are compatible with the given inputs.
 

@@ -509,7 +509,7 @@ class Trajectory:
         for d in dofs:
             if abs(d) >= n:
                 raise ValueError("Invalid dof")
-        return self.constructor([t for t in self.times],[[m[j] for j in dofs] for m in self.milestones])
+        return self.constructor()([t for t in self.times],[[m[j] for j in dofs] for m in self.milestones])
 
     def stackDofs(self, trajs: List['Trajectory'], strict: bool = True) -> None:
         """Stacks the degrees of freedom of multiple trajectories together.
@@ -1074,7 +1074,7 @@ class HermiteTrajectory(Trajectory):
         Trajectory.checkValid(self)
         for m in self.milestones:
             if len(m)%2 != 0:
-                raise ValueError("Milestone length isn't even?: {} != {}".format(len(m)))
+                raise ValueError("Milestone length isn't even?: {}".format(len(m)))
 
     def extractDofs(self,dofs) -> 'HermiteTrajectory':
         """Extracts a trajectory just over the given DOFs.
@@ -1092,7 +1092,7 @@ class HermiteTrajectory(Trajectory):
         for d in dofs:
             if abs(d) >= n:
                 raise ValueError("Invalid dof")
-        return self.constructor([t for t in self.times],[[m[j] for j in dofs] + [m[n+j] for j in dofs] for m in self.milestones])
+        return self.constructor()([t for t in self.times],[[m[j] for j in dofs] + [m[n+j] for j in dofs] for m in self.milestones])
 
     def stackDofs(self,trajs,strict=True) -> None:
         """Stacks the degrees of freedom of multiple trajectories together.
@@ -1292,7 +1292,7 @@ class GeodesicHermiteTrajectory(Trajectory):
             e0 = self.geodesic.interpolate(d0,d1,u2)
             e1 = self.geodesic.interpolate(d1,d2,u2)
             f2 = self.geodesic.interpolate(e0,e1,u2)
-            v = vectorops.mul(self.geodesic.difference(f2,f),1.0/eps)
+            v = vectorops.mul(self.geodesic.difference(f2,f),1.0/(dt*eps))
         return f + v
     def difference_state(self,a,b,u,dt):
         raise NotImplementedError("Can't do derivatives of Bezier geodesic yet")

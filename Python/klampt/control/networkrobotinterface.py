@@ -48,6 +48,8 @@ class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
     def partInterface(self,part,joint_idx=None):
         if joint_idx is not None:
             raise NotImplementedError("TODO: part interfaces for individual joint indices")
+        if part is None:
+            return self
         return self._partInterfaces[part]
 
     def initialize(self):
@@ -262,7 +264,7 @@ Usage
 
     Args:
         interface (RobotInterfaceBase): the interface to serve
-        ip (str): the IP address (usually '128.0.0.1' or 'localhost')
+        ip (str): the IP address (usually '127.0.0.1' or 'localhost')
         port (int): the port of the listening socket. 7881 is used by default.
     
     """
@@ -283,8 +285,9 @@ Usage
         print(err)
 
     def serve(self):
-        if not ServerRobotInterfaceBase.initialize(self): 
-            raise RuntimeError("RobotInterface of type {} could not be initialized".format(self.interface))
+        if not self._base_initialized:
+            if not ServerRobotInterfaceBase.initialize(self): 
+                raise RuntimeError("RobotInterface of type {} could not be initialized".format(self.interface))
         self.startController()
         self.server.serve_forever()
     
@@ -325,10 +328,13 @@ class XMLRPCRobotInterfaceClient(ClientRobotInterfaceBase):
     
     Args:
         addr (str): the IP address of the server, including port. 
-            Localhost port 7881 is used by default.
+            Localhost port 7881 is used by default.  (note that on Windows,
+            using localhost is extremely slow, so we use 127.0.0.1 instead)
     """
-    def __init__(self,addr='http://localhost:7881'):
+    def __init__(self,addr='http://127.0.0.1:7881'):
         ClientRobotInterfaceBase.__init__(self)
+        if not addr.startswith('http'):
+            addr = 'http://'+addr
         self.addr = addr
         self.context_mgr = None     #type: ServerProxy
         self.s = None               #type: ServerProxy

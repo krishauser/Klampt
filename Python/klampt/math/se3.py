@@ -109,7 +109,7 @@ def distance(T1 : RigidTransform, T2 : RigidTransform, Rweight=1.0,tweight=1.0) 
     (R2,t2)=T2
     return Rweight*so3.distance(R1,R2) + tweight*vectorops.distance(t1,t2)
 
-def error(T1 : RigidTransform, T2 : RigidTransform) -> float:
+def error(T1 : RigidTransform, T2 : RigidTransform) -> List[float]:
     """Returns a 6D "difference vector" that describes how far T1 is from T2.
     More precisely, this is the (stacked) Lie derivative (w,v).
     

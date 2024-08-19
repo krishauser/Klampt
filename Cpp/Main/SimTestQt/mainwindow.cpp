@@ -6,7 +6,10 @@
 #include <QFileInfo>
 #include <QInputDialog>
 
-string toStdString(const QString& s);
+string toStdString(const QString& s)
+{
+  return s.toStdString();
+}
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

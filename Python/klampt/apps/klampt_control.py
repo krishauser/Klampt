@@ -16,7 +16,7 @@ import os
 import weakref
 import io
 
-from klampt.control.robotinterfaceutils import StepContext,klamptCartesianPosition
+#from klampt.control.robotinterfaceutils import StepContext,klamptCartesianPosition
 
 vis.init("PyQt5")
 
@@ -154,12 +154,13 @@ class ControllerGLPlugin(GLWidgetPlugin):
             R = ee.getTransform()[0] 
             self.cartesianGoalPoser.set(R,t)
     
-    def setTargetPose(self,Ttgt, q0 = None, activeLinks = None):
+    def setTargetPose(self,Ttgt, q0 = None, activeLinks = None, cartesianLink = None):
         """Sets the target pose and update the IK.
         
         If Ttgt = None, gets the target from the goal poser.
         """
         if not self.cartesianControlEnabled: return
+        assert activeLinks is not None
         if Ttgt is None:
             Ttgt = self.cartesianGoalPoser.get()
         else:
@@ -170,7 +171,9 @@ class ControllerGLPlugin(GLWidgetPlugin):
         link_origin_transform = vectorops.sub(Ttgt[1],so3.apply(Ttgt[0],tool_coordinates))
 
         robot = self.world.robot(0)
-        obj = ik.objective(robot.link(activeLinks[-1]),R=Ttgt[0],t=link_origin_transform)
+        if cartesianLink is None:
+            cartesianLink = activeLinks[-1]
+        obj = ik.objective(robot.link(cartesianLink),R=Ttgt[0],t=link_origin_transform)
         solver = ik.solver(obj)
         if activeLinks is not None:
             solver.setActiveDofs(activeLinks)
@@ -301,7 +304,8 @@ class ControllerGLPlugin(GLWidgetPlugin):
         
 
     def idle(self):
-        self.gui.onIdle()
+        if self.gui is not None:
+            self.gui.onIdle()
 
         t = time.time()
         if t < self.tNextIdle:
@@ -371,23 +375,6 @@ class ControllerGUI(QtWidgets.QMainWindow):
             self.partList.setEnabled(False)
             self.partList.setToolTip("parts() method not implemented")
         self.partList.currentIndexChanged.connect(self.onPartChange)
-        
-        #find map from parts to RobotInfo's end effectors
-        self.partsToEEs = dict()
-        self.unmatchedEEs = set(eename for eename in self.robotinfo.endEffectors)
-        for part in self.controllerParts:
-            eematches = []
-            partIndices = self.controller.indices(part)
-            for eename,ee in self.robotinfo.endEffectors.items():
-                activeDrivers = self.robotinfo.toDriverIndices(ee.activeLinks)
-                if partIndices == activeDrivers:
-                    if part is None:
-                        print("Controller is a match for end effector",eename)
-                    else:
-                        print("Controller for part",part,"is a match for end effector",eename)
-                    eematches.append(eename)
-                    self.unmatchedEEs.remove(eename)
-            self.partsToEEs[part] = eematches
 
         #top region
         self.partList.currentIndexChanged.connect(self.onPartChange)
@@ -440,10 +427,25 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.splitter.addWidget(self.glwidget)
         self.splitter.setSizes([100,640])
 
+        #find map from parts to RobotInfo's end effectors
+        self.partsToEEs = {}
+        self.unmatchedEEs = []
+        for part in controller.parts():
+            self.partsToEEs[part] = []
+        try:
+            eesToParts,self.unmatchedEEs = robotinfo.configureControllerEndEffectors(controller)
+            for ee,part in eesToParts.items():
+                self.partsToEEs[part].append(ee)
+        except NotImplementedError as e:
+            #setToolCoordinates must have failed
+            self.addException("setToolCoordinates",e)
+            pass
+
         self.updateActiveController(None,controller)
         for ee in self.unmatchedEEs:
             self.addError("End effector {} in RobotInfo does not match a part".format(ee))
-    
+   
+
     def onTabChange(self,index):
         if index == 3:
             #presets
@@ -538,7 +540,6 @@ class ControllerGUI(QtWidgets.QMainWindow):
             with ControllerStepContext(self):
                 tool = active.getToolCoordinates()
             cartesianEnabled = True
-            cartesianLink = self.robot.driver(self.controller.indices(self.activePart)[-1]).getAffectedLink()
         except NotImplementedError as e:
             #may need to force tool coordinates on the item
             if self.selectedEndEffector is not None:
@@ -560,6 +561,11 @@ class ControllerGUI(QtWidgets.QMainWindow):
                 cartesianEnabled = False
         except Exception as e:
             self.addException("getToolCoordinates",e)
+        #extract robot model link according to end effector
+        if 'klamptModelCartesianLink' in self.controller.properties:
+            cartesianLink = self.controller.properties['klamptModelCartesianLink']
+        else:
+            cartesianLink = self.robot.driver(self.controller.indices(self.activePart)[-1]).getAffectedLink()
         if cartesianEnabled:
             print("Trying to get one of sensedCartesianPosition or commandedCartesianPosition")
             with ControllerStepContext(self):
@@ -571,7 +577,6 @@ class ControllerGUI(QtWidgets.QMainWindow):
                         Tcmd = None
                     except Exception as e:
                         self.addException("commandedCartesianPosition",e)
-                    self.plugin.setToolCoordinates(tool)
                     self.plugin.setCartesianPoses(Tsns,Tcmd)
                 except ValueError as e:
                     import traceback
@@ -668,7 +673,8 @@ class ControllerGUI(QtWidgets.QMainWindow):
                     q0 = self.controller.configToKlampt(self.controller.commandedPosition())
                     activeIndices = self.controller.indices(self.activePart)
                     activeLinks = sum([self.robot.driver(i).getAffectedLinks() for i in activeIndices],[])
-                    self.plugin.setTargetPose(None,q0,activeLinks)
+                    cartesianLink = self.activeController.properties.get('klamptModelCartesianLink',None)
+                    self.plugin.setTargetPose(None,q0,activeLinks,cartesianLink)
                     # Tgoal = self.plugin.cartesianGoalPoser.get()
                     # q0 = self.controller.configToKlampt(self.controller.commandedPosition())
                     # activeIndices = self.controller.indices(self.activePart)
@@ -949,8 +955,18 @@ class ControllerGUI(QtWidgets.QMainWindow):
             clipboard.setText(text,QtGui.QClipboard.Selection)
     
     def setEndEffectorToolCoordinates(self,eename):
+        """Resets the controller and GUI to use the end effector
+        settings for the given end effector."""
         ee = self.robotinfo.endEffectors[eename]
-        last_link = self.robot.driver(self.activeController.indices()[-1]).getAffectedLink()
+        if 'klamptModelCartesianLink' in self.activeController.properties:
+            last_link = self.controller.properties['klamptModelCartesianLink']
+        else:
+            last_link = self.robot.driver(self.activeController.indices()[-1]).getAffectedLink()
+        if ee.link != last_link:
+            print("WARNING: end effector in robotinfo does not match end effector in controller: {} vs {}".format(ee.link,last_link))
+            print("  The RIL controller developer should update controller or robotinfo to match")
+            #input()
+            last_link = ee.link
         obj = ee.ikObjective   # type: IKObjective
         if obj is None:
             local = [0,0,0]
@@ -962,7 +978,7 @@ class ControllerGUI(QtWidgets.QMainWindow):
             with ControllerStepContext(self):
                 self.activeController.setToolCoordinates(local)
             #update target to match
-            time.sleep(0.01)
+            time.sleep(0.01)   #HACK: for a networked controller, it may take some time for the message to get across
             with ControllerStepContext(self):
                 Tcmd = self.activeController.commandedCartesianPosition()
                 self.plugin.cartesianGoalPoser.set(*Tcmd)
@@ -1323,6 +1339,10 @@ def main():
             port = 7881
         controller = info.controller()
         server = XMLRPCRobotInterfaceServer(controller,addr,int(port))
+        if not server.initialize():
+            print("Error starting up controller, quitting")
+            exit(1)
+        info.configureControllerEndEffectors(controller)
         print("Beginning Robot Interface Layer server for controller",controller)
         print("Press Ctrl+C to exit...")
         server.serve()

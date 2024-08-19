@@ -15,6 +15,7 @@ integration with grasp planning algorithms, but we hope to add more in the
 future.)
 
 """
+from __future__ import annotations
 from klampt.control.robotinterface import RobotInterfaceBase
 import os
 import sys
@@ -22,7 +23,7 @@ import importlib
 from klampt import WorldModel,RobotModel,Geometry3D,IKSolver,IKObjective,SimRobotSensor
 from klampt.model.subrobot import SubRobotModel
 import copy
-from klampt.math import vectorops,se3
+from klampt.math import vectorops,so3,se3
 import json
 import warnings
 from .typing import Vector,Vector3,RigidTransform
@@ -218,12 +219,37 @@ class RobotInfo:
         return self.robotModel
     
     def configureSensor(self,sensor : Union[int,str,SimRobotSensor]) -> SimRobotSensor:
-        """Configures a sensor with a calibration, if present."""
+        """Configures a sensor with a calibration, if present.
+
+        The calibration file can be a JSON, YAML, or numpy file.  If the sensor
+        is a camera, the calibration file can be an intrinsics calibration.
+        """
         if not isinstance(sensor,SimRobotSensor):
             return self.configureSensor(self.klamptModel().sensor(sensor))
         if sensor.name() in self.calibrationFiles:
-            calib = self.calibrationFiles[sensor.name()]
-            for k,value in calib:
+            calib_file = self.calibrationFiles[sensor.name()]
+            if calib_file.endswith('.json'):
+                with open(calib_file,'r') as f:
+                    calib = json.load(f)
+            elif calib_file.endswith('.yaml'):
+                import yaml
+                with open(calib_file,'r') as f:
+                    calib = yaml.load(f,Loader=yaml.SafeLoader)
+            elif calib_file.endswith('.npy') or calib_file.endswith('.npz'):
+                import numpy as np
+                calib = np.load(calib_file)
+            else:
+                raise ValueError("Invalid calibration file format, must be .json or .yaml")
+            if sensor.type() == 'CameraSensor':
+                #might be an intrinsics calibration
+                from klampt.model import sensing
+                if not isinstance(calib,dict):
+                    sensing.intrinsics_to_camera(calib,sensor,'numpy')
+                    return sensor
+                elif 'fx' in calib:
+                    sensing.intrinsics_to_camera(calib,sensor,'json')
+                    return sensor
+            for k,value in calib.items():
                 if hasattr(value,'__iter__'):
                     import klampt.io.loader
                     cast_value = klampt.io.loader.write(value,'auto')
@@ -253,7 +279,73 @@ class RobotInfo:
             raise RuntimeError("Error running make(robotModel) for module {}: {}".format(mod.__name__,str(e)))
         res.properties['klamptModelFile'] = self.modelFile
         return res
+    
+    def configureControllerEndEffectors(self,controller: RobotInterfaceBase) -> Tuple[Dict[str,str],List[str]]:
+        """Configures a Robot Interface Layer object with the appropriate
+        end effector configuration.
+
+        Assumes the controller is initialized.
         
+        Returns a dictionary mapping end effectors to parts and a list of
+        end effectors that are not associated with any part.
+        """
+        eematches = dict()
+        unmatchedEEs = set(eename for eename in self.endEffectors)
+        controllerParts = [None]
+        try:
+            parts = controller.parts()
+            for k in parts:
+                if k is not None:
+                    controllerParts.append(k)
+        except NotImplementedError:
+            pass
+
+        for part in controllerParts:
+            partIndices = controller.indices(part)
+            for eename,ee in self.endEffectors.items():
+                activeDrivers = self.toDriverIndices(ee.activeLinks)
+                if partIndices == activeDrivers:
+                    if part is None:
+                        print("Controller is a match for end effector",eename)
+                        controller.properties['klamptModelCartesianLink'] = ee.link
+                    else:
+                        print("Controller for part",part,"is a match for end effector",eename)
+                        controller.partInterface(part).properties['klamptModelCartesianLink'] = ee.link
+                    #use the robotinfo end effector's link as the cartesian link
+                    eematches[eename] = part
+                    unmatchedEEs.remove(eename)
+        robot = self.klamptModel()
+        controller.beginStep()
+        for eename,part in eematches.items():
+            ee = self.endEffectors[eename]
+            partInterface = controller.partInterface(part)
+            obj = ee.ikObjective   # type: IKObjective
+            if obj is None:
+                local = [0,0,0]
+            else:
+                local,world = obj.getPosition()
+            partInterface.setToolCoordinates(local)
+        controller.endStep()
+        controller.beginStep()
+        for eename,part in eematches.items():
+            ee = self.endEffectors[eename]
+            partInterface = controller.partInterface(part)
+            obj = ee.ikObjective   # type: IKObjective
+            if obj is None:
+                local = [0,0,0]
+            else:
+                local,world = obj.getPosition()
+            #check that the tool coordinates are set correctly
+            Tcmd = partInterface.commandedCartesianPosition()
+            qcmd = partInterface.commandedPosition()
+            robot.setConfig(robot.configFromDrivers(qcmd))
+            t = robot.link(ee.link).getWorldPosition(local)
+            R = robot.link(ee.link).getTransform()[0]
+            if vectorops.norm(vectorops.sub(t,Tcmd[1])) > 1e-3 or vectorops.norm(so3.error(R,Tcmd[0])) > 1e-3:
+                warnings.warn("Tool coordinates or link for end effector {} are not set correctly".format(eename))
+        controller.endStep()
+        return eematches,list(unmatchedEEs)
+            
     def configureSimulator(self,sim,robotIndex=0):
         """Configures a :class:`~klampt.sim.simulation.SimpleSimulator` to
         emulate the robot's behavior.
@@ -278,13 +370,13 @@ class RobotInfo:
         try:
             res = mod.make(sim,robotIndex)
         except Exception as e:
-            raise RuntimeError("Error running make(sim,robotIndex) for module {}: {}"%(mod.__name__,str(e)))
+            raise RuntimeError("Error running make(sim,robotIndex) for module {}: {}".format(mod.__name__,str(e)))
         try:
             controller,emulators = res
             for e in emulators:
                 pass
         except Exception:
-            raise RuntimeError("Result of make(sim,robotIndex) for module {} is not a pair (controller,emulators)"%(mod.__name__,))
+            raise RuntimeError("Result of make(sim,robotIndex) for module {} is not a pair (controller,emulators)".format(mod.__name__,))
         sim.setController(robotIndex,controller)
         for e in emulators:
             sim.addEmulator(robotIndex,e)

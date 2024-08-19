@@ -101,7 +101,7 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   // Get lower joint limit
   const char* lower_str = config->Attribute("lower");
   if (lower_str == NULL){
-    printf("joint limit: no lower, defaults to 0");
+    printf("joint limit: no lower, defaults to 0\n");
     jl.lower = 0;
   }
   else
@@ -116,7 +116,7 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   // Get upper joint limit
   const char* upper_str = config->Attribute("upper");
   if (upper_str == NULL){
-    printf("joint limit: no upper, , defaults to 0");
+    printf("joint limit: no upper, defaults to 0\n");
     jl.upper = 0;
   }
   else
@@ -131,7 +131,7 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   // Get joint effort limit
   const char* effort_str = config->Attribute("effort");
   if (effort_str == NULL){
-    printf("joint limit: no effort");
+    printf("joint limit: no effort\n");
     return false;
   }
   else
