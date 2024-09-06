@@ -346,7 +346,7 @@ class GLNavigationProgram(GLProgram):
         return False
 
     def mousewheelfunc(self,dhorizontal,dvertical,x,y):
-        self.view.camera.dist *= math.exp(dvertical*0.01)
+        self.view.camera.dist *= math.exp(dvertical*0.001)
         self.refresh()
         return True
 
