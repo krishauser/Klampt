@@ -212,8 +212,8 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
         if lighting is not None or value in ['n','normal','nx','ny','nz']:
             if isinstance(geometrydata,PointCloud):
                 #get normals from point cloud
-                from ..model import geometry
-                normals = np.asarray(geometry.point_cloud_normals(geometrydata,estimation_viewpoint=[0,0,0]))
+                from ..model.geometry import point_cloud_normals
+                normals = np.asarray(point_cloud_normals(geometrydata,estimation_viewpoint=[0,0,0]))
             else:
                 if feature == 'vertices':
                     #compute normals by averaging triangle vertices
