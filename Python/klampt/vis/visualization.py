@@ -1189,6 +1189,17 @@ def add(name : str, item,keepAppearance=False,**kwargs) -> None:
         kwargs: key-value pairs to be added into the attributes dictionary.  e.g.
             vis.add("geom",geometry,color=[1,0,0,1]) adds a geometry while setting
             its color to red.
+
+            Common values include:
+            - color: a 3-tuple (r,g,b) or 4-tuple (r,g,b,a) specifying the
+                color of the item
+            - hide_label: if True, the item's label will be hidden
+            - type: a string specifying the type of the item.  This is used by
+                the backend to determine how to draw the item if the type is
+                ambiguous.
+            - appearance: an Appearance object specifying the item's appearance
+            
+            See :func:`setAttribute` for more information.
     """
     _init()
     scene().add(name,item,keepAppearance,**kwargs)
@@ -1556,6 +1567,8 @@ def setAttribute(name : ItemPath, attr : str, value) -> None:
       item as a robot configuration, while 'Vector3' or 'Point' draws it as a
       point.
     - 'label': a replacement label (str)
+    - 'appearance': for Geometry3D objects, an Appearance object specifying
+      the item's appearance.
     - 'hide_label': if True, the label will be hidden
 
     """
@@ -2709,6 +2722,8 @@ class VisAppearance:
                     return False
                 else:
                     return self.item.appearance().getColor()[3] < 1.0
+        if hasattr(self,'appearance'):
+            return self.appearance.getColor()[3] < 1.0
         try:
             return (self.attributes['color'][3] < 1.0)
         except:
@@ -3145,18 +3160,19 @@ class VisAppearance:
                         self.drawText(name,wp)
         elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Geometry3D)):
             #this can be tricky if the mesh or point cloud has colors
+            if 'appearance' in self.attributes:
+                self.appearance = self.attributes['appearance']
             if not hasattr(self,'appearance'):
                 self.appearance = Appearance()
                 self.appearance.setColor(0.5,0.5,0.5,1)
+                self.appearance.setSilhouette(0)
+                self.appearance.setCreaseAngle(0)
             c = self.attributes["color"]
             if c is not None:
                 self.appearance.setColor(*c)
             s = self.attributes["size"]
             if s:
                 self.appearance.setPointSize(s)
-            self.appearance.setSilhouette(0)
-            self.appearance.setCreaseAngle(0)
-            wp = None
             geometry = None
             lighting = True
             restoreLineWidth = False
@@ -3620,7 +3636,7 @@ class VisualizationScene:
         self.doRefresh = False
         self.cameraController = None
 
-    def getItem(self,item_name):
+    def getItem(self,item_name) -> VisAppearance:
         """Returns an VisAppearance according to the given name or path"""
         if isinstance(item_name,(list,tuple)):
             components = item_name
