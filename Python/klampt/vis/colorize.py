@@ -308,8 +308,8 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
         if vrange[0] == vrange[1]:
             val = vrange[0]
             vrange = (val - 0.5,val + 0.5)
-        from matplotlib import cm
-        cm_interpolator = cm.get_cmap(colormap)
+        import matplotlib
+        cm_interpolator = matplotlib.colormaps[colormap]
         value = np.asarray(value)
         interp = (value - vrange[0])*(1.0/(vrange[1]-vrange[0]))
         colors = cm_interpolator(interp).astype(np.float32)
