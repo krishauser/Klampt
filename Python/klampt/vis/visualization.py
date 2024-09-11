@@ -416,7 +416,8 @@ Objects accepted by :func:`add` include:
 
 See func:`setAttribute` for a list of attributes that can be used to customize
 an object's appearance. Common attributes include ``color``, ``hide_label``,
-``type``, ``position`` (for text) and ``size`` (for points).
+``type``, ``position`` (for text), ``size`` (for points), and ``draw_order``
+(for transparent objects).
 
 In OpenGL modes and IPython mode, many objects can be edited using the
 :func:`edit` function.  In OpenGL, this will provide a visual editing widget,
@@ -1190,6 +1191,17 @@ def add(name : str, item,keepAppearance=False,**kwargs) -> None:
         kwargs: key-value pairs to be added into the attributes dictionary.  e.g.
             vis.add("geom",geometry,color=[1,0,0,1]) adds a geometry while setting
             its color to red.
+
+            Common values include:
+            - color: a 3-tuple (r,g,b) or 4-tuple (r,g,b,a) specifying the
+                color of the item.
+            - hide_label: if True, the item's label will be hidden.
+            - type: a string specifying the type of the item.  This is used by
+                the backend to determine how to draw the item if the type is
+                ambiguous.
+            - appearance: an Appearance object specifying the item's appearance.
+            
+            See :func:`setAttribute` for more information on attributes.
     """
     _init()
     scene().add(name,item,keepAppearance,**kwargs)
@@ -1558,6 +1570,9 @@ def setAttribute(name : ItemPath, attr : str, value) -> None:
       point.
     - 'label': a replacement label (str)
     - 'hide_label': if True, the label will be hidden
+    - 'hidden': if True, the item will be hidden
+    - 'draw_order': the order in which the item is drawn, if transparent (default
+        None).  Lower numbers are drawn first.
 
     """
     scene().setAttribute(name,attr,value)
@@ -2484,7 +2499,6 @@ def _default_attributes(item,type=None):
         print("EXTRACTING COLOR FROM APPEARANCE",res['color'])
         pass
     elif isinstance(item,(Trajectory,MultiPath)):
-        
         if isinstance(item,RobotTrajectory):
             return _default_RobotTrajectory_attributes
         else:
@@ -2564,6 +2578,8 @@ class VisAppearance:
             self.attributes['hide_label'] = False
         if 'hidden' not in self.attributes:
             self.attributes['hidden'] = False
+        if 'draw_order' not in self.attributes:
+            self.attributes['draw_order'] = None
         self.attributes['label'] = name
         #used for Qt text rendering
         self.widget = None
@@ -3203,6 +3219,7 @@ class VisAppearance:
                 GL.glEnable(GL.GL_LIGHTING)
             else:
                 GL.glDisable(GL.GL_LIGHTING)
+    
             self.appearance.drawWorldGL(geometry)
             if restoreLineWidth:
                 GL.glLineWidth(1.0)
@@ -4131,11 +4148,14 @@ class VisualizationScene:
         world = self.items.get('world',None)
         if world is not None: world=world.item
         #draw solid items first
-        delayed = []
+        delayed = {}
         for (k,v) in self.items.items():
             transparent = v.transparent()
             if transparent is not False:
-                delayed.append(k)
+                draw_order = v.attributes.get('draw_order',None)
+                if draw_order not in delayed:
+                    delayed[draw_order] = []
+                delayed[draw_order].append(k)
                 if transparent is True:
                     continue
             v.widget = self
@@ -4145,14 +4165,15 @@ class VisualizationScene:
             #allows garbage collector to delete these objects
             v.widget = None 
 
-        for k in delayed:
-            v = self.items[k]
-            v.widget = self
-            v.swapDrawConfig()
-            v.drawGL(world,viewport=vp,draw_transparent=True)
-            v.swapDrawConfig()
-            #allows garbage collector to delete these objects
-            v.widget = None 
+        for o in sorted(list(delayed.keys())):
+            for k in delayed[o]:
+                v = self.items[k]
+                v.widget = self
+                v.swapDrawConfig()
+                v.drawGL(world,viewport=vp,draw_transparent=True)
+                v.swapDrawConfig()
+                #allows garbage collector to delete these objects
+                v.widget = None 
 
         #cluster label points and draw labels
         pointTolerance = view.controller.dist*0.03
