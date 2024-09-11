@@ -629,7 +629,7 @@ class _MyWindow(QMainWindow):
         fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
             fn = fn[0]
-        if fn is None:
+        if fn is None or len(fn) == 0:
             return
         v = scene.getViewport()
         v.save_file(fn)
@@ -641,7 +641,7 @@ class _MyWindow(QMainWindow):
         fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
             fn = fn[0]
-        if fn is None:
+        if fn is None or len(fn) == 0:
             return
         v.load_file(fn)
         scene.setViewport(v)
