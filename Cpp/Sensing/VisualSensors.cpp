@@ -299,7 +299,7 @@ void LaserRangeSensor::DrawGL(const RobotModel& robot,const vector<double>& meas
 
 CameraSensor::CameraSensor()
 :link(-1),rgb(true),depth(true),xres(640),yres(480),
- xfov(DtoR(56.0)),yfov(DtoR(43.0)),
+ xfov(DtoR(56.0)),yfov(DtoR(43.0)),fx(-1),fy(-1),cx(-1),cy(-1),
  zmin(0.4),zmax(4.0),zresolution(0),
  zvarianceLinear(0),zvarianceConstant(0),
  useGLFramebuffers(true)
@@ -341,7 +341,7 @@ void CameraSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
     //set up the POV of the camera
     Camera::Viewport vp;
     GetViewport(vp);
-    vp.xform = Tlink*vp.xform;
+    vp.pose = Tlink*vp.pose;
     vp.n = Min(0.1f,vp.n);
     vp.f = Max(100.f,vp.f);
     renderer.Begin(vp);
@@ -422,16 +422,16 @@ void CameraSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
     //set up the POV of the camera
     Camera::Viewport vp;
     GetViewport(vp);
-    vp.xform = Tlink*vp.xform;
+    vp.pose = Tlink*vp.pose;
     Ray3D ray;
     Vector3 vsrc;
     Vector3 vfwd,dx,dy;
     vp.getClickSource(0,0,vsrc);
     vp.getViewVector(vfwd);
-    dx = Vector3(vp.xDir());
-    dx *= 1.0/(vp.w*vp.scale);
-    dy = Vector3(vp.yDir());
-    dy *= 1.0/(vp.w*vp.scale);
+    dx = Vector3(vp.right());
+    dx *= 1.0/vp.fx;
+    dy = Vector3(vp.up());
+    dy *= 1.0/vp.fy;
     if(rgb)
       pixels.resize(xres*yres*3);
     if(depth)
@@ -441,12 +441,12 @@ void CameraSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
     float fzmax = (float)zmax;
     Vector3 pt;
     for(int j=0;j<yres;j++) {
-      Real v = 0.5*yres - Real(j);
+      Real v = vp.cy - Real(j);
       for(int i=0;i<xres;i++,k++) {
-        Real u = Real(i) - 0.5*xres;    
+        Real u = Real(i) - vp.cx;    
         ray.direction = vfwd + u*dx + v*dy;
+        ray.source = vsrc + ray.direction*zmin;
         ray.direction.inplaceNormalize();
-        ray.source = vsrc + ray.direction * zmin / (vfwd.dot(ray.direction));
         int obj = world.RayCast(ray,pt);
         if (obj >= 0) {
           if(rgb) {
@@ -458,9 +458,13 @@ void CameraSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
             pixels[k*3+1] = (unsigned char)(rgba[1]*255.0);
             pixels[k*3+2] = (unsigned char)(rgba[2]*255.0);
           }
-          Real d = vfwd.dot(pt - vsrc);
-          d = Min(d,zmax);
-          if(depth && d < zmax) floats[k] = (float)Discretize(d,zresolution,zvarianceLinear*d + zvarianceConstant);
+          if(depth) {
+            Real d = vfwd.dot(pt - vsrc);
+            if(d < zmin)  //below minimum sensing depth, assume not sensed
+              d = zmax;
+            d = Min(d,zmax);
+            if(d < zmax) floats[k] = (float)Discretize(d,zresolution,zvarianceLinear*d + zvarianceConstant);
+          }
         }
         else {
           //no reading
@@ -598,9 +602,25 @@ map<string,string> CameraSensor::Settings() const
   FILL_SENSOR_SETTING(res,rgb);
   FILL_SENSOR_SETTING(res,depth);
   FILL_SENSOR_SETTING(res,xres);
-  FILL_SENSOR_SETTING(res,xfov);
+  if(fx < 0) {
+    FILL_SENSOR_SETTING(res,xfov);
+  }
+  else {
+    FILL_SENSOR_SETTING(res,fx);
+  }
+  if(cx > 0) {
+    FILL_SENSOR_SETTING(res,cx);
+  }
   FILL_SENSOR_SETTING(res,yres);
-  FILL_SENSOR_SETTING(res,yfov);
+  if(fy < 0) {
+    FILL_SENSOR_SETTING(res,yfov);
+  }
+  else {
+    FILL_SENSOR_SETTING(res,fy);
+  }
+  if(cy > 0) {
+    FILL_SENSOR_SETTING(res,cy);
+  }
   FILL_SENSOR_SETTING(res,zresolution);
   FILL_SENSOR_SETTING(res,zmin);
   FILL_SENSOR_SETTING(res,zmax);
@@ -616,8 +636,45 @@ bool CameraSensor::GetSetting(const string& name,string& str) const
   GET_SENSOR_SETTING(depth);
   GET_SENSOR_SETTING(xres);
   GET_SENSOR_SETTING(xfov);
+  //TEMP: backup for legacy parameters
+  if(name == "fx") {
+    if(fx < 0) {
+      stringstream ss;
+      ss << xres*0.5/Tan(xfov*0.5);
+      str = ss.str();
+      return true;
+    }
+    GET_SENSOR_SETTING(fx);
+  }
+  if(name == "cx") {
+    if(cx < 0) {
+      stringstream ss;
+      ss << float(xres) / 2;
+      str = ss.str();
+      return true;
+    }
+    GET_SENSOR_SETTING(cx);
+  }
   GET_SENSOR_SETTING(yres);
   GET_SENSOR_SETTING(yfov);
+  if(name == "fy") {
+    if(fy < 0) {
+      stringstream ss;
+      ss << yres*0.5/Tan(yfov*0.5);
+      str = ss.str();
+      return true;
+    }
+    GET_SENSOR_SETTING(fy);
+  }
+  if(name == "cy") {
+    if(cy < 0) {
+      stringstream ss;
+      ss << float(yres) / 2;
+      str = ss.str();
+      return true;
+    }
+    GET_SENSOR_SETTING(cy);
+  }
   GET_SENSOR_SETTING(zresolution);
   GET_SENSOR_SETTING(zmin);
   GET_SENSOR_SETTING(zmax);
@@ -634,8 +691,12 @@ bool CameraSensor::SetSetting(const string& name,const string& str)
   SET_SENSOR_SETTING(depth);
   SET_SENSOR_SETTING(xres);
   SET_SENSOR_SETTING(xfov);
+  SET_SENSOR_SETTING(fx);
+  SET_SENSOR_SETTING(cx);
   SET_SENSOR_SETTING(yres);
   SET_SENSOR_SETTING(yfov);
+  SET_SENSOR_SETTING(fx);
+  SET_SENSOR_SETTING(cx);
   SET_SENSOR_SETTING(zresolution);
   SET_SENSOR_SETTING(zmin);
   SET_SENSOR_SETTING(zmax);
@@ -661,13 +722,13 @@ void CameraSensor::DrawGL(const RobotModel& robot,const vector<double>& measurem
   Camera::Viewport v;
   GetViewport(v);
   if(link >= 0) 
-    v.xform = robot.links[link].T_World*v.xform;
+    v.pose = robot.links[link].T_World*v.pose;
 
   size_t vstart = 0;
   if(rgb) vstart = xres*yres;
   if(depth && !measurements.empty()) {
     glPushMatrix();
-    glMultMatrix((Matrix4)v.xform);
+    glMultMatrix((Matrix4)v.pose);
 
     //check whether this is the same measurements as before
     unsigned int hash = 0;
@@ -686,17 +747,17 @@ void CameraSensor::DrawGL(const RobotModel& robot,const vector<double>& measurem
       glEnable(GL_LIGHTING);
       float white[4]={1,1,1,1};
       glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
-      Real vscale = 0.5/Tan(xfov*0.5);
-      Real xscale = (0.5/vscale)/(xres/2);
-      //Real aspectRatio = Real(xres)/Real(yres);
-      Real yscale = xscale;
+      Camera::Viewport vp;
+      GetViewport(vp);
+      Real xscale = 1.0/vp.fx;
+      Real yscale = 1.0/vp.fy;
       vector<Vector3> pts(xres*yres);
       int k=0;
       for(int i=0;i<yres;i++)
         for(int j=0;j<xres;j++,k++) {
           double d = measurements[vstart+k];
-          double u = Real(j-xres/2);
-          double v = -Real(i-yres/2);
+          double u = Real(j-vp.cx);
+          double v = -Real(i-vp.cy);
           double x = xscale*d*u;
           double y = yscale*d*v;
           pts[k].set(x,y,-d);
@@ -757,19 +818,18 @@ void CameraSensor::DrawGL(const RobotModel& robot,const vector<double>& measurem
   if(rgb && !measurements.empty() && renderer.color_tex != 0) {
     //debugging: draw image in frustum
     glPushMatrix();
-    glMultMatrix((Matrix4)v.xform);
+    glMultMatrix((Matrix4)v.pose);
     Real d = Max(v.n,0.25f);
+    ///on image plane, the point that maps to v.x is fx*x+cy = v.x => x = (v.x-cy)/fx
     Real aspectRatio = Real(xres)/Real(yres);
-    Real xmin = Real(v.x - v.w*0.5)/(Real(v.w)*0.5);
-    Real xmax = Real(v.x + v.w*0.5)/(Real(v.w)*0.5);
-    Real ymax = -Real(v.y - v.h*0.5)/(Real(v.h)*0.5);
-    Real ymin = -Real(v.y + v.h*0.5)/(Real(v.h)*0.5);
-    Real xscale = 0.5*d/v.scale;
-    Real yscale = xscale/aspectRatio;
-    xmin *= xscale;
-    xmax *= xscale;
-    ymin *= yscale;
-    ymax *= yscale;
+    Real xmin = Real(v.x - v.cx)/v.fx;
+    Real xmax = Real(v.x + v.w - v.cx)/v.fx;
+    Real ymax = -Real(v.y - v.cy)/v.fy;
+    Real ymin = -Real(v.y + v.h - v.cy)/v.fy;
+    xmin *= d;
+    xmax *= d;
+    ymin *= d;
+    ymax *= d;
     glBindTexture(GL_TEXTURE_2D,renderer.color_tex);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -809,13 +869,30 @@ void CameraSensor::GetViewport(Camera::Viewport& vp) const
   vp.h = yres;
   vp.n = zmin;
   vp.f = zmax;
-  vp.setFOV(xfov);
-  vp.xform = Tsensor;
+  //TEMP: backup for legacy parameters
+  if(fx < 0)
+    vp.fx = xres*0.5/Tan(xfov*0.5);
+  else
+    vp.fx = fx;
+  if(fy < 0)
+    vp.fy = yres*0.5/Tan(yfov*0.5);
+  else
+    vp.fy = fy;
+  if(cx < 0)
+    vp.cx = xres*0.5;
+  else
+    vp.cx = cx;
+  if(cy < 0)
+    vp.cy = yres*0.5;
+  else
+    vp.cy = cy;
+  vp.pose = Tsensor;
+  vp.ori = Camera::CameraConventions::OpenGL;
   Matrix3 flipYZ;
   flipYZ.setZero();
   flipYZ(0,0) = 1;
   flipYZ(1,1) = -1;
   flipYZ(2,2) = -1;
-  vp.xform.R = vp.xform.R*flipYZ;
+  vp.pose.R = vp.pose.R*flipYZ;
 }
 
