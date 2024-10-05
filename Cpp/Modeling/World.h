@@ -35,6 +35,8 @@ class WorldModel
   ///If elementDir==NULL, they will be saved to a folder that has the same base
   ///name as fn.
   bool SaveXML(const char* fn,const char* elementDir=NULL);
+  /// Sets all display parameters to their defaults
+  void ResetDisplayDefaults();
   /** @brief Performs a shallow copy of a WorldModel.  Since it does not copy geometry,
    * this operation is very fast.
    */
@@ -99,17 +101,14 @@ class WorldModel
   ///Returns true if the given extension is loadable as an element
   bool CanLoadElementExt(const char* ext) const;
 
-  //viewport info
-  Camera::Camera camera;
-  Camera::Viewport viewport;
-  vector<GLDraw::GLLight> lights;
-  GLDraw::GLColor background;
-
   //world occupants
   vector<shared_ptr<RobotModel> > robots;
   vector<shared_ptr<TerrainModel> > terrains;
   vector<shared_ptr<RigidObjectModel> > rigidObjects;
 
+  //display info
+  vector<GLDraw::GLLight> lights;
+  GLDraw::GLColor background;
   vector<ViewRobot> robotViews;
 };
 
