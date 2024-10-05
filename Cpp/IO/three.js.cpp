@@ -149,11 +149,6 @@ void ThreeJSExport(const WorldModel& world,AnyCollection& out,ThreeJSCache& cach
     ThreeJSExport(*world.terrains[i],clist[clist.size()],cache);
 
   vector<GLDraw::GLLight> lights = world.lights;
-  if(lights.empty()) {
-    lights.resize(1);
-    lights[0].setColor(GLDraw::GLColor(1,1,1));
-    lights[0].setDirectionalLight(Vector3(0.2,0.4,-1));
-  }
   for(size_t i=0;i<lights.size();i++) {
     AnyCollection light;
     light["uuid"] = MakeRandomUUID();
@@ -455,7 +450,7 @@ void ThreeJSExport(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& 
     out["type"] = "Group";
   }
   else {
-    if(geom->type == Geometry::AnyGeometry3D::PointCloud)
+    if(geom->type == Geometry::AnyGeometry3D::Type::PointCloud)
       out["type"] = "Points";
     else
       out["type"] = "Mesh";
@@ -635,7 +630,7 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
     out = cache.GetUUID(geom);
     return;
   }
-  if(geom.type == Geometry::AnyCollisionGeometry3D::Primitive) {
+  if(geom.type == Geometry::AnyCollisionGeometry3D::Type::Primitive) {
     const GeometricPrimitive3D& prim = geom.AsPrimitive();
     //save primitive as mesh
     out["uuid"] = cache.GetUUID(geom);
@@ -662,37 +657,25 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
       ThreeJSExport(mesh,out);
     }
   }
-  else if(geom.type == Geometry::AnyCollisionGeometry3D::TriangleMesh) {
+  else if(geom.type == Geometry::AnyCollisionGeometry3D::Type::TriangleMesh) {
     //fprintf(stderr,"Triangle mesh geometry.\n");
     const Meshing::TriMesh& mesh = geom.AsTriangleMesh();
     out["uuid"] = cache.GetUUID(geom);
     ThreeJSExport(mesh,out);
   }
-  else if(geom.type == Geometry::AnyCollisionGeometry3D::PointCloud) {
+  else if(geom.type == Geometry::AnyCollisionGeometry3D::Type::PointCloud) {
     //fprintf(stderr,"Triangle mesh geometry.\n");
     const Meshing::PointCloud3D& pc = geom.AsPointCloud();
     out["uuid"] = cache.GetUUID(geom);
     ThreeJSExport(pc,out);
   }
-  else if(geom.type == Geometry::AnyCollisionGeometry3D::ConvexHull) {
-    Geometry::AnyGeometry3D mesh;
-    const AnyGeometry3D& ggeom = geom;
-    if(!ggeom.Convert(Geometry::AnyGeometry3D::TriangleMesh,mesh))
-      fprintf(stderr,"Unable to save geometries of type %s to three.js, problem exporting to TriangleMesh\n",geom.TypeName());
-    else
-      ThreeJSExport(mesh.AsTriangleMesh(),out);
-  }
-  else if(geom.type == Geometry::AnyCollisionGeometry3D::ImplicitSurface) {
-    Geometry::AnyGeometry3D mesh;
-    const AnyGeometry3D& ggeom = geom;
-    if(!ggeom.Convert(Geometry::AnyGeometry3D::TriangleMesh,mesh))
-      fprintf(stderr,"Unable to save geometries of type %s to three.js, problem exporting to TriangleMesh\n",geom.TypeName());
-    else
-      ThreeJSExport(mesh.AsTriangleMesh(),out);
-  }
   else {
-    //can't export files of that type
-    fprintf(stderr,"Unable to save geometries of type %s to three.js!\n",geom.TypeName());
+    Geometry::AnyGeometry3D mesh;
+    const AnyGeometry3D& ggeom = geom;
+    if(!ggeom.Convert(Geometry::AnyGeometry3D::Type::TriangleMesh,mesh))
+      fprintf(stderr,"Unable to save geometries of type %s to three.js, problem exporting to TriangleMesh\n",geom.TypeName());
+    else
+      ThreeJSExport(mesh.AsTriangleMesh(),out);
   }
 }
 void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out,ThreeJSCache& cache)
@@ -705,7 +688,7 @@ void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyColl
   else {
     //save material
     out["uuid"] = cache.GetUUID(app);
-    if(geom.type != Geometry::AnyGeometry3D::PointCloud) {
+    if(geom.type != Geometry::AnyGeometry3D::Type::PointCloud) {
       //out["type"] = "MeshStandardMaterial";
       out["type"] = "MeshPhongMaterial";
       out["flatShading"] = 1;
