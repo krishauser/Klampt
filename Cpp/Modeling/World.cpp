@@ -10,7 +10,15 @@ namespace Klampt {
 
 WorldModel::WorldModel()
 {
+  ResetDisplayDefaults();
+}
+
+void WorldModel::ResetDisplayDefaults()
+{
   background.set(0.4f,0.4f,1,0);
+  lights.resize(1);
+  lights[0].setColor(GLDraw::GLColor(1,1,1));
+  lights[0].setDirectionalLight(Vector3(0.2,-0.4,1));
 }
 
 bool WorldModel::LoadXML(const char* fn)
@@ -691,8 +699,6 @@ RigidObjectModel* WorldModel::RayCastObject(const Ray3D& r,Vector3& localpt)
 
 void WorldModel::Copy(const WorldModel& a)
 {
-  this->camera=a.camera;
-  this->viewport=a.viewport;
   this->lights=a.lights;
 
   this->robots.resize(a.robots.size());
