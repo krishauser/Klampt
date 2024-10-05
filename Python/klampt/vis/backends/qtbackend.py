@@ -1,14 +1,45 @@
 from OpenGL.GL import *
-try:
+from .. import glinit
+if glinit.active() == 'PyQt6':
+    from PyQt6 import QtGui
+    from PyQt6.QtCore import *
+    from PyQt6.QtWidgets import *
+    from PyQt6.QtOpenGL import *
+    from PyQt6.QtOpenGLWidgets import QOpenGLWidget
+    from PyQt6.QtGui import QAction
+    Key = Qt.Key
+    Button = Qt.MouseButton
+    Modifier = Qt.KeyboardModifier
+    Focus = Qt.FocusPolicy
+    Attribute = Qt.ApplicationAttribute
+    QGLWidget = QOpenGLWidget
+    PYQT_VERSION = 6
+elif glinit.active() == 'PyQt5':
     from PyQt5 import QtGui
     from PyQt5.QtCore import *
     from PyQt5.QtWidgets import *
     from PyQt5.QtOpenGL import *
-except ImportError:
+    Key = Qt
+    Button = Qt
+    Modifier = Qt
+    Focus = Qt
+    Attribute = Qt
+    QGLWidget = QOpenGLWidget
+    PYQT_VERSION = 5
+elif glinit.active() == 'PyQt4':
     from PyQt4 import QtGui
     from PyQt4.QtCore import *
     from PyQt4.QtGui import *
     from PyQt4.QtOpenGL import *
+    Key = Qt
+    Button = Qt
+    Modifier = Qt
+    Focus = Qt
+    Attribute = Qt
+    PYQT_VERSION = 4
+else:
+    raise RuntimeError("Can't load qtbackend without previously initializing with glinit module")
+
 import sys
 import math
 import weakref
@@ -20,45 +51,45 @@ GLUT_ACTIVE_CTRL = 2
 GLUT_ACTIVE_SHIFT = 1
 GLUT_ACTIVE_ALT = 4
 
-keymap = {Qt.Key_F1:'f1',
-    Qt.Key_F2:'f2',
-    Qt.Key_F3:'f3',
-    Qt.Key_F4:'f4',
-    Qt.Key_F5:'f5',
-    Qt.Key_F6:'f6',
-    Qt.Key_F7:'f7',
-    Qt.Key_F8:'f8',
-    Qt.Key_F9:'f9',
-    Qt.Key_F10:'f10',
-    Qt.Key_F11:'f11',
-    Qt.Key_F12:'f12',
-    Qt.Key_Up:'up',
-    Qt.Key_Left:'left',
-    Qt.Key_Down:'down',
-    Qt.Key_Right:'right',
-    Qt.Key_Home:'home',
-    Qt.Key_End:'end',
-    Qt.Key_Delete:'delete',
-    Qt.Key_Enter:'enter'
+keymap = {Key.Key_F1:'f1',
+    Key.Key_F2:'f2',
+    Key.Key_F3:'f3',
+    Key.Key_F4:'f4',
+    Key.Key_F5:'f5',
+    Key.Key_F6:'f6',
+    Key.Key_F7:'f7',
+    Key.Key_F8:'f8',
+    Key.Key_F9:'f9',
+    Key.Key_F10:'f10',
+    Key.Key_F11:'f11',
+    Key.Key_F12:'f12',
+    Key.Key_Up:'up',
+    Key.Key_Left:'left',
+    Key.Key_Down:'down',
+    Key.Key_Right:'right',
+    Key.Key_Home:'home',
+    Key.Key_End:'end',
+    Key.Key_Delete:'delete',
+    Key.Key_Enter:'enter'
 }
 
 
 def toGlutButton(button):
-    if button==Qt.LeftButton:
+    if button==Button.LeftButton:
         return 0
-    elif button==Qt.RightButton:
+    elif button==Button.RightButton:
         return 2
-    elif button==Qt.MidButton:
+    elif button==Button.MidButton:
         return 1
     return 0
 
 def toModifierList(modifiers):
     res = []
-    if modifiers & Qt.AltModifier:
+    if modifiers & Modifier.AltModifier:
         res.append('alt')
-    if modifiers & Qt.ShiftModifier:
+    if modifiers & Modifier.ShiftModifier:
         res.append('shift')
-    if modifiers & Qt.ControlModifier:
+    if modifiers & Modifier.ControlModifier:
         res.append('ctrl')
     return res
 
@@ -79,23 +110,42 @@ class QtGLWindow(QGLWidget):
     reshape_signal = pyqtSignal(int,int)
 
     def __init__(self,name="OpenGL window",parent=None):
-        format = QGLFormat()
-        if not format.hasOpenGL():
-            raise RuntimeError("It appears that your system doesn't have OpenGL support?")
-        format.setRgba(True)
-        format.setDoubleBuffer(True)
-        format.setDepth(True)
-        format.setSampleBuffers(True)
-        format.setSamples(4)
-        if not hasattr(QtGLWindow,"_firstWidget"):
-            QtGLWindow._firstWidget = self
-            QGLWidget.__init__(self,format,parent)
+        if PYQT_VERSION == 4:
+            format = QGLFormat()
+            if not format.hasOpenGL():
+                raise RuntimeError("It appears that your system doesn't have OpenGL support?")
+            format.setRgba(True)
+            format.setDoubleBuffer(True)
+            format.setDepth(True)
+            format.setSampleBuffers(True)
+            format.setSamples(4)
+            if not hasattr(QtGLWindow,"_firstWidget"):
+                QtGLWindow._firstWidget = self
+                QGLWidget.__init__(self,format,parent)
+            else:
+                shareWidget = QtGLWindow._firstWidget
+                QGLWidget.__init__(self,format,shareWidget=shareWidget)
+                #self.setContext(self.context(),shareContext=shareWidget.context())
+            if not self.isValid():
+                raise RuntimeError("Unspecified error creating the Qt GLWidget, OpenGL rendering is not supported")
         else:
-            shareWidget = QtGLWindow._firstWidget
-            QGLWidget.__init__(self,format,shareWidget=shareWidget)
-            #self.setContext(self.context(),shareContext=shareWidget.context())
-        if not self.isValid():
-            raise RuntimeError("Unspecified error creating the Qt GLWidget, OpenGL rendering is not supported")
+            assert QGLWidget == QOpenGLWidget
+            if not hasattr(QtGLWindow,"_firstWidget"):
+                QOpenGLWidget.__init__(self,parent=parent)
+                QtGLWindow._firstWidget = self.context()
+            else:
+                shareWidget = QtGLWindow._firstWidget
+                QOpenGLWidget.__init__(self,shareContext=shareWidget)
+            format = QtGui.QSurfaceFormat.defaultFormat()
+            if format.depthBufferSize() < 24:
+                format.setDepthBufferSize(24)
+            
+            if PYQT_VERSION == 5:
+                format.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
+            else:
+                format.setSwapBehavior(QtGui.QSurfaceFormat.SwapBehavior.DoubleBuffer)
+            format.setSamples(4)
+            self.setFormat(format)
         
         self.name = name
         self.program = None
@@ -140,6 +190,10 @@ class QtGLWindow(QGLWidget):
         program.window = weakref.proxy(self)
         if hasattr(self,'devicePixelRatio'):
             program.view.screenDeviceScale = self.devicePixelRatio()
+            if int(program.view.screenDeviceScale) != program.view.screenDeviceScale:
+                raise ValueError("Screen-device scale is not integer, no idea how this will work...")
+            else:
+                program.view.screenDeviceScale = int(program.view.screenDeviceScale)
         else:
             program.view.screenDeviceScale = 1
         if self.initialized:
@@ -157,7 +211,6 @@ class QtGLWindow(QGLWidget):
     def setParent(self,parent=None):
         QGLWidget.setParent(self,parent)
         
-
     def initialize(self):
         """ Opens a window and initializes.  Called internally, and must be in the visualization thread."""
         assert self.program != None, "QGLWidget initialized without a GLProgram"
@@ -167,7 +220,7 @@ class QtGLWindow(QGLWidget):
             print("QGLWidget.initialize(): perhaps Qt didn't initialize properly?")
             pass
         self.setMouseTracking(True)
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Focus.StrongFocus)
         def idleCallback():
             self.nextIdleEvent = 0
             if self.program: self.program.idlefunc()
@@ -449,7 +502,8 @@ class QtBackend:
         if self.app == None:
             print("QtBackend: initializing app as",program_name)
             #this is needed for some X11 multithreading bug 
-            QCoreApplication.setAttribute(Qt.AA_X11InitThreads)
+            if PYQT_VERSION == 4:
+                QCoreApplication.setAttribute(Attribute.AA_X11InitThreads)
             self.app = QApplication([program_name])
 
     def createWindow(self,name,parent=None):

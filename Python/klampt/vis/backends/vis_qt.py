@@ -9,12 +9,21 @@ import threading
 if not glinit.available('PyQt'):
     raise ImportError("Can't import vis_qt without first calling glinit.init() or vis.init()")
 
-if glinit.available('PyQt5'):
+if glinit.active() == 'PyQt6':
+    from PyQt6.QtCore import *
+    from PyQt6.QtWidgets import *
+    from PyQt6.QtGui import QAction
+    PYQT_VERSION = 6
+elif glinit.active() == 'PyQt5':
     from PyQt5.QtCore import *
     from PyQt5.QtWidgets import *
-else:
+    PYQT_VERSION = 5
+elif glinit.active() == 'PyQt4':
     from PyQt4.QtGui import *
     from PyQt4.QtCore import *
+    PYQT_VERSION = 4
+else:
+    raise RuntimeError("Can't load vis_qt without previously initializing with glinit module")
 
 
 class MyQThread(QThread):
@@ -516,10 +525,16 @@ class _MyDialog(QDialog):
         glwidget = windowinfo.glwindow
         glwidget.setMinimumSize(640,480)
         glwidget.setMaximumSize(4000,4000)
-        glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+        if PYQT_VERSION == 6:
+            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Maximum,QSizePolicy.Policy.Maximum))
+        else:
+            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
 
         self.description = QLabel("Press OK to continue")
-        self.description.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,QSizePolicy.Fixed))
+        if PYQT_VERSION == 6:
+            self.description.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Preferred,QSizePolicy.Policy.Fixed))
+        else:
+            self.description.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,QSizePolicy.Fixed))
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(glwidget)
         self.layout.addWidget(self.description)
@@ -536,7 +551,10 @@ class _MyWindow(QMainWindow):
         self.glwidget = windowinfo.glwindow
         self.glwidget.setMinimumSize(self.glwidget.width,self.glwidget.height)
         self.glwidget.setMaximumSize(4000,4000)
-        self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+        if PYQT_VERSION == 6:
+            self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Maximum,QSizePolicy.Policy.Maximum))
+        else:
+            self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
         self.setCentralWidget(self.glwidget)
         self.glwidget.setParent(self)
         self.setWindowTitle(windowinfo.name)
