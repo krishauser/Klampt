@@ -75,7 +75,9 @@ bool TerrainModel::LoadGeometry(const char* fn)
 {
   geomFile = fn;
   if(geometry.Load(geomFile)) {
-    if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh && !geometry.Appearance()->tex1D && !geometry.Appearance()->tex2D) {
+    if((geometry->type == Geometry::AnyGeometry3D::Type::TriangleMesh || geometry->type == Geometry::AnyGeometry3D::Type::Heightmap) &&
+      !geometry.Appearance()->tex1D && 
+      !geometry.Appearance()->tex2D) {
       geometry.Appearance()->faceColor.set(0.8f,0.6f,0.2f);
       geometry.Appearance()->texWrap = true;
       geometry.Appearance()->shininess = 0;

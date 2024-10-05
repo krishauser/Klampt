@@ -32,42 +32,13 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
   for(size_t i=0;i<order.size();i++) {
     if(order[i].first > best) break; //done
     int k=order[i].second;
-    switch(robot.geometry[k]->type) {
-    case AnyGeometry3D::Primitive:
-      FatalError("Can't get flat contacts for primitives");
-      break;
-    case AnyGeometry3D::ImplicitSurface:
-      FatalError("Can't get flat contacts for implicit surfaces");
-      break;
-    case AnyGeometry3D::Group:
-      FatalError("Can't get flat contacts for geometry group");
-      break;
-    case AnyGeometry3D::ConvexHull:
-      FatalError("Can't get flat contacts for convex hull");
-      break;
-    case AnyGeometry3D::TriangleMesh:
-      {
-	const TriMesh& m=robot.geometry[k]->AsTriangleMesh();
-	for(size_t v=0;v<m.verts.size();v++) {
-	  Vector3 pw = robot.links[k].T_World*m.verts[v];
-	  if(pw.z < best)
-	    best = pw.z;
-	  assert(pw.z >= order[i].first);
-	}
-      }
-      break;
-    case AnyGeometry3D::PointCloud:
-      {
-	const PointCloud3D& pc=robot.geometry[k]->AsPointCloud();
-	for(size_t v=0;v<pc.points.size();v++) {
-	  Vector3 pw = robot.links[k].T_World*pc.points[v];
-	  if(pw.z < best)
-	    best = pw.z;
-	  assert(pw.z >= order[i].first);
-	}
-      }
-      break;
+    Vector3 pt;
+    if(robot.geometry[k]->Support(Vector3(0,0,-1),pt)) {
+      if(pt.z < best)
+        best = pt.z;    
     }
+    else 
+      FatalError("GetFlatContacts: geometry %d type %s doesn't support Support()?",k,robot.geometry[k]->TypeName());
   }
   
   //got the plane height, now output the vertices
@@ -83,7 +54,7 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
     contacts.contacts.resize(contacts.contacts.size()+1);
     vector<Vector3> pts;
     switch(robot.geometry[k]->type) {
-    case AnyGeometry3D::TriangleMesh:
+    case AnyGeometry3D::Type::TriangleMesh:
       {
 	const TriMesh& m=robot.geometry[k]->AsTriangleMesh();
 	for(size_t v=0;v<m.verts.size();v++) {
@@ -94,7 +65,7 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
 	}
       }
       break;
-    case AnyGeometry3D::PointCloud:
+    case AnyGeometry3D::Type::PointCloud:
       {
 	const PointCloud3D& pc=robot.geometry[k]->AsPointCloud();
 	for(size_t v=0;v<pc.points.size();v++) {
@@ -133,34 +104,18 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
 void GetFlatContacts(RobotWithGeometry& robot,int link,Real tol,vector<ContactPoint>& contacts)
 {
   Real best = Inf;
-  const vector<Vector3>* points = NULL;
-  switch(robot.geometry[link]->type) {
-  case AnyGeometry3D::Primitive:
-    FatalError("Can't get flat contacts for primitives");
-    break;
-  case AnyGeometry3D::ImplicitSurface:
-    FatalError("Can't get flat contacts for implicit surfaces");
-    break;
-  case AnyGeometry3D::Group:
-    FatalError("Can't get flat contacts for geometry group");
-    break;
-  case AnyGeometry3D::ConvexHull:
-    FatalError("Can't get flat contacts for convex hull");
-    break;
-  case AnyGeometry3D::TriangleMesh:
-    points = &robot.geometry[link]->AsTriangleMesh().verts;
-    break;
-  case AnyGeometry3D::PointCloud:
-    points = &robot.geometry[link]->AsPointCloud().points;
-    break;
+  Vector3 pt;
+  if(!robot.geometry[link]->Support(Vector3(0,0,-1),pt)) {
+    FatalError("GetFlatContacts: geometry %d type %s doesn't support Support()?",link,robot.geometry[link]->TypeName());
   }
-
-  for(size_t v=0;v<points->size();v++) {
-    Vector3 pw = robot.links[link].T_World*(*points)[v];
-    if(pw.z < best)
-      best = pw.z;
-  }
+  best = pt.z;
   
+  AnyCollisionGeometry3D gtemp;
+  if(!robot.geometry[link]->Convert(AnyGeometry3D::Type::PointCloud,gtemp)) {
+    FatalError("GetFlatContacts: geometry %d type %s can't be converted to point cloud?",link,robot.geometry[link]->TypeName());
+  }
+  const vector<Vector3>* points = &gtemp.AsPointCloud().points;
+
   //got the plane height, now output the vertices
   ContactPoint cp;
   cp.kFriction = 0.0;

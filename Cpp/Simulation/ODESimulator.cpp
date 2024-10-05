@@ -394,17 +394,17 @@ void GetCurrentCollisionStatus(ODESimulator* sim,
       CustomGeometryData* g2 = dGetCustomGeometryData(i->o2);
       double margin = g1->outerMargin + g2->outerMargin;
       //some geometry types accept penetration depths -- don't roll back except for 
-      if(g1->geometry->type == Geometry::AnyCollisionGeometry3D::ImplicitSurface)
+      if(g1->geometry->type == Geometry::AnyGeometry3D::Type::ImplicitSurface)
         continue;
-      if(g1->geometry->type == Geometry::AnyCollisionGeometry3D::Primitive) {
+      if(g1->geometry->type == Geometry::AnyGeometry3D::Type::Primitive) {
         if(g1->geometry->AsPrimitive().type == Math3D::GeometricPrimitive3D::Sphere)
           continue;
-        if(g2->geometry->type == Geometry::AnyCollisionGeometry3D::Primitive)
+        if(g2->geometry->type == Geometry::AnyGeometry3D::Type::Primitive)
           continue;
       }
-      if(g2->geometry->type == Geometry::AnyCollisionGeometry3D::ImplicitSurface)
+      if(g2->geometry->type == Geometry::AnyGeometry3D::Type::ImplicitSurface)
         continue;
-      if(g2->geometry->type == Geometry::AnyCollisionGeometry3D::Primitive)
+      if(g2->geometry->type == Geometry::AnyGeometry3D::Type::Primitive)
         if(g2->geometry->AsPrimitive().type == Math3D::GeometricPrimitive3D::Sphere)
           continue;
       double depth = 0;

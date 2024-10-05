@@ -1257,10 +1257,12 @@ ResourcePtr MakeResource(const string& name,const Meshing::TriMesh& mesh)
 
 ResourcePtr MakeResource(const string& name,const Geometry::AnyGeometry3D& geom)
 {
-  if(geom.type == Geometry::AnyGeometry3D::TriangleMesh)
+  if(geom.type == Geometry::AnyGeometry3D::Type::TriangleMesh)
     return MakeResource(name,geom.AsTriangleMesh());
-  else if(geom.type == Geometry::AnyGeometry3D::Primitive)
+  else if(geom.type == Geometry::AnyGeometry3D::Type::Primitive)
     return MakeResource(name,geom.AsPrimitive());
+  else if(geom.type == Geometry::AnyGeometry3D::Type::PointCloud)
+    return MakeResource(name,geom.AsPointCloud());
   else
     return NULL;
 }

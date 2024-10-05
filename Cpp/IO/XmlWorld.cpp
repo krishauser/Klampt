@@ -786,13 +786,15 @@ string GetRelativeFilename(const std::string& filename,const std::string& path)
 
 const char* DefaultFileExtension(const Geometry::AnyCollisionGeometry3D& geom)
 {
-  if(geom.type == Geometry::AnyGeometry3D::Primitive)
+  if(geom.type == Geometry::AnyGeometry3D::Type::Primitive)
     return ".geom";
-  else if(geom.type == Geometry::AnyGeometry3D::TriangleMesh)
+  else if(geom.type == Geometry::AnyGeometry3D::Type::TriangleMesh)
     return ".off";
-  else if(geom.type == Geometry::AnyGeometry3D::PointCloud)
+  else if(geom.type == Geometry::AnyGeometry3D::Type::PointCloud)
     return ".pcd";
-  else if(geom.type == Geometry::AnyGeometry3D::ImplicitSurface)
+  else if(geom.type == Geometry::AnyGeometry3D::Type::ImplicitSurface)
+    return ".vol";
+  else if(geom.type == Geometry::AnyGeometry3D::Type::OccupancyGrid)
     return ".vol";
   else
     return ".unknown";

@@ -73,7 +73,7 @@ public:
 Real Radius(const Geometry::AnyGeometry3D& geom)
 {
   switch(geom.type) {
-  case Geometry::AnyGeometry3D::Primitive:
+  case Geometry::AnyGeometry3D::Type::Primitive:
     {
       if(geom.Empty()) return 0.0;
       Box3D box = geom.AsPrimitive().GetBB();
@@ -84,7 +84,7 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
       Real zmax = Max(Abs(originLocal.z),Abs(originLocal.z+box.dims.z));
       return Sqrt(Sqr(xmax)+Sqr(ymax)+Sqr(zmax));
     }
-  case Geometry::AnyGeometry3D::TriangleMesh:
+  case Geometry::AnyGeometry3D::Type::TriangleMesh:
     {
       const Meshing::TriMesh& mesh = geom.AsTriangleMesh();
       Real dmax = 0;
@@ -92,7 +92,7 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
         dmax = Max(dmax,mesh.verts[i].normSquared());
       return Sqrt(dmax);
     }
-  case Geometry::AnyGeometry3D::PointCloud:
+  case Geometry::AnyGeometry3D::Type::PointCloud:
     {
       const Meshing::PointCloud3D& mesh = geom.AsPointCloud();
       Real dmax = 0;
@@ -100,19 +100,16 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
         dmax = Max(dmax,mesh.points[i].normSquared());
       return Sqrt(dmax);
     }
-  case Geometry::AnyGeometry3D::ImplicitSurface:
-  case Geometry::AnyGeometry3D::OccupancyGrid:
+  case Geometry::AnyGeometry3D::Type::ImplicitSurface:
+  case Geometry::AnyGeometry3D::Type::OccupancyGrid:
     {
-      Box3D box;
-      box.set(geom.AsImplicitSurface().bb);
-      Vector3 originLocal;
-      box.toLocal(Vector3(0.0),originLocal);
-      Real xmax = Max(Abs(originLocal.x),Abs(originLocal.x+box.dims.x));
-      Real ymax = Max(Abs(originLocal.y),Abs(originLocal.y+box.dims.y));
-      Real zmax = Max(Abs(originLocal.z),Abs(originLocal.z+box.dims.z));
+      AABB3D bb = geom.GetAABB();
+      Real xmax = Max(Abs(bb.bmin.x),Abs(bb.bmax.x));
+      Real ymax = Max(Abs(bb.bmin.y),Abs(bb.bmax.y));
+      Real zmax = Max(Abs(bb.bmin.z),Abs(bb.bmax.z));
       return Sqrt(Sqr(xmax)+Sqr(ymax)+Sqr(zmax));
     }
-  case Geometry::AnyGeometry3D::Group:
+  case Geometry::AnyGeometry3D::Type::Group:
     {
       const vector<Geometry::AnyGeometry3D>& items = geom.AsGroup();
       Real rmax = 0;
@@ -120,14 +117,17 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
         rmax = Max(rmax,Radius(items[i]));
       return rmax;
     }
-  case Geometry::AnyGeometry3D::ConvexHull:
+  default:
     {
-      Meshing::TriMesh mesh;
-      Geometry::ConvexHullToMesh(geom.AsConvexHull(),mesh);
-      Real dmax = 0;
-      for(size_t i=0;i<mesh.verts.size();i++)
-        dmax = Max(dmax,mesh.verts[i].normSquared());
-      return Sqrt(dmax);
+      Geometry::AnyGeometry3D temp;
+      if(!geom.Convert(Geometry::AnyGeometry3D::Type::TriangleMesh,temp)) {
+        AABB3D bb = geom.GetAABB();
+        Real xmax = Max(Abs(bb.bmin.x),Abs(bb.bmax.x));
+        Real ymax = Max(Abs(bb.bmin.y),Abs(bb.bmax.y));
+        Real zmax = Max(Abs(bb.bmin.z),Abs(bb.bmax.z));
+        return Sqrt(Sqr(xmax)+Sqr(ymax)+Sqr(zmax));
+      }
+      return Radius(temp);
     }
   }
   return 0;
@@ -505,6 +505,10 @@ bool RobotModel::LoadRob(const char* fn) {
         ss >> m(1,0) >> m(1,1) >> m(1,2) >> m(1,3);
         ss >> m(2,0) >> m(2,1) >> m(2,2) >> m(2,3);
         ss >> m(3,0) >> m(3,1) >> m(3,2) >> m(3,3);
+        if(m(3,3) != 1.0) {
+          LOG4CXX_ERROR(GET_LOGGER(RobParser),"Invalid geomTransform on line "<<lineno<<", not a homogeneous transform");
+          return false;
+        }
         geomTransform.push_back(m);
       }else{
         LOG4CXX_ERROR(GET_LOGGER(RobParser),"Invalid geomTransform on line "<<lineno);
@@ -3298,7 +3302,7 @@ bool RobotModel::LoadURDF(const char* fn)
       //*geomManagers[link_index] = geom;
       //TEMP: convert primitives to mesh?
       Geometry::AnyGeometry3D meshGeom;
-      linkNode->geomData.Convert(Geometry::AnyGeometry3D::TriangleMesh,meshGeom,0.01);
+      linkNode->geomData.Convert(Geometry::AnyGeometry3D::Type::TriangleMesh,meshGeom,0.01);
       geomManagers[link_index].CreateEmpty();
       *geomManagers[link_index] = meshGeom;
       //make the default appearance be grey
