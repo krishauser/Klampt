@@ -17,13 +17,17 @@ ViewCamera::ViewCamera()
 
 void ViewCamera::DrawGL(const Camera::Viewport& v) const
 {
-	//Real fov = 2.0*Atan(0.5/v.scale);
+	if(v.ori != Camera::CameraConventions::OpenGL) {
+		fprintf(stderr,"ViewCamera::DrawGL: Warning, only OpenGL orientation is supported for now\n");
+		return;
+	}
 	Real aspectRatio = Real(v.w)/Real(v.h);
 	glPushMatrix();
-	glMultMatrix(Matrix4(v.xform));
+	glMultMatrix(Matrix4(v.pose));
 	//note that +z is *backward* in the camera view
 	if(drawIcon) {
-		Real pyr_h = iconSize*v.scale;
+		Real scale = 2.0*v.fx/v.w;
+		Real pyr_h = iconSize*scale;
 		Real pyr_base = -pyr_h + iconSize*0.25;
 		if(drawIconWireframe) {
 			glDisable(GL_LIGHTING);
@@ -47,16 +51,8 @@ void ViewCamera::DrawGL(const Camera::Viewport& v) const
 		}
 	}
 	if(drawFrustum) {
-		Real xmin = Real(v.x - v.w*0.5)/(Real(v.w)*0.5);
-		Real xmax = Real(v.x + v.w*0.5)/(Real(v.w)*0.5);
-		Real ymax = -Real(v.y - v.h*0.5)/(Real(v.h)*0.5);
-		Real ymin = -Real(v.y + v.h*0.5)/(Real(v.h)*0.5);
-		Real xscale = 0.5/v.scale;
-		Real yscale = xscale/aspectRatio;
-		xmin *= xscale;
-		xmax *= xscale;
-		ymin *= yscale;
-		ymax *= yscale;
+		AABB2D bb2d = v.getViewRectangle(1.0,false);
+		Real xmin=bb2d.bmin.x,xmax=bb2d.bmax.x,ymin=bb2d.bmin.y,ymax=bb2d.bmax.y;
 		glDisable(GL_LIGHTING);
 		if(frustumColor.rgba[3] != 1.0) {
 			glEnable(GL_BLEND);

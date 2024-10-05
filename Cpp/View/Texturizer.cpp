@@ -60,7 +60,7 @@ bool Texturizer::Set(ManagedGeometry& geom)
 
   switch(texCoords) {
   case ParameterizedTexCoord:
-    if(geom->type != Geometry::AnyGeometry3D::TriangleMesh)
+    if(geom->type != Geometry::AnyGeometry3D::Type::TriangleMesh)
       fprintf(stderr,"Can't wrap texture coordinates around non-triangle mesh geometry\n");
     else
       SetupTextureCoordinates(geom->TriangleMeshCollisionData(),app->texcoords);

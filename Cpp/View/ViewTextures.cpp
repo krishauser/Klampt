@@ -3,7 +3,7 @@
 #include <KrisLibrary/GLdraw/GLTexture2D.h>
 #include <KrisLibrary/GLdraw/GLColor.h>
 #include <KrisLibrary/math/random.h>
-#include <KrisLibrary/image/import.h>
+#include <KrisLibrary/image/io.h>
 #include <KrisLibrary/math/infnan.h>
 #include <KrisLibrary/errors.h>
 using namespace Math;
