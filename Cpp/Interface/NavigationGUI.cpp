@@ -133,7 +133,8 @@ GLNavigationBackend::GLNavigationBackend()
   camera.tgt.setZero();
   camera.rot.setZero();
   camera.dist=100;
-  camera.ori=Camera::Camera::XZnY;
+  camera.ori=Camera::CameraConventions::OpenGL;
+  camera.wori=Camera::CameraConventions::Zup;
 }
 
 void GLNavigationBackend::Start()
@@ -147,8 +148,7 @@ bool GLNavigationBackend::OnGLViewport(int x,int y,int w,int h)
 {
   viewport.x=x;
   viewport.y=y;
-  viewport.w=w;
-  viewport.h=h;
+  viewport.resize(w,h);
   return true;
 }
 
@@ -162,7 +162,7 @@ bool GLNavigationBackend::OnGLRender()
   glLoadIdentity();
   //SetWorldLights();
 
-  camera.toCamera(viewport);
+  camera.toCameraPose(viewport.pose);
 
   DEBUG_GL_ERRORS()
   GLView view;
@@ -215,7 +215,8 @@ void GLNavigationBackend::ClickRay(int x,int y,Math3D::Vector3& src,Math3D::Vect
 
 bool GLNavigationBackend::OnMouseWheel(int dwheel)
 {
-  viewport.scale *= (1+float(dwheel)/20*0.01f);
+  viewport.fx *= (1+float(dwheel)/20*0.01f);
+  viewport.fy *= (1+float(dwheel)/20*0.01f);
   SHOW_VIEW_TARGET(0.5);
   SendRefresh();
   return true;
@@ -307,15 +308,17 @@ void GLNavigationBackend::DragRotate(int dx,int dy)
 
 void GLNavigationBackend::DragZoom(int dx,int dy)
 {
-  viewport.scale *= (1+float(dy)*0.01f);
+  viewport.fx *= (1+float(dy)*0.01f);
+  viewport.fy *= (1+float(dy)*0.01f);
   SHOW_VIEW_TARGET(0.5);
   SendRefresh();
 }
 
 void GLNavigationBackend::DragTruck(int dx,int dy)
 {
-  Vector3 v(viewport.zDir());
-  camera.tgt.madd(v,Real(dy)/viewport.scale/**camera.dist*/);
+  Vector3 v(viewport.forward());
+  Real scale = 2*viewport.fx/viewport.w;
+  camera.tgt.madd(v,Real(dy)/scale/**camera.dist*/);
   SHOW_VIEW_TARGET(0.5);
   SendRefresh();
 }
@@ -378,20 +381,22 @@ void GLNavigationBackend::WriteDisplaySettings(ostream& out) const
 void GLNavigationBackend::ReadDisplaySettings(istream& in)
 {
   //viewport should not change
-  int x=viewport.x,y=viewport.y,w=viewport.w,h=viewport.h;
+  int x=viewport.x,y=viewport.y,w=viewport.w,h=viewport.h,cx=viewport.cx,cy=viewport.cy;
   in>>viewport;
   string str;
   in>>str;
   if(str != "ORBITDIST") { in.setstate(ios::badbit); return; }
   in>>camera.dist;
 
-  camera.fromCamera(viewport,camera.dist);
+  camera.fromCameraPose(viewport.pose,camera.dist);
 
   //restore viewport
   viewport.x=x;
   viewport.y=y;
   viewport.w=w;
   viewport.h=h;
+  viewport.cx=cx;
+  viewport.cy=cy;
 
   //request resize -- may or may not succeed!
   SendResize(w,h);

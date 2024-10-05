@@ -888,16 +888,16 @@ void RobotPoseBackend::DoFreeDrag(int dx,int dy,int button)
     if(allWidgets.hasFocus) {
       allWidgets.Drag(dx,-dy,viewport);
       if(allWidgets.requestRedraw) {
-	allWidgets.requestRedraw = false;
-	SendRefresh();
-	UpdateConfig();
+        allWidgets.requestRedraw = false;
+        SendRefresh();
+        UpdateConfig();
       }
     }
   }
 }
 
 void RobotPoseBackend::DoPassiveMouseMove(int x, int y)
-{  
+{
   double d;
   if(allWidgets.Hover(x,viewport.h-y,viewport,d))
     allWidgets.SetHighlight(true);

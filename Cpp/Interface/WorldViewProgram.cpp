@@ -60,9 +60,6 @@ bool LoadWorldCommandLine(WorldModel& world,int argc, const char** argv)
 {
   XmlWorld xmlWorld;
   vector<string> configs;
-  world.lights.resize(1);
-  world.lights[0].setColor(GLColor(1, 1, 1));
-  world.lights[0].setDirectionalLight(Vector3(0.2, -0.4, 1));
 
   for (int i = 1; i<argc; i++) {
     if (argv[i][0] == '-') {
@@ -130,7 +127,7 @@ bool WorldViewProgram::Initialize()
   camera.dist = 6;
   viewport.n = 0.1;
   viewport.f = 100;
-  viewport.setLensAngle(DtoR(60.0));
+  viewport.setFOV(DtoR(60.0));
 
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);

@@ -70,7 +70,7 @@ void StandardInputProcessor::Drag(float dx,float dy)
   Vector3 ofs;
   Vector3 vv;
   viewport->getViewVector(vv);
-  Real d = (wp - viewport->position()).dot(vv);
+  Real d = (wp - viewport->pose.t).dot(vv);
   viewport->getMovementVectorAtDistance(dx, -dy, d, ofs);
     
   currentDestination += ofs;
