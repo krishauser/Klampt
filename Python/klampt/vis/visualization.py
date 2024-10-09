@@ -529,6 +529,7 @@ Global appearance / camera control functions
   view.
 - :func:`setViewport`: Sets the :class:`GLViewport` for the currently active
   scene.  (This may also be used to resize windows.)
+- :func:`resizeViewport`: resizes the viewport.
 - :func:`setBackgroundColor`: Sets the background color for the active
   view.
 - :func:`autoFitCamera`: Automatically fits the camera to all objects in the
@@ -645,7 +646,7 @@ def init(backends=None):
     set:
 
     - 'PyQt': uses PyQT + OpenGL
-    - 'PyQt4' / 'PyQt5': uses a specific version of PyQT
+    - 'PyQt4' / 'PyQt5 / PyQt6': uses a specific version of PyQT
     - 'GLUT': uses GLUT + OpenGL
     - 'IPython': uses an IPython widget
     - 'HTML': outputs an HTML / Javascript widget
@@ -674,7 +675,7 @@ def init(backends=None):
         _window_manager = None
         _backend = None
     
-    OpenGLBackends = ['PyQt','PyQt4','PyQt5','GLUT']
+    OpenGLBackends = ['PyQt','PyQt4','PyQt5','PyQt6','GLUT']
     order = [[]]
     for backend in backends:
         if backend in ['IPython','HTML']:
@@ -1674,10 +1675,11 @@ def autoFitViewport(viewport : Viewport, objects : Sequence, zoom=True,rotate=Tr
     #print("Bounding box",bb,"center",center)
     #raw_input()
     #reset
-    viewport.camera.rot = [0.,0.,0.]
-    viewport.camera.tgt = [0.,0.,0.]
-    viewport.camera.dist = 6.0
-    viewport.clippingplanes = (0.2,20)
+    viewport.controller.rot = [0.,0.,0.]
+    viewport.controller.tgt = [0.,0.,0.]
+    viewport.controller.dist = 6.0
+    viewport.n = 0.2
+    viewport.f = 20
     if len(ofs) == 0:
         return
 
@@ -1687,13 +1689,13 @@ def autoFitViewport(viewport : Viewport, objects : Sequence, zoom=True,rotate=Tr
 
     bb = bb_create(*pts)
     center = vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)
-    viewport.camera.tgt = center
+    viewport.controller.tgt = center
     if zoom:
         radius = max(vectorops.distance(bb[0],center),0.25)
-        viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
+        viewport.controller.dist = 1.2*radius * viewport.fx * 2.0 / viewport.w
     #default: oblique view
     if rotate:
-        viewport.camera.rot = [0,math.radians(30),math.radians(45)]
+        viewport.controller.rot = [0,math.radians(30),math.radians(45)]
         #fit a plane to these points
         try:
             centroid,normal = fit_plane_centroid(ofs)
@@ -1712,7 +1714,7 @@ def autoFitViewport(viewport : Viewport, objects : Sequence, zoom=True,rotate=Tr
         roll = 0
         yaw = math.atan2(normal[0],normal[1])
         pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
-        viewport.camera.rot = [roll,pitch,yaw]
+        viewport.controller.rot = [roll,pitch,yaw]
     else:
         x = [1,0,0]
         y = [0,0,1]
@@ -1723,14 +1725,14 @@ def autoFitViewport(viewport : Viewport, objects : Sequence, zoom=True,rotate=Tr
         zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
         zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
         #orient camera to point along normal direction
-        viewport.camera.tgt = center
-        viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
-        near,far = viewport.clippingplanes
-        if viewport.camera.dist + zmin < near:
-            near = max((viewport.camera.dist + zmin)*0.5, radius*0.1)
-        if viewport.camera.dist + zmax > far:
-            far = max((viewport.camera.dist + zmax)*1.5, radius*3)
-        viewport.clippingplanes = (near,far)
+        viewport.controller.tgt = center
+        viewport.controller.dist = 1.2*radius * viewport.fx * 2.0 / viewport.w
+        near,far = viewport.n, viewport.f
+        if viewport.controller.dist + zmin < near:
+            near = max((viewport.controller.dist + zmin)*0.5, radius*0.1)
+        if viewport.controller.dist + zmax > far:
+            far = max((viewport.controller.dist + zmax)*1.5, radius*3)
+        viewport.n, viewport.f = (near,far)
 
 def addText(name : str, text : str, position=None, **kwargs) -> None:
     """Adds text to the visualizer.  You must give an identifier to all pieces 
@@ -1860,6 +1862,12 @@ def getViewport() -> GLViewport:
 def setViewport(viewport : GLViewport) -> None:
     """Sets the current scene to use a given :class:`GLViewport`"""
     scene().setViewport(viewport)
+
+def resizeViewport(w : int, h : int) -> None:
+    """Resizes the viewport of the current scene."""
+    vp = getViewport()
+    vp.resize(w,h)
+    setViewport(vp)
 
 def setBackgroundColor(r : float, g : float, b : float, a : float=1) -> None: 
     """Sets the background color of the current scene."""
@@ -2473,6 +2481,7 @@ def _default_attributes(item,type=None):
         pass
     elif hasattr(item,'appearance'):
         res['color'] = item.appearance().getColor()
+        print("EXTRACTING COLOR FROM APPEARANCE",res['color'])
         pass
     elif isinstance(item,(Trajectory,MultiPath)):
         
@@ -4027,7 +4036,7 @@ class VisualizationScene:
         vp = self.getViewport()
         try:
             autoFitViewport(vp,list(self.items.values()),zoom=zoom,rotate=rotate)
-            vp.camera.dist /= scale
+            vp.controller.dist /= scale
             self.setViewport(vp)
         except Exception as e:
             warnings.warn("Unable to auto-fit camera")
@@ -4106,18 +4115,18 @@ class VisualizationScene:
     def pick(self,click_callback,hover_callback,highlight_color,filter,tolerance):
         raise NotImplementedError("Picking not implemented by {}".format(self.__class__.__name__))
 
-    def getViewport(self):
+    def getViewport(self) -> Viewport:
         raise NotImplementedError("Viewport ops not implemented by {}".format(self.__class__.__name__))
 
-    def setViewport(self,viewport):
+    def setViewport(self,viewport : Viewport):
         raise NotImplementedError("Viewport ops not implemented by {}".format(self.__class__.__name__))
 
     def setBackgroundColor(self,r,g,b,a=1): 
         raise NotImplementedError("Background color changing not implemented by {}".format(self.__class__.__name__))
 
-    def renderGL(self,view):
+    def renderGL(self,view : Viewport):
         """Renders the scene in OpenGL"""
-        vp = view.to_viewport()
+        vp = view.update_viewport()
         self.labels = []
         world = self.items.get('world',None)
         if world is not None: world=world.item
@@ -4146,7 +4155,7 @@ class VisualizationScene:
             v.widget = None 
 
         #cluster label points and draw labels
-        pointTolerance = view.camera.dist*0.03
+        pointTolerance = view.controller.dist*0.03
         if pointTolerance > 0:
             pointHash = {}
             for (text,point,color) in self.labels:
@@ -4158,7 +4167,7 @@ class VisualizationScene:
             for (p,items) in pointHash.values():
                 self._renderGLLabelRaw(view,p,*list(zip(*items)))
 
-    def renderScreenGL(self,view,window):
+    def renderScreenGL(self,view : Viewport,window):
         cx = 20
         cy = 20
         GL.glDisable(GL.GL_LIGHTING)
@@ -4202,12 +4211,12 @@ class VisualizationScene:
     def _renderGLLabelRaw(self,view,point,textList,colorList):
         #assert not self.makingDisplayList,"drawText must be called outside of display list"
         assert self.window is not None
-        invCameraRot = so3.inv(view.camera.matrix()[0])
+        invCameraRot = so3.inv(view.controller.matrix()[0])
         for i,(text,c) in enumerate(zip(textList,colorList)):
             if i+1 < len(textList): text = text+","
 
             projpt = view.project(point,clip=False)
-            if projpt[2] > view.clippingplanes[0]:
+            if projpt[2] > view.n:
                 d = float(12)/float(view.w)*projpt[2]*0.7
                 point = vectorops.add(point,so3.apply(invCameraRot,(0,-d,0)))
 
@@ -4321,18 +4330,18 @@ class VisualizationScene:
 
 
 def _camera_translate(vp,tgt):
-    vp.camera.tgt = tgt
+    vp.controller.tgt = tgt
 
 def _camera_lookat(vp,tgt):
     T = vp.get_transform()
-    vp.camera.tgt = tgt
-    vp.camera.dist = max(vectorops.distance(T[1],tgt),0.1)
+    vp.controller.tgt = tgt
+    vp.controller.dist = max(vectorops.distance(T[1],tgt),0.1)
     #set R to point at target
     zdir = vectorops.unit(vectorops.sub(tgt,T[1]))
     xdir = vectorops.unit(vectorops.cross(zdir,[0,0,1]))
     ydir = vectorops.unit(vectorops.cross(zdir,xdir))
     R = xdir + ydir + zdir
-    vp.camera.set_orientation(R,'xyz')
+    vp.controller.set_orientation(R,'xyz')
 
 class _TrackingCameraController:
     def __init__(self,vp,target):
@@ -4360,7 +4369,7 @@ class _TranslatingCameraController:
         self.target.swapDrawConfig()
         t = self.target.getCenter()
         self.target.swapDrawConfig()
-        self.vp.camera.tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
+        self.vp.controller.tgt = vectorops.add(self.vp.controller.tgt,vectorops.sub(t,self.last_target_pos))
         self.last_target_pos = t
         return self.vp
 
@@ -4375,7 +4384,7 @@ class _TargetCameraController:
         self.target.swapDrawConfig()
         t = self.target.getCenter()
         self.target.swapDrawConfig()
-        tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
+        tgt = vectorops.add(self.vp.controller.tgt,vectorops.sub(t,self.last_target_pos))
         self.last_target_pos = t
         _camera_lookat(self.vp,tgt)
         return self.vp
@@ -4397,12 +4406,12 @@ class _TrajectoryCameraController:
             self.vp.set_transform(T)
         elif isinstance(self.trajectory,(SO3Trajectory,SO3HermiteTrajectory)):
             R = self.trajectory.eval(t,'loop')
-            self.vp.camera.set_orientation(R,'xyz')
+            self.vp.controller.set_orientation(R,'xyz')
         else:
             trans = self.trajectory.eval(t,'loop')
             T = self.vp.get_transform()
             ofs = vectorops(self.vp.tgt,T[0])
-            self.vp.camera.tgt = vectorops.add(trans,ofs)
+            self.vp.controller.tgt = vectorops.add(trans,ofs)
         return self.vp
 
 class _SimCamCameraController:
