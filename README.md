@@ -93,11 +93,14 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**master** (8/1/2024)
+**master** (8/2/2024)
 Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
--   C++ API: Renamed `Merge` to `Union` for all geometries. Added `Merge` function that merges a single geometry.
--   Python API: Added Geometry3D `merge` function that can be used for SDF fusion.
+-   New geometry types `OccupancyGrid` and `Heightmap`.  `OccupancyGrid` uses the same `VolumeGrid` data structure as `ImplicitSurface`.  `Heightmap` can represent orthographic heightmaps (e.g., elevation maps) as well as depth maps coming from RGB-D cameras. 
+-   Viewport data structure now accepts non-square pixels and non-centered focal points.  API breaking change; to resize viewports and keep the FOV and relative center, use `Viewport.resize(w,h)`.
+-   C++ API: Breaking changes to KrisLibrary Geometry API.  Older builds of Klampt will need to pull KrisLibrary branch `old_geometry`. 
+-   C++ API: Renamed `Merge` to `Union` for all geometries. Added `Merge` function that merges a single geometry into the current geometry's representation.
+-   Python API: Added Geometry3D `merge` function that can be used for SDF and heightmap fusion.
 -   Python API: Improved calibration routines in `klampt.model.calibrate`.
 -   Python API: Added surface sampling and vertex normals to `klampt.model.geometry`.
 -   Python API: Added visibility fraction determination to `klampt.model.sensing`.
