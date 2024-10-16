@@ -749,6 +749,7 @@ void CameraSensor::DrawGL(const RobotModel& robot,const vector<double>& measurem
       glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
       Camera::Viewport vp;
       GetViewport(vp);
+      Assert(vp.ori == Camera::CameraConventions::OpenGL);
       Real xscale = 1.0/vp.fx;
       Real yscale = 1.0/vp.fy;
       vector<Vector3> pts(xres*yres);
