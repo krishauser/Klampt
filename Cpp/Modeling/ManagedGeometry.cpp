@@ -96,7 +96,6 @@ shared_ptr<Geometry::AnyCollisionGeometry3D> ManagedGeometry::CreateEmpty()
   geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
   appearance = make_shared<GLDraw::GeometryAppearance>();
   SetupDefaultAppearance(*appearance);
-  appearance->geom = geometry.get();
   return geometry;
 }
 
@@ -239,7 +238,6 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
         LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: loaded "<<filename<<" in time "<<t<<"s");
       if(geometry->type == Geometry::AnyGeometry3D::Type::TriangleMesh) {
         if(geometry->TriangleMeshAppearanceData() != NULL) {
-          printf("Geometry %s has appearance data\n",fn);
           appearance = make_shared<GLDraw::GeometryAppearance>(*geometry->TriangleMeshAppearanceData());
           appearance->Set(*geometry);
           SetupDefaultAppearance(*appearance);
@@ -364,7 +362,7 @@ void ManagedGeometry::SetUnique()
       //don't need to completely reset appearance, just the geometry pointers
       appearance->geom = geometry.get();
       appearance->collisionGeom = geometry.get();
-      appearance->Refresh();
+      appearance->RefreshGeometry();
     }
     RemoveFromCache();
   }
@@ -416,7 +414,7 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
       manager.cache[newCacheKey].geoms.push_back(this);
     }
     //OnGeometryChange();
-    if(appearance) appearance->Refresh();
+    if(appearance) appearance->RefreshGeometry();
   }
 }
 
@@ -424,7 +422,10 @@ void ManagedGeometry::OnGeometryChange()
 {
   //geometry has changed, may need to refresh appearance
   if(geometry && appearance) {
-     appearance->Set(*geometry);
+    if(appearance->geom != geometry.get())
+      appearance->Set(*geometry);
+    else
+      appearance->RefreshGeometry();
   }
 }
 
