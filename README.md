@@ -98,6 +98,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 Note: If you have a `pip` installed Klampt at version `0.9.2`, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
 - Python API: can control draw order of transparent objects with `draw_order` attribute.
+- Python API: `imageio` library can be used to save movie files in the visualizer rather than relying on ffmpeg (and dumping lots of image files). 
 - Python API: minor bug fixes.
 
 **0.9.2** (8/13/2024)
