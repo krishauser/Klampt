@@ -222,7 +222,8 @@ def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format=
     return None
 
 
-def image_to_points(depth : ImageLike, color : ImageLike, xfov : float, yfov: Optional[float]=None,
+def image_to_points(depth : ImageLike, color : ImageLike,
+                    intrinsics : Optional[dict]=None, xfov : Optional[float]=None, yfov: Optional[float]=None,
                     depth_scale : Optional[float] = None, depth_range : Optional[Tuple[float,float]]=None,
                     color_format='auto',points_format='numpy',all_points=False):
     r"""Given a depth and optionally color image, returns a point cloud
@@ -239,7 +240,9 @@ def image_to_points(depth : ImageLike, color : ImageLike, xfov : float, yfov: Op
             array of shape (h,w) encoding RGB pixels in the format 0xrrggbb.
             It is assumed that color maps directly onto depth pixels. 
             If color = None, an uncolored point cloud will be produced. 
-        xfov (float): horizontal field of view, in radians.  Related to the
+        intrinsics (dict, optional): Contains fields 'fx', 'fy', 'cx', 'cy' giving
+            the intrisincs parameters of the camera.
+        xfov (float, optional): horizontal field of view, in radians.  Related to the
             intrinsics fx via :math:`fx = w/(2 \tan(xfov/2))`, i.e.,
             :math:`xfov = 2*\arctan(w/(2*fx))`.
         yfov (float, optional): vertical field of view, in radians.  If not
@@ -303,13 +306,18 @@ def image_to_points(depth : ImageLike, color : ImageLike, xfov : float, yfov: Op
     if (points_format == 'PointCloud' or points_format == 'Geometry3D') and all_points:
         #shortcut, about 2x faster than going through Numpy
         res = PointCloud()
-        fx = 0.5*w/math.tan(xfov*0.5)
-        if yfov is None:
-            fy = fx
+        if intrinsics is None:
+            if xfov is None:
+                raise ValueError("Either intrinsics or xfov must be provided")
+            fx = 0.5*w/math.tan(xfov*0.5)
+            if yfov is None:
+                fy = fx
+            else:
+                fy = 0.5*h/math.tan(yfov*0.5)
+            cx = 0.5*w
+            cy = 0.5*h
         else:
-            fy = 0.5*h/math.tan(yfov*0.5)
-        cx = 0.5*w
-        cy = 0.5*h
+            fx,fy,cx,cy = intrinsics['fx'],intrinsics['fy'],intrinsics['cx'],intrinsics['cy']
         if depth_scale is None:
             depth_scale = 1.0
         if color_format is None:
@@ -331,13 +339,19 @@ def image_to_points(depth : ImageLike, color : ImageLike, xfov : float, yfov: Op
         if not all_points:
             raise NotImplementedError("TODO: TriangleMesh result but with missing data")
 
-    xshift = -w*0.5
-    yshift = -h*0.5
-    xscale = math.tan(xfov*0.5)/(w*0.5)
-    if yfov is not None:
-        yscale = math.tan(yfov*0.5)/(h*0.5)
+    if intrinsics is None:
+        xshift = -w*0.5
+        yshift = -h*0.5
+        xscale = math.tan(xfov*0.5)/(w*0.5)
+        if yfov is not None:
+            yscale = math.tan(yfov*0.5)/(h*0.5)
+        else:
+            yscale = xscale #square pixels are assumed
     else:
-        yscale = xscale #square pixels are assumed
+        xshift = -intrinsics['cx']
+        yshift = -intrinsics['cy']
+        xscale = 1.0/fx
+        yscale = 1.0/fy
     xs = [(j+xshift)*xscale for j in range(w)]
     ys = [(i+yshift)*yscale for i in range(h)]
     if color_format == 'channels' and color.dtype == np.uint8:
@@ -478,16 +492,14 @@ def camera_to_points(camera : SimRobotSensor,
 
     w = int(camera.getSetting('xres'))
     h = int(camera.getSetting('yres'))
-    xfov = float(camera.getSetting('xfov'))
-    yfov = float(camera.getSetting('yfov'))
+    fx = float(camera.getSetting('fx'))
+    fy = float(camera.getSetting('fy'))
+    cx = float(camera.getSetting('cx'))
+    cy = float(camera.getSetting('cy'))
 
     if (points_format == 'PointCloud' or points_format == 'Geometry3D') and (color_format is None or color_format == 'rgb') and all_points:
         #shortcut, about 2x faster than going through Numpy
         res = PointCloud()
-        fx = 0.5*w/math.tan(xfov*0.5)
-        fy = 0.5*h/math.tan(yfov*0.5)
-        cx = 0.5*w
-        cy = 0.5*h
         if color_format is None:
             res.setDepthImage([fx,fy,cx,cy],depth)
         else:
@@ -505,11 +517,10 @@ def camera_to_points(camera : SimRobotSensor,
 
     zmin = float(camera.getSetting('zmin'))
     zmax = float(camera.getSetting('zmax'))
-    xshift = -w*0.5
-    yshift = -h*0.5
-    xscale = math.tan(xfov*0.5)/(w*0.5)
-    #yscale = math.tan(yfov*0.5)/(h*0.5)
-    yscale = xscale #square pixels are assumed
+    xshift = -cx
+    yshift = -cy
+    xscale = 1.0/fx
+    yscale = 1.0/fy
     xs = [(j+xshift)*xscale for j in range(w)]
     ys = [(i+yshift)*yscale for i in range(h)]
 
@@ -634,22 +645,28 @@ def camera_to_viewport(camera : SimRobotSensor, robot : RobotModel) -> GLViewpor
     xform = get_sensor_xform(camera,robot)
     w = int(camera.getSetting('xres'))
     h = int(camera.getSetting('yres'))
-    xfov = float(camera.getSetting('xfov'))
-    yfov = float(camera.getSetting('yfov'))
+    fx = float(camera.getSetting('fx'))
+    fy = float(camera.getSetting('fy'))
+    cx = float(camera.getSetting('cx'))
+    cy = float(camera.getSetting('cy'))
     zmin = float(camera.getSetting('zmin'))
     zmax = float(camera.getSetting('zmax'))
     view = GLViewport()
     view.w, view.h = w,h
-    view.fov = math.degrees(xfov)
-    view.camera.dist = 1.0
-    view.camera.tgt = se3.apply(xform,[0,0,view.camera.dist])
+    view.fx = fx
+    view.fy = fy
+    view.cx = cx
+    view.cy = cy
+    view.controller.dist = 1.0
+    view.controller.tgt = se3.apply(xform,[0,0,view.controller.dist])
     #axes corresponding to right, down, fwd in camera view
-    view.camera.set_orientation(xform[0],['x','y','z'])
-    view.clippingplanes = (zmin,zmax)
+    view.controller.set_orientation(xform[0],['x','y','z'])
+    view.n = zmin
+    view.f = zmax
     return view
 
 
-def viewport_to_camera(viewport : GLViewport, camera : SimRobotSensor, robot : RobotModel):
+def viewport_to_camera(viewport : Viewport, camera : SimRobotSensor, robot : RobotModel):
     """Fills in a simulated camera's settings to match a GLViewport specifying
     the camera's view. 
 
@@ -662,8 +679,7 @@ def viewport_to_camera(viewport : GLViewport, camera : SimRobotSensor, robot : R
             local coordinates.
 
     """
-    from ..vis.glprogram import GLViewport
-    assert isinstance(viewport,GLViewport)
+    assert isinstance(viewport,Viewport)
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
     xform = viewport.get_transform()
@@ -673,15 +689,14 @@ def viewport_to_camera(viewport : GLViewport, camera : SimRobotSensor, robot : R
     else:
         rlink = robot.link(link)
     set_sensor_xform(camera,xform,rlink)
-    (zmin,zmax) = viewport.clippingplanes
-    xfov = math.radians(viewport.fov)
-    yfov = 2.0*math.atan(math.tan(xfov*0.5)*viewport.h/viewport.w)
     camera.setSetting('xres',str(viewport.w))
     camera.setSetting('yres',str(viewport.h))
-    camera.setSetting('xfov',str(xfov))
-    camera.setSetting('yfov',str(yfov))
-    camera.setSetting('zmin',str(zmin))
-    camera.setSetting('zmax',str(zmax))
+    camera.setSetting('fx',str(viewport.fx))
+    camera.setSetting('fy',str(viewport.fy))
+    camera.setSetting('cx',str(viewport.cx))
+    camera.setSetting('cy',str(viewport.cy))
+    camera.setSetting('zmin',str(viewport.n))
+    camera.setSetting('zmax',str(viewport.f))
     return camera
 
 
@@ -708,12 +723,10 @@ def camera_to_intrinsics(camera : SimRobotSensor, format='opencv', fn=None):
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
     w = int(camera.getSetting('xres'))
     h = int(camera.getSetting('yres'))
-    xfov = float(camera.getSetting('xfov'))
-    yfov = float(camera.getSetting('yfov'))
-    fx = 0.5*w/math.tan(xfov*0.5);
-    fy = 0.5*h/math.tan(yfov*0.5);
-    cx = w*0.5
-    cy = h*0.5
+    fx = float(camera.getSetting('fx'))
+    fy = float(camera.getSetting('fy'))
+    cx = float(camera.getSetting('cx'))
+    cy = float(camera.getSetting('cy'))
     if format == 'json':
         jsonobj = {'fx':fx,'fy':fy,'cx':cy,'model':None,'coeffs':[]}
         if fn is not None:
@@ -841,12 +854,12 @@ def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
         raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
     w = int(cx*2)
     h = int(cy*2)
-    xfov = math.atan(w/(fx*2))*2
-    yfov = math.atan(h/(fy*2))*2
     camera.setSetting('xres',str(w))
     camera.setSetting('yres',str(h))
-    camera.setSetting('xfov',str(xfov))
-    camera.setSetting('yfov',str(yfov))
+    camera.setSetting('fx',str(fx))
+    camera.setSetting('fy',str(fy))
+    camera.setSetting('cx',str(cx))
+    camera.setSetting('cy',str(cy))
     return camera
 
 
@@ -953,9 +966,9 @@ def visible(camera : Union[SimRobotSensor,GLViewport], object, full=True, robot=
                 return False
             if full:
                 return True
-            if min(p[2] for p in points) > camera.clippingplanes[1]:
+            if min(p[2] for p in points) > camera.f:
                 return False
-            if max(p[2] for p in points) < camera.clippingplanes[0]:
+            if max(p[2] for p in points) < camera.n:
                 return False
             points = [p for p in points if p[2] > 0]
             for p in points:
@@ -972,23 +985,23 @@ def visible(camera : Union[SimRobotSensor,GLViewport], object, full=True, robot=
                 cproj = camera.project(c,True)
                 if cproj is None: return False
                 rproj = camera.w/cproj[2]*r
-                if cproj[2] - r < camera.clippingplanes[0] or cproj[2] + r > camera.clippingplanes[1]: return False
+                if cproj[2] - r < camera.n or cproj[2] + r > camera.f: return False
                 return 0 <= cproj[0] - rproj and cproj[0] + rproj <= camera.w and 0 <= cproj[1] - rproj and cproj[1] + rproj <= camera.h
             else:
                 cproj = camera.project(c,False)
                 if cproj is None:
                     dist = r - vectorops.distance(camera.getTransform()[1],c) 
-                    if dist >= camera.clippingplanes[0]:
+                    if dist >= camera.n:
                         return True
                     return False
                 if 0 <= cproj[0] <= camera.w and 0 <= cproj[1] <= camera.h:
-                    if cproj[2] + r > camera.clippingplanes[0] and cproj[2] - r < camera.clippingplanes[1]:
+                    if cproj[2] + r > camera.n and cproj[2] - r < camera.f:
                         return True
                     return False
                 rproj = camera.w/cproj[2]*r
                 xclosest = max(min(cproj[0],camera.w),0)
                 yclosest = max(min(cproj[1],camera.h),0)
-                zclosest = max(min(cproj[2],camera.clippingplanes[1]),camera.clippingplanes[0])
+                zclosest = max(min(cproj[2],camera.f),camera.n)
                 return vectorops.distance((xclosest,yclosest),cproj[0:2]) <= rproj
     if not isinstance(object,Geometry3D):
         raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
@@ -1137,7 +1150,7 @@ def visible_fraction(camera : Union[SimRobotSensor,GLViewport], object, num_samp
 
 
 
-def laser_to_points(sensor, robot=None, scan=None):
+def laser_to_points(sensor : SimRobotSensor, robot : Optional[RobotModel]=None, scan=None):
     """Converts laser readings to a PointCloud.
 
     Args:
@@ -1160,6 +1173,7 @@ def laser_to_points(sensor, robot=None, scan=None):
 
     angle_range = float(sensor.getSetting("xSweepMagnitude"))
 
+    from klampt.math import so2
     points = []
     for i in range(len(scan)):
         u = float(i)/float(len(scan)+1)
@@ -1191,7 +1205,8 @@ def projection_map_texture(vp : Union[SimRobotSensor,GLViewport],
     xdir = so3.apply(T[0],[1,0,0])
     ydir = so3.apply(T[0],[0,1,0])
     zdir = so3.apply(T[0],[0,0,1])
-    if vp.orthogonal:
+    raise NotImplementedError("TODO: update this for new Viewport data structure")
+    if not vp.perspective:
         vscale = vp.h/vp.w
         texgen[0,0:3] = vectorops.mul(xdir,0.5/vp.fov)
         texgen[1,0:3] = vectorops.mul(ydir,0.5/(vp.fov*vscale))
