@@ -265,7 +265,7 @@ class Trajectory:
                 if jumpPolicy=='strict' and suffix.milestones[0] != self.milestones[-1]:
                     print("Suffix start:",suffix.milestones[0])
                     print("Self end:",self.milestones[-1])
-                    raise ValueError("Concatenation would cause a jump in configuration")
+                    raise ValueError("Concatenation would cause a jump in configuration, distance %g"%(vectorops.distance(suffix.milestones[0],self.milestones[-1])))
                 if jumpPolicy=='strict' or (jumpPolicy=='blend' and suffix.milestones[0] != self.milestones[-1]):
                     #discard last milestone of self
                     times = self.times[:-1] + [t+offset for t in suffix.times]
