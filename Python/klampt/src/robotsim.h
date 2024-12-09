@@ -362,7 +362,8 @@ class SimRobotController
  * 
  *     The transform of the body is centered at the *object's center of mass*
  *     rather than the object's reference frame given in the RobotModelLink or
- *     RigidObjectModel.
+ *     RigidObjectModel.  The object's reference frame is retrieved/set by
+ *     getObjectTransform()/setObjectTransform().
  * 
  */
 class SimBody
@@ -389,7 +390,13 @@ class SimBody
   void applyForceAtPoint(const double f[3],const double pworld[3]);
   /// Applies a force at a given point (in local center-of-mass-centered
   /// coordinates) over the duration of the next Simulator.simulate(t) call.
-  void applyForceAtLocalPoint(const double f[3],const double plocal[3]);
+  void applyForceAtCOMLocalPoint(const double f[3],const double plocal[3]);
+  /// Applies a force at a given point (in local object-centered
+  /// coordinates) over the duration of the next Simulator.simulate(t) call.
+  void applyForceAtObjectLocalPoint(const double f[3],const double plocal[3]);
+
+  /// Deprecated: use applyForceAtCOMLocalPoint instead to match old behavior.
+  void applyForceAtLocalPoint(const double f[3],const double plocal_com[3]);
 
   /// Sets the body's transformation at the current
   /// simulation time step (in center-of-mass centered coordinates).
@@ -405,11 +412,17 @@ class SimBody
   /// simulation time step (in object-native coordinates).
   void getObjectTransform(double out[9],double out2[3]);
 
-  /// Sets the angular velocity and translational velocity at the current
-  /// simulation time step.
+  /// Sets the angular velocity and translational velocity (of the COM)
+  /// at the current simulation time step.
   void setVelocity(const double w[3],const double v[3]);
-  /// Returns the angular velocity and translational velocity
+  /// Returns the angular velocity and translational velocity (of the COM)
   void getVelocity(double out[3],double out2[3]);
+
+  /// Sets the angular velocity and translational velocity (of the object origin)
+  /// at the current simulation time step.
+  void setObjectVelocity(const double w[3],const double v[3]);
+  /// Returns the angular velocity and translational velocity (of the object origin)
+  void getObjectVelocity(double out[3],double out2[3]);
 
   /// Sets the collision padding used for contact generation.  At 0 padding
   /// the simulation will be unstable for triangle mesh and point cloud
@@ -540,9 +553,6 @@ class Simulator
   /// Returns the current actual torques on the robot's drivers
   /// from the simulator
   void getActualTorque(int robot,std::vector<double>& out);
-  /// Deprecated: renamed to getActualTorque to be consistent with
-  /// SimRobotController methods
-  void getActualTorques(int robot,std::vector<double>& out);
 
   /// Call this to enable contact feedback between the two objects
   /// (arguments are indexes returned by object.getID()).  Contact feedback

@@ -31,6 +31,11 @@ namespace Klampt {
  *     Recommended to use the set/get functions rather than changing the members
  *     directly due to strangeness in SWIG's handling of vectors.
  * 
+ * .. note:
+ * 
+ *     The inertia matrix is specified in the local frame of the object
+ *     and centered at the center of mass. 
+ * 
  * Attributes:
  *
  *     mass (float): the actual mass (typically in kg)

@@ -139,6 +139,13 @@ If n == 3, each row is an rgb value.
 Only supports feature=VERTICES and feature=FACES  
 ";
 
+%feature("docstring") Appearance::getColors "
+
+Retrieves per-element color for elements of the given feature type. If per-
+element colors are not enabled, then a 1 x 4 array is returned. Otherwise,
+returns an m x 4 array, where m is the number of featuress of that type.  
+";
+
 %feature("docstring") Appearance::setTintColor "
 
 Sets a temporary tint color that modulates the appearance of the object. This
@@ -213,6 +220,17 @@ strings are.
 *   l8: unsigned byte grayscale colors, one channel  
 ";
 
+%feature("docstring") Appearance::getTexture1D_format "
+
+Retrieves a 1D texture format, returning '' if the texture is not set.  
+";
+
+%feature("docstring") Appearance::getTexture1D_channels "
+
+Retrieves a view into the 1D texture data. If the texture is not set, throws an
+exception.  
+";
+
 %feature("docstring") Appearance::setTexture2D_b "
 
 Sets a 2D texture of the given width/height. See :func:`setTexture1D_b` for
@@ -240,11 +258,28 @@ The array is given in top to bottom order if `topdown==True`. Otherwise, it is
 given in order bottom to top.  
 ";
 
+%feature("docstring") Appearance::getTexture2D_format "
+
+Retrieves a 2D texture format, returning '' if the texture is not set.  
+";
+
+%feature("docstring") Appearance::getTexture2D_channels "
+
+Retrieves a view into the 2D texture data. If the texture is not set, throws an
+exception.  
+";
+
 %feature("docstring") Appearance::setTexcoords1D "
 
 Sets per-vertex texture coordinates for a 1D texture.  
 
 You may also set uvs to be empty, which turns off texture mapping altogether.  
+";
+
+%feature("docstring") Appearance::getTexcoords1D "
+
+Gets per-vertex texture coordinates for a 1D texture. If no 1D texture is set,
+throws an exception.  
 ";
 
 %feature("docstring") Appearance::setTexcoords2D "
@@ -255,11 +290,28 @@ Sets per-vertex texture coordinates for a 2D texture. uvs is an array of shape
 You may also set uvs to be empty, which turns off texture mapping altogether.  
 ";
 
+%feature("docstring") Appearance::getTexcoords2D "
+
+Gets per-vertex texture coordinates for a 2D texture. If no 2D texture is set,
+throws an exception.  
+";
+
 %feature("docstring") Appearance::setTexgen "
 
 Sets the texture generation. The array must be size m x 4, with m in the range
 0,...,4. If worldcoordinates=true, the texture generation is performed in world
 coordinates rather than object coordinates.  
+";
+
+%feature("docstring") Appearance::getTexgenMatrix "
+
+Retrieves the texture generation. The array will be size m x 4, with m in the
+range 0,...,4. The texture generation is performed in  
+";
+
+%feature("docstring") Appearance::isTexgenWorld "
+
+Returns whether texture generation is performed in world coordinates.  
 ";
 
 %feature("docstring") Appearance::setTexWrap "
@@ -880,14 +932,19 @@ C++ includes: geometry.h
 
 The three-D geometry container used throughout Klampt.  
 
-There are five currently supported types of geometry:  
+There are eight currently supported types of geometry:  
 
 *   primitives (:class:`GeometricPrimitive`)  
+*   convex hulls (:class:`ConvexHull`)  
 *   triangle meshes (:class:`TriangleMesh`)  
 *   point clouds (:class:`PointCloud`)  
-*   volumetric grids (:class:`VolumeGrid`)  
+*   implicit surfaces (name \"ImplicitSurface\", data :class:`VolumeGrid`)  
+*   occupancy grids (name \"OccupancyGrid\", data :class:`VolumeGrid`)  
+*   heightmaps (:class:`Heightmap`)  
 *   groups (\"Group\" type)  
-*   convex hulls (:class:`ConvexHull`)  
+
+For now we also support the \"VolumeGrid\" identifier which is treated as an
+alias for \"ImplicitSurface\"  
 
 This class acts as a uniform container of all of these types.  
 
@@ -958,10 +1015,13 @@ margin. By default the margin is zero.
  **Conversions**  
 
 Many geometry types can be converted to and from one another using the
-:meth:`convert` method. This can also be used to remesh TriangleMesh objects and
-PointCloud objects.  
+:meth:`convert` method. This can also be used to remesh TriangleMesh,
+PointCloud, ImplicitSurface, OccupancyGrid, and Heightmap objects.  
 
 C++ includes: geometry.h
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
 ";
 
 %feature("docstring") Geometry3D::Geometry3D "
@@ -988,12 +1048,6 @@ C++ includes: geometry.h
 %feature("docstring") Geometry3D::~Geometry3D "
 ";
 
-%feature("docstring") Geometry3D::clone "
-
-Creates a standalone geometry from this geometry (identical to copy... will be
-deprecated in a future version)  
-";
-
 %feature("docstring") Geometry3D::copy "
 
 Creates a standalone geometry from this geometry.  
@@ -1016,8 +1070,8 @@ Frees the data associated with this geometry, if standalone.
 
 %feature("docstring") Geometry3D::type "
 
-Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,
-GeometricPrimitive, or Group.  
+Returns the type of geometry: GeometricPrimitive, ConvexHull, TriangleMesh,
+PointCloud, ImplicitSurface, OccupancyGrid, Heightmap, or Group.  
 ";
 
 %feature("docstring") Geometry3D::empty "
@@ -1047,7 +1101,23 @@ Returns a ConvexHull if this geometry is of type ConvexHull.
 
 %feature("docstring") Geometry3D::getVolumeGrid "
 
-Returns a VolumeGrid if this geometry is of type VolumeGrid.  
+Returns a VolumeGrid if this geometry is of type ImplicitSurface or
+OccupancyGrid.  
+";
+
+%feature("docstring") Geometry3D::getImplicitSurface "
+
+Returns the VolumeGrid if this geometry is of type ImplicitSurface.  
+";
+
+%feature("docstring") Geometry3D::getOccupancyGrid "
+
+Returns the VolumeGrid if this geometry is of type OccupancyGrid.  
+";
+
+%feature("docstring") Geometry3D::getHeightmap "
+
+Returns the Heightmap if this geometry is of type Heightmap.  
 ";
 
 %feature("docstring") Geometry3D::setTriangleMesh "
@@ -1079,7 +1149,22 @@ transform of g2 doesn't do anything to this object.
 
 %feature("docstring") Geometry3D::setVolumeGrid "
 
-Sets this Geometry3D to a volumeGrid.  
+Sets this Geometry3D to an ImplicitSurface. Will be deprecated soon.  
+";
+
+%feature("docstring") Geometry3D::setImplicitSurface "
+
+Sets this Geometry3D to an ImplicitSurface.  
+";
+
+%feature("docstring") Geometry3D::setOccupancyGrid "
+
+Sets this Geometry3D to an OccupancyGrid.  
+";
+
+%feature("docstring") Geometry3D::setHeightmap "
+
+Sets this Geometry3D to a Heightmap.  
 ";
 
 %feature("docstring") Geometry3D::setGroup "
@@ -1432,24 +1517,242 @@ Supported types:
 *   TriangleMesh  
 ";
 
-%feature("docstring") Geometry3D::union_ "
+%feature("docstring") Geometry3D::merge "
 
-Calculates a \"union\" of this geometry with another geometry. The result is
-stored inplace and the type of the result is the same as this geometry. This can
-be used to calculate the union of PointClouds, TriangleMeshes, ConvexPolytopes,
-and VolumeGrids.  
+Merges another geometry into this geometry. The result is stored inplace and the
+type of the result is the same as this geometry. This can be used to calculate
+the union of PointClouds, TriangleMeshes, ConvexPolytopes, and ImplicitSurfaces,
+OccupancyGrids, and Heightmaps.  
 
-VolumeGrid unions preserve the domain of the current volume grid. They can also
-be unioned with GeometricPrimitives, PointClouds, TriangleMeshes, and
-ConvexPolytopes, in which case the output is either an occupancy grid, signed
-distance field (SDF), or TSDF (TSDF) according to the `representation` argument.
-Valid values are \"auto\" (=\"sdf\"), \"occupancy\", \"sdf\", and \"tsdf\".  
+ImplicitSurface, OccupancyGrid, and Heightmap merges preserve the domain of the
+current grid. They can also be merged with many other geometries.  
 
-In the TSDF case, the truncation value is either `threshold`, or if
-`threshold`=0, the current range of the existing TSDF is used.  
+In the ImplicitSurface case, a truncation value can be set via `threshold`. This
+performs a TSDF-style merge  
+";
 
-Note: the C++ name of this method is union_ but you can also use union in the
-Python API.  
+// File: classHeightmap.xml
+
+
+%feature("docstring") Heightmap "
+
+A height (elevation) map or a depth map.  
+
+In elevation-map form (viewport.perspective=false), the values are the z-height
+of the terrain at each grid point. In depth-map form
+(viewport.perspective=true), the values are the depths of each grid point (not
+distance) from the origin in the +z direction.  
+
+Note that unlike VolumeGrid types, each grid entry is defined at a vertex, not a
+cell. The (i,j) cell is associated with the vertex
+((i+0.5-cx)/fx,(j+0.5-cy)/fy,heights[i,j]) in elevation map mode.  
+
+Attributes:  
+
+    viewport (Viewport): contains the size (w,h), projection (perspective)
+         intrinsics (fx,fy,cx,cy), and pose (pose) of the heightmap
+         reference coordinate system.
+    heights (SWIG vector of floats): contains a 2D array of
+         ``dims[0]*dims[1]`` values from the bottom left to the upper
+         right (row major, i.e., x order, then y order).
+
+         The vertex index (i,j) is flattened to
+         ``i*dims[1] + j``.
+
+         The array index i is associated to vertex index
+         ``(i/dims[1], i % dims[0])``
+
+     colors (SWIG vector of floats): contains a 2D array of colors in
+         grayscale (w*h), RGB (3*w*h), or RGBA (4*w*h) form.  The layout
+         is row major in the space (i,j,channel), i.e., the index of
+         (i,j,channel) is ``i*h*C + j*C + channel`` where C is 1, 3, or 4.
+
+     properties (SWIG vector of floats): contains a 3D array of properties
+         (w*h*p) where p is the number of properties.  p matches the length
+        of propertyNames.  Layout is row-major with (property, i, j), i.e., p
+order,
+        w order, then h order.  Property p at index (i,j) is flattened to
+       ``p*w*h + i*h + j``.
+
+     propertyNames (SWIG vector of strings): A list of the p property names.
+  
+
+C++ includes: geometry.h
+";
+
+%feature("docstring") Heightmap::Heightmap "
+";
+
+%feature("docstring") Heightmap::resize "
+
+Resizes the height map.  
+";
+
+%feature("docstring") Heightmap::setSize "
+
+Sets an orthographic projection (elevation map) with the given width and height.  
+";
+
+%feature("docstring") Heightmap::setFOV "
+
+Sets an perspective projection (depth map) with the given x and y fields of view
+and centered focal point. If fovy=-1, then it will be set so that pixels are
+square.  
+";
+
+%feature("docstring") Heightmap::setIntrinsics "
+
+Sets an perspective projection (depth map) with the given intrinsics fx, fy, cx,
+cy. If cx or cy are negative, then cx = (w-1)/2, cy = (h-1)/2.  
+";
+
+%feature("docstring") Heightmap::set "
+
+Sets all elements to a uniform value (e.g., 0)  
+";
+
+%feature("docstring") Heightmap::set "
+
+Sets the height of a vertex.  
+";
+
+%feature("docstring") Heightmap::get "
+
+Gets the height of a vertex.  
+";
+
+%feature("docstring") Heightmap::shift "
+
+Shifts the height uniformly.  
+";
+
+%feature("docstring") Heightmap::scale "
+
+Scales the height uniformly.  
+";
+
+%feature("docstring") Heightmap::getHeights "
+
+Returns a 2D Numpy array view of the values of size (w x h) PROBLEM: numpy
+stores in row-major order i*h + j.  
+";
+
+%feature("docstring") Heightmap::setHeights "
+
+Sets the values to 2D numpy array of size (w x h)  
+";
+
+%feature("docstring") Heightmap::setHeightImage_d "
+
+Sets values to an image with size (h x w) with rows ordered top to bottom.  
+";
+
+%feature("docstring") Heightmap::setHeightImage_f "
+
+Sets values to an image with size (h x w) with rows ordered top to bottom.  
+";
+
+%feature("docstring") Heightmap::setHeightImage_s "
+
+Sets values to an image with size (h x w) with rows ordered top to bottom.  
+";
+
+%feature("docstring") Heightmap::setHeightImage_b "
+
+Sets values to an image with size (h x w) with rows ordered top to bottom.  
+";
+
+%feature("docstring") Heightmap::clearColors "
+
+Erases all colors.  
+";
+
+%feature("docstring") Heightmap::setColor "
+
+Sets a uniform grayscale color. Call this first if you want to start setting
+colors.  
+";
+
+%feature("docstring") Heightmap::setColor "
+
+Sets a uniform color. Call this first if you want to start setting colors.  
+";
+
+%feature("docstring") Heightmap::setColor "
+
+Gets the grayscale color of a cell.  
+";
+
+%feature("docstring") Heightmap::setColor "
+
+Gets the RGBA color of a cell.  
+";
+
+%feature("docstring") Heightmap::getColor "
+
+Gets the RGBA color of a cell.  
+";
+
+%feature("docstring") Heightmap::getColors "
+
+Returns a 3D Numpy array view of the colors (w x h x 1, 3, or 4)  
+";
+
+%feature("docstring") Heightmap::setColors "
+
+Sets the values to a 3D numpy array (w x h x 1, 3, or 4)  
+";
+
+%feature("docstring") Heightmap::setColorImage_i "
+
+Sets colors to a 32-bit RGBA image (size h x w) with rows ordered top to bottom.  
+";
+
+%feature("docstring") Heightmap::setColorImage_b3 "
+
+Sets colors to a 24-bit RGB image (size h x w x 3) with rows ordered top to
+bottom.  
+";
+
+%feature("docstring") Heightmap::setColorImage_b "
+
+Sets colors to an 8-bit grayscale image (size h x w) with rows ordered top to
+bottom.  
+";
+
+%feature("docstring") Heightmap::addProperty "
+
+Adds a new property and sets it to 0.  
+";
+
+%feature("docstring") Heightmap::addProperty "
+
+Adds a new property and sets it to an array of size (w x h)  
+";
+
+%feature("docstring") Heightmap::setProperty "
+
+Sets an individual pixel's property vector.  
+";
+
+%feature("docstring") Heightmap::getProperty "
+
+Retrieves an individual pixel's property vector.  
+";
+
+%feature("docstring") Heightmap::setProperties "
+
+Sets a property to an array of size (w x h)  
+";
+
+%feature("docstring") Heightmap::getProperties "
+
+Retrieves a view of the property of size (w x h)  
+";
+
+%feature("docstring") Heightmap::setPropertyImage "
+
+Sets a property to an image of size (h x w) with rows ordered top to bottom.  
 ";
 
 // File: classIKObjective.xml
@@ -1873,6 +2176,10 @@ Stores mass information for a rigid body or robot link.
 
     Recommended to use the set/get functions rather than changing the members
     directly due to strangeness in SWIG's handling of vectors.
+ .. note:  
+
+    The inertia matrix is specified in the local frame of the object
+    and centered at the center of mass.
  Attributes:  
 
     mass (float): the actual mass (typically in kg)
@@ -3569,7 +3876,8 @@ of objects in the simulation.
 
     The transform of the body is centered at the *object's center of mass*
     rather than the object's reference frame given in the RobotModelLink or
-    RigidObjectModel.
+    RigidObjectModel.  The object's reference frame is retrieved/set by
+    getObjectTransform()/setObjectTransform().
   
 
 C++ includes: robotsim.h
@@ -3612,10 +3920,21 @@ Applies a force at a given point (in world coordinates) over the duration of the
 next Simulator.simulate(t) call.  
 ";
 
-%feature("docstring") SimBody::applyForceAtLocalPoint "
+%feature("docstring") SimBody::applyForceAtCOMLocalPoint "
 
 Applies a force at a given point (in local center-of-mass-centered coordinates)
 over the duration of the next Simulator.simulate(t) call.  
+";
+
+%feature("docstring") SimBody::applyForceAtObjectLocalPoint "
+
+Applies a force at a given point (in local object-centered coordinates) over the
+duration of the next Simulator.simulate(t) call.  
+";
+
+%feature("docstring") SimBody::applyForceAtLocalPoint "
+
+Deprecated: use applyForceAtCOMLocalPoint instead to match old behavior.  
 ";
 
 %feature("docstring") SimBody::setTransform "
@@ -3644,13 +3963,24 @@ native coordinates).
 
 %feature("docstring") SimBody::setVelocity "
 
-Sets the angular velocity and translational velocity at the current simulation
-time step.  
+Sets the angular velocity and translational velocity (of the COM) at the current
+simulation time step.  
 ";
 
 %feature("docstring") SimBody::getVelocity "
 
-Returns the angular velocity and translational velocity.  
+Returns the angular velocity and translational velocity (of the COM)  
+";
+
+%feature("docstring") SimBody::setObjectVelocity "
+
+Sets the angular velocity and translational velocity (of the object origin) at
+the current simulation time step.  
+";
+
+%feature("docstring") SimBody::getObjectVelocity "
+
+Returns the angular velocity and translational velocity (of the object origin)  
 ";
 
 %feature("docstring") SimBody::setCollisionPadding "
@@ -4320,12 +4650,6 @@ Returns the current actual velocity of the robot from the simulator.
 Returns the current actual torques on the robot's drivers from the simulator.  
 ";
 
-%feature("docstring") Simulator::getActualTorques "
-
-Deprecated: renamed to getActualTorque to be consistent with SimRobotController
-methods.  
-";
-
 %feature("docstring") Simulator::enableContactFeedback "
 
 Call this to enable contact feedback between the two objects (arguments are
@@ -4694,27 +5018,6 @@ Translates all the vertices by v=v+t.
 Transforms all the vertices by the rigid transform v=R*v+t.  
 ";
 
-// File: classViewport.xml
-
-
-%feature("docstring") Viewport "
-";
-
-%feature("docstring") Viewport::fromJson "
-";
-
-%feature("docstring") Viewport::toJson "
-";
-
-%feature("docstring") Viewport::setModelviewMatrix "
-";
-
-%feature("docstring") Viewport::setRigidTransform "
-";
-
-%feature("docstring") Viewport::getRigidTransform "
-";
-
 // File: classVolumeGrid.xml
 
 
@@ -4739,7 +5042,7 @@ Attributes:
         (xmin,ymin,zmin),(xmax,ymax,zmax)
     dims (SWIG vector of  of 3 ints): size of grid in each of 3 dimensions
     values (SWIG vector of doubles): contains a 3D array of
-         ``dims[0]*dims[1]*dims[1]`` values.
+         ``dims[0]*dims[1]*dims[2]`` values.
 
          The cell index (i,j,k) is flattened to
          ``i*dims[1]*dims[2] + j*dims[2] + k``.
@@ -4755,9 +5058,13 @@ C++ includes: geometry.h
 ";
 
 %feature("docstring") VolumeGrid::setBounds "
+
+Sets the min / max bounds for this volume.  
 ";
 
 %feature("docstring") VolumeGrid::resize "
+
+Resizes the x, y, and z dimensions of the grid.  
 ";
 
 %feature("docstring") VolumeGrid::set "
@@ -4776,6 +5083,13 @@ Gets a specific element of a cell.
 ";
 
 %feature("docstring") VolumeGrid::shift "
+
+Shifts the value uniformly.  
+";
+
+%feature("docstring") VolumeGrid::scale "
+
+Scales the value uniformly.  
 ";
 
 %feature("docstring") VolumeGrid::getValues "

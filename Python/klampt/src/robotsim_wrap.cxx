@@ -2704,80 +2704,84 @@ SWIGINTERN PyObject *SWIG_PyStaticMethod_New(PyObject *SWIGUNUSEDPARM(self), PyO
 #define SWIGTYPE_p_GeneralizedIKSolver swig_types[9]
 #define SWIGTYPE_p_GeometricPrimitive swig_types[10]
 #define SWIGTYPE_p_Geometry3D swig_types[11]
-#define SWIGTYPE_p_IKGoal swig_types[12]
-#define SWIGTYPE_p_IKObjective swig_types[13]
-#define SWIGTYPE_p_IKSolver swig_types[14]
-#define SWIGTYPE_p_Klampt__ODEGeometry swig_types[15]
-#define SWIGTYPE_p_Klampt__RigidObjectModel swig_types[16]
-#define SWIGTYPE_p_Klampt__RobotModel swig_types[17]
-#define SWIGTYPE_p_Klampt__SensorBase swig_types[18]
-#define SWIGTYPE_p_Klampt__SimRobotController swig_types[19]
-#define SWIGTYPE_p_Klampt__Simulator swig_types[20]
-#define SWIGTYPE_p_Klampt__TerrainModel swig_types[21]
-#define SWIGTYPE_p_Mass swig_types[22]
-#define SWIGTYPE_p_ObjectPoser swig_types[23]
-#define SWIGTYPE_p_PointCloud swig_types[24]
-#define SWIGTYPE_p_PointPoser swig_types[25]
-#define SWIGTYPE_p_RigidObjectModel swig_types[26]
-#define SWIGTYPE_p_RobotModel swig_types[27]
-#define SWIGTYPE_p_RobotModelDriver swig_types[28]
-#define SWIGTYPE_p_RobotModelLink swig_types[29]
-#define SWIGTYPE_p_RobotPoser swig_types[30]
-#define SWIGTYPE_p_SimBody swig_types[31]
-#define SWIGTYPE_p_SimJoint swig_types[32]
-#define SWIGTYPE_p_SimRobotController swig_types[33]
-#define SWIGTYPE_p_SimRobotSensor swig_types[34]
-#define SWIGTYPE_p_Simulator swig_types[35]
-#define SWIGTYPE_p_SpherePoser swig_types[36]
-#define SWIGTYPE_p_TerrainModel swig_types[37]
-#define SWIGTYPE_p_TransformPoser swig_types[38]
-#define SWIGTYPE_p_TriangleMesh swig_types[39]
-#define SWIGTYPE_p_Viewport swig_types[40]
-#define SWIGTYPE_p_VolumeGrid swig_types[41]
-#define SWIGTYPE_p_Widget swig_types[42]
-#define SWIGTYPE_p_WidgetSet swig_types[43]
-#define SWIGTYPE_p_WorldModel swig_types[44]
-#define SWIGTYPE_p__object swig_types[45]
-#define SWIGTYPE_p_allocator_type swig_types[46]
-#define SWIGTYPE_p_char swig_types[47]
-#define SWIGTYPE_p_difference_type swig_types[48]
-#define SWIGTYPE_p_double swig_types[49]
-#define SWIGTYPE_p_doubleArray swig_types[50]
-#define SWIGTYPE_p_dxBody swig_types[51]
-#define SWIGTYPE_p_dxJoint swig_types[52]
-#define SWIGTYPE_p_float swig_types[53]
-#define SWIGTYPE_p_floatArray swig_types[54]
-#define SWIGTYPE_p_int swig_types[55]
-#define SWIGTYPE_p_intArray swig_types[56]
-#define SWIGTYPE_p_key_type swig_types[57]
-#define SWIGTYPE_p_mapped_type swig_types[58]
-#define SWIGTYPE_p_p__object swig_types[59]
-#define SWIGTYPE_p_p_double swig_types[60]
-#define SWIGTYPE_p_p_doubleArray swig_types[61]
-#define SWIGTYPE_p_p_int swig_types[62]
-#define SWIGTYPE_p_p_intArray swig_types[63]
-#define SWIGTYPE_p_size_type swig_types[64]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[65]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[66]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[67]
-#define SWIGTYPE_p_std__allocatorT_std__pairT_std__string_const_std__string_t_t swig_types[68]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[69]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[70]
-#define SWIGTYPE_p_std__invalid_argument swig_types[71]
-#define SWIGTYPE_p_std__lessT_std__string_t swig_types[72]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[73]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[74]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[75]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[76]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[77]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[78]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[79]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[80]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[81]
-#define SWIGTYPE_p_value_type swig_types[82]
-#define SWIGTYPE_p_void swig_types[83]
-static swig_type_info *swig_types[85];
-static swig_module_info swig_module = {swig_types, 84, 0, 0, 0, 0};
+#define SWIGTYPE_p_Heightmap swig_types[12]
+#define SWIGTYPE_p_IKGoal swig_types[13]
+#define SWIGTYPE_p_IKObjective swig_types[14]
+#define SWIGTYPE_p_IKSolver swig_types[15]
+#define SWIGTYPE_p_Klampt__ODEGeometry swig_types[16]
+#define SWIGTYPE_p_Klampt__RigidObjectModel swig_types[17]
+#define SWIGTYPE_p_Klampt__RobotModel swig_types[18]
+#define SWIGTYPE_p_Klampt__SensorBase swig_types[19]
+#define SWIGTYPE_p_Klampt__SimRobotController swig_types[20]
+#define SWIGTYPE_p_Klampt__Simulator swig_types[21]
+#define SWIGTYPE_p_Klampt__TerrainModel swig_types[22]
+#define SWIGTYPE_p_Mass swig_types[23]
+#define SWIGTYPE_p_ObjectPoser swig_types[24]
+#define SWIGTYPE_p_PointCloud swig_types[25]
+#define SWIGTYPE_p_PointPoser swig_types[26]
+#define SWIGTYPE_p_RigidObjectModel swig_types[27]
+#define SWIGTYPE_p_RobotModel swig_types[28]
+#define SWIGTYPE_p_RobotModelDriver swig_types[29]
+#define SWIGTYPE_p_RobotModelLink swig_types[30]
+#define SWIGTYPE_p_RobotPoser swig_types[31]
+#define SWIGTYPE_p_SimBody swig_types[32]
+#define SWIGTYPE_p_SimJoint swig_types[33]
+#define SWIGTYPE_p_SimRobotController swig_types[34]
+#define SWIGTYPE_p_SimRobotSensor swig_types[35]
+#define SWIGTYPE_p_Simulator swig_types[36]
+#define SWIGTYPE_p_SpherePoser swig_types[37]
+#define SWIGTYPE_p_TerrainModel swig_types[38]
+#define SWIGTYPE_p_TransformPoser swig_types[39]
+#define SWIGTYPE_p_TriangleMesh swig_types[40]
+#define SWIGTYPE_p_Viewport swig_types[41]
+#define SWIGTYPE_p_VolumeGrid swig_types[42]
+#define SWIGTYPE_p_Widget swig_types[43]
+#define SWIGTYPE_p_WidgetSet swig_types[44]
+#define SWIGTYPE_p_WorldModel swig_types[45]
+#define SWIGTYPE_p__object swig_types[46]
+#define SWIGTYPE_p_allocator_type swig_types[47]
+#define SWIGTYPE_p_char swig_types[48]
+#define SWIGTYPE_p_difference_type swig_types[49]
+#define SWIGTYPE_p_double swig_types[50]
+#define SWIGTYPE_p_doubleArray swig_types[51]
+#define SWIGTYPE_p_dxBody swig_types[52]
+#define SWIGTYPE_p_dxJoint swig_types[53]
+#define SWIGTYPE_p_float swig_types[54]
+#define SWIGTYPE_p_floatArray swig_types[55]
+#define SWIGTYPE_p_int swig_types[56]
+#define SWIGTYPE_p_intArray swig_types[57]
+#define SWIGTYPE_p_key_type swig_types[58]
+#define SWIGTYPE_p_mapped_type swig_types[59]
+#define SWIGTYPE_p_p__object swig_types[60]
+#define SWIGTYPE_p_p_double swig_types[61]
+#define SWIGTYPE_p_p_doubleArray swig_types[62]
+#define SWIGTYPE_p_p_float swig_types[63]
+#define SWIGTYPE_p_p_floatArray swig_types[64]
+#define SWIGTYPE_p_p_int swig_types[65]
+#define SWIGTYPE_p_p_intArray swig_types[66]
+#define SWIGTYPE_p_p_unsigned_char swig_types[67]
+#define SWIGTYPE_p_size_type swig_types[68]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[69]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[70]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[71]
+#define SWIGTYPE_p_std__allocatorT_std__pairT_std__string_const_std__string_t_t swig_types[72]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[73]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[74]
+#define SWIGTYPE_p_std__invalid_argument swig_types[75]
+#define SWIGTYPE_p_std__lessT_std__string_t swig_types[76]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[77]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[78]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[79]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[80]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[81]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[82]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[83]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[84]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[85]
+#define SWIGTYPE_p_value_type swig_types[86]
+#define SWIGTYPE_p_void swig_types[87]
+static swig_type_info *swig_types[89];
+static swig_module_info swig_module = {swig_types, 88, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -2888,6 +2892,7 @@ namespace swig {
 	#include "geometry.h"
 	#include "appearance.h"
 	#include "widget.h"
+	#include "viewport.h"
 	#include "robotmodel.h"
 	#include "robotik.h"
 	#include "robotsim.h"
@@ -6664,6 +6669,13 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 }
 
 
+SWIGINTERNINLINE PyObject * 
+SWIG_FromCharPtr(const char *cptr)
+{ 
+  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
+}
+
+
 SWIGINTERN int
 SWIG_AsCharArray(PyObject * obj, char *val, size_t size)
 { 
@@ -6705,13 +6717,6 @@ SWIG_AsVal_char (PyObject * obj, char *val)
     }
   }
   return res;
-}
-
-
-SWIGINTERNINLINE PyObject * 
-SWIG_FromCharPtr(const char *cptr)
-{ 
-  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
 }
 
 #ifdef __cplusplus
@@ -23250,6 +23255,47 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_VolumeGrid_scale(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_scale", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_scale" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VolumeGrid_scale" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->scale(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_VolumeGrid_getValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   VolumeGrid *arg1 = (VolumeGrid *) 0 ;
@@ -23570,6 +23616,3262 @@ SWIGINTERN PyObject *VolumeGrid_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
 }
 
 SWIGINTERN PyObject *VolumeGrid_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_new_Heightmap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "new_Heightmap", 0, 0, 0)) SWIG_fail;
+  {
+    try {
+      result = (Heightmap *)new Heightmap();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Heightmap, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_resize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_resize", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_resize" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_resize" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_resize" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      (arg1)->resize(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setSize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setSize", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setSize" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setSize" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_setSize" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      (arg1)->setSize(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setFOV__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setFOV" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setFOV" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_setFOV" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      (arg1)->setFOV(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setFOV__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setFOV" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setFOV" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setFOV(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setFOV(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_setFOV", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_Heightmap_setFOV__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Heightmap_setFOV__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_setFOV'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::setFOV(double,double)\n"
+    "    Heightmap::setFOV(double)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setIntrinsics__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  double arg4 ;
+  double arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  
+  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setIntrinsics" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setIntrinsics" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_setIntrinsics" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Heightmap_setIntrinsics" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Heightmap_setIntrinsics" "', argument " "5"" of type '" "double""'");
+  } 
+  arg5 = static_cast< double >(val5);
+  {
+    try {
+      (arg1)->setIntrinsics(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setIntrinsics__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setIntrinsics" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setIntrinsics" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_setIntrinsics" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Heightmap_setIntrinsics" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      (arg1)->setIntrinsics(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setIntrinsics__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setIntrinsics" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setIntrinsics" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_setIntrinsics" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      (arg1)->setIntrinsics(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setIntrinsics(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[6] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_setIntrinsics", 0, 5, argv))) SWIG_fail;
+  --argc;
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Heightmap_setIntrinsics__SWIG_2(self, argc, argv);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Heightmap_setIntrinsics__SWIG_1(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_double(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              return _wrap_Heightmap_setIntrinsics__SWIG_0(self, argc, argv);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_setIntrinsics'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::setIntrinsics(double,double,double,double)\n"
+    "    Heightmap::setIntrinsics(double,double,double)\n"
+    "    Heightmap::setIntrinsics(double,double)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_set__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_set" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->set(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_set__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_set" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_set" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Heightmap_set" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      (arg1)->set(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_set(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[5] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_set", 0, 4, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_Heightmap_set__SWIG_0(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Heightmap_set__SWIG_1(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_set'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::set(double)\n"
+    "    Heightmap::set(int,int,double)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  double result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_get", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_get" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_get" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_get" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      result = (double)(arg1)->get(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_shift(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_shift", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_shift" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_shift" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->shift(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_scale(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_scale", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_scale" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_scale" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->scale(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_getHeights(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_getHeights" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    try {
+      (arg1)->getHeights(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeights(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setHeights", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeights" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setHeights(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_d__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  double arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeightImage_d" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  ecode5 = SWIG_AsVal_double(swig_obj[2], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Heightmap_setHeightImage_d" "', argument " "5"" of type '" "double""'");
+  } 
+  arg5 = static_cast< double >(val5);
+  {
+    try {
+      (arg1)->setHeightImage_d(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_d__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeightImage_d" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setHeightImage_d(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_d(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_setHeightImage_d", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        if (argc <= 2) {
+          return _wrap_Heightmap_setHeightImage_d__SWIG_1(self, argc, argv);
+        }
+        if (argc <= 3) {
+          return _wrap_Heightmap_setHeightImage_d__SWIG_1(self, argc, argv);
+        }
+        return _wrap_Heightmap_setHeightImage_d__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Heightmap_setHeightImage_d__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_setHeightImage_d'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::setHeightImage_d(double *,int,int,double)\n"
+    "    Heightmap::setHeightImage_d(double *,int,int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_f__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  float *arg2 = (float *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  double arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeightImage_f" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_FLOAT,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (float*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  ecode5 = SWIG_AsVal_double(swig_obj[2], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Heightmap_setHeightImage_f" "', argument " "5"" of type '" "double""'");
+  } 
+  arg5 = static_cast< double >(val5);
+  {
+    try {
+      (arg1)->setHeightImage_f(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_f__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  float *arg2 = (float *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeightImage_f" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_FLOAT,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (float*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setHeightImage_f(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_f(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_setHeightImage_f", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        if (argc <= 2) {
+          return _wrap_Heightmap_setHeightImage_f__SWIG_1(self, argc, argv);
+        }
+        if (argc <= 3) {
+          return _wrap_Heightmap_setHeightImage_f__SWIG_1(self, argc, argv);
+        }
+        return _wrap_Heightmap_setHeightImage_f__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Heightmap_setHeightImage_f__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_setHeightImage_f'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::setHeightImage_f(float *,int,int,double)\n"
+    "    Heightmap::setHeightImage_f(float *,int,int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_s__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  unsigned short *arg2 = (unsigned short *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  double arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeightImage_s" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_USHORT,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (unsigned short*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  ecode5 = SWIG_AsVal_double(swig_obj[2], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Heightmap_setHeightImage_s" "', argument " "5"" of type '" "double""'");
+  } 
+  arg5 = static_cast< double >(val5);
+  {
+    try {
+      (arg1)->setHeightImage_s(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_s__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  unsigned short *arg2 = (unsigned short *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeightImage_s" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_USHORT,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (unsigned short*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setHeightImage_s(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_s(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_setHeightImage_s", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        if (argc <= 2) {
+          return _wrap_Heightmap_setHeightImage_s__SWIG_1(self, argc, argv);
+        }
+        if (argc <= 3) {
+          return _wrap_Heightmap_setHeightImage_s__SWIG_1(self, argc, argv);
+        }
+        return _wrap_Heightmap_setHeightImage_s__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Heightmap_setHeightImage_s__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_setHeightImage_s'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::setHeightImage_s(unsigned short *,int,int,double)\n"
+    "    Heightmap::setHeightImage_s(unsigned short *,int,int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_b__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  double arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeightImage_b" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_UBYTE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (unsigned char*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  ecode5 = SWIG_AsVal_double(swig_obj[2], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Heightmap_setHeightImage_b" "', argument " "5"" of type '" "double""'");
+  } 
+  arg5 = static_cast< double >(val5);
+  {
+    try {
+      (arg1)->setHeightImage_b(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_b__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setHeightImage_b" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_UBYTE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (unsigned char*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setHeightImage_b(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setHeightImage_b(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_setHeightImage_b", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        if (argc <= 2) {
+          return _wrap_Heightmap_setHeightImage_b__SWIG_1(self, argc, argv);
+        }
+        if (argc <= 3) {
+          return _wrap_Heightmap_setHeightImage_b__SWIG_1(self, argc, argv);
+        }
+        return _wrap_Heightmap_setHeightImage_b__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Heightmap_setHeightImage_b__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_setHeightImage_b'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::setHeightImage_b(unsigned char *,int,int,double)\n"
+    "    Heightmap::setHeightImage_b(unsigned char *,int,int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_clearColors(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_clearColors" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    try {
+      (arg1)->clearColors();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColor__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setColor" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setColor" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setColor(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColor__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setColor" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->setColor((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColor__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setColor" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setColor" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_setColor" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Heightmap_setColor" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      (arg1)->setColor(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColor__SWIG_3(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double temp4[4] ;
+  
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setColor" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setColor" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_setColor" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    if (!convert_darray(swig_obj[3],temp4,4)) {
+      return NULL;
+    }
+    arg4 = &temp4[0];
+  }
+  {
+    try {
+      (arg1)->setColor(arg2,arg3,(double const (*))arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColor(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[5] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_setColor", 0, 4, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_Heightmap_setColor__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_Heightmap_setColor__SWIG_0(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          void *vptr = 0;
+          int res = SWIG_ConvertPtr(argv[3], &vptr, SWIGTYPE_p_double, 0);
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            return _wrap_Heightmap_setColor__SWIG_3(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Heightmap_setColor__SWIG_2(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_setColor'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::setColor(double)\n"
+    "    Heightmap::setColor(double const [4])\n"
+    "    Heightmap::setColor(int,int,double)\n"
+    "    Heightmap::setColor(int,int,double const [4])\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_getColor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double temp4[4] ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_getColor", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_getColor" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_getColor" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_getColor" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      (arg1)->getColor(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg4,4);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_getColors(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  int dim3_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+    arg5 = &dim3_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_getColors" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    try {
+      (arg1)->getColors(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[3] = {
+      *arg3, *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(3, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColors(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setColors", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setColors" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 3) ||
+      !require_size(array2, size, 3)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+    arg5 = (int) array_size(array2,2);
+  }
+  {
+    try {
+      (arg1)->setColors(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColorImage_i(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  unsigned int *arg2 = (unsigned int *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setColorImage_i", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setColorImage_i" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_UINT,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (unsigned int*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setColorImage_i(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColorImage_b3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setColorImage_b3", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setColorImage_b3" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_UBYTE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 3) ||
+      !require_size(array2, size, 3)) SWIG_fail;
+    arg2 = (unsigned char*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+    arg5 = (int) array_size(array2,2);
+  }
+  {
+    try {
+      (arg1)->setColorImage_b3(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setColorImage_b(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setColorImage_b", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setColorImage_b" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_UBYTE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (unsigned char*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setColorImage_b(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_addProperty__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_addProperty" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Heightmap_addProperty" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Heightmap_addProperty" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      (arg1)->addProperty((std::string const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_addProperty__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  std::string *arg2 = 0 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_addProperty" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Heightmap_addProperty" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Heightmap_addProperty" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    try {
+      (arg1)->addProperty((std::string const &)*arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_addProperty(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Heightmap_addProperty", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_Heightmap_addProperty__SWIG_0(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Heightmap, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
+        if (_v) {
+          if (argc <= 3) {
+            return _wrap_Heightmap_addProperty__SWIG_1(self, argc, argv);
+          }
+          if (argc <= 4) {
+            return _wrap_Heightmap_addProperty__SWIG_1(self, argc, argv);
+          }
+          return _wrap_Heightmap_addProperty__SWIG_1(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Heightmap_addProperty'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Heightmap::addProperty(std::string const &)\n"
+    "    Heightmap::addProperty(std::string const &,double *,int,int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setProperty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 = (double *) 0 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyArrayObject *array4 = NULL ;
+  int is_new_object4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setProperty", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setProperty" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setProperty" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_setProperty" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    npy_intp size[1] = {
+      -1 
+    };
+    array4 = obj_to_array_contiguous_allow_conversion(swig_obj[3],
+      NPY_DOUBLE,
+      &is_new_object4);
+    if (!array4 || !require_dimensions(array4, 1) ||
+      !require_size(array4, size, 1)) SWIG_fail;
+    arg4 = (double*) array_data(array4);
+    arg5 = (int) array_size(array4,0);
+  }
+  {
+    try {
+      (arg1)->setProperty(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object4 && array4)
+    {
+      Py_DECREF(array4); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object4 && array4)
+    {
+      Py_DECREF(array4); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_getProperty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double **arg4 = (double **) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double *data_temp4 = NULL ;
+  int dim_temp4 ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &data_temp4;
+    arg5 = &dim_temp4;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_getProperty", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_getProperty" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_getProperty" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_getProperty" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      (arg1)->getProperty(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[1] = {
+      *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)(*arg4));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg4), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg4), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setProperties(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setProperties", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setProperties" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setProperties" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    try {
+      (arg1)->setProperties(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_getProperties(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
+  PyObject *swig_obj[2] ;
+  
+  {
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_getProperties", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_getProperties" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_getProperties" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      (arg1)->getProperties(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_setPropertyImage(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_setPropertyImage", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_setPropertyImage" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_setPropertyImage" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    try {
+      (arg1)->setPropertyImage(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_viewport_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  Viewport *arg2 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_viewport_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_viewport_set" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Heightmap_viewport_set" "', argument " "2"" of type '" "Viewport *""'"); 
+  }
+  arg2 = reinterpret_cast< Viewport * >(argp2);
+  if (arg1) (arg1)->viewport = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_viewport_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  Viewport *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_viewport_get" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  result = (Viewport *)& ((arg1)->viewport);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Viewport, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_heights_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_heights_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_heights_set" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Heightmap_heights_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->heights = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_heights_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_heights_get" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->heights);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_colors_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_colors_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_colors_set" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Heightmap_colors_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->colors = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_colors_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_colors_get" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->colors);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_propertyNames_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  std::vector< std::string,std::allocator< std::string > > *arg2 = (std::vector< std::string,std::allocator< std::string > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_propertyNames_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_propertyNames_set" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Heightmap_propertyNames_set" "', argument " "2"" of type '" "std::vector< std::string,std::allocator< std::string > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::string,std::allocator< std::string > > * >(argp2);
+  if (arg1) (arg1)->propertyNames = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_propertyNames_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::vector< std::string,std::allocator< std::string > > *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_propertyNames_get" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  result = (std::vector< std::string,std::allocator< std::string > > *)& ((arg1)->propertyNames);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_properties_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_properties_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_properties_set" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Heightmap_properties_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->properties = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_properties_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_properties_get" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->properties);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_Heightmap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Heightmap" "', argument " "1"" of type '" "Heightmap *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *Heightmap_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_Heightmap, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *Heightmap_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   return SWIG_Python_InitShadowInstance(args);
 }
 
@@ -24960,6 +28262,42 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_7(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  Geometry3D *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Heightmap,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Geometry3D" "', argument " "1"" of type '" "Heightmap const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Geometry3D" "', argument " "1"" of type '" "Heightmap const &""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    try {
+      result = (Geometry3D *)new Geometry3D((Heightmap const &)*arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Geometry3D, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
@@ -25019,6 +28357,14 @@ SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *self, PyObject *args) {
       return _wrap_new_Geometry3D__SWIG_6(self, argc, argv);
     }
   }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Heightmap, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Geometry3D__SWIG_7(self, argc, argv);
+    }
+  }
   
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_Geometry3D'.\n"
@@ -25029,7 +28375,8 @@ fail:
     "    Geometry3D::Geometry3D(ConvexHull const &)\n"
     "    Geometry3D::Geometry3D(TriangleMesh const &)\n"
     "    Geometry3D::Geometry3D(PointCloud const &)\n"
-    "    Geometry3D::Geometry3D(VolumeGrid const &)\n");
+    "    Geometry3D::Geometry3D(VolumeGrid const &)\n"
+    "    Geometry3D::Geometry3D(Heightmap const &)\n");
   return 0;
 }
 
@@ -25062,41 +28409,6 @@ SWIGINTERN PyObject *_wrap_delete_Geometry3D(PyObject *SWIGUNUSEDPARM(self), PyO
     }
   }
   resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Geometry3D_clone(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  Geometry3D result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_clone" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  {
-    try {
-      result = (arg1)->clone();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new Geometry3D(static_cast< const Geometry3D& >(result))), SWIGTYPE_p_Geometry3D, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -25496,6 +28808,111 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_getImplicitSurface(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  VolumeGrid result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getImplicitSurface" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->getImplicitSurface();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new VolumeGrid(static_cast< const VolumeGrid& >(result))), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getOccupancyGrid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  VolumeGrid result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getOccupancyGrid" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->getOccupancyGrid();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new VolumeGrid(static_cast< const VolumeGrid& >(result))), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getHeightmap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  Heightmap result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getHeightmap" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->getHeightmap();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Heightmap(static_cast< const Heightmap& >(result))), SWIGTYPE_p_Heightmap, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_setTriangleMesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -25754,6 +29171,138 @@ SWIGINTERN PyObject *_wrap_Geometry3D_setVolumeGrid(PyObject *SWIGUNUSEDPARM(sel
   {
     try {
       (arg1)->setVolumeGrid((VolumeGrid const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setImplicitSurface(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  VolumeGrid *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_setImplicitSurface", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setImplicitSurface" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_VolumeGrid,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setImplicitSurface" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setImplicitSurface" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+  }
+  arg2 = reinterpret_cast< VolumeGrid * >(argp2);
+  {
+    try {
+      (arg1)->setImplicitSurface((VolumeGrid const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setOccupancyGrid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  VolumeGrid *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_setOccupancyGrid", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setOccupancyGrid" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_VolumeGrid,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setOccupancyGrid" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setOccupancyGrid" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+  }
+  arg2 = reinterpret_cast< VolumeGrid * >(argp2);
+  {
+    try {
+      (arg1)->setOccupancyGrid((VolumeGrid const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setHeightmap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Heightmap *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_setHeightmap", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setHeightmap" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Heightmap,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setHeightmap" "', argument " "2"" of type '" "Heightmap const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setHeightmap" "', argument " "2"" of type '" "Heightmap const &""'"); 
+  }
+  arg2 = reinterpret_cast< Heightmap * >(argp2);
+  {
+    try {
+      (arg1)->setHeightmap((Heightmap const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -27888,103 +31437,40 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_union___SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_Geometry3D_merge__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   Geometry3D *arg2 = 0 ;
-  char *arg3 = (char *) 0 ;
-  double arg4 ;
+  double arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  int res3 ;
-  char *buf3 = 0 ;
-  int alloc3 = 0 ;
-  double val4 ;
-  int ecode4 = 0 ;
-  
-  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_union_" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_union_" "', argument " "2"" of type '" "Geometry3D const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_union_" "', argument " "2"" of type '" "Geometry3D const &""'"); 
-  }
-  arg2 = reinterpret_cast< Geometry3D * >(argp2);
-  res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_union_" "', argument " "3"" of type '" "char const *""'");
-  }
-  arg3 = reinterpret_cast< char * >(buf3);
-  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_union_" "', argument " "4"" of type '" "double""'");
-  } 
-  arg4 = static_cast< double >(val4);
-  {
-    try {
-      (arg1)->union_((Geometry3D const &)*arg2,(char const *)arg3,arg4);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return resultobj;
-fail:
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Geometry3D_union___SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  Geometry3D *arg2 = 0 ;
-  char *arg3 = (char *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int res3 ;
-  char *buf3 = 0 ;
-  int alloc3 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
   
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_union_" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_merge" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_union_" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_merge" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_union_" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_merge" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   arg2 = reinterpret_cast< Geometry3D * >(argp2);
-  res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_union_" "', argument " "3"" of type '" "char const *""'");
-  }
-  arg3 = reinterpret_cast< char * >(buf3);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_merge" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
   {
     try {
-      (arg1)->union_((Geometry3D const &)*arg2,(char const *)arg3);
+      (arg1)->merge((Geometry3D const &)*arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -27996,15 +31482,13 @@ SWIGINTERN PyObject *_wrap_Geometry3D_union___SWIG_1(PyObject *SWIGUNUSEDPARM(se
     }
   }
   resultobj = SWIG_Py_Void();
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
   return resultobj;
 fail:
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_union___SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_Geometry3D_merge__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   Geometry3D *arg2 = 0 ;
@@ -28016,20 +31500,20 @@ SWIGINTERN PyObject *_wrap_Geometry3D_union___SWIG_2(PyObject *SWIGUNUSEDPARM(se
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_union_" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_merge" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_union_" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_merge" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_union_" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_merge" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   arg2 = reinterpret_cast< Geometry3D * >(argp2);
   {
     try {
-      (arg1)->union_((Geometry3D const &)*arg2);
+      (arg1)->merge((Geometry3D const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -28047,13 +31531,13 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_union_(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_merge(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[5] = {
+  PyObject *argv[4] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "Geometry3D_union_", 0, 4, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Geometry3D_merge", 0, 3, argv))) SWIG_fail;
   --argc;
   if (argc == 2) {
     int _v;
@@ -28064,7 +31548,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_union_(PyObject *self, PyObject *args) {
       int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, SWIG_POINTER_NO_NULL | 0);
       _v = SWIG_CheckState(res);
       if (_v) {
-        return _wrap_Geometry3D_union___SWIG_2(self, argc, argv);
+        return _wrap_Geometry3D_merge__SWIG_1(self, argc, argv);
       }
     }
   }
@@ -28077,44 +31561,22 @@ SWIGINTERN PyObject *_wrap_Geometry3D_union_(PyObject *self, PyObject *args) {
       int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, SWIG_POINTER_NO_NULL | 0);
       _v = SWIG_CheckState(res);
       if (_v) {
-        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          return _wrap_Geometry3D_union___SWIG_1(self, argc, argv);
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
         }
-      }
-    }
-  }
-  if (argc == 4) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, SWIG_POINTER_NO_NULL | 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
-        _v = SWIG_CheckState(res);
         if (_v) {
-          {
-            int res = SWIG_AsVal_double(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            return _wrap_Geometry3D_union___SWIG_0(self, argc, argv);
-          }
+          return _wrap_Geometry3D_merge__SWIG_0(self, argc, argv);
         }
       }
     }
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Geometry3D_union_'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Geometry3D_merge'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    Geometry3D::union_(Geometry3D const &,char const *,double)\n"
-    "    Geometry3D::union_(Geometry3D const &,char const *)\n"
-    "    Geometry3D::union_(Geometry3D const &)\n");
+    "    Geometry3D::merge(Geometry3D const &,double)\n"
+    "    Geometry3D::merge(Geometry3D const &)\n");
   return 0;
 }
 
@@ -29470,6 +32932,81 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Appearance_getColors(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  int arg2 ;
+  float **arg3 = (float **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  float *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
+  PyObject *swig_obj[2] ;
+  
+  {
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_getColors", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getColors" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_getColors" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      (arg1)->getColors(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Appearance_setTintColor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
@@ -30333,6 +33870,98 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Appearance_getTexture1D_format(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  char *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTexture1D_format" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      result = (char *)(arg1)->getTexture1D_format();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_FromCharPtr((const char *)result);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTexture1D_channels(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  unsigned char **arg2 = (unsigned char **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_getTexture1D_channels", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTexture1D_channels" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_p_unsigned_char, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_getTexture1D_channels" "', argument " "2"" of type '" "unsigned char **""'"); 
+  }
+  arg2 = reinterpret_cast< unsigned char ** >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_int, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Appearance_getTexture1D_channels" "', argument " "3"" of type '" "int *""'"); 
+  }
+  arg3 = reinterpret_cast< int * >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_int, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Appearance_getTexture1D_channels" "', argument " "4"" of type '" "int *""'"); 
+  }
+  arg4 = reinterpret_cast< int * >(argp4);
+  {
+    try {
+      (arg1)->getTexture1D_channels(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_b__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
@@ -30994,6 +34623,99 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Appearance_getTexture2D_format(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  char *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTexture2D_format" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      result = (char *)(arg1)->getTexture2D_format();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_FromCharPtr((const char *)result);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTexture2D_channels(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  unsigned char **arg2 = (unsigned char **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned char *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  int dim3_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+    arg5 = &dim3_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTexture2D_channels" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      (arg1)->getTexture2D_channels(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[3] = {
+      *arg3, *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(3, dims, NPY_UBYTE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Appearance_setTexcoords1D(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
@@ -31051,6 +34773,71 @@ fail:
       Py_DECREF(array2); 
     }
   }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTexcoords1D(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTexcoords1D" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      (arg1)->getTexcoords1D(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[1] = {
+      *arg3 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
   return NULL;
 }
 
@@ -31113,6 +34900,74 @@ fail:
       Py_DECREF(array2); 
     }
   }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTexcoords2D(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTexcoords2D" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      (arg1)->getTexcoords2D(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
   return NULL;
 }
 
@@ -31302,6 +35157,109 @@ fail:
     "    Appearance::setTexgen(double *,int,int,bool)\n"
     "    Appearance::setTexgen(double *,int,int)\n");
   return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTexgenMatrix(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTexgenMatrix" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      (arg1)->getTexgenMatrix(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_isTexgenWorld(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  bool result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_isTexgenWorld" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->isTexgenWorld();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
 }
 
 
@@ -32186,800 +36144,6 @@ SWIGINTERN PyObject *Appearance_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
 }
 
 SWIGINTERN PyObject *Appearance_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  return SWIG_Python_InitShadowInstance(args);
-}
-
-SWIGINTERN PyObject *_wrap_Viewport_fromJson(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  std::string *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
-  PyObject *swig_obj[2] ;
-  bool result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_fromJson", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_fromJson" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  {
-    std::string *ptr = (std::string *)0;
-    res2 = SWIG_AsPtr_std_string(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Viewport_fromJson" "', argument " "2"" of type '" "std::string const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Viewport_fromJson" "', argument " "2"" of type '" "std::string const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    try {
-      result = (bool)(arg1)->fromJson((std::string const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_toJson(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  std::string result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_toJson" "', argument " "1"" of type '" "Viewport const *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  {
-    try {
-      result = ((Viewport const *)arg1)->toJson();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_setModelviewMatrix(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  double *arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[16] ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_setModelviewMatrix", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_setModelviewMatrix" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  {
-    if (!convert_darray(swig_obj[1],temp2,16)) {
-      return NULL;
-    }
-    arg2 = &temp2[0];
-  }
-  {
-    try {
-      (arg1)->setModelviewMatrix((double const (*))arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_setRigidTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[9] ;
-  double temp3[3] ;
-  PyObject *swig_obj[3] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_setRigidTransform", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_setRigidTransform" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  {
-    if (!convert_darray(swig_obj[1],temp2,9)) {
-      return NULL;
-    }
-    arg2 = &temp2[0];
-  }
-  {
-    if (!convert_darray(swig_obj[2],temp3,3)) {
-      return NULL;
-    }
-    arg3 = &temp3[0];
-  }
-  {
-    try {
-      (arg1)->setRigidTransform((double const (*))arg2,(double const (*))arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_getRigidTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[9] ;
-  double temp3[3] ;
-  PyObject *swig_obj[1] ;
-  
-  {
-    arg2 = &temp2[0];
-  }
-  {
-    arg3 = &temp3[0];
-  }
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_getRigidTransform" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  {
-    try {
-      (arg1)->getRigidTransform(arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg2,9);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg3,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_perspective_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  bool arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  bool val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_perspective_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_perspective_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_perspective_set" "', argument " "2"" of type '" "bool""'");
-  } 
-  arg2 = static_cast< bool >(val2);
-  if (arg1) (arg1)->perspective = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_perspective_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  bool result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_perspective_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (bool) ((arg1)->perspective);
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_scale_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  float arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  float val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_scale_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_scale_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  ecode2 = SWIG_AsVal_float(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_scale_set" "', argument " "2"" of type '" "float""'");
-  } 
-  arg2 = static_cast< float >(val2);
-  if (arg1) (arg1)->scale = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_scale_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  float result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_scale_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (float) ((arg1)->scale);
-  resultobj = SWIG_From_float(static_cast< float >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_x_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_x_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_x_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_x_set" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  if (arg1) (arg1)->x = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_x_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_x_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (int) ((arg1)->x);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_y_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_y_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_y_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_y_set" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  if (arg1) (arg1)->y = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_y_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_y_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (int) ((arg1)->y);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_w_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_w_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_w_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_w_set" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  if (arg1) (arg1)->w = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_w_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_w_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (int) ((arg1)->w);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_h_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_h_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_h_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_h_set" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  if (arg1) (arg1)->h = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_h_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_h_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (int) ((arg1)->h);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_n_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  double arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_n_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_n_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_n_set" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = static_cast< double >(val2);
-  if (arg1) (arg1)->n = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_n_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  double result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_n_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (double) ((arg1)->n);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_f_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  double arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_f_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_f_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_f_set" "', argument " "2"" of type '" "double""'");
-  } 
-  arg2 = static_cast< double >(val2);
-  if (arg1) (arg1)->f = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_f_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  double result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_f_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (double) ((arg1)->f);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_xform_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_xform_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_xform_set" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Viewport_xform_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
-  }
-  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
-  if (arg1) (arg1)->xform = *arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Viewport_xform_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  std::vector< double,std::allocator< double > > *result = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_xform_get" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->xform);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_Viewport(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *result = 0 ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "new_Viewport", 0, 0, 0)) SWIG_fail;
-  {
-    try {
-      result = (Viewport *)new Viewport();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Viewport, SWIG_POINTER_NEW |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_delete_Viewport(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *arg1 = (Viewport *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Viewport" "', argument " "1"" of type '" "Viewport *""'"); 
-  }
-  arg1 = reinterpret_cast< Viewport * >(argp1);
-  {
-    try {
-      delete arg1;
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *Viewport_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_Viewport, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *Viewport_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   return SWIG_Python_InitShadowInstance(args);
 }
 
@@ -35793,6 +38957,1595 @@ SWIGINTERN PyObject *SpherePoser_swigregister(PyObject *SWIGUNUSEDPARM(self), Py
 }
 
 SWIGINTERN PyObject *SpherePoser_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_Viewport_fromJson(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject *swig_obj[2] ;
+  bool result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_fromJson", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_fromJson" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Viewport_fromJson" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Viewport_fromJson" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      result = (bool)(arg1)->fromJson((std::string const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_toJson(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::string result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_toJson" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    try {
+      result = ((Viewport const *)arg1)->toJson();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_fromText(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject *swig_obj[2] ;
+  bool result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_fromText", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_fromText" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Viewport_fromText" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Viewport_fromText" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      result = (bool)(arg1)->fromText((std::string const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_toText(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::string result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_toText" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    try {
+      result = ((Viewport const *)arg1)->toText();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_resize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_resize", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_resize" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_resize" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Viewport_resize" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      (arg1)->resize(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_setFOV__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_setFOV" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_setFOV" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Viewport_setFOV" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      (arg1)->setFOV(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_setFOV__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_setFOV" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_setFOV" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setFOV(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_setFOV(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Viewport_setFOV", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Viewport, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_Viewport_setFOV__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Viewport, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Viewport_setFOV__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Viewport_setFOV'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Viewport::setFOV(double,double)\n"
+    "    Viewport::setFOV(double)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_getFOV(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_getFOV" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    try {
+      result = (double)((Viewport const *)arg1)->getFOV();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_getVFOV(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_getVFOV" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    try {
+      result = (double)((Viewport const *)arg1)->getVFOV();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_setPose(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_setPose", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_setPose" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setPose((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_getPose(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp3[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_getPose" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    try {
+      ((Viewport const *)arg1)->getPose(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,9);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_viewRectangle(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double temp3[4] ;
+  PyObject *swig_obj[2] ;
+  
+  {
+    arg3 = &temp3[0];
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_viewRectangle", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_viewRectangle" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_viewRectangle" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      ((Viewport const *)arg1)->viewRectangle(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,4);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_project(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject *swig_obj[2] ;
+  
+  {
+    arg3 = &temp3[0];
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_project", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_project" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      ((Viewport const *)arg1)->project((double const (*))arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_clickSource(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double temp4[3] ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_clickSource", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_clickSource" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_clickSource" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Viewport_clickSource" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      ((Viewport const *)arg1)->clickSource(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg4,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_clickDirection(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double temp4[3] ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_clickDirection", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_clickDirection" "', argument " "1"" of type '" "Viewport const *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_clickDirection" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Viewport_clickDirection" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      ((Viewport const *)arg1)->clickDirection(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg4,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_perspective_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_perspective_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_perspective_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_perspective_set" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  if (arg1) (arg1)->perspective = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_perspective_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  bool result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_perspective_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (bool) ((arg1)->perspective);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_x_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_x_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_x_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_x_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->x = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_x_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_x_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (int) ((arg1)->x);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_y_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_y_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_y_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_y_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->y = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_y_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_y_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (int) ((arg1)->y);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_w_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_w_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_w_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_w_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->w = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_w_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_w_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (int) ((arg1)->w);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_h_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_h_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_h_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_h_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->h = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_h_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_h_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (int) ((arg1)->h);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_n_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_n_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_n_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_n_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->n = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_n_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_n_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (double) ((arg1)->n);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_f_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_f_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_f_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_f_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->f = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_f_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_f_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (double) ((arg1)->f);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_fx_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_fx_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_fx_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_fx_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->fx = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_fx_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_fx_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (double) ((arg1)->fx);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_fy_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_fy_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_fy_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_fy_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->fy = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_fy_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_fy_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (double) ((arg1)->fy);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_cx_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_cx_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_cx_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_cx_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->cx = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_cx_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_cx_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (double) ((arg1)->cx);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_cy_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_cy_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_cy_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Viewport_cy_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->cy = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_cy_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_cy_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (double) ((arg1)->cy);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_xform_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_xform_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_xform_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Viewport_xform_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->xform = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_xform_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_xform_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->xform);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_ori_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Viewport_ori_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_ori_set" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Viewport_ori_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Viewport_ori_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  if (arg1) (arg1)->ori = *arg2;
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Viewport_ori_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::string *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_ori_get" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  result = (std::string *) & ((arg1)->ori);
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Viewport(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "new_Viewport", 0, 0, 0)) SWIG_fail;
+  {
+    try {
+      result = (Viewport *)new Viewport();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Viewport, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_Viewport(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *arg1 = (Viewport *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Viewport" "', argument " "1"" of type '" "Viewport *""'"); 
+  }
+  arg1 = reinterpret_cast< Viewport * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *Viewport_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_Viewport, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *Viewport_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   return SWIG_Python_InitShadowInstance(args);
 }
 
@@ -58809,6 +63562,104 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimBody_applyForceAtCOMLocalPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SimBody_applyForceAtCOMLocalPoint", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_applyForceAtCOMLocalPoint" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->applyForceAtCOMLocalPoint((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_applyForceAtObjectLocalPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SimBody_applyForceAtObjectLocalPoint", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_applyForceAtObjectLocalPoint" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->applyForceAtObjectLocalPoint((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimBody_applyForceAtLocalPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimBody *arg1 = (SimBody *) 0 ;
@@ -59196,6 +64047,137 @@ SWIGINTERN PyObject *_wrap_SimBody_getVelocity(PyObject *SWIGUNUSEDPARM(self), P
   {
     try {
       (arg1)->getVelocity(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_setObjectVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SimBody_setObjectVelocity", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_setObjectVelocity" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setObjectVelocity((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_getObjectVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp3[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_getObjectVelocity" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    try {
+      (arg1)->getObjectVelocity(arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -61445,71 +66427,6 @@ SWIGINTERN PyObject *_wrap_Simulator_getActualTorque(PyObject *SWIGUNUSEDPARM(se
   {
     try {
       (arg1)->getActualTorque(arg2,*arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Simulator_getActualTorques(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Simulator *arg1 = (Simulator *) 0 ;
-  int arg2 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  std::vector< double > temp3 ;
-  PyObject *swig_obj[2] ;
-  
-  {
-    arg3 = &temp3;
-  }
-  if (!SWIG_Python_UnpackTuple(args, "Simulator_getActualTorques", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getActualTorques" "', argument " "1"" of type '" "Simulator *""'"); 
-  }
-  arg1 = reinterpret_cast< Simulator * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Simulator_getActualTorques" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  {
-    try {
-      (arg1)->getActualTorques(arg2,*arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -65909,10 +70826,14 @@ static PyMethodDef SwigMethods[] = {
 		"VolumeGrid_setBounds(VolumeGrid self, double const [3] bmin, double const [3] bmax)\n"
 		"\n"
 		"\n"
+		"Sets the min / max bounds for this volume.  \n"
+		"\n"
 		""},
 	 { "VolumeGrid_resize", _wrap_VolumeGrid_resize, METH_VARARGS, "\n"
 		"VolumeGrid_resize(VolumeGrid self, int sx, int sy, int sz)\n"
 		"\n"
+		"\n"
+		"Resizes the x, y, and z dimensions of the grid.  \n"
 		"\n"
 		""},
 	 { "VolumeGrid_set", _wrap_VolumeGrid_set, METH_VARARGS, "\n"
@@ -65933,6 +70854,15 @@ static PyMethodDef SwigMethods[] = {
 	 { "VolumeGrid_shift", _wrap_VolumeGrid_shift, METH_VARARGS, "\n"
 		"VolumeGrid_shift(VolumeGrid self, double dv)\n"
 		"\n"
+		"\n"
+		"Shifts the value uniformly.  \n"
+		"\n"
+		""},
+	 { "VolumeGrid_scale", _wrap_VolumeGrid_scale, METH_VARARGS, "\n"
+		"VolumeGrid_scale(VolumeGrid self, double cv)\n"
+		"\n"
+		"\n"
+		"Scales the value uniformly.  \n"
 		"\n"
 		""},
 	 { "VolumeGrid_getValues", _wrap_VolumeGrid_getValues, METH_O, "\n"
@@ -65958,6 +70888,231 @@ static PyMethodDef SwigMethods[] = {
 	 { "delete_VolumeGrid", _wrap_delete_VolumeGrid, METH_O, "delete_VolumeGrid(VolumeGrid self)"},
 	 { "VolumeGrid_swigregister", VolumeGrid_swigregister, METH_O, NULL},
 	 { "VolumeGrid_swiginit", VolumeGrid_swiginit, METH_VARARGS, NULL},
+	 { "new_Heightmap", _wrap_new_Heightmap, METH_NOARGS, "\n"
+		"new_Heightmap() -> Heightmap\n"
+		"\n"
+		"\n"
+		""},
+	 { "Heightmap_resize", _wrap_Heightmap_resize, METH_VARARGS, "\n"
+		"Heightmap_resize(Heightmap self, int w, int h)\n"
+		"\n"
+		"\n"
+		"Resizes the height map.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setSize", _wrap_Heightmap_setSize, METH_VARARGS, "\n"
+		"Heightmap_setSize(Heightmap self, double width, double height)\n"
+		"\n"
+		"\n"
+		"Sets an orthographic projection (elevation map) with the given width and height.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setFOV", _wrap_Heightmap_setFOV, METH_VARARGS, "\n"
+		"Heightmap_setFOV(Heightmap self, double fovx, double fovy=-1)\n"
+		"\n"
+		"\n"
+		"Sets an perspective projection (depth map) with the given x and y fields of view\n"
+		"and centered focal point. If fovy=-1, then it will be set so that pixels are\n"
+		"square.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setIntrinsics", _wrap_Heightmap_setIntrinsics, METH_VARARGS, "\n"
+		"Heightmap_setIntrinsics(Heightmap self, double fx, double fy, double cx=-1, double cy=-1)\n"
+		"\n"
+		"\n"
+		"Sets an perspective projection (depth map) with the given intrinsics fx, fy, cx,\n"
+		"cy. If cx or cy are negative, then cx = (w-1)/2, cy = (h-1)/2.  \n"
+		"\n"
+		""},
+	 { "Heightmap_set", _wrap_Heightmap_set, METH_VARARGS, "\n"
+		"Heightmap_set(Heightmap self, double value)\n"
+		"Heightmap_set(Heightmap self, int i, int j, double value)\n"
+		"\n"
+		"\n"
+		"Sets the height of a vertex.  \n"
+		"\n"
+		""},
+	 { "Heightmap_get", _wrap_Heightmap_get, METH_VARARGS, "\n"
+		"Heightmap_get(Heightmap self, int i, int j) -> double\n"
+		"\n"
+		"\n"
+		"Gets the height of a vertex.  \n"
+		"\n"
+		""},
+	 { "Heightmap_shift", _wrap_Heightmap_shift, METH_VARARGS, "\n"
+		"Heightmap_shift(Heightmap self, double dh)\n"
+		"\n"
+		"\n"
+		"Shifts the height uniformly.  \n"
+		"\n"
+		""},
+	 { "Heightmap_scale", _wrap_Heightmap_scale, METH_VARARGS, "\n"
+		"Heightmap_scale(Heightmap self, double c)\n"
+		"\n"
+		"\n"
+		"Scales the height uniformly.  \n"
+		"\n"
+		""},
+	 { "Heightmap_getHeights", _wrap_Heightmap_getHeights, METH_O, "\n"
+		"Heightmap_getHeights(Heightmap self)\n"
+		"\n"
+		"\n"
+		"Returns a 2D Numpy array view of the values of size (w x h) PROBLEM: numpy\n"
+		"stores in row-major order i*h + j.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setHeights", _wrap_Heightmap_setHeights, METH_VARARGS, "\n"
+		"Heightmap_setHeights(Heightmap self, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets the values to 2D numpy array of size (w x h)  \n"
+		"\n"
+		""},
+	 { "Heightmap_setHeightImage_d", _wrap_Heightmap_setHeightImage_d, METH_VARARGS, "\n"
+		"Heightmap_setHeightImage_d(Heightmap self, double * np_array2, double height_scale=1)\n"
+		"\n"
+		"\n"
+		"Sets values to an image with size (h x w) with rows ordered top to bottom.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setHeightImage_f", _wrap_Heightmap_setHeightImage_f, METH_VARARGS, "\n"
+		"Heightmap_setHeightImage_f(Heightmap self, float * np_array2, double height_scale=1)\n"
+		"\n"
+		"\n"
+		"Sets values to an image with size (h x w) with rows ordered top to bottom.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setHeightImage_s", _wrap_Heightmap_setHeightImage_s, METH_VARARGS, "\n"
+		"Heightmap_setHeightImage_s(Heightmap self, unsigned short * np_array2, double height_scale=1)\n"
+		"\n"
+		"\n"
+		"Sets values to an image with size (h x w) with rows ordered top to bottom.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setHeightImage_b", _wrap_Heightmap_setHeightImage_b, METH_VARARGS, "\n"
+		"Heightmap_setHeightImage_b(Heightmap self, unsigned char * np_array2, double height_scale=1)\n"
+		"\n"
+		"\n"
+		"Sets values to an image with size (h x w) with rows ordered top to bottom.  \n"
+		"\n"
+		""},
+	 { "Heightmap_clearColors", _wrap_Heightmap_clearColors, METH_O, "\n"
+		"Heightmap_clearColors(Heightmap self)\n"
+		"\n"
+		"\n"
+		"Erases all colors.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setColor", _wrap_Heightmap_setColor, METH_VARARGS, "\n"
+		"Heightmap_setColor(Heightmap self, double intensity)\n"
+		"Heightmap_setColor(Heightmap self, double const [4] rgba)\n"
+		"Heightmap_setColor(Heightmap self, int i, int j, double intensity)\n"
+		"Heightmap_setColor(Heightmap self, int i, int j, double const [4] rgba)\n"
+		"\n"
+		"\n"
+		"Gets the RGBA color of a cell.  \n"
+		"\n"
+		""},
+	 { "Heightmap_getColor", _wrap_Heightmap_getColor, METH_VARARGS, "\n"
+		"Heightmap_getColor(Heightmap self, int i, int j)\n"
+		"\n"
+		"\n"
+		"Gets the RGBA color of a cell.  \n"
+		"\n"
+		""},
+	 { "Heightmap_getColors", _wrap_Heightmap_getColors, METH_O, "\n"
+		"Heightmap_getColors(Heightmap self)\n"
+		"\n"
+		"\n"
+		"Returns a 3D Numpy array view of the colors (w x h x 1, 3, or 4)  \n"
+		"\n"
+		""},
+	 { "Heightmap_setColors", _wrap_Heightmap_setColors, METH_VARARGS, "\n"
+		"Heightmap_setColors(Heightmap self, double * np_array3)\n"
+		"\n"
+		"\n"
+		"Sets the values to a 3D numpy array (w x h x 1, 3, or 4)  \n"
+		"\n"
+		""},
+	 { "Heightmap_setColorImage_i", _wrap_Heightmap_setColorImage_i, METH_VARARGS, "\n"
+		"Heightmap_setColorImage_i(Heightmap self, unsigned int * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets colors to a 32-bit RGBA image (size h x w) with rows ordered top to bottom.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setColorImage_b3", _wrap_Heightmap_setColorImage_b3, METH_VARARGS, "\n"
+		"Heightmap_setColorImage_b3(Heightmap self, unsigned char * np_array3)\n"
+		"\n"
+		"\n"
+		"Sets colors to a 24-bit RGB image (size h x w x 3) with rows ordered top to\n"
+		"bottom.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setColorImage_b", _wrap_Heightmap_setColorImage_b, METH_VARARGS, "\n"
+		"Heightmap_setColorImage_b(Heightmap self, unsigned char * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets colors to an 8-bit grayscale image (size h x w) with rows ordered top to\n"
+		"bottom.  \n"
+		"\n"
+		""},
+	 { "Heightmap_addProperty", _wrap_Heightmap_addProperty, METH_VARARGS, "\n"
+		"Heightmap_addProperty(Heightmap self, std::string const & pname)\n"
+		"Heightmap_addProperty(Heightmap self, std::string const & pname, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Adds a new property and sets it to an array of size (w x h)  \n"
+		"\n"
+		""},
+	 { "Heightmap_setProperty", _wrap_Heightmap_setProperty, METH_VARARGS, "\n"
+		"Heightmap_setProperty(Heightmap self, int i, int j, double * np_array)\n"
+		"\n"
+		"\n"
+		"Sets an individual pixel's property vector.  \n"
+		"\n"
+		""},
+	 { "Heightmap_getProperty", _wrap_Heightmap_getProperty, METH_VARARGS, "\n"
+		"Heightmap_getProperty(Heightmap self, int i, int j)\n"
+		"\n"
+		"\n"
+		"Retrieves an individual pixel's property vector.  \n"
+		"\n"
+		""},
+	 { "Heightmap_setProperties", _wrap_Heightmap_setProperties, METH_VARARGS, "\n"
+		"Heightmap_setProperties(Heightmap self, int pindex, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets a property to an array of size (w x h)  \n"
+		"\n"
+		""},
+	 { "Heightmap_getProperties", _wrap_Heightmap_getProperties, METH_VARARGS, "\n"
+		"Heightmap_getProperties(Heightmap self, int pindex)\n"
+		"\n"
+		"\n"
+		"Retrieves a view of the property of size (w x h)  \n"
+		"\n"
+		""},
+	 { "Heightmap_setPropertyImage", _wrap_Heightmap_setPropertyImage, METH_VARARGS, "\n"
+		"Heightmap_setPropertyImage(Heightmap self, int pindex, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets a property to an image of size (h x w) with rows ordered top to bottom.  \n"
+		"\n"
+		""},
+	 { "Heightmap_viewport_set", _wrap_Heightmap_viewport_set, METH_VARARGS, "Heightmap_viewport_set(Heightmap self, Viewport viewport)"},
+	 { "Heightmap_viewport_get", _wrap_Heightmap_viewport_get, METH_O, "Heightmap_viewport_get(Heightmap self) -> Viewport"},
+	 { "Heightmap_heights_set", _wrap_Heightmap_heights_set, METH_VARARGS, "Heightmap_heights_set(Heightmap self, doubleVector heights)"},
+	 { "Heightmap_heights_get", _wrap_Heightmap_heights_get, METH_O, "Heightmap_heights_get(Heightmap self) -> doubleVector"},
+	 { "Heightmap_colors_set", _wrap_Heightmap_colors_set, METH_VARARGS, "Heightmap_colors_set(Heightmap self, doubleVector colors)"},
+	 { "Heightmap_colors_get", _wrap_Heightmap_colors_get, METH_O, "Heightmap_colors_get(Heightmap self) -> doubleVector"},
+	 { "Heightmap_propertyNames_set", _wrap_Heightmap_propertyNames_set, METH_VARARGS, "Heightmap_propertyNames_set(Heightmap self, stringVector propertyNames)"},
+	 { "Heightmap_propertyNames_get", _wrap_Heightmap_propertyNames_get, METH_O, "Heightmap_propertyNames_get(Heightmap self) -> stringVector"},
+	 { "Heightmap_properties_set", _wrap_Heightmap_properties_set, METH_VARARGS, "Heightmap_properties_set(Heightmap self, doubleVector properties)"},
+	 { "Heightmap_properties_get", _wrap_Heightmap_properties_get, METH_O, "Heightmap_properties_get(Heightmap self) -> doubleVector"},
+	 { "delete_Heightmap", _wrap_delete_Heightmap, METH_O, "delete_Heightmap(Heightmap self)"},
+	 { "Heightmap_swigregister", Heightmap_swigregister, METH_O, NULL},
+	 { "Heightmap_swiginit", Heightmap_swiginit, METH_VARARGS, NULL},
 	 { "new_DistanceQuerySettings", _wrap_new_DistanceQuerySettings, METH_NOARGS, "\n"
 		"new_DistanceQuerySettings() -> DistanceQuerySettings\n"
 		"\n"
@@ -66025,21 +71180,14 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D(ConvexHull arg1)\n"
 		"Geometry3D(TriangleMesh arg1)\n"
 		"Geometry3D(PointCloud arg1)\n"
-		"new_Geometry3D(VolumeGrid arg1) -> Geometry3D\n"
+		"Geometry3D(VolumeGrid arg1)\n"
+		"new_Geometry3D(Heightmap arg1) -> Geometry3D\n"
 		"\n"
 		"\n"
 		""},
 	 { "delete_Geometry3D", _wrap_delete_Geometry3D, METH_O, "\n"
 		"delete_Geometry3D(Geometry3D self)\n"
 		"\n"
-		"\n"
-		""},
-	 { "Geometry3D_clone", _wrap_Geometry3D_clone, METH_O, "\n"
-		"Geometry3D_clone(Geometry3D self) -> Geometry3D\n"
-		"\n"
-		"\n"
-		"Creates a standalone geometry from this geometry (identical to copy... will be\n"
-		"deprecated in a future version)  \n"
 		"\n"
 		""},
 	 { "Geometry3D_copy", _wrap_Geometry3D_copy, METH_O, "\n"
@@ -66074,8 +71222,8 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_type(Geometry3D self) -> std::string\n"
 		"\n"
 		"\n"
-		"Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,\n"
-		"GeometricPrimitive, or Group.  \n"
+		"Returns the type of geometry: GeometricPrimitive, ConvexHull, TriangleMesh,\n"
+		"PointCloud, ImplicitSurface, OccupancyGrid, Heightmap, or Group.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_empty", _wrap_Geometry3D_empty, METH_O, "\n"
@@ -66117,7 +71265,29 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_getVolumeGrid(Geometry3D self) -> VolumeGrid\n"
 		"\n"
 		"\n"
-		"Returns a VolumeGrid if this geometry is of type VolumeGrid.  \n"
+		"Returns a VolumeGrid if this geometry is of type ImplicitSurface or\n"
+		"OccupancyGrid.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_getImplicitSurface", _wrap_Geometry3D_getImplicitSurface, METH_O, "\n"
+		"Geometry3D_getImplicitSurface(Geometry3D self) -> VolumeGrid\n"
+		"\n"
+		"\n"
+		"Returns the VolumeGrid if this geometry is of type ImplicitSurface.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_getOccupancyGrid", _wrap_Geometry3D_getOccupancyGrid, METH_O, "\n"
+		"Geometry3D_getOccupancyGrid(Geometry3D self) -> VolumeGrid\n"
+		"\n"
+		"\n"
+		"Returns the VolumeGrid if this geometry is of type OccupancyGrid.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_getHeightmap", _wrap_Geometry3D_getHeightmap, METH_O, "\n"
+		"Geometry3D_getHeightmap(Geometry3D self) -> Heightmap\n"
+		"\n"
+		"\n"
+		"Returns the Heightmap if this geometry is of type Heightmap.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, "\n"
@@ -66161,7 +71331,28 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_setVolumeGrid(Geometry3D self, VolumeGrid arg2)\n"
 		"\n"
 		"\n"
-		"Sets this Geometry3D to a volumeGrid.  \n"
+		"Sets this Geometry3D to an ImplicitSurface. Will be deprecated soon.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_setImplicitSurface", _wrap_Geometry3D_setImplicitSurface, METH_VARARGS, "\n"
+		"Geometry3D_setImplicitSurface(Geometry3D self, VolumeGrid vg)\n"
+		"\n"
+		"\n"
+		"Sets this Geometry3D to an ImplicitSurface.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_setOccupancyGrid", _wrap_Geometry3D_setOccupancyGrid, METH_VARARGS, "\n"
+		"Geometry3D_setOccupancyGrid(Geometry3D self, VolumeGrid vg)\n"
+		"\n"
+		"\n"
+		"Sets this Geometry3D to an OccupancyGrid.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_setHeightmap", _wrap_Geometry3D_setHeightmap, METH_VARARGS, "\n"
+		"Geometry3D_setHeightmap(Geometry3D self, Heightmap hm)\n"
+		"\n"
+		"\n"
+		"Sets this Geometry3D to a Heightmap.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_setGroup", _wrap_Geometry3D_setGroup, METH_O, "\n"
@@ -66569,26 +71760,20 @@ static PyMethodDef SwigMethods[] = {
 		"*   TriangleMesh  \n"
 		"\n"
 		""},
-	 { "Geometry3D_union_", _wrap_Geometry3D_union_, METH_VARARGS, "\n"
-		"Geometry3D_union_(Geometry3D self, Geometry3D other, char const * representation=\"auto\", double threshold=0)\n"
+	 { "Geometry3D_merge", _wrap_Geometry3D_merge, METH_VARARGS, "\n"
+		"Geometry3D_merge(Geometry3D self, Geometry3D other, double threshold=0)\n"
 		"\n"
 		"\n"
-		"Calculates a \"union\" of this geometry with another geometry. The result is\n"
-		"stored inplace and the type of the result is the same as this geometry. This can\n"
-		"be used to calculate the union of PointClouds, TriangleMeshes, ConvexPolytopes,\n"
-		"and VolumeGrids.  \n"
+		"Merges another geometry into this geometry. The result is stored inplace and the\n"
+		"type of the result is the same as this geometry. This can be used to calculate\n"
+		"the union of PointClouds, TriangleMeshes, ConvexPolytopes, and ImplicitSurfaces,\n"
+		"OccupancyGrids, and Heightmaps.  \n"
 		"\n"
-		"VolumeGrid unions preserve the domain of the current volume grid. They can also\n"
-		"be unioned with GeometricPrimitives, PointClouds, TriangleMeshes, and\n"
-		"ConvexPolytopes, in which case the output is either an occupancy grid, signed\n"
-		"distance field (SDF), or TSDF (TSDF) according to the `representation` argument.\n"
-		"Valid values are \"auto\" (=\"sdf\"), \"occupancy\", \"sdf\", and \"tsdf\".  \n"
+		"ImplicitSurface, OccupancyGrid, and Heightmap merges preserve the domain of the\n"
+		"current grid. They can also be merged with many other geometries.  \n"
 		"\n"
-		"In the TSDF case, the truncation value is either `threshold`, or if\n"
-		"`threshold`=0, the current range of the existing TSDF is used.  \n"
-		"\n"
-		"Note: the C++ name of this method is union_ but you can also use union in the\n"
-		"Python API.  \n"
+		"In the ImplicitSurface case, a truncation value can be set via `threshold`. This\n"
+		"performs a TSDF-style merge  \n"
 		"\n"
 		""},
 	 { "Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, "Geometry3D_world_set(Geometry3D self, int world)"},
@@ -66713,6 +71898,15 @@ static PyMethodDef SwigMethods[] = {
 		"Only supports feature=VERTICES and feature=FACES  \n"
 		"\n"
 		""},
+	 { "Appearance_getColors", _wrap_Appearance_getColors, METH_VARARGS, "\n"
+		"Appearance_getColors(Appearance self, int feature)\n"
+		"\n"
+		"\n"
+		"Retrieves per-element color for elements of the given feature type. If per-\n"
+		"element colors are not enabled, then a 1 x 4 array is returned. Otherwise,\n"
+		"returns an m x 4 array, where m is the number of featuress of that type.  \n"
+		"\n"
+		""},
 	 { "Appearance_setTintColor", _wrap_Appearance_setTintColor, METH_VARARGS, "\n"
 		"Appearance_setTintColor(Appearance self, float const [4] color, float strength)\n"
 		"\n"
@@ -66807,6 +72001,21 @@ static PyMethodDef SwigMethods[] = {
 		"*   l8: unsigned byte grayscale colors, one channel  \n"
 		"\n"
 		""},
+	 { "Appearance_getTexture1D_format", _wrap_Appearance_getTexture1D_format, METH_O, "\n"
+		"Appearance_getTexture1D_format(Appearance self) -> char const *\n"
+		"\n"
+		"\n"
+		"Retrieves a 1D texture format, returning '' if the texture is not set.  \n"
+		"\n"
+		""},
+	 { "Appearance_getTexture1D_channels", _wrap_Appearance_getTexture1D_channels, METH_VARARGS, "\n"
+		"Appearance_getTexture1D_channels(Appearance self, unsigned char ** np_view2, int * m, int * n)\n"
+		"\n"
+		"\n"
+		"Retrieves a view into the 1D texture data. If the texture is not set, throws an\n"
+		"exception.  \n"
+		"\n"
+		""},
 	 { "Appearance_setTexture2D_b", _wrap_Appearance_setTexture2D_b, METH_VARARGS, "\n"
 		"Appearance_setTexture2D_b(Appearance self, char const * format, unsigned char * np_array2, bool topdown=True)\n"
 		"\n"
@@ -66840,6 +72049,21 @@ static PyMethodDef SwigMethods[] = {
 		"given in order bottom to top.  \n"
 		"\n"
 		""},
+	 { "Appearance_getTexture2D_format", _wrap_Appearance_getTexture2D_format, METH_O, "\n"
+		"Appearance_getTexture2D_format(Appearance self) -> char const *\n"
+		"\n"
+		"\n"
+		"Retrieves a 2D texture format, returning '' if the texture is not set.  \n"
+		"\n"
+		""},
+	 { "Appearance_getTexture2D_channels", _wrap_Appearance_getTexture2D_channels, METH_O, "\n"
+		"Appearance_getTexture2D_channels(Appearance self)\n"
+		"\n"
+		"\n"
+		"Retrieves a view into the 2D texture data. If the texture is not set, throws an\n"
+		"exception.  \n"
+		"\n"
+		""},
 	 { "Appearance_setTexcoords1D", _wrap_Appearance_setTexcoords1D, METH_VARARGS, "\n"
 		"Appearance_setTexcoords1D(Appearance self, double * np_array)\n"
 		"\n"
@@ -66847,6 +72071,14 @@ static PyMethodDef SwigMethods[] = {
 		"Sets per-vertex texture coordinates for a 1D texture.  \n"
 		"\n"
 		"You may also set uvs to be empty, which turns off texture mapping altogether.  \n"
+		"\n"
+		""},
+	 { "Appearance_getTexcoords1D", _wrap_Appearance_getTexcoords1D, METH_O, "\n"
+		"Appearance_getTexcoords1D(Appearance self)\n"
+		"\n"
+		"\n"
+		"Gets per-vertex texture coordinates for a 1D texture. If no 1D texture is set,\n"
+		"throws an exception.  \n"
 		"\n"
 		""},
 	 { "Appearance_setTexcoords2D", _wrap_Appearance_setTexcoords2D, METH_VARARGS, "\n"
@@ -66859,6 +72091,14 @@ static PyMethodDef SwigMethods[] = {
 		"You may also set uvs to be empty, which turns off texture mapping altogether.  \n"
 		"\n"
 		""},
+	 { "Appearance_getTexcoords2D", _wrap_Appearance_getTexcoords2D, METH_O, "\n"
+		"Appearance_getTexcoords2D(Appearance self)\n"
+		"\n"
+		"\n"
+		"Gets per-vertex texture coordinates for a 2D texture. If no 2D texture is set,\n"
+		"throws an exception.  \n"
+		"\n"
+		""},
 	 { "Appearance_setTexgen", _wrap_Appearance_setTexgen, METH_VARARGS, "\n"
 		"Appearance_setTexgen(Appearance self, double * np_array2, bool worldcoordinates=False)\n"
 		"\n"
@@ -66866,6 +72106,21 @@ static PyMethodDef SwigMethods[] = {
 		"Sets the texture generation. The array must be size m x 4, with m in the range\n"
 		"0,...,4. If worldcoordinates=true, the texture generation is performed in world\n"
 		"coordinates rather than object coordinates.  \n"
+		"\n"
+		""},
+	 { "Appearance_getTexgenMatrix", _wrap_Appearance_getTexgenMatrix, METH_O, "\n"
+		"Appearance_getTexgenMatrix(Appearance self)\n"
+		"\n"
+		"\n"
+		"Retrieves the texture generation. The array will be size m x 4, with m in the\n"
+		"range 0,...,4. The texture generation is performed in  \n"
+		"\n"
+		""},
+	 { "Appearance_isTexgenWorld", _wrap_Appearance_isTexgenWorld, METH_O, "\n"
+		"Appearance_isTexgenWorld(Appearance self) -> bool\n"
+		"\n"
+		"\n"
+		"Returns whether texture generation is performed in world coordinates.  \n"
 		"\n"
 		""},
 	 { "Appearance_setTexWrap", _wrap_Appearance_setTexWrap, METH_VARARGS, "\n"
@@ -66930,57 +72185,6 @@ static PyMethodDef SwigMethods[] = {
 	 { "Appearance_appearancePtr_get", _wrap_Appearance_appearancePtr_get, METH_O, "Appearance_appearancePtr_get(Appearance self) -> void *"},
 	 { "Appearance_swigregister", Appearance_swigregister, METH_O, NULL},
 	 { "Appearance_swiginit", Appearance_swiginit, METH_VARARGS, NULL},
-	 { "Viewport_fromJson", _wrap_Viewport_fromJson, METH_VARARGS, "\n"
-		"Viewport_fromJson(Viewport self, std::string const & str) -> bool\n"
-		"\n"
-		"\n"
-		""},
-	 { "Viewport_toJson", _wrap_Viewport_toJson, METH_O, "\n"
-		"Viewport_toJson(Viewport self) -> std::string\n"
-		"\n"
-		"\n"
-		""},
-	 { "Viewport_setModelviewMatrix", _wrap_Viewport_setModelviewMatrix, METH_VARARGS, "\n"
-		"Viewport_setModelviewMatrix(Viewport self, double const [16] M)\n"
-		"\n"
-		"\n"
-		""},
-	 { "Viewport_setRigidTransform", _wrap_Viewport_setRigidTransform, METH_VARARGS, "\n"
-		"Viewport_setRigidTransform(Viewport self, double const [9] R, double const [3] t)\n"
-		"\n"
-		"\n"
-		""},
-	 { "Viewport_getRigidTransform", _wrap_Viewport_getRigidTransform, METH_O, "\n"
-		"Viewport_getRigidTransform(Viewport self)\n"
-		"\n"
-		"\n"
-		""},
-	 { "Viewport_perspective_set", _wrap_Viewport_perspective_set, METH_VARARGS, "Viewport_perspective_set(Viewport self, bool perspective)"},
-	 { "Viewport_perspective_get", _wrap_Viewport_perspective_get, METH_O, "Viewport_perspective_get(Viewport self) -> bool"},
-	 { "Viewport_scale_set", _wrap_Viewport_scale_set, METH_VARARGS, "Viewport_scale_set(Viewport self, float scale)"},
-	 { "Viewport_scale_get", _wrap_Viewport_scale_get, METH_O, "Viewport_scale_get(Viewport self) -> float"},
-	 { "Viewport_x_set", _wrap_Viewport_x_set, METH_VARARGS, "Viewport_x_set(Viewport self, int x)"},
-	 { "Viewport_x_get", _wrap_Viewport_x_get, METH_O, "Viewport_x_get(Viewport self) -> int"},
-	 { "Viewport_y_set", _wrap_Viewport_y_set, METH_VARARGS, "Viewport_y_set(Viewport self, int y)"},
-	 { "Viewport_y_get", _wrap_Viewport_y_get, METH_O, "Viewport_y_get(Viewport self) -> int"},
-	 { "Viewport_w_set", _wrap_Viewport_w_set, METH_VARARGS, "Viewport_w_set(Viewport self, int w)"},
-	 { "Viewport_w_get", _wrap_Viewport_w_get, METH_O, "Viewport_w_get(Viewport self) -> int"},
-	 { "Viewport_h_set", _wrap_Viewport_h_set, METH_VARARGS, "Viewport_h_set(Viewport self, int h)"},
-	 { "Viewport_h_get", _wrap_Viewport_h_get, METH_O, "Viewport_h_get(Viewport self) -> int"},
-	 { "Viewport_n_set", _wrap_Viewport_n_set, METH_VARARGS, "Viewport_n_set(Viewport self, double n)"},
-	 { "Viewport_n_get", _wrap_Viewport_n_get, METH_O, "Viewport_n_get(Viewport self) -> double"},
-	 { "Viewport_f_set", _wrap_Viewport_f_set, METH_VARARGS, "Viewport_f_set(Viewport self, double f)"},
-	 { "Viewport_f_get", _wrap_Viewport_f_get, METH_O, "Viewport_f_get(Viewport self) -> double"},
-	 { "Viewport_xform_set", _wrap_Viewport_xform_set, METH_VARARGS, "Viewport_xform_set(Viewport self, doubleVector xform)"},
-	 { "Viewport_xform_get", _wrap_Viewport_xform_get, METH_O, "Viewport_xform_get(Viewport self) -> doubleVector"},
-	 { "new_Viewport", _wrap_new_Viewport, METH_NOARGS, "\n"
-		"new_Viewport() -> Viewport\n"
-		"\n"
-		"\n"
-		""},
-	 { "delete_Viewport", _wrap_delete_Viewport, METH_O, "delete_Viewport(Viewport self)"},
-	 { "Viewport_swigregister", Viewport_swigregister, METH_O, NULL},
-	 { "Viewport_swiginit", Viewport_swiginit, METH_VARARGS, NULL},
 	 { "new_Widget", _wrap_new_Widget, METH_NOARGS, "\n"
 		"new_Widget() -> Widget\n"
 		"\n"
@@ -67266,6 +72470,50 @@ static PyMethodDef SwigMethods[] = {
 	 { "delete_SpherePoser", _wrap_delete_SpherePoser, METH_O, "delete_SpherePoser(SpherePoser self)"},
 	 { "SpherePoser_swigregister", SpherePoser_swigregister, METH_O, NULL},
 	 { "SpherePoser_swiginit", SpherePoser_swiginit, METH_VARARGS, NULL},
+	 { "Viewport_fromJson", _wrap_Viewport_fromJson, METH_VARARGS, "Viewport_fromJson(Viewport self, std::string const & str) -> bool"},
+	 { "Viewport_toJson", _wrap_Viewport_toJson, METH_O, "Viewport_toJson(Viewport self) -> std::string"},
+	 { "Viewport_fromText", _wrap_Viewport_fromText, METH_VARARGS, "Viewport_fromText(Viewport self, std::string const & str) -> bool"},
+	 { "Viewport_toText", _wrap_Viewport_toText, METH_O, "Viewport_toText(Viewport self) -> std::string"},
+	 { "Viewport_resize", _wrap_Viewport_resize, METH_VARARGS, "Viewport_resize(Viewport self, int w, int h)"},
+	 { "Viewport_setFOV", _wrap_Viewport_setFOV, METH_VARARGS, "Viewport_setFOV(Viewport self, double xfov, double yfov=-1)"},
+	 { "Viewport_getFOV", _wrap_Viewport_getFOV, METH_O, "Viewport_getFOV(Viewport self) -> double"},
+	 { "Viewport_getVFOV", _wrap_Viewport_getVFOV, METH_O, "Viewport_getVFOV(Viewport self) -> double"},
+	 { "Viewport_setPose", _wrap_Viewport_setPose, METH_VARARGS, "Viewport_setPose(Viewport self, double const [9] R, double const [3] t)"},
+	 { "Viewport_getPose", _wrap_Viewport_getPose, METH_O, "Viewport_getPose(Viewport self)"},
+	 { "Viewport_viewRectangle", _wrap_Viewport_viewRectangle, METH_VARARGS, "Viewport_viewRectangle(Viewport self, double depth)"},
+	 { "Viewport_project", _wrap_Viewport_project, METH_VARARGS, "Viewport_project(Viewport self, double const [3] pt)"},
+	 { "Viewport_clickSource", _wrap_Viewport_clickSource, METH_VARARGS, "Viewport_clickSource(Viewport self, double x, double y)"},
+	 { "Viewport_clickDirection", _wrap_Viewport_clickDirection, METH_VARARGS, "Viewport_clickDirection(Viewport self, double x, double y)"},
+	 { "Viewport_perspective_set", _wrap_Viewport_perspective_set, METH_VARARGS, "Viewport_perspective_set(Viewport self, bool perspective)"},
+	 { "Viewport_perspective_get", _wrap_Viewport_perspective_get, METH_O, "Viewport_perspective_get(Viewport self) -> bool"},
+	 { "Viewport_x_set", _wrap_Viewport_x_set, METH_VARARGS, "Viewport_x_set(Viewport self, int x)"},
+	 { "Viewport_x_get", _wrap_Viewport_x_get, METH_O, "Viewport_x_get(Viewport self) -> int"},
+	 { "Viewport_y_set", _wrap_Viewport_y_set, METH_VARARGS, "Viewport_y_set(Viewport self, int y)"},
+	 { "Viewport_y_get", _wrap_Viewport_y_get, METH_O, "Viewport_y_get(Viewport self) -> int"},
+	 { "Viewport_w_set", _wrap_Viewport_w_set, METH_VARARGS, "Viewport_w_set(Viewport self, int w)"},
+	 { "Viewport_w_get", _wrap_Viewport_w_get, METH_O, "Viewport_w_get(Viewport self) -> int"},
+	 { "Viewport_h_set", _wrap_Viewport_h_set, METH_VARARGS, "Viewport_h_set(Viewport self, int h)"},
+	 { "Viewport_h_get", _wrap_Viewport_h_get, METH_O, "Viewport_h_get(Viewport self) -> int"},
+	 { "Viewport_n_set", _wrap_Viewport_n_set, METH_VARARGS, "Viewport_n_set(Viewport self, double n)"},
+	 { "Viewport_n_get", _wrap_Viewport_n_get, METH_O, "Viewport_n_get(Viewport self) -> double"},
+	 { "Viewport_f_set", _wrap_Viewport_f_set, METH_VARARGS, "Viewport_f_set(Viewport self, double f)"},
+	 { "Viewport_f_get", _wrap_Viewport_f_get, METH_O, "Viewport_f_get(Viewport self) -> double"},
+	 { "Viewport_fx_set", _wrap_Viewport_fx_set, METH_VARARGS, "Viewport_fx_set(Viewport self, double fx)"},
+	 { "Viewport_fx_get", _wrap_Viewport_fx_get, METH_O, "Viewport_fx_get(Viewport self) -> double"},
+	 { "Viewport_fy_set", _wrap_Viewport_fy_set, METH_VARARGS, "Viewport_fy_set(Viewport self, double fy)"},
+	 { "Viewport_fy_get", _wrap_Viewport_fy_get, METH_O, "Viewport_fy_get(Viewport self) -> double"},
+	 { "Viewport_cx_set", _wrap_Viewport_cx_set, METH_VARARGS, "Viewport_cx_set(Viewport self, double cx)"},
+	 { "Viewport_cx_get", _wrap_Viewport_cx_get, METH_O, "Viewport_cx_get(Viewport self) -> double"},
+	 { "Viewport_cy_set", _wrap_Viewport_cy_set, METH_VARARGS, "Viewport_cy_set(Viewport self, double cy)"},
+	 { "Viewport_cy_get", _wrap_Viewport_cy_get, METH_O, "Viewport_cy_get(Viewport self) -> double"},
+	 { "Viewport_xform_set", _wrap_Viewport_xform_set, METH_VARARGS, "Viewport_xform_set(Viewport self, doubleVector xform)"},
+	 { "Viewport_xform_get", _wrap_Viewport_xform_get, METH_O, "Viewport_xform_get(Viewport self) -> doubleVector"},
+	 { "Viewport_ori_set", _wrap_Viewport_ori_set, METH_VARARGS, "Viewport_ori_set(Viewport self, std::string const & ori)"},
+	 { "Viewport_ori_get", _wrap_Viewport_ori_get, METH_O, "Viewport_ori_get(Viewport self) -> std::string const &"},
+	 { "new_Viewport", _wrap_new_Viewport, METH_NOARGS, "new_Viewport() -> Viewport"},
+	 { "delete_Viewport", _wrap_delete_Viewport, METH_O, "delete_Viewport(Viewport self)"},
+	 { "Viewport_swigregister", Viewport_swigregister, METH_O, NULL},
+	 { "Viewport_swiginit", Viewport_swiginit, METH_VARARGS, NULL},
 	 { "new_Mass", _wrap_new_Mass, METH_NOARGS, "\n"
 		"new_Mass() -> Mass\n"
 		"\n"
@@ -70128,12 +75376,27 @@ static PyMethodDef SwigMethods[] = {
 		"next Simulator.simulate(t) call.  \n"
 		"\n"
 		""},
-	 { "SimBody_applyForceAtLocalPoint", _wrap_SimBody_applyForceAtLocalPoint, METH_VARARGS, "\n"
-		"SimBody_applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal)\n"
+	 { "SimBody_applyForceAtCOMLocalPoint", _wrap_SimBody_applyForceAtCOMLocalPoint, METH_VARARGS, "\n"
+		"SimBody_applyForceAtCOMLocalPoint(SimBody self, double const [3] f, double const [3] plocal)\n"
 		"\n"
 		"\n"
 		"Applies a force at a given point (in local center-of-mass-centered coordinates)\n"
 		"over the duration of the next Simulator.simulate(t) call.  \n"
+		"\n"
+		""},
+	 { "SimBody_applyForceAtObjectLocalPoint", _wrap_SimBody_applyForceAtObjectLocalPoint, METH_VARARGS, "\n"
+		"SimBody_applyForceAtObjectLocalPoint(SimBody self, double const [3] f, double const [3] plocal)\n"
+		"\n"
+		"\n"
+		"Applies a force at a given point (in local object-centered coordinates) over the\n"
+		"duration of the next Simulator.simulate(t) call.  \n"
+		"\n"
+		""},
+	 { "SimBody_applyForceAtLocalPoint", _wrap_SimBody_applyForceAtLocalPoint, METH_VARARGS, "\n"
+		"SimBody_applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal_com)\n"
+		"\n"
+		"\n"
+		"Deprecated: use applyForceAtCOMLocalPoint instead to match old behavior.  \n"
 		"\n"
 		""},
 	 { "SimBody_setTransform", _wrap_SimBody_setTransform, METH_VARARGS, "\n"
@@ -70172,15 +75435,30 @@ static PyMethodDef SwigMethods[] = {
 		"SimBody_setVelocity(SimBody self, double const [3] w, double const [3] v)\n"
 		"\n"
 		"\n"
-		"Sets the angular velocity and translational velocity at the current simulation\n"
-		"time step.  \n"
+		"Sets the angular velocity and translational velocity (of the COM) at the current\n"
+		"simulation time step.  \n"
 		"\n"
 		""},
 	 { "SimBody_getVelocity", _wrap_SimBody_getVelocity, METH_O, "\n"
 		"SimBody_getVelocity(SimBody self)\n"
 		"\n"
 		"\n"
-		"Returns the angular velocity and translational velocity.  \n"
+		"Returns the angular velocity and translational velocity (of the COM)  \n"
+		"\n"
+		""},
+	 { "SimBody_setObjectVelocity", _wrap_SimBody_setObjectVelocity, METH_VARARGS, "\n"
+		"SimBody_setObjectVelocity(SimBody self, double const [3] w, double const [3] v)\n"
+		"\n"
+		"\n"
+		"Sets the angular velocity and translational velocity (of the object origin) at\n"
+		"the current simulation time step.  \n"
+		"\n"
+		""},
+	 { "SimBody_getObjectVelocity", _wrap_SimBody_getObjectVelocity, METH_O, "\n"
+		"SimBody_getObjectVelocity(SimBody self)\n"
+		"\n"
+		"\n"
+		"Returns the angular velocity and translational velocity (of the object origin)  \n"
 		"\n"
 		""},
 	 { "SimBody_setCollisionPadding", _wrap_SimBody_setCollisionPadding, METH_VARARGS, "\n"
@@ -70250,7 +75528,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"    The transform of the body is centered at the *object's center of mass*\n"
 		"    rather than the object's reference frame given in the RobotModelLink or\n"
-		"    RigidObjectModel.\n"
+		"    RigidObjectModel.  The object's reference frame is retrieved/set by\n"
+		"    getObjectTransform()/setObjectTransform().\n"
 		"\n"
 		"\n"
 		"C++ includes: robotsim.h\n"
@@ -70460,14 +75739,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the current actual torques on the robot's drivers from the simulator.  \n"
-		"\n"
-		""},
-	 { "Simulator_getActualTorques", _wrap_Simulator_getActualTorques, METH_VARARGS, "\n"
-		"Simulator_getActualTorques(Simulator self, int robot)\n"
-		"\n"
-		"\n"
-		"Deprecated: renamed to getActualTorque to be consistent with SimRobotController\n"
-		"methods.  \n"
 		"\n"
 		""},
 	 { "Simulator_enableContactFeedback", _wrap_Simulator_enableContactFeedback, METH_VARARGS, "\n"
@@ -71076,6 +76347,9 @@ static void *_p_p_doubleArrayTo_p_p_double(void *x, int *SWIGUNUSEDPARM(newmemor
 static void *_p_p_intArrayTo_p_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((int **)  ((intArray **) x));
 }
+static void *_p_p_floatArrayTo_p_p_float(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((float **)  ((floatArray **) x));
+}
 static void *_p_floatArrayTo_p_float(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((float *)  ((floatArray *) x));
 }
@@ -71118,6 +76392,7 @@ static swig_type_info _swigt__p_GeneralizedIKObjective = {"_p_GeneralizedIKObjec
 static swig_type_info _swigt__p_GeneralizedIKSolver = {"_p_GeneralizedIKSolver", "GeneralizedIKSolver *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeometricPrimitive = {"_p_GeometricPrimitive", "GeometricPrimitive *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Geometry3D = {"_p_Geometry3D", "Geometry3D *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Heightmap = {"_p_Heightmap", "Heightmap *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKGoal = {"_p_IKGoal", "IKGoal *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKObjective = {"_p_IKObjective", "IKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKSolver = {"_p_IKSolver", "IKSolver *", 0, 0, (void*)0, 0};
@@ -71168,8 +76443,11 @@ static swig_type_info _swigt__p_mapped_type = {"_p_mapped_type", "mapped_type *"
 static swig_type_info _swigt__p_p__object = {"_p_p__object", "_object **|PyObject **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_double = {"_p_p_double", "double **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_doubleArray = {"_p_p_doubleArray", 0, 0, 0, 0, 0};
+static swig_type_info _swigt__p_p_float = {"_p_p_float", "float **", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_p_floatArray = {"_p_p_floatArray", 0, 0, 0, 0, 0};
 static swig_type_info _swigt__p_p_int = {"_p_p_int", "int **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_intArray = {"_p_p_intArray", 0, 0, 0, 0, 0};
+static swig_type_info _swigt__p_p_unsigned_char = {"_p_p_unsigned_char", "unsigned char **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_double_t = {"_p_std__allocatorT_double_t", "std::vector< double >::allocator_type *|std::allocator< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_float_t = {"_p_std__allocatorT_float_t", "std::vector< float >::allocator_type *|std::allocator< float > *", 0, 0, (void*)0, 0};
@@ -71204,6 +76482,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_GeneralizedIKSolver,
   &_swigt__p_GeometricPrimitive,
   &_swigt__p_Geometry3D,
+  &_swigt__p_Heightmap,
   &_swigt__p_IKGoal,
   &_swigt__p_IKObjective,
   &_swigt__p_IKSolver,
@@ -71254,8 +76533,11 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_p__object,
   &_swigt__p_p_double,
   &_swigt__p_p_doubleArray,
+  &_swigt__p_p_float,
+  &_swigt__p_p_floatArray,
   &_swigt__p_p_int,
   &_swigt__p_p_intArray,
+  &_swigt__p_p_unsigned_char,
   &_swigt__p_size_type,
   &_swigt__p_std__allocatorT_double_t,
   &_swigt__p_std__allocatorT_float_t,
@@ -71290,6 +76572,7 @@ static swig_cast_info _swigc__p_GeneralizedIKObjective[] = {  {&_swigt__p_Genera
 static swig_cast_info _swigc__p_GeneralizedIKSolver[] = {  {&_swigt__p_GeneralizedIKSolver, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeometricPrimitive[] = {  {&_swigt__p_GeometricPrimitive, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Geometry3D[] = {  {&_swigt__p_Geometry3D, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Heightmap[] = {  {&_swigt__p_Heightmap, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKGoal[] = {  {&_swigt__p_IKGoal, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKObjective[] = {  {&_swigt__p_IKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKSolver[] = {  {&_swigt__p_IKSolver, 0, 0, 0},{0, 0, 0, 0}};
@@ -71340,8 +76623,11 @@ static swig_cast_info _swigc__p_mapped_type[] = {  {&_swigt__p_mapped_type, 0, 0
 static swig_cast_info _swigc__p_p__object[] = {  {&_swigt__p_p__object, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_doubleArray[] = {{&_swigt__p_p_doubleArray, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_double[] = {  {&_swigt__p_p_doubleArray, _p_p_doubleArrayTo_p_p_double, 0, 0},  {&_swigt__p_p_double, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_floatArray[] = {{&_swigt__p_p_floatArray, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_float[] = {  {&_swigt__p_p_float, 0, 0, 0},  {&_swigt__p_p_floatArray, _p_p_floatArrayTo_p_p_float, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_intArray[] = {{&_swigt__p_p_intArray, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_int[] = {  {&_swigt__p_p_intArray, _p_p_intArrayTo_p_p_int, 0, 0},  {&_swigt__p_p_int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_unsigned_char[] = {  {&_swigt__p_p_unsigned_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_double_t[] = {  {&_swigt__p_std__allocatorT_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_float_t[] = {  {&_swigt__p_std__allocatorT_float_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -71376,6 +76662,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_GeneralizedIKSolver,
   _swigc__p_GeometricPrimitive,
   _swigc__p_Geometry3D,
+  _swigc__p_Heightmap,
   _swigc__p_IKGoal,
   _swigc__p_IKObjective,
   _swigc__p_IKSolver,
@@ -71426,8 +76713,11 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_p__object,
   _swigc__p_p_double,
   _swigc__p_p_doubleArray,
+  _swigc__p_p_float,
+  _swigc__p_p_floatArray,
   _swigc__p_p_int,
   _swigc__p_p_intArray,
+  _swigc__p_p_unsigned_char,
   _swigc__p_size_type,
   _swigc__p_std__allocatorT_double_t,
   _swigc__p_std__allocatorT_float_t,
