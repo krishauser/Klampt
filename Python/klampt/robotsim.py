@@ -1530,7 +1530,7 @@ class PointCloud(object):
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
-            depth (np.ndarray): the depth values, of size h x w.  Should have
+            depth (np.ndarray): the depth values, of shape (h,w).  Should have
                 dtype float, np.float32, or np.uint16 for best performance.
             depth_scale (float, optional): converts depth image values to real
                 depth units.
@@ -1553,12 +1553,12 @@ class PointCloud(object):
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
-            color (np.ndarray): the color values, of size h x w or h x w x 3.
+            color (np.ndarray): the color values, of shape (h,w) or (h,w,3).
                 In first case, must have dtype np.uint32 with r,g,b values
                 packed in 0xrrggbb order.  In second case, if dtype is
                 np.uint8, min and max are [0,255].  If dtype is float or
                 np.float32, min and max are [0,1].
-            depth (np.ndarray): the depth values, of size h x w.  Should have
+            depth (np.ndarray): the depth values, of shape (h,w).  Should have
                 dtype float, np.float32, or np.uint16 for best performance.
             depth_scale (float, optional): converts depth image values to real
                 depth units.
@@ -1728,7 +1728,7 @@ class VolumeGrid(object):
             (xmin,ymin,zmin),(xmax,ymax,zmax)
         dims (SWIG vector of  of 3 ints): size of grid in each of 3 dimensions
         values (SWIG vector of doubles): contains a 3D array of
-             ``dims[0]*dims[1]*dims[1]`` values.
+             ``dims[0]*dims[1]*dims[2]`` values.
 
              The cell index (i,j,k) is flattened to
              ``i*dims[1]*dims[2] + j*dims[2] + k``.
@@ -1751,6 +1751,8 @@ class VolumeGrid(object):
 
     def setBounds(self, bmin: Point, bmax: Point) ->None:
         r"""
+        Sets the min / max bounds for this volume.  
+
         Args:
             bmin (:obj:`list of 3 floats`)
             bmax (:obj:`list of 3 floats`)
@@ -1759,6 +1761,8 @@ class VolumeGrid(object):
 
     def resize(self, sx: int, sy: int, sz: int) ->None:
         r"""
+        Resizes the x, y, and z dimensions of the grid.  
+
         Args:
             sx (int)
             sy (int)
@@ -1796,10 +1800,21 @@ class VolumeGrid(object):
 
     def shift(self, dv: float) ->None:
         r"""
+        Shifts the value uniformly.  
+
         Args:
             dv (float)
         """
         return _robotsim.VolumeGrid_shift(self, dv)
+
+    def scale(self, cv: float) ->None:
+        r"""
+        Scales the value uniformly.  
+
+        Args:
+            cv (float)
+        """
+        return _robotsim.VolumeGrid_scale(self, cv)
 
     def getValues(self) ->None:
         r"""
@@ -1821,17 +1836,438 @@ class VolumeGrid(object):
     values = property(_robotsim.VolumeGrid_values_get, _robotsim.VolumeGrid_values_set, doc=r"""values : std::vector<(double,std::allocator<(double)>)>""")
 
     values = property(getValues, setValues)
-
+    """The 3D array of values in the grid (numpy.ndarray)"""
 
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'VolumeGrid')
         return (loader.from_json,(jsonobj,'VolumeGrid'))
 
+
     __swig_destroy__ = _robotsim.delete_VolumeGrid
 
 # Register VolumeGrid in _robotsim:
 _robotsim.VolumeGrid_swigregister(VolumeGrid)
+
+class Heightmap(object):
+    r"""
+
+
+    A height (elevation) map or a depth map.  
+
+    In elevation-map form (viewport.perspective=false), the values are the z-height
+    of the terrain at each grid point. In depth-map form
+    (viewport.perspective=true), the values are the depths of each grid point (not
+    distance) from the origin in the +z direction.  
+
+    Note that unlike VolumeGrid types, each grid entry is defined at a vertex, not a
+    cell. The (i,j) cell is associated with the vertex
+    ((i+0.5-cx)/fx,(j+0.5-cy)/fy,heights[i,j]) in elevation map mode.  
+
+    Attributes:  
+
+        viewport (Viewport): contains the size (w,h), projection (perspective)
+             intrinsics (fx,fy,cx,cy), and pose (pose) of the heightmap
+             reference coordinate system.
+        heights (SWIG vector of floats): contains a 2D array of
+             ``dims[0]*dims[1]`` values from the bottom left to the upper
+             right (row major, i.e., x order, then y order).
+
+             The vertex index (i,j) is flattened to
+             ``i*dims[1] + j``.
+
+             The array index i is associated to vertex index
+             ``(i/dims[1], i % dims[0])``
+
+         colors (SWIG vector of floats): contains a 2D array of colors in
+             grayscale (w*h), RGB (3*w*h), or RGBA (4*w*h) form.  The layout
+             is row major in the space (i,j,channel), i.e., the index of
+             (i,j,channel) is ``i*h*C + j*C + channel`` where C is 1, 3, or 4.
+
+         properties (SWIG vector of floats): contains a 3D array of properties
+             (w*h*p) where p is the number of properties.  p matches the length
+            of propertyNames.  Layout is row-major with (property, i, j), i.e., p
+    order,
+            w order, then h order.  Property p at index (i,j) is flattened to
+           ``p*w*h + i*h + j``.
+
+         propertyNames (SWIG vector of strings): A list of the p property names.
+
+
+    C++ includes: geometry.h
+
+    """
+
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        r"""
+        """
+        _robotsim.Heightmap_swiginit(self, _robotsim.new_Heightmap())
+
+    def resize(self, w: int, h: int) ->None:
+        r"""
+        Resizes the height map.  
+
+        Args:
+            w (int)
+            h (int)
+        """
+        return _robotsim.Heightmap_resize(self, w, h)
+
+    def setSize(self, width: float, height: float) ->None:
+        r"""
+        Sets an orthographic projection (elevation map) with the given width and height.  
+
+        Args:
+            width (float)
+            height (float)
+        """
+        return _robotsim.Heightmap_setSize(self, width, height)
+
+    def setFOV(self, fovx: float, fovy: float=-1) ->None:
+        r"""
+        Sets an perspective projection (depth map) with the given x and y fields of view
+        and centered focal point. If fovy=-1, then it will be set so that pixels are
+        square.  
+
+        Args:
+            fovx (float)
+            fovy (float, optional): default value -1
+        """
+        return _robotsim.Heightmap_setFOV(self, fovx, fovy)
+
+    def setIntrinsics(self, fx: float, fy: float, cx: float=-1, cy: float=-1) ->None:
+        r"""
+        Sets an perspective projection (depth map) with the given intrinsics fx, fy, cx,
+        cy. If cx or cy are negative, then cx = (w-1)/2, cy = (h-1)/2.  
+
+        Args:
+            fx (float)
+            fy (float)
+            cx (float, optional): default value -1
+            cy (float, optional): default value -1
+        """
+        return _robotsim.Heightmap_setIntrinsics(self, fx, fy, cx, cy)
+
+    def set(self, *args) ->None:
+        r"""
+        Sets the height of a vertex.  
+
+        set (value)
+
+        set (i,j,value)
+
+
+        Args:
+            value (float): 
+            i (int, optional): 
+            j (int, optional): 
+        """
+        return _robotsim.Heightmap_set(self, *args)
+
+    def get(self, i: int, j: int) ->float:
+        r"""
+        Gets the height of a vertex.  
+
+        Args:
+            i (int)
+            j (int)
+        """
+        return _robotsim.Heightmap_get(self, i, j)
+
+    def shift(self, dh: float) ->None:
+        r"""
+        Shifts the height uniformly.  
+
+        Args:
+            dh (float)
+        """
+        return _robotsim.Heightmap_shift(self, dh)
+
+    def scale(self, c: float) ->None:
+        r"""
+        Scales the height uniformly.  
+
+        Args:
+            c (float)
+        """
+        return _robotsim.Heightmap_scale(self, c)
+
+    def getHeights(self) ->None:
+        r"""
+        Returns a 2D Numpy array view of the values of size (w x h) PROBLEM: numpy
+        stores in row-major order i*h + j.  
+
+        """
+        return _robotsim.Heightmap_getHeights(self)
+
+    def setHeights(self, np_array2: Vector) ->None:
+        r"""
+        Sets the values to 2D numpy array of size (w x h)  
+
+        Args:
+            np_array2 (:obj:`2D Numpy array of floats`)
+        """
+        return _robotsim.Heightmap_setHeights(self, np_array2)
+
+    def setHeightImage_d(self, np_array2: Vector, height_scale: float=1) ->None:
+        r"""
+        Sets values to an image with size (h x w) with rows ordered top to bottom.  
+
+        Args:
+            np_array2 (:obj:`2D Numpy array of floats`)
+            height_scale (float, optional): default value 1
+        """
+        return _robotsim.Heightmap_setHeightImage_d(self, np_array2, height_scale)
+
+    def setHeightImage_f(self, np_array2: Vector, height_scale: float=1) ->None:
+        r"""
+        Sets values to an image with size (h x w) with rows ordered top to bottom.  
+
+        Args:
+            np_array2 (:obj:`2D Numpy array of np.float32`)
+            height_scale (float, optional): default value 1
+        """
+        return _robotsim.Heightmap_setHeightImage_f(self, np_array2, height_scale)
+
+    def setHeightImage_s(self, np_array2: "ndarray", height_scale: float=1) ->None:
+        r"""
+        Sets values to an image with size (h x w) with rows ordered top to bottom.  
+
+        Args:
+            np_array2 (:obj:`unsigned short *`)
+            height_scale (float, optional): default value 1
+        """
+        return _robotsim.Heightmap_setHeightImage_s(self, np_array2, height_scale)
+
+    def setHeightImage_b(self, np_array2: "ndarray", height_scale: float=1) ->None:
+        r"""
+        Sets values to an image with size (h x w) with rows ordered top to bottom.  
+
+        Args:
+            np_array2 (:obj:`unsigned char *`)
+            height_scale (float, optional): default value 1
+        """
+        return _robotsim.Heightmap_setHeightImage_b(self, np_array2, height_scale)
+
+    def clearColors(self) ->None:
+        r"""
+        Erases all colors.  
+
+        """
+        return _robotsim.Heightmap_clearColors(self)
+
+    def setColor(self, *args) ->None:
+        r"""
+        Gets the RGBA color of a cell.  
+
+        setColor (intensity)
+
+        setColor (rgba)
+
+        setColor (i,j,intensity)
+
+        setColor (i,j,rgba)
+
+
+        Args:
+            intensity (float, optional): 
+            rgba (:obj:`double [4]`, optional): 
+            i (int, optional): 
+            j (int, optional): 
+        """
+        return _robotsim.Heightmap_setColor(self, *args)
+
+    def getColor(self, i: int, j: int) ->None:
+        r"""
+        Gets the RGBA color of a cell.  
+
+        Args:
+            i (int)
+            j (int)
+        """
+        return _robotsim.Heightmap_getColor(self, i, j)
+
+    def getColors(self) ->None:
+        r"""
+        Returns a 3D Numpy array view of the colors (w x h x 1, 3, or 4)  
+
+        """
+        return _robotsim.Heightmap_getColors(self)
+
+    def setColors(self, np_array3: Vector) ->None:
+        r"""
+        Sets the values to a 3D numpy array (w x h x 1, 3, or 4)  
+
+        Args:
+            np_array3 (:obj:`3D Numpy array of floats`)
+        """
+        return _robotsim.Heightmap_setColors(self, np_array3)
+
+    def setColorImage_i(self, np_array2: "ndarray") ->None:
+        r"""
+        Sets colors to a 32-bit RGBA image (size h x w) with rows ordered top to bottom.  
+
+        Args:
+            np_array2 (:obj:`unsigned int *`)
+        """
+        return _robotsim.Heightmap_setColorImage_i(self, np_array2)
+
+    def setColorImage_b3(self, np_array3: "ndarray") ->None:
+        r"""
+        Sets colors to a 24-bit RGB image (size h x w x 3) with rows ordered top to
+        bottom.  
+
+        Args:
+            np_array3 (:obj:`unsigned char *`)
+        """
+        return _robotsim.Heightmap_setColorImage_b3(self, np_array3)
+
+    def setColorImage_b(self, np_array2: "ndarray") ->None:
+        r"""
+        Sets colors to an 8-bit grayscale image (size h x w) with rows ordered top to
+        bottom.  
+
+        Args:
+            np_array2 (:obj:`unsigned char *`)
+        """
+        return _robotsim.Heightmap_setColorImage_b(self, np_array2)
+
+    def addProperty(self, *args) ->None:
+        r"""
+        Adds a new property and sets it to an array of size (w x h)  
+
+        addProperty (pname)
+
+        addProperty (pname,np_array2)
+
+
+        Args:
+            pname (str): 
+            np_array2 (:obj:`2D Numpy array of floats`, optional): 
+        """
+        return _robotsim.Heightmap_addProperty(self, *args)
+
+    def setProperty(self, i: int, j: int, np_array: Vector) ->None:
+        r"""
+        Sets an individual pixel's property vector.  
+
+        Args:
+            i (int)
+            j (int)
+            np_array (:obj:`1D Numpy array of floats`)
+        """
+        return _robotsim.Heightmap_setProperty(self, i, j, np_array)
+
+    def getProperty(self, i: int, j: int) ->None:
+        r"""
+        Retrieves an individual pixel's property vector.  
+
+        Args:
+            i (int)
+            j (int)
+        """
+        return _robotsim.Heightmap_getProperty(self, i, j)
+
+    def setProperties(self, pindex: int, np_array2: Vector) ->None:
+        r"""
+        Sets a property to an array of size (w x h)  
+
+        Args:
+            pindex (int)
+            np_array2 (:obj:`2D Numpy array of floats`)
+        """
+        return _robotsim.Heightmap_setProperties(self, pindex, np_array2)
+
+    def getProperties(self, pindex: int) ->None:
+        r"""
+        Retrieves a view of the property of size (w x h)  
+
+        Args:
+            pindex (int)
+        """
+        return _robotsim.Heightmap_getProperties(self, pindex)
+
+    def setPropertyImage(self, pindex: int, np_array2: Vector) ->None:
+        r"""
+        Sets a property to an image of size (h x w) with rows ordered top to bottom.  
+
+        Args:
+            pindex (int)
+            np_array2 (:obj:`2D Numpy array of floats`)
+        """
+        return _robotsim.Heightmap_setPropertyImage(self, pindex, np_array2)
+    viewport = property(_robotsim.Heightmap_viewport_get, _robotsim.Heightmap_viewport_set, doc=r"""viewport : Viewport""")
+    heights = property(_robotsim.Heightmap_heights_get, _robotsim.Heightmap_heights_set, doc=r"""heights : std::vector<(double,std::allocator<(double)>)>""")
+    colors = property(_robotsim.Heightmap_colors_get, _robotsim.Heightmap_colors_set, doc=r"""colors : std::vector<(double,std::allocator<(double)>)>""")
+    propertyNames = property(_robotsim.Heightmap_propertyNames_get, _robotsim.Heightmap_propertyNames_set, doc=r"""propertyNames : std::vector<(std::string,std::allocator<(std::string)>)>""")
+    properties = property(_robotsim.Heightmap_properties_get, _robotsim.Heightmap_properties_set, doc=r"""properties : std::vector<(double,std::allocator<(double)>)>""")
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.to_json(self,'Heightmap')
+        return (loader.from_json,(jsonobj,'Heightmap'))
+
+    def setHeightImage(self, img, height_scale : float= 1.0):
+        """
+        Sets heights from a height image.
+
+        Args:
+            img (np.ndarray): the height values, of shape (h,w).  Should have
+                dtype float, np.float32, or np.uint16 for best performance.
+            height_scale (float, optional): converts depth image values to real
+                depth units.
+        """
+        import numpy as np
+        if len(img.shape) != 2:
+            raise ValueError("Invalid shape for the height image")
+        if img.dtype == float:
+            return self.setHeightImage_d(img,height_scale)
+        elif img.dtype == np.float32:
+            return self.setHeightImage_f(img,height_scale)
+        elif img.dtype == np.uint16:
+            return self.setHeightImage_s(img,height_scale)
+        elif img.dtype == np.uint8:
+            return self.setHeightImage_b(img,height_scale)
+        else:
+            raise ValueError("Invalid dtype for the height image, can use float, np.float32, np.uint16, or np.uint8")
+
+    def setColorImage(self, img):
+        """
+        Sets colors from a color image.
+
+        Args:
+            img (np.ndarray): the color values, of shape (h,w) or (h,w,3) or (h,w,4).
+                Should have dtype float, np.float32, np.uint32 (RGBA 32-bit) or np.uint8.
+        """
+        import numpy as np
+        if len(img.shape) != 2 and len(img.shape) != 3:
+            raise ValueError("Invalid shape for the color image")
+        if len(img.shape) == 2:
+            if img.dtype == np.uint32:
+                return self.setColorImage_i(img)
+            elif img.dtype == np.uint8:
+                return self.setColorImage_b(img)
+            elif img.dtype == float:
+                return self.setColors(img.reshape(img.shape[0],img.shape[1],1))
+            else:
+                raise ValueError("Invalid dtype for the color image, can use np.uint32, np.uint8, or float")
+        else:
+            if img.shape[2] != 3 and img.shape[2] != 4:
+                raise ValueError("Invalid shape for the color image")
+            if img.dtype == np.uint8:
+                return self.setColorImage_b(img)
+            elif img.dtype == float:
+                return self.setColors(img)
+            else:
+                raise ValueError("Invalid dtype for the height image, can use float or np.uint8")
+
+    __swig_destroy__ = _robotsim.delete_Heightmap
+
+# Register Heightmap in _robotsim:
+_robotsim.Heightmap_swigregister(Heightmap)
 
 class DistanceQuerySettings(object):
     r"""
@@ -1975,14 +2411,19 @@ class Geometry3D(object):
 
     The three-D geometry container used throughout Klampt.  
 
-    There are five currently supported types of geometry:  
+    There are eight currently supported types of geometry:  
 
     *   primitives (:class:`GeometricPrimitive`)  
+    *   convex hulls (:class:`ConvexHull`)  
     *   triangle meshes (:class:`TriangleMesh`)  
     *   point clouds (:class:`PointCloud`)  
-    *   volumetric grids (:class:`VolumeGrid`)  
+    *   implicit surfaces (name "ImplicitSurface", data :class:`VolumeGrid`)  
+    *   occupancy grids (name "OccupancyGrid", data :class:`VolumeGrid`)  
+    *   heightmaps (:class:`Heightmap`)  
     *   groups ("Group" type)  
-    *   convex hulls (:class:`ConvexHull`)  
+
+    For now we also support the "VolumeGrid" identifier which is treated as an
+    alias for "ImplicitSurface"  
 
     This class acts as a uniform container of all of these types.  
 
@@ -2053,8 +2494,8 @@ class Geometry3D(object):
      **Conversions**  
 
     Many geometry types can be converted to and from one another using the
-    :meth:`convert` method. This can also be used to remesh TriangleMesh objects and
-    PointCloud objects.  
+    :meth:`convert` method. This can also be used to remesh TriangleMesh,
+    PointCloud, ImplicitSurface, OccupancyGrid, and Heightmap objects.  
 
     C++ includes: geometry.h
 
@@ -2071,18 +2512,10 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.GeometricPrimitive`, optional): 
+            arg2 (:obj:`Heightmap` or :class:`~klampt.ConvexHull` or :class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
-
-    def clone(self) -> "Geometry3D":
-        r"""
-        Creates a standalone geometry from this geometry (identical to copy... will be
-        deprecated in a future version)  
-
-        """
-        return _robotsim.Geometry3D_clone(self)
 
     def copy(self) -> "Geometry3D":
         r"""
@@ -2116,8 +2549,8 @@ class Geometry3D(object):
 
     def type(self) ->str:
         r"""
-        Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,
-        GeometricPrimitive, or Group.  
+        Returns the type of geometry: GeometricPrimitive, ConvexHull, TriangleMesh,
+        PointCloud, ImplicitSurface, OccupancyGrid, Heightmap, or Group.  
 
         """
         return _robotsim.Geometry3D_type(self)
@@ -2159,10 +2592,32 @@ class Geometry3D(object):
 
     def getVolumeGrid(self) -> "VolumeGrid":
         r"""
-        Returns a VolumeGrid if this geometry is of type VolumeGrid.  
+        Returns a VolumeGrid if this geometry is of type ImplicitSurface or
+        OccupancyGrid.  
 
         """
         return _robotsim.Geometry3D_getVolumeGrid(self)
+
+    def getImplicitSurface(self) -> "VolumeGrid":
+        r"""
+        Returns the VolumeGrid if this geometry is of type ImplicitSurface.  
+
+        """
+        return _robotsim.Geometry3D_getImplicitSurface(self)
+
+    def getOccupancyGrid(self) -> "VolumeGrid":
+        r"""
+        Returns the VolumeGrid if this geometry is of type OccupancyGrid.  
+
+        """
+        return _robotsim.Geometry3D_getOccupancyGrid(self)
+
+    def getHeightmap(self) -> "Heightmap":
+        r"""
+        Returns the Heightmap if this geometry is of type Heightmap.  
+
+        """
+        return _robotsim.Geometry3D_getHeightmap(self)
 
     def setTriangleMesh(self, arg2:  "TriangleMesh") ->None:
         r"""
@@ -2214,12 +2669,39 @@ class Geometry3D(object):
 
     def setVolumeGrid(self, arg2:  "VolumeGrid") ->None:
         r"""
-        Sets this Geometry3D to a volumeGrid.  
+        Sets this Geometry3D to an ImplicitSurface. Will be deprecated soon.  
 
         Args:
             arg2 (:class:`~klampt.VolumeGrid`)
         """
         return _robotsim.Geometry3D_setVolumeGrid(self, arg2)
+
+    def setImplicitSurface(self, vg:  "VolumeGrid") ->None:
+        r"""
+        Sets this Geometry3D to an ImplicitSurface.  
+
+        Args:
+            vg (:class:`~klampt.VolumeGrid`)
+        """
+        return _robotsim.Geometry3D_setImplicitSurface(self, vg)
+
+    def setOccupancyGrid(self, vg:  "VolumeGrid") ->None:
+        r"""
+        Sets this Geometry3D to an OccupancyGrid.  
+
+        Args:
+            vg (:class:`~klampt.VolumeGrid`)
+        """
+        return _robotsim.Geometry3D_setOccupancyGrid(self, vg)
+
+    def setHeightmap(self, hm:  "Heightmap") ->None:
+        r"""
+        Sets this Geometry3D to a Heightmap.  
+
+        Args:
+            hm (:obj:`Heightmap`)
+        """
+        return _robotsim.Geometry3D_setHeightmap(self, hm)
 
     def setGroup(self) ->None:
         r"""
@@ -2713,39 +3195,28 @@ class Geometry3D(object):
         """
         return _robotsim.Geometry3D_roi(self, query, bmin, bmax)
 
-    def union_(self, *args) ->None:
+    def merge(self, other:  "Geometry3D", threshold: float=0) ->None:
         r"""
-        Calculates a "union" of this geometry with another geometry. The result is
-        stored inplace and the type of the result is the same as this geometry. This can
-        be used to calculate the union of PointClouds, TriangleMeshes, ConvexPolytopes,
-        and VolumeGrids.  
+        Merges another geometry into this geometry. The result is stored inplace and the
+        type of the result is the same as this geometry. This can be used to calculate
+        the union of PointClouds, TriangleMeshes, ConvexPolytopes, and ImplicitSurfaces,
+        OccupancyGrids, and Heightmaps.  
 
         Args:
             other (:class:`~klampt.Geometry3D`)
-            representation (str, optional): default value "auto"
             threshold (float, optional): default value 0
 
-        VolumeGrid unions preserve the domain of the current volume grid. They can also
-        be unioned with GeometricPrimitives, PointClouds, TriangleMeshes, and
-        ConvexPolytopes, in which case the output is either an occupancy grid, signed
-        distance field (SDF), or TSDF (TSDF) according to the `representation` argument.
-        Valid values are "auto" (="sdf"), "occupancy", "sdf", and "tsdf".  
+        ImplicitSurface, OccupancyGrid, and Heightmap merges preserve the domain of the
+        current grid. They can also be merged with many other geometries.  
 
-        In the TSDF case, the truncation value is either `threshold`, or if
-        `threshold`=0, the current range of the existing TSDF is used.  
-
-        Note: the C++ name of this method is union_ but you can also use union in the
-        Python API.  
+        In the ImplicitSurface case, a truncation value can be set via `threshold`. This
+        performs a TSDF-style merge  
 
         """
-        return _robotsim.Geometry3D_union_(self, *args)
+        return _robotsim.Geometry3D_merge(self, other, threshold)
     world = property(_robotsim.Geometry3D_world_get, _robotsim.Geometry3D_world_set, doc=r"""world : int""")
     id = property(_robotsim.Geometry3D_id_get, _robotsim.Geometry3D_id_set, doc=r"""id : int""")
     geomPtr = property(_robotsim.Geometry3D_geomPtr_get, _robotsim.Geometry3D_geomPtr_set, doc=r"""geomPtr : p.void""")
-
-    def union(self,other: Geometry3D,representation='auto',threshold=0.0):
-        """See union_"""
-        return self.union_(other,representation,threshold)
 
     def __reduce__(self):
         from klampt.io import loader
@@ -2951,6 +3422,17 @@ class Appearance(object):
         """
         return _robotsim.Appearance_setColors(self, feature, np_array2)
 
+    def getColors(self, feature: int) ->None:
+        r"""
+        Retrieves per-element color for elements of the given feature type. If per-
+        element colors are not enabled, then a 1 x 4 array is returned. Otherwise,
+        returns an m x 4 array, where m is the number of featuress of that type.  
+
+        Args:
+            feature (int)
+        """
+        return _robotsim.Appearance_getColors(self, feature)
+
     def setTintColor(self, color: Sequence[float], strength: float) ->None:
         r"""
         Sets a temporary tint color that modulates the appearance of the object. This
@@ -3073,6 +3555,25 @@ class Appearance(object):
         """
         return _robotsim.Appearance_setTexture1D_channels(self, format, np_array2)
 
+    def getTexture1D_format(self) ->str:
+        r"""
+        Retrieves a 1D texture format, returning '' if the texture is not set.  
+
+        """
+        return _robotsim.Appearance_getTexture1D_format(self)
+
+    def getTexture1D_channels(self, np_view2:  "unsigned char **", m: IntArray, n: IntArray) ->None:
+        r"""
+        Retrieves a view into the 1D texture data. If the texture is not set, throws an
+        exception.  
+
+        Args:
+            np_view2 (:obj:`unsigned char **`)
+            m (:obj:`int *`)
+            n (:obj:`int *`)
+        """
+        return _robotsim.Appearance_getTexture1D_channels(self, np_view2, m, n)
+
     def setTexture2D_b(self, format: str, np_array2: "ndarray", topdown: bool=True) ->None:
         r"""
         Sets a 2D texture of the given width/height. See :func:`setTexture1D_b` for
@@ -3121,6 +3622,21 @@ class Appearance(object):
         """
         return _robotsim.Appearance_setTexture2D_channels(self, format, np_array3, topdown)
 
+    def getTexture2D_format(self) ->str:
+        r"""
+        Retrieves a 2D texture format, returning '' if the texture is not set.  
+
+        """
+        return _robotsim.Appearance_getTexture2D_format(self)
+
+    def getTexture2D_channels(self) ->None:
+        r"""
+        Retrieves a view into the 2D texture data. If the texture is not set, throws an
+        exception.  
+
+        """
+        return _robotsim.Appearance_getTexture2D_channels(self)
+
     def setTexcoords1D(self, np_array: Vector) ->None:
         r"""
         Sets per-vertex texture coordinates for a 1D texture.  
@@ -3132,6 +3648,14 @@ class Appearance(object):
 
         """
         return _robotsim.Appearance_setTexcoords1D(self, np_array)
+
+    def getTexcoords1D(self) ->None:
+        r"""
+        Gets per-vertex texture coordinates for a 1D texture. If no 1D texture is set,
+        throws an exception.  
+
+        """
+        return _robotsim.Appearance_getTexcoords1D(self)
 
     def setTexcoords2D(self, np_array2: Vector) ->None:
         r"""
@@ -3146,6 +3670,14 @@ class Appearance(object):
         """
         return _robotsim.Appearance_setTexcoords2D(self, np_array2)
 
+    def getTexcoords2D(self) ->None:
+        r"""
+        Gets per-vertex texture coordinates for a 2D texture. If no 2D texture is set,
+        throws an exception.  
+
+        """
+        return _robotsim.Appearance_getTexcoords2D(self)
+
     def setTexgen(self, np_array2: Vector, worldcoordinates: bool=False) ->None:
         r"""
         Sets the texture generation. The array must be size m x 4, with m in the range
@@ -3157,6 +3689,21 @@ class Appearance(object):
             worldcoordinates (bool, optional): default value False
         """
         return _robotsim.Appearance_setTexgen(self, np_array2, worldcoordinates)
+
+    def getTexgenMatrix(self) ->None:
+        r"""
+        Retrieves the texture generation. The array will be size m x 4, with m in the
+        range 0,...,4. The texture generation is performed in  
+
+        """
+        return _robotsim.Appearance_getTexgenMatrix(self)
+
+    def isTexgenWorld(self) ->bool:
+        r"""
+        Returns whether texture generation is performed in world coordinates.  
+
+        """
+        return _robotsim.Appearance_isTexgenWorld(self)
 
     def setTexWrap(self, wrap: bool) ->None:
         r"""
@@ -3332,65 +3879,6 @@ class Appearance(object):
 
 # Register Appearance in _robotsim:
 _robotsim.Appearance_swigregister(Appearance)
-
-class Viewport(object):
-    r"""
-
-
-    """
-
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
-    __repr__ = _swig_repr
-
-    def fromJson(self, str: str) ->bool:
-        r"""
-        Args:
-            str (str)
-        """
-        return _robotsim.Viewport_fromJson(self, str)
-
-    def toJson(self) ->str:
-        r"""
-        """
-        return _robotsim.Viewport_toJson(self)
-
-    def setModelviewMatrix(self, M: Sequence[float]) ->None:
-        r"""
-        Args:
-            M (:obj:`double [16]`)
-        """
-        return _robotsim.Viewport_setModelviewMatrix(self, M)
-
-    def setRigidTransform(self, R: Rotation, t: Point) ->None:
-        r"""
-        Args:
-            R (:obj:`list of 9 floats (so3 element)`)
-            t (:obj:`list of 3 floats`)
-        """
-        return _robotsim.Viewport_setRigidTransform(self, R, t)
-
-    def getRigidTransform(self) ->None:
-        r"""
-        """
-        return _robotsim.Viewport_getRigidTransform(self)
-    perspective = property(_robotsim.Viewport_perspective_get, _robotsim.Viewport_perspective_set, doc=r"""perspective : bool""")
-    scale = property(_robotsim.Viewport_scale_get, _robotsim.Viewport_scale_set, doc=r"""scale : float""")
-    x = property(_robotsim.Viewport_x_get, _robotsim.Viewport_x_set, doc=r"""x : int""")
-    y = property(_robotsim.Viewport_y_get, _robotsim.Viewport_y_set, doc=r"""y : int""")
-    w = property(_robotsim.Viewport_w_get, _robotsim.Viewport_w_set, doc=r"""w : int""")
-    h = property(_robotsim.Viewport_h_get, _robotsim.Viewport_h_set, doc=r"""h : int""")
-    n = property(_robotsim.Viewport_n_get, _robotsim.Viewport_n_set, doc=r"""n : double""")
-    f = property(_robotsim.Viewport_f_get, _robotsim.Viewport_f_set, doc=r"""f : double""")
-    xform = property(_robotsim.Viewport_xform_get, _robotsim.Viewport_xform_set, doc=r"""xform : std::vector<(double,std::allocator<(double)>)>""")
-
-    def __init__(self):
-        r"""
-        """
-        _robotsim.Viewport_swiginit(self, _robotsim.new_Viewport())
-    __swig_destroy__ = _robotsim.delete_Viewport
-
-# Register Viewport in _robotsim:
-_robotsim.Viewport_swigregister(Viewport)
 
 class Widget(object):
     r"""
@@ -3840,6 +4328,108 @@ class SpherePoser(Widget):
 # Register SpherePoser in _robotsim:
 _robotsim.SpherePoser_swigregister(SpherePoser)
 
+class Viewport(object):
+    r"""Proxy of C++ Viewport class."""
+
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def fromJson(self, str: str) ->bool:
+        r"""fromJson(Viewport self, std::string const & str) -> bool"""
+        return _robotsim.Viewport_fromJson(self, str)
+
+    def toJson(self) ->str:
+        r"""toJson(Viewport self) -> std::string"""
+        return _robotsim.Viewport_toJson(self)
+
+    def fromText(self, str: str) ->bool:
+        r"""fromText(Viewport self, std::string const & str) -> bool"""
+        return _robotsim.Viewport_fromText(self, str)
+
+    def toText(self) ->str:
+        r"""toText(Viewport self) -> std::string"""
+        return _robotsim.Viewport_toText(self)
+
+    def resize(self, w: int, h: int) ->None:
+        r"""resize(Viewport self, int w, int h)"""
+        return _robotsim.Viewport_resize(self, w, h)
+
+    def setFOV(self, xfov: float, yfov: float=-1) ->None:
+        r"""setFOV(Viewport self, double xfov, double yfov=-1)"""
+        return _robotsim.Viewport_setFOV(self, xfov, yfov)
+
+    def getFOV(self) ->float:
+        r"""getFOV(Viewport self) -> double"""
+        return _robotsim.Viewport_getFOV(self)
+
+    def getVFOV(self) ->float:
+        r"""getVFOV(Viewport self) -> double"""
+        return _robotsim.Viewport_getVFOV(self)
+
+    def setPose(self, R: Rotation, t: Point) ->None:
+        r"""setPose(Viewport self, double const [9] R, double const [3] t)"""
+        return _robotsim.Viewport_setPose(self, R, t)
+
+    def getPose(self) ->None:
+        r"""getPose(Viewport self)"""
+        return _robotsim.Viewport_getPose(self)
+
+    def viewRectangle(self, depth: float) ->None:
+        r"""viewRectangle(Viewport self, double depth)"""
+        return _robotsim.Viewport_viewRectangle(self, depth)
+
+    def project(self, pt: Point) ->None:
+        r"""project(Viewport self, double const [3] pt)"""
+        return _robotsim.Viewport_project(self, pt)
+
+    def clickSource(self, x: float, y: float) ->None:
+        r"""clickSource(Viewport self, double x, double y)"""
+        return _robotsim.Viewport_clickSource(self, x, y)
+
+    def clickDirection(self, x: float, y: float) ->None:
+        r"""clickDirection(Viewport self, double x, double y)"""
+        return _robotsim.Viewport_clickDirection(self, x, y)
+    perspective = property(_robotsim.Viewport_perspective_get, _robotsim.Viewport_perspective_set, doc=r"""perspective : bool""")
+    x = property(_robotsim.Viewport_x_get, _robotsim.Viewport_x_set, doc=r"""x : int""")
+    y = property(_robotsim.Viewport_y_get, _robotsim.Viewport_y_set, doc=r"""y : int""")
+    w = property(_robotsim.Viewport_w_get, _robotsim.Viewport_w_set, doc=r"""w : int""")
+    h = property(_robotsim.Viewport_h_get, _robotsim.Viewport_h_set, doc=r"""h : int""")
+    n = property(_robotsim.Viewport_n_get, _robotsim.Viewport_n_set, doc=r"""n : double""")
+    f = property(_robotsim.Viewport_f_get, _robotsim.Viewport_f_set, doc=r"""f : double""")
+    fx = property(_robotsim.Viewport_fx_get, _robotsim.Viewport_fx_set, doc=r"""fx : double""")
+    fy = property(_robotsim.Viewport_fy_get, _robotsim.Viewport_fy_set, doc=r"""fy : double""")
+    cx = property(_robotsim.Viewport_cx_get, _robotsim.Viewport_cx_set, doc=r"""cx : double""")
+    cy = property(_robotsim.Viewport_cy_get, _robotsim.Viewport_cy_set, doc=r"""cy : double""")
+    xform = property(_robotsim.Viewport_xform_get, _robotsim.Viewport_xform_set, doc=r"""xform : std::vector<(double,std::allocator<(double)>)>""")
+    ori = property(_robotsim.Viewport_ori_get, _robotsim.Viewport_ori_set, doc=r"""ori : std::string""")
+
+    def setClippingPlanes(self, cp):
+        """Provided for backwards compatibility"""
+        import warnings
+        warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
+        self.n, self.f = cp
+
+    def getClippingPlanes(self):
+        """Provided for backwards compatibility"""
+        import warnings
+        warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
+        return (self.n, self.f)
+
+    fov = property(getFOV, setFOV)
+    """Convenience accessor for the field of view, in radians."""
+
+    clippingPlanes = property(getClippingPlanes, setClippingPlanes)
+    """Klampt 0.9 backwards compatibility accessor for the (n, f) pair."""
+
+
+    def __init__(self):
+        r"""__init__(Viewport self) -> Viewport"""
+        _robotsim.Viewport_swiginit(self, _robotsim.new_Viewport())
+    __swig_destroy__ = _robotsim.delete_Viewport
+
+# Register Viewport in _robotsim:
+_robotsim.Viewport_swigregister(Viewport)
+
 class Mass(object):
     r"""
 
@@ -3850,6 +4440,10 @@ class Mass(object):
 
         Recommended to use the set/get functions rather than changing the members
         directly due to strangeness in SWIG's handling of vectors.
+     .. note:  
+
+        The inertia matrix is specified in the local frame of the object
+        and centered at the center of mass.
      Attributes:  
 
         mass (float): the actual mass (typically in kg)
@@ -3935,7 +4529,9 @@ class Mass(object):
     inertia = property(_robotsim.Mass_inertia_get, _robotsim.Mass_inertia_set, doc=r"""inertia : std::vector<(double,std::allocator<(double)>)>""")
 
     com = property(getCom, setCom)
+    """The object's center of mass in local coordinates (3-list)"""
     inertia = property(getInertia, setInertia)
+    """The object's inertia in local coordinates (9-list)"""
 
     __swig_destroy__ = _robotsim.delete_Mass
 
@@ -4557,10 +5153,10 @@ class RobotModelLink(object):
     name = property(getName, setName)
     parent = property(getParent, setParent)
     mass = property(getMass, setMass)
-    parentTransform = property(getParentTransform, setParentTransform)
+    parentTransform = property(getParentTransform)
     axis = property(getAxis,setAxis)
     prismatic = property(isPrismatic,setPrismatic)
-    transform = property(getTransform,setTransform)
+    transform = property(getTransform)
 
     __swig_destroy__ = _robotsim.delete_RobotModelLink
 
@@ -5700,6 +6296,12 @@ class RigidObjectModel(object):
     world = property(_robotsim.RigidObjectModel_world_get, _robotsim.RigidObjectModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.RigidObjectModel_index_get, _robotsim.RigidObjectModel_index_set, doc=r"""index : int""")
     object = property(_robotsim.RigidObjectModel_object_get, _robotsim.RigidObjectModel_object_set, doc=r"""object : p.Klampt::RigidObjectModel""")
+
+    name = property(getName, setName)
+    id = property(getID)
+    mass = property(getMass, setMass)
+    transform = property(getTransform)
+
     __swig_destroy__ = _robotsim.delete_RigidObjectModel
 
 # Register RigidObjectModel in _robotsim:
@@ -5805,6 +6407,10 @@ class TerrainModel(object):
     world = property(_robotsim.TerrainModel_world_get, _robotsim.TerrainModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.TerrainModel_index_get, _robotsim.TerrainModel_index_set, doc=r"""index : int""")
     terrain = property(_robotsim.TerrainModel_terrain_get, _robotsim.TerrainModel_terrain_set, doc=r"""terrain : p.Klampt::TerrainModel""")
+
+    name = property(getName, setName)
+    id = property(getID)
+
     __swig_destroy__ = _robotsim.delete_TerrainModel
 
 # Register TerrainModel in _robotsim:
@@ -6126,7 +6732,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6909,7 +7515,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7200,7 +7806,7 @@ class SimRobotSensor(object):
 
 
         Args:
-            link (:class:`~klampt.RobotModelLink` or int): 
+            link (int or :class:`~klampt.RobotModelLink`): 
         """
         return _robotsim.SimRobotSensor_setLink(self, *args)
 
@@ -7723,7 +8329,8 @@ class SimBody(object):
 
         The transform of the body is centered at the *object's center of mass*
         rather than the object's reference frame given in the RobotModelLink or
-        RigidObjectModel.
+        RigidObjectModel.  The object's reference frame is retrieved/set by
+        getObjectTransform()/setObjectTransform().
 
 
     C++ includes: robotsim.h
@@ -7794,7 +8401,7 @@ class SimBody(object):
         """
         return _robotsim.SimBody_applyForceAtPoint(self, f, pworld)
 
-    def applyForceAtLocalPoint(self, f: Point, plocal: Point) ->None:
+    def applyForceAtCOMLocalPoint(self, f: Point, plocal: Point) ->None:
         r"""
         Applies a force at a given point (in local center-of-mass-centered coordinates)
         over the duration of the next Simulator.simulate(t) call.  
@@ -7803,7 +8410,28 @@ class SimBody(object):
             f (:obj:`list of 3 floats`)
             plocal (:obj:`list of 3 floats`)
         """
-        return _robotsim.SimBody_applyForceAtLocalPoint(self, f, plocal)
+        return _robotsim.SimBody_applyForceAtCOMLocalPoint(self, f, plocal)
+
+    def applyForceAtObjectLocalPoint(self, f: Point, plocal: Point) ->None:
+        r"""
+        Applies a force at a given point (in local object-centered coordinates) over the
+        duration of the next Simulator.simulate(t) call.  
+
+        Args:
+            f (:obj:`list of 3 floats`)
+            plocal (:obj:`list of 3 floats`)
+        """
+        return _robotsim.SimBody_applyForceAtObjectLocalPoint(self, f, plocal)
+
+    def applyForceAtLocalPoint(self, f: Point, plocal_com: Point) ->None:
+        r"""
+        Deprecated: use applyForceAtCOMLocalPoint instead to match old behavior.  
+
+        Args:
+            f (:obj:`list of 3 floats`)
+            plocal_com (:obj:`list of 3 floats`)
+        """
+        return _robotsim.SimBody_applyForceAtLocalPoint(self, f, plocal_com)
 
     def setTransform(self, R: Rotation, t: Point) ->None:
         r"""
@@ -7845,8 +8473,8 @@ class SimBody(object):
 
     def setVelocity(self, w: Point, v: Point) ->None:
         r"""
-        Sets the angular velocity and translational velocity at the current simulation
-        time step.  
+        Sets the angular velocity and translational velocity (of the COM) at the current
+        simulation time step.  
 
         Args:
             w (:obj:`list of 3 floats`)
@@ -7856,10 +8484,28 @@ class SimBody(object):
 
     def getVelocity(self) ->None:
         r"""
-        Returns the angular velocity and translational velocity.  
+        Returns the angular velocity and translational velocity (of the COM)  
 
         """
         return _robotsim.SimBody_getVelocity(self)
+
+    def setObjectVelocity(self, w: Point, v: Point) ->None:
+        r"""
+        Sets the angular velocity and translational velocity (of the object origin) at
+        the current simulation time step.  
+
+        Args:
+            w (:obj:`list of 3 floats`)
+            v (:obj:`list of 3 floats`)
+        """
+        return _robotsim.SimBody_setObjectVelocity(self, w, v)
+
+    def getObjectVelocity(self) ->None:
+        r"""
+        Returns the angular velocity and translational velocity (of the object origin)  
+
+        """
+        return _robotsim.SimBody_getObjectVelocity(self)
 
     def setCollisionPadding(self, padding: float) ->None:
         r"""
@@ -7929,7 +8575,8 @@ class SimBody(object):
 
             The transform of the body is centered at the *object's center of mass*
             rather than the object's reference frame given in the RobotModelLink or
-            RigidObjectModel.
+            RigidObjectModel.  The object's reference frame is retrieved/set by
+            getObjectTransform()/setObjectTransform().
 
 
         C++ includes: robotsim.h
@@ -8219,16 +8866,6 @@ class Simulator(object):
             robot (int)
         """
         return _robotsim.Simulator_getActualTorque(self, robot)
-
-    def getActualTorques(self, robot: int) ->None:
-        r"""
-        Deprecated: renamed to getActualTorque to be consistent with SimRobotController
-        methods.  
-
-        Args:
-            robot (int)
-        """
-        return _robotsim.Simulator_getActualTorques(self, robot)
 
     def enableContactFeedback(self, obj1: int, obj2: int) ->None:
         r"""
@@ -8941,33 +9578,6 @@ def _deprecated_func(oldName,newName):
         return f(*args,**kwargs)
     depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
     setattr(mod,oldName,depf)
-
-_deprecated_func('SubscribeToStream','subscribe_to_stream')
-_deprecated_func('DetachFromStream','detach_from_stream')
-_deprecated_func('ProcessStreams','process_streams')
-_deprecated_func('WaitForStream','wait_for_stream')
-_deprecated_func('ThreeJSGetScene','threejs_get_scene')
-_deprecated_func('ThreeJSGetTransforms','threejs_get_transforms')
-_deprecated_func('setFrictionConeApproximationEdges','set_friction_cone_approximation_edges')
-_deprecated_func('forceClosure','force_closure')
-_deprecated_func('forceClosure2D','force_closure_2d')
-_deprecated_func('comEquilibrium','com_equilibrium')
-_deprecated_func('comEquilibrium2D','com_equilibrium_2d')
-_deprecated_func('supportPolygon','support_polygon')
-_deprecated_func('supportPolygon2D','support_polygon_2d')
-_deprecated_func('equilibriumTorques','equilibrium_torques')
-_deprecated_func('setRandomSeed','set_random_seed')
-
-def SampleTransform(obj):
-    """Deprecated.  Use ``obj.sampleTransform()`` instead.
-
-    Args:
-        obj (IKObjective or GeneralizedIKObjective)
-
-    Returns:
-        klampt se3 element.
-    """
-    return obj.sampleTransform()
 
 
 
