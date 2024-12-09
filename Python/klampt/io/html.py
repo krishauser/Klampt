@@ -103,7 +103,7 @@ class HTMLSharePath:
             self.sim = None
             self.world = world
         if self.world is not None:
-            self.scene = robotsim.ThreeJSGetScene(self.world)
+            self.scene = robotsim.threejs_get_scene(self.world)
     def animate(self,time=None,rpc=None):
         """Updates the path from the world.  If the world wasn't a simulator, the time
         argument needs to be provided.
@@ -127,7 +127,7 @@ class HTMLSharePath:
         while dt >= self.dt:
             numadd += 1
             if self.world is not None:
-                transforms = json.loads(robotsim.ThreeJSGetTransforms(self.world))
+                transforms = json.loads(robotsim.threejs_get_transforms(self.world))
             else:
                 transforms = {'object':[]}
             for update in transforms['object']:
