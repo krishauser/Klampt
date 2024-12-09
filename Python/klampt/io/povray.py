@@ -271,18 +271,17 @@ def to_povray(vis,world,properties={}):
     patch_vapory()
     
     #camera
-    mat=vis.view.camera.matrix()
+    mat=vis.view.controller.matrix()
     pos=mat[1]
     right=mat[0][0:3]
     up=mat[0][3:6]
     dir=op.mul(mat[0][6:9],-1)
     tgt=op.add(mat[1],dir)
     #scale
-    fovy=vis.view.fov*vis.view.h/vis.view.w
-    fovx=math.atan(vis.view.w*math.tan(fovy*math.pi/360.)/vis.view.h)*360./math.pi
+    fovx = 2.0*vis.view.fx/vis.view.w
     right=op.mul(right,-float(vis.view.w)/vis.view.h)
     #camera
-    camera_params=['orthographic' if vis.view.orthogonal else 'perspective',
+    camera_params=['orthographic' if not vis.view.perspective else 'perspective',
                    'location',[pos[0],pos[1],pos[2]],
                    'look_at',[tgt[0],tgt[1],tgt[2]],
                    'right',[right[0],right[1],right[2]],
