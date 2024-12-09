@@ -1,7 +1,7 @@
 __all__ = ['WorldModel','RobotModel','RobotModelLink','RigidObjectModel','TerrainModel','Mass','ContactParameters',
            'SimRobotController','SimRobotSensor','SimBody','SimJoint','Simulator',
            'Geometry3D','Appearance','DistanceQuerySettings','DistanceQueryResult','ContactQueryResult',
-           'TriangleMesh','PointCloud','GeometricPrimitive','ConvexHull','VolumeGrid',
+           'TriangleMesh','PointCloud','GeometricPrimitive','ConvexHull','VolumeGrid','Heightmap',
            'IKObjective','IKSolver','GeneralizedIKObjective','GeneralizedIKSolver',
            'model','io','plan','sim','vis','control']
 
