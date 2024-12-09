@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include "viewport.h"
 
 /** @file geometry.h
  * @brief C++ bindings for geometry modeling. */
@@ -281,7 +282,6 @@ struct PointCloud
   void setRGBDImages_b_f(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,float* np_depth2,int m2,int n2,double depth_scale);
   ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are an h x w x 3 array, top to bottom.
   void setRGBDImages_b_s(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,unsigned short* np_depth2,int m2,int n2,double depth_scale);
-  
 
   std::vector<double> vertices;
   std::vector<std::string> propertyNames;
@@ -337,7 +337,7 @@ struct GeometricPrimitive
  *         (xmin,ymin,zmin),(xmax,ymax,zmax)
  *     dims (SWIG vector of  of 3 ints): size of grid in each of 3 dimensions
  *     values (SWIG vector of doubles): contains a 3D array of
- *          ``dims[0]*dims[1]*dims[1]`` values. 
+ *          ``dims[0]*dims[1]*dims[2]`` values. 
  * 
  *          The cell index (i,j,k) is flattened to
  *          ``i*dims[1]*dims[2] + j*dims[2] + k``.
@@ -350,7 +350,9 @@ class VolumeGrid
 {
 public:
   VolumeGrid();
+  /// Sets the min / max bounds for this volume 
   void setBounds(const double bmin[3],const double bmax[3]);
+  /// Resizes the x, y, and z dimensions of the grid 
   void resize(int sx,int sy,int sz);
   ///Sets all elements to a uniform value (e.g., 0)
   void set(double value);
@@ -358,7 +360,10 @@ public:
   void set(int i,int j,int k,double value);
   ///Gets a specific element of a cell
   double get(int i,int j,int k);
+  ///Shifts the value uniformly 
   void shift(double dv);
+  ///Scales the value uniformly 
+  void scale(double cv);
   ///Returns a 3D Numpy array view of the values
   void getValues(double** np_view3, int* m, int* n, int* p);
   ///Sets the values to a 3D numpy array
@@ -367,6 +372,144 @@ public:
   std::vector<double> bbox; 
   std::vector<int> dims;
   std::vector<double> values; 
+};
+
+/** @brief A height (elevation) map or a depth map.
+ * 
+ * In elevation-map form (viewport.perspective=false), the values are the
+ * z-height of the terrain at each grid point.  In depth-map form
+ * (viewport.perspective=true), the values are the depths of each
+ * grid point (not distance) from the origin in the +z direction.
+ * 
+ * Note that unlike VolumeGrid types, each grid entry is defined at a
+ * vertex, not a cell.  The (i,j) cell is associated with the vertex
+ * ((i+0.5-cx)/fx,(j+0.5-cy)/fy,heights[i,j]) in elevation map
+ * mode. 
+ *
+ * Attributes:
+ *
+ *     viewport (Viewport): contains the size (w,h), projection (perspective)
+ *          intrinsics (fx,fy,cx,cy), and pose (pose) of the heightmap
+ *          reference coordinate system.
+ *     heights (SWIG vector of floats): contains a 2D array of
+ *          ``dims[0]*dims[1]`` values from the bottom left to the upper
+ *          right (row major, i.e., x order, then y order). 
+ * 
+ *          The vertex index (i,j) is flattened to
+ *          ``i*dims[1] + j``.
+ *
+ *          The array index i is associated to vertex index
+ *          ``(i/dims[1], i % dims[0])``
+ * 
+ *      colors (SWIG vector of floats): contains a 2D array of colors in
+ *          grayscale (w*h), RGB (3*w*h), or RGBA (4*w*h) form.  The layout
+ *          is row major in the space (i,j,channel), i.e., the index of
+ *          (i,j,channel) is ``i*h*C + j*C + channel`` where C is 1, 3, or 4.
+ * 
+ *      properties (SWIG vector of floats): contains a 3D array of properties
+ *          (w*h*p) where p is the number of properties.  p matches the length
+ *         of propertyNames.  Layout is row-major with (property, i, j), i.e., p order,
+ *         w order, then h order.  Property p at index (i,j) is flattened to 
+ *        ``p*w*h + i*h + j``.
+ * 
+ *      propertyNames (SWIG vector of strings): A list of the p property names.
+ */
+class Heightmap
+{
+public:
+  Heightmap();
+  /// Resizes the height map 
+  void resize(int w,int h);
+  ///Sets an orthographic projection (elevation map) with the given width and height
+  void setSize(double width, double height);
+  /// Sets an perspective projection (depth map) with the given x and y fields of view 
+  /// and centered focal point.  If fovy=-1, then it will be set so that pixels
+  /// are square.
+  void setFOV(double fovx,double fovy=-1);
+  /// Sets an perspective projection (depth map) with the given intrinsics fx, fy, cx, cy.
+  /// If cx or cy are negative, then cx = (w-1)/2, cy = (h-1)/2.
+  void setIntrinsics(double fx,double fy,double cx=-1,double cy=-1);
+  ///Sets all elements to a uniform value (e.g., 0)
+  void set(double value);
+  ///Sets the height of a vertex
+  void set(int i,int j,double value);
+  ///Gets the height of a vertex
+  double get(int i,int j);
+  /// Shifts the height uniformly 
+  void shift(double dh);
+  /// Scales the height uniformly 
+  void scale(double c);
+  ///Returns a 2D Numpy array view of the values of size (w x h)
+  ///PROBLEM: numpy stores in row-major order i*h + j
+  void getHeights(double** np_view2, int* m, int* n);
+  ///Sets the values to 2D numpy array of size (w x h)
+  void setHeights(double* np_array2, int m, int n);
+  ///Sets values to an image with size (h x w) with rows ordered top to bottom
+  void setHeightImage_d(double* np_array2,int m,int n,double height_scale=1);
+  ///Sets values to an image with size (h x w) with rows ordered top to bottom
+  void setHeightImage_f(float* np_array2,int m,int n,double height_scale=1);
+  ///Sets values to an image with size (h x w) with rows ordered top to bottom
+  void setHeightImage_s(unsigned short* np_array2,int m,int n,double height_scale=1);
+  ///Sets values to an image with size (h x w) with rows ordered top to bottom
+  void setHeightImage_b(unsigned char* np_array2,int m,int n,double height_scale=1);
+  // ///Gets values as an image with size (h x w) with rows ordered top to bottom.  No scaling performed.
+  // void getHeightImage_d(double** np_out2,int* m,int* n);
+  // ///Sets values to an image with size (h x w) with rows ordered top to bottom.  No scaling performed.
+  // void getHeightImage_f(float** np_out2,int* m,int* n);
+  // ///Sets values to an image with size (h x w) with rows ordered top to bottom.  Values are scaled to [0,2^16)
+  // void getHeightImage_s(unsigned short** np_out2,int* m,int* n);
+  // ///Sets values to an image with size (h x w) with rows ordered top to bottom.  Values are scaled to [0,2^8)
+  // void getHeightImage_b(unsigned char** np_out2,int* m,int* n);
+  ///Erases all colors
+  void clearColors();
+  ///Sets a uniform grayscale color.  Call this first if you want to start setting colors.
+  void setColor(double intensity);
+  ///Sets a uniform color.  Call this first if you want to start setting colors.
+  void setColor(const double rgba[4]);
+  ///Gets the grayscale color of a cell
+  void setColor(int i,int j,double intensity);
+  ///Gets the RGBA color of a cell
+  void setColor(int i,int j,const double rgba[4]);
+  ///Gets the RGBA color of a cell
+  void getColor(int i,int j,double out[4]);
+  ///Returns a 3D Numpy array view of the colors (w x h x 1, 3, or 4)
+  void getColors(double** np_view3, int* m, int* n, int* p);
+  ///Sets the values to a 3D numpy array (w x h x 1, 3, or 4)
+  void setColors(double* np_array3, int m, int n, int p);
+  /// Sets colors to a 32-bit RGBA image (size h x w) with rows ordered top to bottom
+  void setColorImage_i(unsigned int* np_array2, int m, int n);
+  /// Sets colors to a 24-bit RGB image (size h x w x 3) with rows ordered top to bottom
+  void setColorImage_b3(unsigned char* np_array3, int m, int n, int p);
+  /// Sets colors to an 8-bit grayscale image (size h x w) with rows ordered top to bottom
+  void setColorImage_b(unsigned char* np_array2, int m, int n);
+  // /// Retrieves a 32-bit RGBA image of the heightmap's colors (h x w)
+  // void getColorImage_i(unsigned int** np_out2, int* m, int* n);
+  // /// Retrieves a 24-bit RGB image of the heightmap's colors
+  // void getColorImage_b(unsigned char** np_out2, int* m, int* n, int* p);
+  // /// Retrieves an 8-bit grayscale image of the heightmap's colors (h x w) (only if colors are indeed grayscale)
+  // void getColorImage_gray_b(unsigned char** np_out2, int* m, int* n);
+  /// Adds a new property and sets it to 0
+  void addProperty(const std::string& pname);
+  /// Adds a new property and sets it to an array of size (w x h)
+  void addProperty(const std::string& pname,double* np_array2,int m,int n);
+  /// Sets an individual pixel's property vector 
+  void setProperty(int i,int j,double* np_array,int m);
+  /// Retrieves an individual pixel's property vector 
+  void getProperty(int i,int j,double** np_out,int* m);
+  /// Sets a property to an array of size (w x h)
+  void setProperties(int pindex,double* np_array2,int m,int n);
+  /// Retrieves a view of the property of size (w x h)
+  void getProperties(int pindex,double** np_out2,int* m,int* n);
+  /// Sets a property to an image of size (h x w) with rows ordered top to bottom
+  void setPropertyImage(int pindex,double* np_array2,int m,int n);
+  /// Retrieves a property as an image of size (h x w) with rows ordered top to bottom
+  //void getPropertyImage(int pindex,double** np_out2,int* m,int* n);
+
+  Viewport viewport;
+  std::vector<double> heights; 
+  std::vector<double> colors;
+  std::vector<std::string> propertyNames;
+  std::vector<double> properties;
 };
 
 /** @brief Configures the _ext distance queries of
@@ -463,14 +606,19 @@ public:
 
 /** @brief The three-D geometry container used throughout Klampt.  
  *
- * There are five currently supported types of geometry:
+ * There are eight currently supported types of geometry:
  *
  * - primitives (:class:`GeometricPrimitive`)
+ * - convex hulls (:class:`ConvexHull`)
  * - triangle meshes (:class:`TriangleMesh`)
  * - point clouds (:class:`PointCloud`)
- * - volumetric grids (:class:`VolumeGrid`)
+ * - implicit surfaces (name "ImplicitSurface", data :class:`VolumeGrid`)
+ * - occupancy grids (name "OccupancyGrid", data :class:`VolumeGrid`)
+ * - heightmaps (:class:`Heightmap`)
  * - groups ("Group" type)
- * - convex hulls (:class:`ConvexHull`)
+ * 
+ * For now we also support the "VolumeGrid" identifier which is treated
+ * as an alias for "ImplicitSurface"
  * 
  * This class acts as a uniform container of all of these types.
  *
@@ -546,8 +694,8 @@ public:
  * **Conversions**
  *
  * Many geometry types can be converted to and from one another using the
- * :meth:`convert` method.  This can also be used to remesh TriangleMesh
- * objects and PointCloud objects.
+ * :meth:`convert` method.  This can also be used to remesh TriangleMesh,
+ * PointCloud, ImplicitSurface, OccupancyGrid, and Heightmap objects.
  *
  */
 class Geometry3D
@@ -560,10 +708,9 @@ class Geometry3D
   Geometry3D(const TriangleMesh&);
   Geometry3D(const PointCloud&);
   Geometry3D(const VolumeGrid&);
+  Geometry3D(const Heightmap&);
   ~Geometry3D();
   const Geometry3D& operator = (const Geometry3D& rhs);
-  ///Creates a standalone geometry from this geometry (identical to copy... will be deprecated in a future version)
-  Geometry3D clone();
   ///Creates a standalone geometry from this geometry
   Geometry3D copy();
   ///Copies the geometry of the argument into this geometry.
@@ -572,8 +719,8 @@ class Geometry3D
   bool isStandalone();
   ///Frees the data associated with this geometry, if standalone 
   void free();
-  ///Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, 
-  ///GeometricPrimitive, or Group
+  ///Returns the type of geometry: GeometricPrimitive, ConvexHull, TriangleMesh,
+  ///PointCloud, ImplicitSurface, OccupancyGrid, Heightmap, or Group
   std::string type();
   ///Returns True if this has no contents (not the same as numElements()==0)
   bool empty();
@@ -585,8 +732,15 @@ class Geometry3D
   GeometricPrimitive getGeometricPrimitive();
   ///Returns a ConvexHull if this geometry is of type ConvexHull
   ConvexHull getConvexHull();
-  ///Returns a VolumeGrid if this geometry is of type VolumeGrid
+  ///Returns a VolumeGrid if this geometry is of type ImplicitSurface or OccupancyGrid
   VolumeGrid getVolumeGrid();
+  ///Returns the VolumeGrid if this geometry is of type ImplicitSurface
+  VolumeGrid getImplicitSurface();
+  ///Returns the VolumeGrid if this geometry is of type OccupancyGrid
+  VolumeGrid getOccupancyGrid();
+  ///Returns the Heightmap if this geometry is of type Heightmap
+  Heightmap getHeightmap();
+  
   ///Sets this Geometry3D to a TriangleMesh
   void setTriangleMesh(const TriangleMesh&);
   ///Sets this Geometry3D to a PointCloud
@@ -599,8 +753,14 @@ class Geometry3D
   ///transform of these two objects is frozen in place; i.e., setting the current
   ///transform of g2 doesn't do anything to this object.
   void setConvexHullGroup(const Geometry3D& g1, const Geometry3D & g2);
-  ///Sets this Geometry3D to a volumeGrid
+  ///Sets this Geometry3D to an ImplicitSurface.  Will be deprecated soon.
   void setVolumeGrid(const VolumeGrid&);
+  ///Sets this Geometry3D to an ImplicitSurface.
+  void setImplicitSurface(const VolumeGrid& vg);
+  ///Sets this Geometry3D to an OccupancyGrid.
+  void setOccupancyGrid(const VolumeGrid& vg);
+  ///Sets this Geometry3D to a Heightmap.
+  void setHeightmap(const Heightmap& hm);
   ///Sets this Geometry3D to a group geometry.  To add sub-geometries, 
   ///repeatedly call setElement() with increasing indices.
   void setGroup();
@@ -873,17 +1033,14 @@ class Geometry3D
   ///Merges another geometry into this geometry.  The result is stored
   ///inplace and the type of the result is the same as this geometry.  This can be used
   ///to calculate the union of PointClouds, TriangleMeshes, ConvexPolytopes, and
-  ///VolumeGrids. 
+  ///ImplicitSurfaces, OccupancyGrids, and Heightmaps. 
   ///
-  ///VolumeGrid merges preserve the domain of the current volume grid.  They can also
-  ///be merged with GeometricPrimitives, PointClouds, TriangleMeshes, and
-  ///ConvexPolytopes, in which case the output is either an occupancy grid, signed
-  ///distance field (SDF), or TSDF (TSDF) according to the `representation` argument.
-  ///Valid values are "auto" (="sdf"), "occupancy", "sdf", and "tsdf".
+  ///ImplicitSurface, OccupancyGrid, and Heightmap merges preserve the domain of the
+  ///current grid.  They can also be merged with many other geometries.
   ///
-  ///In the TSDF case, the truncation value is either `threshold`, or if `threshold`=0,
-  ///the current range of the existing TSDF is used. 
-  void merge(const Geometry3D& other,const char* representation="auto",double threshold=0);
+  ///In the ImplicitSurface case, a truncation value can be set via `threshold`.  This
+  ///performs a TSDF-style merge
+  void merge(const Geometry3D& other,double threshold=0);
 
   int world;
   int id;
