@@ -85,12 +85,11 @@ class GLProgram:
         if self.window:
             return self.window.reshape(w,h)
         else:
-            self.view.w,self.view.h = w,h
+            self.view.resize(w,h)
 
     def reshapefunc(self,w,h):
         """Called on window resize.  May be overridden."""
-        self.view.w = w
-        self.view.h = h
+        self.view.resize(w,h)
         self.refresh()
         return True
 
@@ -200,53 +199,7 @@ class GLProgram:
 
     def get_screen(self,format='auto',want_depth=False):
         """Retrieves a screenshot"""
-        if hasattr(self.window,'makeCurrent'):
-            self.window.makeCurrent()
-        GL.glReadBuffer(GL.GL_FRONT);
-        x,y,w,h = self.view.x*self.view.screenDeviceScale,self.view.y*self.view.screenDeviceScale,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale
-        screenshot = GL.glReadPixels( x, y, w, h, GL.GL_RGB, GL.GL_UNSIGNED_BYTE)
-        if format == 'auto':
-            try:
-                import numpy as np
-                format = 'numpy'
-            except ImportError:
-                try:
-                    from PIL import Image
-                    format = 'Image'
-                except ImportError:
-                    format = 'bytes'
-        if format == 'numpy':
-            import numpy as np
-            rgb = np.frombuffer(screenshot,dtype=np.uint8).reshape((h,w,3))
-            rgb = np.flip(rgb,0)
-        elif format == 'Image':
-            from PIL import Image
-            rgb = Image.frombuffer("RGB", (w, h), screenshot, "raw", "RGB", 0, 0)
-            rgb = rgb.transpose(Image.FLIP_TOP_BOTTOM)
-        else:
-            rgb = (w,h,screenshot)
-        if want_depth:
-            n,f = self.view.clippingplanes
-            depthdata = GL.glReadPixels( x, y, w, h, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)
-            if format == 'numpy':
-                import numpy as np
-                depth = np.frombuffer(depthdata,dtype=np.float32).reshape((h,w))
-                depth = np.flip(depth,0)
-                depth = (n*f)/(f - depth*(f-n))
-            elif format == 'Image':
-                from PIL import Image,ImageMath
-                depth = Image.frombuffer("F", (w, h), depthdata, "raw", "F", 0, 0)
-                depth = depth.transpose(Image.FLIP_TOP_BOTTOM)
-                depth = ImageMath.eval("%f / (%f - a*%f)"%(n*f,f,f-n),a=depth)
-            else:
-                import struct
-                deptharray = [struct.unpack("<f",depthdata[i:i+4]) for i in range(0,w*h*4,4)] 
-                for i in range(w*h):
-                    deptharray[i] = n*f/(f - deptharray[i]*(f-n))
-                depth = (w,h,deptharray)
-            return (rgb,depth)
-        else:
-            return rgb
+        return self.window.get_screen(format,want_depth)
 
     def save_screen(self,fn,multithreaded=True):
         """Saves a screenshot"""
@@ -268,7 +221,6 @@ class GLProgram:
                 im.save(fn)
             th = threading.Thread(target=func,args=(im,fn))
             th.start()
-
 
     def draw_text(self,point,text,size=12,color=None):
         self.window.draw_text(point,text,size,color)
@@ -321,17 +273,16 @@ class GLNavigationProgram(GLProgram):
     def motionfunc(self,x,y,dx,dy):
         if self.dragging:
             if 'ctrl' in self.modifiers():
-                R,t = self.view.camera.matrix()
-                aspect = float(self.view.w)/self.view.h
-                rfov = math.radians(self.view.fov)
-                scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
-                delta = so3.apply(R,[-scale*float(dx)*self.view.camera.dist/self.view.w,scale*float(dy)*self.view.camera.dist/self.view.w,0])
-                self.view.camera.tgt = vectorops.add(self.view.camera.tgt,delta)
+                R,t = self.view.controller.matrix()
+                xscale = 1.0/self.view.fx
+                yscale = 1.0/self.view.fy
+                delta = so3.apply(R,[-xscale*float(dx)*self.view.controller.dist,yscale*float(dy)*self.view.controller.dist,0])
+                self.view.controller.tgt = vectorops.add(self.view.controller.tgt,delta)
             elif 'shift' in self.modifiers():
-                self.view.camera.dist *= math.exp(dy*0.01)
+                self.view.controller.dist *= math.exp(dy*0.01)
             else:
-                self.view.camera.rot[2] -= float(dx)*0.01
-                self.view.camera.rot[1] -= float(dy)*0.01 
+                self.view.controller.rot[2] -= float(dx)*0.01
+                self.view.controller.rot[1] -= float(dy)*0.01
             self.refresh()
             return True
         return False
@@ -346,7 +297,7 @@ class GLNavigationProgram(GLProgram):
         return False
 
     def mousewheelfunc(self,dhorizontal,dvertical,x,y):
-        self.view.camera.dist *= math.exp(dvertical*0.01)
+        self.view.controller.dist *= math.exp(dvertical*0.001)
         self.refresh()
         return True
 
@@ -373,7 +324,6 @@ class GLRealtimeProgram(GLNavigationProgram):
         tcur = time.time()
         tsleep = self.dt - (tcur - self.lasttime)
         if tsleep > 0.001:
-            #print "Elapsed time",tcur-self.lasttime,"sleep",tsleep,"window",self.window.name
             self.idlesleep(tsleep)
             return
         

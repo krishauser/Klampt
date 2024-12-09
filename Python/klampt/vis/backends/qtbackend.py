@@ -12,7 +12,6 @@ if glinit.active() == 'PyQt6':
     Modifier = Qt.KeyboardModifier
     Focus = Qt.FocusPolicy
     Attribute = Qt.ApplicationAttribute
-    QGLWidget = QOpenGLWidget
     PYQT_VERSION = 6
 elif glinit.active() == 'PyQt5':
     from PyQt5 import QtGui
@@ -24,19 +23,13 @@ elif glinit.active() == 'PyQt5':
     Modifier = Qt
     Focus = Qt
     Attribute = Qt
-    QGLWidget = QOpenGLWidget
+
+    #hack needed to get OpenCV working with PyQt5
+    import os
+    from PyQt5.QtCore import QLibraryInfo
+    os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = QLibraryInfo.location(QLibraryInfo.PluginsPath)
+
     PYQT_VERSION = 5
-elif glinit.active() == 'PyQt4':
-    from PyQt4 import QtGui
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
-    from PyQt4.QtOpenGL import *
-    Key = Qt
-    Button = Qt
-    Modifier = Qt
-    Focus = Qt
-    Attribute = Qt
-    PYQT_VERSION = 4
 else:
     raise RuntimeError("Can't load qtbackend without previously initializing with glinit module")
 
@@ -93,7 +86,7 @@ def toModifierList(modifiers):
         res.append('ctrl')
     return res
 
-class QtGLWindow(QGLWidget):
+class QtGLWindow(QOpenGLWidget):
     """A basic OpenGL window using Qt.  Should not be used directly, use
     the functions in QtBackend instead.
 
@@ -110,43 +103,19 @@ class QtGLWindow(QGLWidget):
     reshape_signal = pyqtSignal(int,int)
 
     def __init__(self,name="OpenGL window",parent=None):
-        if PYQT_VERSION == 4:
-            format = QGLFormat()
-            if not format.hasOpenGL():
-                raise RuntimeError("It appears that your system doesn't have OpenGL support?")
-            format.setRgba(True)
-            format.setDoubleBuffer(True)
-            format.setDepth(True)
-            format.setSampleBuffers(True)
-            format.setSamples(4)
-            if not hasattr(QtGLWindow,"_firstWidget"):
-                QtGLWindow._firstWidget = self
-                QGLWidget.__init__(self,format,parent)
-            else:
-                shareWidget = QtGLWindow._firstWidget
-                QGLWidget.__init__(self,format,shareWidget=shareWidget)
-                #self.setContext(self.context(),shareContext=shareWidget.context())
-            if not self.isValid():
-                raise RuntimeError("Unspecified error creating the Qt GLWidget, OpenGL rendering is not supported")
-        else:
-            assert QGLWidget == QOpenGLWidget
-            if not hasattr(QtGLWindow,"_firstWidget"):
-                QOpenGLWidget.__init__(self,parent=parent)
-                QtGLWindow._firstWidget = self.context()
-            else:
-                shareWidget = QtGLWindow._firstWidget
-                QOpenGLWidget.__init__(self,shareContext=shareWidget)
-            format = QtGui.QSurfaceFormat.defaultFormat()
-            if format.depthBufferSize() < 24:
-                format.setDepthBufferSize(24)
-            
-            if PYQT_VERSION == 5:
-                format.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
-            else:
-                format.setSwapBehavior(QtGui.QSurfaceFormat.SwapBehavior.DoubleBuffer)
-            format.setSamples(4)
-            self.setFormat(format)
+        QOpenGLWidget.__init__(self,parent=parent)
+        QtGLWindow._firstWidget = self.context()
+        format = QtGui.QSurfaceFormat.defaultFormat()
+        if format.depthBufferSize() < 24:
+            format.setDepthBufferSize(24)
         
+        if PYQT_VERSION == 5:
+            format.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
+        else:
+            format.setSwapBehavior(QtGui.QSurfaceFormat.SwapBehavior.DoubleBuffer)
+        format.setSamples(4)
+        self.setFormat(format)
+    
         self.name = name
         self.program = None
         self.width = 640
@@ -176,12 +145,67 @@ class QtGLWindow(QGLWidget):
         self.idlesleep_signal.connect(self.do_idlesleep)
         self.refresh_signal.connect(self.do_refresh)
         self.reshape_signal.connect(self.do_reshape)
+        self.painted = False
+        def im_painted():
+            self.painted = True        
+        self.aboutToCompose.connect(im_painted)
 
+    def renderText(self, x:float, y:float, z:float, text:str, font:QtGui.QFont):
+        """Provided for compatibility between PyQt6 and earlier versions"""
+        if PYQT_VERSION >= 5:
+            width = self.width
+            height = self.height
+
+            from OpenGL import arrays
+            model = glGetDoublev(GL_MODELVIEW_MATRIX)
+            proj = glGetDoublev(GL_PROJECTION_MATRIX)
+            view = glGetIntegerv(GL_VIEWPORT)
+            proj = arrays.GLdoubleArray.asArray(proj)
+            model = arrays.GLdoubleArray.asArray(model)
+            model = model.T
+            proj = proj.T
+            
+            (tx,ty,tz) = self.project((x, y, z), 
+                        model, proj, view)
+
+            ty = height - ty#  // y is inverted
+
+            painter = QtGui.QPainter(self)
+            rgba = glGetFloatv(GL_CURRENT_COLOR)
+            col = QtGui.QColor()
+            col.setRgbF(rgba[0], rgba[1], rgba[2], rgba[3])
+            painter.setPen(col)
+            painter.setFont(QtGui.QFont("Helvetica", 8))
+            if PYQT_VERSION == 6:
+                painter.setRenderHints(QtGui.QPainter.RenderHint.Antialiasing | QtGui.QPainter.RenderHint.TextAntialiasing)
+            else:
+                painter.setRenderHints(QtGui.QPainter.Antialiasing | QtGui.QPainter.TextAntialiasing)
+            painter.drawText(int(tx), int(ty), text)
+            painter.end()
+        else:
+            QOpenGLWidget.renderText(self, x, y, z, text, font)
+
+    def project(self,pt, model, proj, view):
+        """Compatibility needed for renderText"""
+        pt = [pt[0],pt[1],pt[2],1.0]
+        pt = proj.dot(model.dot(pt))
+        if pt[3] == 0.0:
+            return pt[:3]
+
+        pt[0] /= pt[3]
+        pt[1] /= pt[3]
+        pt[2] /= pt[3]
+
+        winx = view[0] + (1 + pt[0]) * view[2] / 2
+        winy = view[1] + (1 + pt[1]) * view[3] / 2
+        winz = (1 + pt[2]) / 2
+        return winx,winy,winz
+        
     def setProgram(self,program):
         """User will call this to set up the program variable"""
         from ..glprogram import GLProgram
         assert isinstance(program,GLProgram)
-        print("######### QGLWidget setProgram ###############")
+        print("######### QtGLWindow setProgram ###############")
         if hasattr(program,'name'):
             self.name = program.name
             if self.initialized:
@@ -209,15 +233,15 @@ class QtGLWindow(QGLWidget):
             self.reshape(program.view.w,program.view.h)
 
     def setParent(self,parent=None):
-        QGLWidget.setParent(self,parent)
+        QOpenGLWidget.setParent(self,parent)
         
     def initialize(self):
         """ Opens a window and initializes.  Called internally, and must be in the visualization thread."""
-        assert self.program != None, "QGLWidget initialized without a GLProgram"
+        assert self.program != None, "QtGLWindow initialized without a GLProgram"
         try:
             glEnable(GL_MULTISAMPLE)
         except Exception:
-            print("QGLWidget.initialize(): perhaps Qt didn't initialize properly?")
+            print("QtGLWindow.initialize(): perhaps Qt didn't initialize properly?")
             pass
         self.setMouseTracking(True)
         self.setFocusPolicy(Focus.StrongFocus)
@@ -243,13 +267,13 @@ class QtGLWindow(QGLWidget):
 
     def hide(self):
         """Hides the window, if already shown"""
-        QGLWidget.hide(self)
+        QOpenGLWidget.hide(self)
         if self.initialized:
             self.idlesleep()           
 
     def show(self):
         """Restores from a previous hide call"""
-        QGLWidget.show(self)
+        QOpenGLWidget.show(self)
         if self.initialized:
             #boot it back up again
             self.idlesleep(0)
@@ -260,7 +284,7 @@ class QtGLWindow(QGLWidget):
         any existing Qt callbacks."""
         if not self.initialized:
             return
-        print("######### QGLWidget close ###############")
+        print("######### QtGLWindow close ###############")
         self.idleTimer.stop()
         self.idleTimer.deleteLater()
         self.idleTimer = None
@@ -292,35 +316,78 @@ class QtGLWindow(QGLWidget):
     def sizeHint(self):
         return QSize(self.width,self.height)
 
+    def get_screen(self,format,want_depth):
+        if want_depth:
+            raise NotImplementedError("Depth screenshots not supported in Qt")
+        if PYQT_VERSION == 4:
+            raise NotImplementedError("Screenshots no longer supported in PyQt4 version")
+        import io
+        qimg = self.grabFramebuffer()
+        if format == 'auto':
+            try:
+                import numpy as np
+                format = 'numpy'
+            except ImportError:
+                try:
+                    from PIL import Image
+                    format = 'Image'
+                except ImportError:
+                    format = 'bytes'
+        if format == 'numpy':
+            import numpy as np
+            width = qimg.width()
+            height = qimg.height()
+
+            ptr = qimg.bits()
+            ptr.setsize(height * width * 4)
+            rgb = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
+            return rgb
+        elif format == 'Image':
+            from PIL import Image
+            buffer = QBuffer()
+            if PYQT_VERSION < 6:
+                buffer.open(QBuffer.ReadWrite)
+            else:
+                buffer.open(QBuffer.OpenModeFlag.ReadWrite)
+            qimg.save(buffer, "PNG")
+            pil_im = Image.open(io.BytesIO(buffer.data()))
+            return pil_im
+        else:
+            width = qimg.width()
+            height = qimg.height()
+            return (width,height,qimg.bits().tobytes())
+    
     #QtGLWidget bindings
     def initializeGL(self):
-        print("######### QGLWidget Initialize GL ###############")
+        print("######### QtGLWindow Initialize GL ###############")
         if self.initialized:
-            print("QGLWidget.initializeGL: already initialized?")
+            print("QtGLWindow.initializeGL: already initialized?")
         try:
             self.makeCurrent()
             return self.initialize()
         except Exception as e:
             import traceback
-            print("QGLWidget.initializeGL: hit an exception?")
+            print("QtGLWindow.initializeGL: hit an exception?")
             traceback.print_exc()
             exit(-1)
     def resizeGL(self,w,h): 
         if self.program == None:
-            print("QGLWidget.resizeGL: called after close?")
+            print("QtGLWindow.resizeGL: called after close?")
             return
         if not self.isVisible():
+            print("QtGLWindow.resizeGL: called when invisible?")
             return
         (self.devwidth,self.devheight) = (w,h)
         return
     def paintGL(self):
         if self.program == None:
-            print("QGLWidget.paintGL: called after close?")
+            print("QtGLWindow.paintGL: called after close?")
             return
         if not self.isVisible():
-            print("QGLWidget.paintGL: called while invisible?")
+            print("QtGLWindow.paintGL: called while invisible?")
             return
         if self.inpaint:
+            print("QtGLWindow.paintGL: called in the middle of painting?")
             return
         self.inpaint = True
         self.refreshed = False
@@ -329,7 +396,7 @@ class QtGLWindow(QGLWidget):
             res = self.program.displayfunc()
         except Exception as e:
             import traceback
-            print("QGLWidget.paintGL: hit an exception?")
+            print("QtGLWindow.paintGL: hit an exception?")
             traceback.print_exc()
             exit(-1)
         self.inpaint = False
@@ -337,7 +404,7 @@ class QtGLWindow(QGLWidget):
     #QWidget bindings
     def mouseMoveEvent(self,e):
         if self.program == None:
-            print("QGLWidget.mouseMoveEvent: called after close?")
+            print("QtGLWindow.mouseMoveEvent: called after close?")
             return
         self.modifierList = toModifierList(e.modifiers())
         x,y = e.pos().x(),e.pos().y()
@@ -361,11 +428,11 @@ class QtGLWindow(QGLWidget):
         self.lastx,self.lasty = x,y
         self.program.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
     def wheelEvent(self,e):
-        x,y = e.pos().x(),e.pos().y()
+        #x,y = e.pos().x(),e.pos().y()
         numDegrees = e.angleDelta() / 8
         self.modifierList = toModifierList(e.modifiers())
-        self.lastx,self.lasty = x,y
-        self.program.mousewheelfunc(numDegrees.x(),numDegrees.y(),x,y)
+        #self.lastx,self.lasty = x,y
+        self.program.mousewheelfunc(numDegrees.x(),numDegrees.y(),self.lastx,self.lasty)
     def keyPressEvent(self,e):
         if e.isAutoRepeat():
             return
@@ -405,10 +472,11 @@ class QtGLWindow(QGLWidget):
             self.nextIdleEvent = 0
             self.idleTimer.start(0)
         elif duration == float('inf'):
-            #print "Stopping idle timer",self.name,"forever"
+            #print("Stopping idle timer",self.name,"forever")
             self.idleTimer.stop()
+            self.nextIdleEvent = 1
         else:
-            #print "Stopping idle timer",self.name,duration
+            #print("Delaying idle timer",self.name,duration)
             self.idleTimer.start(int(1000*duration))
             self.nextIdleEvent = duration
 
@@ -420,20 +488,19 @@ class QtGLWindow(QGLWidget):
     @pyqtSlot()
     def do_refresh(self):
         self.makeCurrent()
-        #self.updateGL()
         self.update()
+        self.refreshed = True
 
     def refresh(self):
         """Externally callable. Requests a refresh of the window"""
         if not self.refreshed:
-            self.refreshed = True
             if not self.isVisible():
                 return
             self.refresh_signal.emit()
 
     def resizeEvent(self,event):
         """Called internally by Qt when Qt resizes the window"""
-        QGLWidget.resizeEvent(self,event)
+        QOpenGLWidget.resizeEvent(self,event)
 
         self.width,self.height = (event.size().width(),event.size().height())
         if hasattr(self,'devicePixelRatio'):
@@ -503,7 +570,9 @@ class QtBackend:
             print("QtBackend: initializing app as",program_name)
             #this is needed for some X11 multithreading bug 
             if PYQT_VERSION == 4:
-                QCoreApplication.setAttribute(Attribute.AA_X11InitThreads)
+                QCoreApplication.setAttribute(Attribute.AA_X11InitThreads | Attribute.AA_ShareOpenGLContexts )
+            else:
+                QCoreApplication.setAttribute(Attribute.AA_ShareOpenGLContexts)
             self.app = QApplication([program_name])
 
     def createWindow(self,name,parent=None):

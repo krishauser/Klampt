@@ -175,6 +175,53 @@ class GLUTWindow:
         for c in text:
             glutBitmapCharacter(font, ctypes.c_int( ord(c) ))
 
+    def get_screen(self, format, want_depth):
+        glReadBuffer(GL_FRONT)
+        x,y,w,h = self.program.view.x*self.program.view.screenDeviceScale,self.program.view.y*self.program.view.screenDeviceScale,self.program.view.w*self.program.view.screenDeviceScale,self.program.view.h*self.program.view.screenDeviceScale
+        screenshot = glReadPixels( x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE)
+        if format == 'auto':
+            try:
+                import numpy as np
+                format = 'numpy'
+            except ImportError:
+                try:
+                    from PIL import Image
+                    format = 'Image'
+                except ImportError:
+                    format = 'bytes'
+        if format == 'numpy':
+            import numpy as np
+            rgb = np.frombuffer(screenshot,dtype=np.uint8).reshape((h,w,3))
+            rgb = np.flip(rgb,0)
+        elif format == 'Image':
+            from PIL import Image
+            rgb = Image.frombuffer("RGB", (w, h), screenshot, "raw", "RGB", 0, 0)
+            rgb = rgb.transpose(Image.FLIP_TOP_BOTTOM)
+        else:
+            rgb = (w,h,screenshot)
+        if want_depth:
+            n,f = self.program.view.n,self.program.view.f
+            depthdata = glReadPixels( x, y, w, h, GL_DEPTH_COMPONENT, GL_FLOAT)
+            if format == 'numpy':
+                import numpy as np
+                depth = np.frombuffer(depthdata,dtype=np.float32).reshape((h,w))
+                depth = np.flip(depth,0)
+                depth = (n*f)/(f - depth*(f-n))
+            elif format == 'Image':
+                from PIL import Image,ImageMath
+                depth = Image.frombuffer("F", (w, h), depthdata, "raw", "F", 0, 0)
+                depth = depth.transpose(Image.FLIP_TOP_BOTTOM)
+                depth = ImageMath.eval("%f / (%f - a*%f)"%(n*f,f,f-n),a=depth)
+            else:
+                import struct
+                deptharray = [struct.unpack("<f",depthdata[i:i+4]) for i in range(0,w*h*4,4)] 
+                for i in range(w*h):
+                    deptharray[i] = n*f/(f - deptharray[i]*(f-n))
+                depth = (w,h,deptharray)
+            return (rgb,depth)
+        else:
+            return rgb
+
     def close(self):
         if self.index is not None:
             self._closefunc()

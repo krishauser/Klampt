@@ -149,11 +149,20 @@ class ConfigsEditor(VisualEditorBase):
         return 'Right-click and drag on the robot links to pose the robot.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
 
     def add_dialog_items(self,parent,ui='qt'):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton
+            from PyQt6.QtCore import Qt
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton
+            from PyQt5.QtCore import Qt
         self.indexSpinBox = QSpinBox()
         self.indexSpinBox.setRange(0,len(self.value)-1)
         layout = QHBoxLayout(parent)
         label = QLabel("Index")
-        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        if glinit.active() == 'PyQt6':
+            label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        else:
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(label)
         layout.addWidget(self.indexSpinBox)
         self.insertButton = QPushButton("Insert")
@@ -392,6 +401,13 @@ class TrajectoryEditor(VisualEditorBase):
             return 'Right-click and drag on the poser to set keyframes.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
 
     def add_dialog_items(self,parent,ui='qt'):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox
+            from PyQt6.QtCore import Qt
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox
+            from PyQt5.QtCore import Qt
+
         vlayout = QVBoxLayout(parent)
         #adding and editing keyframes
         self.indexSpinBox = QSpinBox()
@@ -411,11 +427,17 @@ class TrajectoryEditor(VisualEditorBase):
         layout = QHBoxLayout()
         vlayout.addLayout(layout)
         label = QLabel("Index")
-        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        if glinit.active() == 'PyQt6':
+            label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        else:
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(label)
         layout.addWidget(self.indexSpinBox)
         label = QLabel("Duration")
-        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        if glinit.active() == 'PyQt6':
+            label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        else:
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(label)
         layout.addWidget(self.durationSpinBox)
         layout.addWidget(self.insertButton)
@@ -442,13 +464,19 @@ class TrajectoryEditor(VisualEditorBase):
         self.animSelector.currentIndexChanged.connect(self.anim_selector_changed)
 
         label = QLabel("Time")
-        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        if glinit.active() == 'PyQt6':
+            label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        else:
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(label)
         layout.addWidget(self.timeDriver)
         layout.addWidget(self.playButton)
         
         label = QLabel("Interp.")
-        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        if glinit.active() == 'PyQt6':
+            label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        else:
+            label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(label)
         layout.addWidget(self.animSelector)
         self.index_changed(self.editingIndex)
@@ -776,11 +804,21 @@ class SelectionEditor(VisualEditorBase):
         return 'Right-click to toggle selection of robot links / objects in the world.\nKeyboard: < to deselect previous, > to select next'
 
     def add_dialog_items(self,parent,ui='qt'):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox,QListWidget,QAbstractItemView
+            from PyQt6.QtCore import Qt
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox,QListWidget,QAbstractItemView
+            from PyQt5.QtCore import Qt
+
         layout = QHBoxLayout(parent)
         self.clearButton = QPushButton("Clear")
         self.selectAllButton = QPushButton("Select all")
         self.selectionList = QListWidget()
-        self.selectionList.setSelectionMode(QAbstractItemView.MultiSelection)
+        if glinit.active() == 'PyQt6':
+            self.selectionList.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+        else:
+            self.selectionList.setSelectionMode(QAbstractItemView.MultiSelection)
         if self.robot != None:
             for i in range(self.robot.numLinks()):
                 self.selectionList.addItem(self.robot.link(i).getName())
@@ -1328,6 +1366,12 @@ class SensorEditor(RigidTransformEditor):
         return False
     
     def add_dialog_items(self,parent,ui='qt'):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QListWidget,QLineEdit
+            from PyQt6.QtCore import Qt
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QListWidget,QLineEdit
+            from PyQt5.QtCore import Qt
         layout = QHBoxLayout(parent)
         self.selectionList = QListWidget()
         settings = self.value.settings()
@@ -1416,35 +1460,50 @@ class SensorEditor(RigidTransformEditor):
         self.value = sensor
 
 
-#Qt stuff
-global _has_qt
-_has_qt = False
-try:
-    from PyQt5.QtCore import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtWidgets import *
-    _has_qt = True
-except ImportError:
-    try:
-        from PyQt4.QtCore import *
-        from PyQt4.QtGui import *
-        _has_qt = True
-    except ImportError:
-        _has_qt = False
 
-if _has_qt:
-    global _vis_id,_my_dialog_res,_doexit
-    _vis_id = None
-    _my_dialog_res = None
-    _doexit = False
+global _vis_id,_my_dialog_res,_doexit
+_vis_id = None
+_my_dialog_res = None
+_doexit = False
 
+
+def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
+    """
+    Launches a visual editor.
+
+    Args:
+        editorObject (VisualEditorBase): some subclass of VisualEditorBase
+
+    Returns:
+        tuple: A pair (res,value) containing: 
+
+            * res (bool):True / False if OK / Cancel was pressed, respectively, 
+            * value: the return value of the editor object
+
+    """
+    from klampt.vis import glinit
+    if not glinit.active().startswith('PyQt'):
+        raise ValueError("Unable to perform visual editing without Qt")
+    #Import Qt stuff into global namespace
+    if glinit.active() == 'PyQt6':
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtWidgets import QSizePolicy,QDialog,QMessageBox,QDialogButtonBox,QSplitter,QWidget,QFrame,QLabel,QVBoxLayout,QHBoxLayout,QPushButton,QListWidget,QLineEdit
+    elif glinit.active() == 'PyQt5':
+        from PyQt5.QtCore import Qt
+        from PyQt5.QtWidgets import QSizePolicy,QDialog,QMessageBox,QDialogButtonBox,QSplitter,QWidget,QFrame,QLabel,QVBoxLayout,QHBoxLayout,QPushButton,QListWidget,QLineEdit
+    else:
+        raise RuntimeError("Unknown active GUI "+glinit.active())
+    
     class _EditDialog(QDialog):
         def __init__(self,glwidget):
             QDialog.__init__(self)
             self.glwidget = glwidget
             #glwidget.setMinimumSize(glwidget.width,glwidget.height)
             glwidget.setMaximumSize(4000,4000)
-            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+            if glinit.active() == 'PyQt6':
+                glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Maximum,QSizePolicy.Policy.Maximum))
+            else:
+                glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.instructions = QLabel()
             self.description = QLabel()
             self.description2 = QLabel("Press OK to save, Cancel to continue without saving")
@@ -1460,7 +1519,10 @@ if _has_qt:
             self.saveButton.clicked.connect(self.save)
 
             self.extraDialog = QFrame()
-            self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
+            if glinit.active() == 'PyQt6':
+                self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Minimum,QSizePolicy.Policy.Minimum))
+            else:
+                self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
             self.topBoxLayout.addWidget(self.extraDialog)
             self.layout = QVBoxLayout()
             self.layout.addWidget(self.topBox)
@@ -1468,11 +1530,17 @@ if _has_qt:
             self.layout.addWidget(self.description2)
             self.layout.setStretchFactor(glwidget,10)
             #self.layout.setStretchFactor(self.topBox,0)
-            self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
+            if glinit.active() == 'PyQt6':
+                self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,Qt.Orientation.Horizontal, self)
+            else:
+                self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
             self.buttons.accepted.connect(self.accept)
             self.buttons.rejected.connect(self.reject)
             self.layout.addWidget(self.buttons)
-            self.splitter = QSplitter(Qt.Vertical)
+            if glinit.active() == 'PyQt6':
+                self.splitter = QSplitter(Qt.Orientation.Vertical)
+            else:
+                self.splitter = QSplitter(Qt.Vertical)
             top = QWidget(self)
             bottom = QWidget(self)
             top.setLayout(self.topBoxLayout)
@@ -1506,8 +1574,8 @@ if _has_qt:
         def closeEvent(self,event):
             global _doexit
             reply = QMessageBox.question(self, 'Message',
-                 "Are you sure you wish to quit the program?", QMessageBox.Yes | 
-                 QMessageBox.No, QMessageBox.No)
+                    "Are you sure you wish to quit the program?", QMessageBox.Yes | 
+                    QMessageBox.No, QMessageBox.No)
 
             if reply == QMessageBox.Yes:
                 _doexit = True
@@ -1549,66 +1617,39 @@ if _has_qt:
             
 
 
-    def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
-        """
-        Launches a visual editor.
+    assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to vis.editors.run()"
+    global _vis_id, _my_dialog_res
 
-        Args:
-            editorObject (VisualEditorBase): some subclass of VisualEditorBase
+    old_vis_window = visualization.getWindow()
+    if _vis_id is None:
+        _vis_id = visualization.createWindow("Resource Editor")
+    else:
+        visualization.setWindow(_vis_id)
+    visualization.setPlugin(editorObject)
+    def makefunc(gl_backend):
+        assert gl_backend is not None
+        res = _EditDialog(gl_backend)
+        res.setEditor(editorObject)
+        return res
+    visualization.customUI(makefunc)
+    visualization.dialog()
+    res,retVal = _my_dialog_res,editorObject.value
+    
+    if _doexit:
+        visualization.kill()
+        print("Exiting program.")
+        exit(0)
 
-        Returns:
-            tuple: A pair (res,value) containing: 
+    assert res is not None,"vis.editors.run(): There may be something wrong with the vis module not catching the customUI, or terminating from a prior dialog?"
 
-                * res (bool):True / False if OK / Cancel was pressed, respectively, 
-                * value: the return value of the editor object
+    visualization.setPlugin(None)
+    visualization.customUI(None)
+    if old_vis_window is not None:
+        print("Returning from editor to old window",old_vis_window)
+        visualization.setWindow(old_vis_window)
+    else:
+        print("Returning from editor to window 0")
+        visualization.setWindow(0)
 
-        """
-        assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to vis.editors.run()"
-        global _vis_id, _my_dialog_res
-
-        old_vis_window = visualization.getWindow()
-        if _vis_id is None:
-            _vis_id = visualization.createWindow("Resource Editor")
-        else:
-            visualization.setWindow(_vis_id)
-        visualization.setPlugin(editorObject)
-        def makefunc(gl_backend):
-            assert gl_backend is not None
-            res = _EditDialog(gl_backend)
-            res.setEditor(editorObject)
-            return res
-        visualization.customUI(makefunc)
-        visualization.dialog()
-        res,retVal = _my_dialog_res,editorObject.value
-        
-        if _doexit:
-            visualization.kill()
-            print("Exiting program.")
-            exit(0)
-
-        assert res is not None,"vis.editors.run(): There may be something wrong with the vis module not catching the customUI, or terminating from a prior dialog?"
-
-        visualization.setPlugin(None)
-        visualization.customUI(None)
-        if old_vis_window is not None:
-            print("Returning from editor to old window",old_vis_window)
-            visualization.setWindow(old_vis_window)
-        else:
-            print("Returning from editor to window 0")
-            visualization.setWindow(0)
-
-        print("vis.editors.run(): Result",res,"return value",retVal)
-        return res,retVal
-else:
-    def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
-        """
-        Args:
-            editorObject (VisualEditorBase): some subclass of VisualEditorBase
-
-        Returns:
-            res,value (bool, value pair): 
-
-                * res is True / False if OK / Cancel was pressed, respectively, 
-                * value is the return value of the editor object
-        """
-        raise ValueError("Unable to perform visual editing without PyQt")
+    print("vis.editors.run(): Result",res,"return value",retVal)
+    return res,retVal

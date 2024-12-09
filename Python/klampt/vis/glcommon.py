@@ -167,8 +167,7 @@ class GLMultiViewportProgram(GLProgram):
         for w in colwidths:
             cumcolwidths.append(cumcolwidths[-1]+w)
         if self.sizePolicy == 'fit':
-            self.view.w = sum(colwidths)
-            self.view.h = sum(rowheights)
+            self.view.resize(sum(colwidths),sum(rowheights))
             for i,p in enumerate(self.views):
                 col = i % rowlen
                 row = int(i / rowlen)
@@ -185,22 +184,20 @@ class GLMultiViewportProgram(GLProgram):
                 col = i % rowlen
                 row = int(i / rowlen)
                 p.view.screenDeviceScale = self.view.screenDeviceScale
-                p.view.x = float(self.view.w)*float(cumcolwidths[col])/float(cumcolwidths[-1])
-                p.view.y = float(self.view.h)*float(cumrowheights[row])/float(cumrowheights[-1])
-                p.view.w = float(self.view.w)*float(colwidths[col]) / float(cumcolwidths[-1])
-                p.view.h = float(self.view.h)*float(rowheights[row]) / float(cumrowheights[-1])
-                p.view.x = self.view.x+int(p.view.x)
-                p.view.y = self.view.y+int(p.view.y)
-                p.view.w = int(p.view.w)
-                p.view.h = int(p.view.h)
-                #print "View",i,"shape",(p.view.x,p.view.y,p.view.w,p.view.h)
-                p.reshapefunc(p.view.w,p.view.h)
+                p.view.x = int(self.view.w*float(cumcolwidths[col])/float(cumcolwidths[-1]))
+                p.view.y = int(self.view.h*float(cumrowheights[row])/float(cumrowheights[-1]))
+                w = int(self.view.w*float(colwidths[col]) / float(cumcolwidths[-1]))
+                h = int(self.view.h*float(rowheights[row]) / float(cumrowheights[-1]))
+                p.view.x = self.view.x+p.view.x
+                p.view.y = self.view.y+p.view.y
+                p.view.resize(w,h)
+                p.reshapefunc(w,h)
         if self.window != None:
             self.refresh()
 
     def reshapefunc(self,w,h):
         if (w,h) != (self.view.w,self.view.h):
-            self.view.w,self.view.h = w,h
+            self.view.resize(w,h)
             self.height = self.view.h
             self.sizePolicy = 'squash'
             self.fit()
@@ -209,8 +206,8 @@ class GLMultiViewportProgram(GLProgram):
         anyTrue = False
         GL.glClearColor(0,0,0,0)
         GL.glScissor(0,0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale)
-        GL.glEnable(GL.GL_SCISSOR_TEST);
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        GL.glEnable(GL.GL_SCISSOR_TEST)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         for p in self.views:
             try:
                 if p.displayfunc():
