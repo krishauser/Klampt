@@ -647,10 +647,11 @@ def init(backends=None):
     set:
 
     - 'PyQt': uses PyQT + OpenGL
-    - 'PyQt4' / 'PyQt5 / PyQt6': uses a specific version of PyQT
+    - 'PyQt5 / PyQt6': uses a specific version of PyQT
     - 'GLUT': uses GLUT + OpenGL
     - 'IPython': uses an IPython widget
     - 'HTML': outputs an HTML / Javascript widget
+    - 'Rerun': uses the Rerun.io backend
 
     """
     global _backend,_window_manager,GL
@@ -662,6 +663,11 @@ def init(backends=None):
                 backends = ['IPython']
         else:
             backends = ['PyQt','GLUT','HTML']
+            try:
+                import rerun
+                backends.insert(2,'Rerun')
+            except ImportError:
+                pass
     if isinstance(backends,str):
         backends = [backends]
     if _backend is not None:
@@ -676,10 +682,10 @@ def init(backends=None):
         _window_manager = None
         _backend = None
     
-    OpenGLBackends = ['PyQt','PyQt4','PyQt5','PyQt6','GLUT']
+    OpenGLBackends = ['PyQt','PyQt5','PyQt6','GLUT']
     order = [[]]
     for backend in backends:
-        if backend in ['IPython','HTML']:
+        if backend in ['IPython','HTML','Rerun']:
             order.append(backend)
             order.append([])
         else:
@@ -694,6 +700,11 @@ def init(backends=None):
             _backend = 'HTML'
             from .backends import vis_html
             _window_manager = vis_html.HTMLWindowManager()
+            return _backend
+        elif trials == 'Rerun':
+            _backend = 'Rerun'
+            from .backends import vis_rerun
+            _window_manager = vis_rerun.RerunWindowManager()
             return _backend
         elif len(trials)>0:
             res = glinit.init(trials)
@@ -2388,7 +2399,7 @@ def drawRobotTrajectory(traj,robot,ees,width=2,color=(1,0.5,0,1),pointSize=None,
     only the end effector points at the trajectory's milestones are shown.  If you want more accurate trajectories,
     first call traj.discretize(eps)."""
     for i,ee in enumerate(ees):
-        if ee < 0: ees[i] = robot.numLinks()-1
+        if ee < 0: ees[i] = robot.numLinks() + ee
     pointTrajectories = []
     for ee in ees:
         pointTrajectories.append([])
@@ -2474,6 +2485,7 @@ class _CascadingDict:
             return False
         return item in self.parent
 
+
 _default_str_attributes = {'color':[0,0,0,1], 'position':None, 'size':12 }
 _default_Trajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "pointSize":None, "pointColor":None }
 _default_RobotTrajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "pointSize":None, "pointColor":None , "endeffectors":[-1]}
@@ -2498,7 +2510,6 @@ def _default_attributes(item,type=None):
         pass
     elif hasattr(item,'appearance'):
         res['color'] = item.appearance().getColor()
-        print("EXTRACTING COLOR FROM APPEARANCE",res['color'])
         pass
     elif isinstance(item,(Trajectory,MultiPath)):
         if isinstance(item,RobotTrajectory):
@@ -2861,16 +2872,20 @@ class VisAppearance:
             centroid = None
             if len(item.milestones) == 0:
                 return
-            robot = (world.robot(self.attributes["robot"]) if world is not None and world.numRobots() > 0 else None)
+            if isinstance(item,RobotTrajectory):
+                robot = item.robot
+            else:
+                robot = (world.robot(self.attributes["robot"]) if world is not None and world.numRobots() > 0 else None)
             if robot is not None:
                 robotConfig = robot.getConfig()
             treatAsRobotTrajectory = (item.__class__ == Trajectory and len(item.milestones) > 0 and robot and len(item.milestones[0]) == robot.numLinks())
             if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
                 ees = self.attributes.get("endeffectors",[-1])
-                if world:
+                if robot is not None:
                     doDraw = (len(ees) > 0)
                     for i,ee in enumerate(ees):
-                        if ee < 0: ees[i] = robot.numLinks()-1
+                        if ee < 0: ees[i] = robot.numLinks()+ee
+                        assert ees[i] >= 0 and ees[i] < robot.numLinks(),"Invalid end effector index {}".format(ee)
                     if doDraw:
                         robot.setConfig(item.milestones[0])
                         centroid = vectorops.div(vectorops.add(*[robot.link(ee).getTransform()[1] for ee in ees]),len(ees))
