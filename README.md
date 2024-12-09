@@ -93,14 +93,18 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.10.0** (10/5/2024)
-Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
+Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
+**Latest (master)**
+-   None
+
+**0.10.0** (10/5/2024)
 -   New geometry types `OccupancyGrid` and `Heightmap`.  `OccupancyGrid` uses the same `VolumeGrid` data structure as `ImplicitSurface`.  `Heightmap` can represent orthographic heightmaps (e.g., elevation maps) as well as depth maps coming from RGB-D cameras. 
 -   Viewport data structure now accepts non-square pixels and non-centered focal points.  API breaking change; to resize viewports and keep the FOV and relative center, use `Viewport.resize(w,h)`.
 -   C++ API: Breaking changes to KrisLibrary Geometry API.  Older builds of Klampt will need to pull KrisLibrary branch `old_geometry`. 
 -   C++ API: Renamed `Merge` to `Union` for all geometries. Added `Merge` function that merges a single geometry into the current geometry's representation.
--   Python API: Upgraded to support PyQt6, deprecated PyQt4. 
+-   Python API: Upgraded to support PyQt6, deprecated PyQt4.  Changed to using ``QOpenGLWidget`` for visualization, which may introduce visualization bugs as we work through the kinks.  Klampt windows can now be run in concert with OpenCV visualizations, although only in single-threaded (`vis.loop` / `vis.run`) mode (see [opencvtest.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/opencvtest.py)).  Also, when simulating sensors and showing them in matplotlib, `vis.scene().window.makeCurrent() / doneCurrent()` needs to be called (see [sensor_matplotlib.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/sensor_matplotlib.py)).
+-   Python API: Added Rerun.io visualization frontend.  Try `vis.init('Rerun')`.  Unsupported functions: multi-window, coordinates module items, ContactPoints, Holds.
 -   Python API: Added Geometry3D `merge` function that can be used for SDF and heightmap fusion.
 -   Python API: can control draw order of transparent objects with `draw_order` attribute.
 -   Python API: Improved calibration routines in `klampt.model.calibrate`.
@@ -109,6 +113,7 @@ Note: If you have a `pip` installed Klampt, you may get these updates by cloning
 -   Python API: Added conversions of meshes to/from the ``trimesh`` library in `klampt.io.trimesh_convert`.
 -   Python API: Fixed bug in SO3/SE3 Hermite velocity interpolation.  Now using extrinsic angular velocity representation as tangent vectors.
 -   Python API: Mouse wheel events can now be captured in visualization (Qt and GLUT backends).
+-   Python API: `SimBody.applyForceAtLocalPoint` will be deprecated, and is split into `SimBody.applyForceAtCOMLocalPoint` and `SimBody.applyForceAtObjectLocalPoint` to help users avoid bugs in COM-local or object-local coordinate conventions.
 -   Python API: minor bug fixes.
 
 **0.9.1** (10/30/2023)
