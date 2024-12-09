@@ -260,7 +260,11 @@ class FileGetter:
         self.filetypes = []
         self.result = None
     def getOpen(self):
-        from PyQt5.QtWidgets import QFileDialog
+        from klampt.vis import glinit
+        if glinit.active() == 'PyQt5':
+            from PyQt5.QtWidgets import QFileDialog
+        elif glinit.active() == 'PyQt6':
+            from PyQt6.QtWidgets import QFileDialog
         defaultpattern = None
         patternlist = []
         for (desc,exts) in self.filetypes:
@@ -279,7 +283,11 @@ class FileGetter:
         if isinstance(self.result,tuple):
             self.result = self.result[0]
     def getSave(self):
-        from PyQt5.QtWidgets import QFileDialog
+        from klampt.vis import glinit
+        if glinit.active() == 'PyQt5':
+            from PyQt5.QtWidgets import QFileDialog
+        elif glinit.active() == 'PyQt6':
+            from PyQt6.QtWidgets import QFileDialog
         defaultpattern = None
         patternlist = []
         for (desc,exts) in self.filetypes:
@@ -467,12 +475,12 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
         _thumbnail_window = vis.createWindow("")
     vis.setWindow(_thumbnail_window)
     assert not vis.shown()
-    vp = vis.getViewport()
-    vp.w,vp.h = size
-    if vp.w < 256 or vp.h < 256:
-        vp.w = vp.w *256 / min(vp.w,vp.h)
-        vp.h = vp.h *256 / min(vp.w,vp.h)
-    vis.setViewport(vp)
+    
+    w,h = size
+    if w < 256 or h < 256:
+        w = w *256 / min(w,h)
+        h = h *256 / min(w,h)
+    vis.resizeViewport(w,h)
     vp = vis.getViewport()
     plugin = _ThumbnailPlugin(world)
     if world:
