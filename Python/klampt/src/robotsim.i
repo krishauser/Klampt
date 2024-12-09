@@ -7,6 +7,7 @@
 	#include "geometry.h"
 	#include "appearance.h"
 	#include "widget.h"
+	#include "viewport.h"
 	#include "robotmodel.h"
 	#include "robotik.h"
 	#include "robotsim.h"
@@ -403,6 +404,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %apply (unsigned char* IN_ARRAY1,int DIM1) {(unsigned char* np_array,int m)};
 %apply (unsigned char* IN_ARRAY2,int DIM1,int DIM2) {(unsigned char* np_array2, int m, int n)};
 %apply (unsigned char* IN_ARRAY3,int DIM1,int DIM2,int DIM3) {(unsigned char* np_array3, int m, int n,int p)};
+%apply (unsigned char** ARGOUTVIEW_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(unsigned char** np_view3,int* m, int *n, int* p)};
 %apply (unsigned short* IN_ARRAY2,int DIM1,int DIM2) {(unsigned short* np_array2, int m, int n)};
 %apply (unsigned int* IN_ARRAY1,int DIM1) {(unsigned int* np_array, int m)};
 %apply (unsigned int* IN_ARRAY2,int DIM1,int DIM2) {(unsigned int* np_array2, int m, int n)};
@@ -417,6 +419,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %apply (double** ARGOUTVIEW_ARRAY1,int* DIM1) {(double** np_view,int* m)};
 %apply (double** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(double** np_view2,int* m, int *n)};
 %apply (double** ARGOUTVIEW_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(double** np_view3,int* m, int *n, int* p)};
+%apply (float** ARGOUTVIEWM_ARRAY1,int* DIM1) {(float** np_out,int* m)};
+%apply (float** ARGOUTVIEWM_ARRAY2,int* DIM1,int* DIM2) {(float** np_out2,int* m, int *n)};
+%apply (float** ARGOUTVIEWM_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(float** np_out3,int* m, int *n, int* p)};
 %apply (double** ARGOUTVIEWM_ARRAY1,int* DIM1) {(double** np_out,int* m)};
 %apply (double** ARGOUTVIEWM_ARRAY2,int* DIM1,int* DIM2) {(double** np_out2,int* m, int *n)};
 %apply (double** ARGOUTVIEWM_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(double** np_out3,int* m, int *n, int* p)};
@@ -432,7 +437,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend Mass { 
 %pythoncode {
      com = property(getCom, setCom)
+     """The object's center of mass in local coordinates (3-list)"""
      inertia = property(getInertia, setInertia)
+     """The object's inertia in local coordinates (9-list)"""
 }
 }
 
@@ -441,10 +448,10 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
      name = property(getName, setName)
      parent = property(getParent, setParent)
      mass = property(getMass, setMass)
-     parentTransform = property(getParentTransform, setParentTransform)
+     parentTransform = property(getParentTransform)
      axis = property(getAxis,setAxis)
      prismatic = property(isPrismatic,setPrismatic)
-     transform = property(getTransform,setTransform)
+     transform = property(getTransform)
 }
 }
 
@@ -469,10 +476,32 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 }
 
+%extend RigidObjectModel { 
+%pythoncode {
+     name = property(getName, setName)
+     id = property(getID)
+     mass = property(getMass, setMass)
+     transform = property(getTransform)
+}
+}
+
+%extend TerrainModel { 
+%pythoncode {
+     name = property(getName, setName)
+     id = property(getID)
+}
+}
 
 %extend VolumeGrid { 
 %pythoncode {
-     values = property(getValues, setValues)
+    values = property(getValues, setValues)
+    """The 3D array of values in the grid (numpy.ndarray)"""
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.to_json(self,'VolumeGrid')
+        return (loader.from_json,(jsonobj,'VolumeGrid'))
+
 }
 }
 
@@ -612,7 +641,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
-            depth (np.ndarray): the depth values, of size h x w.  Should have
+            depth (np.ndarray): the depth values, of shape (h,w).  Should have
                 dtype float, np.float32, or np.uint16 for best performance.
             depth_scale (float, optional): converts depth image values to real
                 depth units.
@@ -635,12 +664,12 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
-            color (np.ndarray): the color values, of size h x w or h x w x 3.
+            color (np.ndarray): the color values, of shape (h,w) or (h,w,3).
                 In first case, must have dtype np.uint32 with r,g,b values
                 packed in 0xrrggbb order.  In second case, if dtype is
                 np.uint8, min and max are [0,255].  If dtype is float or
                 np.float32, min and max are [0,1].
-            depth (np.ndarray): the depth values, of size h x w.  Should have
+            depth (np.ndarray): the depth values, of shape (h,w).  Should have
                 dtype float, np.float32, or np.uint16 for best performance.
             depth_scale (float, optional): converts depth image values to real
                 depth units.
@@ -676,15 +705,6 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 }
 
-%extend VolumeGrid {
-%pythoncode {
-    def __reduce__(self):
-        from klampt.io import loader
-        jsonobj = loader.to_json(self,'VolumeGrid')
-        return (loader.from_json,(jsonobj,'VolumeGrid'))
-}
-}
-
 %extend ConvexHull {
 %pythoncode {
     def __reduce__(self):
@@ -703,9 +723,96 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 }
 
+%extend Heightmap {
+%pythoncode {
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.to_json(self,'Heightmap')
+        return (loader.from_json,(jsonobj,'Heightmap'))
+
+    def setHeightImage(self, img, height_scale : float = 1.0):
+        """
+        Sets heights from a height image.
+
+        Args:
+            img (np.ndarray): the height values, of shape (h,w).  Should have
+                dtype float, np.float32, or np.uint16 for best performance.
+            height_scale (float, optional): converts depth image values to real
+                depth units.
+        """
+        import numpy as np
+        if len(img.shape) != 2:
+            raise ValueError("Invalid shape for the height image")
+        if img.dtype == float:
+            return self.setHeightImage_d(img,height_scale)
+        elif img.dtype == np.float32:
+            return self.setHeightImage_f(img,height_scale)
+        elif img.dtype == np.uint16:
+            return self.setHeightImage_s(img,height_scale)
+        elif img.dtype == np.uint8:
+            return self.setHeightImage_b(img,height_scale)
+        else:
+            raise ValueError("Invalid dtype for the height image, can use float, np.float32, np.uint16, or np.uint8")
+
+    def setColorImage(self, img):
+        """
+        Sets colors from a color image.
+
+        Args:
+            img (np.ndarray): the color values, of shape (h,w) or (h,w,3) or (h,w,4).
+                Should have dtype float, np.float32, np.uint32 (RGBA 32-bit) or np.uint8.
+        """
+        import numpy as np
+        if len(img.shape) != 2 and len(img.shape) != 3:
+            raise ValueError("Invalid shape for the color image")
+        if len(img.shape) == 2:
+            if img.dtype == np.uint32:
+                return self.setColorImage_i(img)
+            elif img.dtype == np.uint8:
+                return self.setColorImage_b(img)
+            elif img.dtype == float:
+                return self.setColors(img.reshape(img.shape[0],img.shape[1],1))
+            else:
+                raise ValueError("Invalid dtype for the color image, can use np.uint32, np.uint8, or float")
+        else:
+            if img.shape[2] != 3 and img.shape[2] != 4:
+                raise ValueError("Invalid shape for the color image")
+            if img.dtype == np.uint8:
+                return self.setColorImage_b(img)
+            elif img.dtype == float:
+                return self.setColors(img)
+            else:
+                raise ValueError("Invalid dtype for the height image, can use float or np.uint8")
+}
+}
+
+%extend Viewport { 
+%pythoncode {
+    def setClippingPlanes(self, cp):
+        """Provided for backwards compatibility"""
+        import warnings
+        warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
+        self.n, self.f = cp
+    
+    def getClippingPlanes(self):
+        """Provided for backwards compatibility"""
+        import warnings
+        warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
+        return (self.n, self.f)
+
+    fov = property(getFOV, setFOV)
+    """Convenience accessor for the field of view, in radians."""
+
+    clippingPlanes = property(getClippingPlanes, setClippingPlanes)
+    """Klampt 0.9 backwards compatibility accessor for the (n, f) pair."""
+}
+}
+
+
 %include "geometry.h"
 %include "appearance.h"
 %include "widget.h"
+%include "viewport.h"
 %include "robotmodel.h"
 %include "robotik.h"
 %include "robotsim.h"
@@ -727,31 +834,6 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
         setattr(mod,oldName,depf)
 
-    _deprecated_func('SubscribeToStream','subscribe_to_stream')
-    _deprecated_func('DetachFromStream','detach_from_stream')
-    _deprecated_func('ProcessStreams','process_streams')
-    _deprecated_func('WaitForStream','wait_for_stream')
-    _deprecated_func('ThreeJSGetScene','threejs_get_scene')
-    _deprecated_func('ThreeJSGetTransforms','threejs_get_transforms')
-    _deprecated_func('setFrictionConeApproximationEdges','set_friction_cone_approximation_edges')
-    _deprecated_func('forceClosure','force_closure')
-    _deprecated_func('forceClosure2D','force_closure_2d')
-    _deprecated_func('comEquilibrium','com_equilibrium')
-    _deprecated_func('comEquilibrium2D','com_equilibrium_2d')
-    _deprecated_func('supportPolygon','support_polygon')
-    _deprecated_func('supportPolygon2D','support_polygon_2d')
-    _deprecated_func('equilibriumTorques','equilibrium_torques')
-    _deprecated_func('setRandomSeed','set_random_seed')
-
-    def SampleTransform(obj):
-        """Deprecated.  Use ``obj.sampleTransform()`` instead.
-
-        Args:
-            obj (IKObjective or GeneralizedIKObjective)
-
-        Returns:
-            klampt se3 element.
-        """
-        return obj.sampleTransform()
-
 }
+// add deprecations above, e.g.,
+// _deprecated_func('SubscribeToStream','subscribe_to_stream')
