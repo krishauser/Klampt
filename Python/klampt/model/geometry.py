@@ -81,7 +81,9 @@ def _try_scipy_import():
 
 class PlaneFitter:
     """
-    Online fitting of planes through 3D point clouds
+    Online fitting of planes to 3D point clouds.  Updating via
+    :meth:`add_point` and retrieving via :meth:`plane_equation`
+    is O(1).
    
     Attributes:
         normal (3-vector): best-fit normal
