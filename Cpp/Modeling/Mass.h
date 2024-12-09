@@ -25,7 +25,7 @@ inline Matrix3 Covariance(const Meshing::TriMesh& mesh,Real surfaceFraction=1.0)
 inline Matrix3 Covariance(const Meshing::PointCloud3D& mesh,Real surfaceFraction=1.0) { return Covariance(mesh,CenterOfMass(mesh,surfaceFraction),surfaceFraction); }
 inline Matrix3 Covariance(const Geometry::AnyGeometry3D& mesh,Real surfaceFraction=1.0) { return Covariance(mesh,CenterOfMass(mesh,surfaceFraction),surfaceFraction); }
 
-///Computes the inertia tensor by integrating over the mesh
+///Computes the inertia tensor (about the center of mass) by integrating over the mesh
 Matrix3 Inertia(const Meshing::TriMesh& mesh,const Vector3& center,Real mass,Real surfaceFraction=1.0);
 Matrix3 Inertia(const Meshing::PointCloud3D& mesh,const Vector3& center,Real mass,Real surfaceFraction=1.0);
 Matrix3 Inertia(const Geometry::AnyGeometry3D& mesh,const Vector3& center,Real mass,Real surfaceFraction=1.0);
