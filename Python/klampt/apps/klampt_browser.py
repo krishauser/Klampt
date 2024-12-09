@@ -5,14 +5,24 @@ from klampt.model.trajectory import Trajectory,RobotTrajectory
 from klampt.model.multipath import MultiPath
 from klampt.model import types
 from klampt import vis
+from klampt.vis import glinit
 from klampt.vis.glcommon import GLMultiViewportProgram
-vis.init("PyQt5")
 from klampt.vis.backends.vis_gl import GLVisualizationPlugin
 from klampt.vis.backends.qtbackend import QtGLWindow
 import sys,os,time
-from PyQt5 import QtGui
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
+vis.init("PyQt")
+if glinit.active() == 'PyQt6':
+    from PyQt6 import QtGui
+    from PyQt6 import QtCore
+    from PyQt6 import QtWidgets
+    PYQT_VERSION = 6
+elif glinit.active() == 'PyQt5':
+    from PyQt5 import QtGui
+    from PyQt5 import QtCore
+    from PyQt5 import QtWidgets
+    PYQT_VERSION = 5
+else:
+    raise RuntimeError("Can only run with PyQt6 or PyQt5")
 
 world_item_extensions = set(['.obj','.rob','.urdf','.env'])
 robot_override_types = ['Config','Configs']
@@ -117,14 +127,20 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.view.setModel(self.model)
         #nicer size for columns
         self.view.header().resizeSection(0, 200)
-        self.view.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        if PYQT_VERSION > 5:
+            self.view.header().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        else:
+            self.view.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.view.header().resizeSection(1, 75)
         self.view.header().resizeSection(2, 75)
         self.view.header().resizeSection(3, 150)
         # Set the root index of the view as the user's home directory.
         #self.view.setRootIndex(self.model.index(QtCore.QDir.homePath()))
         self.view.setRootIndex(self.model.index(os.getcwd()))
-        self.view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        if PYQT_VERSION > 5:
+            self.view.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
+        else:
+            self.view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
         self.world = WorldModel()
         self.tempWorld = WorldModel()
@@ -165,7 +181,10 @@ class ResourceBrowser(QtWidgets.QMainWindow):
 
         #playback
         self.timeDriver = QtWidgets.QSlider()
-        self.timeDriver.setOrientation(QtCore.Qt.Horizontal)
+        if PYQT_VERSION > 5:
+            self.timeDriver.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        else:
+            self.timeDriver.setOrientation(QtCore.Qt.Horizontal)
         self.timeDriver.setRange(0,1000)
         #self.timeDriver.setSizeHint()
         self.playButton = QtWidgets.QPushButton("Play")
@@ -174,7 +193,10 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.playButton.setToolTip("Starts/pauses playing any selected animations")
         self.stopButton.setToolTip("Stops playing any selected animations")
         label = QtWidgets.QLabel("Time")
-        label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        if PYQT_VERSION > 5:
+            label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        else:
+            label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         vbuttonLayout = QtWidgets.QHBoxLayout()
         vbuttonLayout.addWidget(label)
         vbuttonLayout.addWidget(self.timeDriver)
@@ -248,10 +270,16 @@ class ResourceBrowser(QtWidgets.QMainWindow):
 
     def closeEvent(self,event):
         if len(self.modified) > 0:
-            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
-                                    QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No);
-            if reply == QtWidgets.QMessageBox.Yes:
-                self.onSaveClicked()
+            if PYQT_VERSION > 5:
+                reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
+                                        QtWidgets.QMessageBox.StandardButton.Yes|QtWidgets.QMessageBox.StandardButton.No)
+                if reply == QtWidgets.QMessageBox.StandardButton.Yes:
+                    self.onSaveClicked()
+            else:
+                reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
+                                        QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No)
+                if reply == QtWidgets.QMessageBox.Yes:
+                    self.onSaveClicked()
         vis.show(False)
 
     def onViewDoubleClick(self):
@@ -531,7 +559,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             f = open(fn,'r')
             jsonobj = json.load(f)
             try:
-                obj = loader.fromJson(jsonobj)
+                obj = loader.from_json(jsonobj)
             except Exception:
                 if warn:
                     QtWidgets.QMessageBox.warning(self.splitter,"Invalid JSON","Could not recognize "+fn+" as a known Klamp't type")
@@ -599,11 +627,18 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         if fn not in self.active:
             return
         if fn in self.modified:
-            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
-                                    QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No);
-            if reply == QtWidgets.QMessageBox.Yes:
-                save(self.active[fn],fn)
-                self.modified.remove(fn)
+            if PYQT_VERSION > 5:
+                reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
+                                        QtWidgets.QMessageBox.StandardButton.Yes|QtWidgets.QMessageBox.StandardButton.No)
+                if reply == QtWidgets.QMessageBox.StandardButton.Yes:
+                    save(self.active[fn],fn)
+                    self.modified.remove(fn)
+            else:
+                reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
+                                        QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No)
+                if reply == QtWidgets.QMessageBox.Yes:
+                    save(self.active[fn],fn)
+                    self.modified.remove(fn)
         s = self.active[fn]
         del self.active[fn]
         if s.program is not None:
