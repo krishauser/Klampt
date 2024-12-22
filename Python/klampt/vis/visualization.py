@@ -3279,6 +3279,7 @@ class VisAppearance:
                             centroid = item[0] + [0]*(3-len(item[0]))
                             if name is not None:
                                 self.drawText(name,centroid)
+                            return
                         else:
                             warnings.warn("Configs items aren't the right size for the robot")
                     if not self.useDefaultAppearance:
