@@ -2644,8 +2644,9 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         assert self._inStep,"endStep called outside of a step?"
         self._inStep = False
 
-        q = self.sensedPosition()
-        v = self.sensedVelocity()
+        q = self._try('sensedPosition',[],lambda : None)
+        v = self._try('sensedVelocity',[],lambda : None)
+        
         try:
             self._emulator.update(q,v)
         except Exception as e:
