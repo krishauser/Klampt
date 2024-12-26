@@ -247,11 +247,9 @@ def from_numpy(obj,type='auto',template=None):
             if len(geomdata)==3:
                 if geomdata[0].shape == (3,) and geomdata[1].shape == (3,):
                     subtype = 'VolumeGrid'
-        g = Geometry3D(from_numpy(obj,subtype))
+        g = Geometry3D(from_numpy(geomdata,subtype))
         g.setCurrentTransform(*T)
         return g
     else:
         return obj.flatten()
 
-from .loader import _DeprecatedList
-supportedTypes = _DeprecatedList("supportedTypes","SUPPORTED_TYPES",SUPPORTED_TYPES)
