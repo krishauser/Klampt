@@ -4633,8 +4633,7 @@ class _ThreadedWindowManager(_WindowManager):
 
     def _start_app_thread(self):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
-        self.vis_thread = threading.Thread(target=self.run_app_thread)
-        self.vis_thread.setDaemon(True)
+        self.vis_thread = threading.Thread(target=self.run_app_thread, daemon=True)
         self.vis_thread.start()
         time.sleep(0.1)
 
