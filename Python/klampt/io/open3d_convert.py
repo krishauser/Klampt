@@ -59,7 +59,11 @@ def to_open3d(obj):
             cell = np.array([i//(obj.dims[2]*obj.dims[1]), (i//obj.dims[2]) % obj.dims[1], i%obj.dims[2]])
             pt = (cell + 0.5)*voxel_size + origin
             pc.points.append(pt)
-        return open3d.geometry.create_surface_voxel_grid_from_point_cloud(pc,voxel_size)
+        vg = open3d.geometry.VoxelGrid()
+        vg.create_from_point_cloud(pc,voxel_size)
+        return vg
+        #deprecated in open3d 0.8.0
+        #return open3d.geometry.create_surface_voxel_grid_from_point_cloud(pc,voxel_size)
     elif isinstance(obj,Geometry3D):
         if obj.type() == 'PointCloud':
             pc = obj.getPointCloud()
@@ -96,6 +100,9 @@ def from_open3d(obj):
             occupied = np.array(obj.voxels,dtype=np.int32)
         else:
             occupied = np.array([v.grid_index for v in obj.get_voxels()],dtype=np.int32)
+        if len(occupied) == 0:
+            #empty grid?
+            return grid
         imin = np.min(occupied,axis=0)
         imax = np.max(occupied,axis=0)
         assert imin.shape == (3,)
