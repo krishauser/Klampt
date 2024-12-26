@@ -14,7 +14,7 @@ void set_friction_cone_approximation_edges(int numEdges);
 /// Returns true if the array of contact points has force closure.  A contact point
 /// is given by a list of n=7 floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position,
 /// (nx,ny,nz) is the normal, and k is the coefficient of friction (>= 0)
-bool force_closure(double* contacts,int m,int n);
+bool force_closure(double* np_array2,int m,int n);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Returns true if the list of contact points has force closure. 
@@ -50,7 +50,7 @@ bool force_closure(const std::vector<std::vector<double > >& contactPositions,co
 /// Returns true if the list of 2D contact points has force closure.  A contact point
 /// is given by a list of n=4 floats, [x,y,theta,k] where (x,y) is the position,
 /// theta is the normal angle, and k is the coefficient of friction (>= 0)
-bool force_closure_2d(double* contacts,int m,int n);
+bool force_closure_2d(double* np_array2,int m,int n);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Returns true if the list of 2D contact points has force closure. 
@@ -90,7 +90,7 @@ bool force_closure_2d(const std::vector<std::vector<double > >& contactPositions
 /// 
 /// com can also be set to None in which case this tests if ANY COM has
 /// at the contacts.  The return value is True or False.
-PyObject* com_equilibrium(double* contacts,int m,int n,const std::vector<double>& fext,PyObject* com);
+PyObject* com_equilibrium(double* np_array2,int m,int n,const std::vector<double>& fext,PyObject* com);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Tests whether the given COM com is stable for the given contacts and the given
@@ -143,7 +143,7 @@ PyObject* com_equilibrium(const std::vector<std::vector<double> >& contactPositi
 /// 
 /// com can also be set to None in which case this tests if ANY COM has
 /// at the contacts.  The return value is True or False.
-PyObject* com_equilibrium_2d(double* contacts,int m,int n,const std::vector<double>& fext,PyObject* com);
+PyObject* com_equilibrium_2d(double* np_array2,int m,int n,const std::vector<double>& fext,PyObject* com);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Tests whether the given COM com is stable for the given contacts and the given
@@ -193,7 +193,7 @@ PyObject* com_equilibrium_2d(const std::vector<std::vector<double> >& contactPos
 /// The format of a plane is (nx,ny,ofs) where (nx,ny) are the outward facing normals, and
 /// ofs is the offset from 0.  In other words to test stability of a com [x,y], you can test
 /// whether dot([nx,ny],[x,y]) <= ofs  for all planes.
-PyObject* support_polygon(double* contacts,int m,int n);
+PyObject* support_polygon(double* np_array2,int m,int n);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Calculates the support polygon for a given set of contacts and a downward external force (0,0,-g).
@@ -245,7 +245,7 @@ PyObject* support_polygon(const std::vector<std::vector<double> >& contactPositi
 /// 
 /// The return value is a 2-tuple giving the min / max extents of the support polygon.
 /// If they are both infinite, the support polygon is empty.
-PyObject* support_polygon_2d(double* contacts,int m,int n);
+PyObject* support_polygon_2d(double* np_array2,int m,int n);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Calculates the support polygon (interval)  for a given set of contacts and a downward
@@ -299,7 +299,7 @@ PyObject* support_polygon_2d(const std::vector<std::vector<double> >& contacts,c
  *
  */
 PyObject* equilibrium_torques(const RobotModel& robot,
-							double* contacts,int m,int n,const std::vector<int>& links,
+							double* np_array2,int m,int n,const std::vector<int>& links,
 							const std::vector<double>& fext,
 							double norm=0);
 /** Solves for the torques / forces that keep the robot balanced against gravity.
@@ -345,7 +345,7 @@ PyObject* equilibrium_torques(const RobotModel& robot,
  *
  */
 PyObject* equilibrium_torques(const RobotModel& robot,
-							double* contacts,int m,int n,const std::vector<int>& links,
+							double* np_array2,int m,int n,const std::vector<int>& links,
 							const std::vector<double>& fext,
 							const std::vector<double>& internalTorques,
 							double norm=0);

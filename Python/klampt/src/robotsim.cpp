@@ -6195,18 +6195,20 @@ void Simulator::getContacts(int aid,int bid,double** out,int* m,int* n)
 {
   Klampt::ODEContactList* c=sim->GetContactList(aid,bid);
   if(!c) {
-    *out = NULL;
+    *out = (double*)malloc(0);
     *m = 0;
     *n = 0;
     return;
   }
   Matrix temp;
   MakeNumpyArray(out,m,n,c->points.size(),7,temp);
+  Assert(temp.m == (int)c->points.size());
+  Assert(temp.n == 7);
   for(size_t i=0;i<c->points.size();i++) {
     c->points[i].x.get(temp(i,0),temp(i,1),temp(i,2));
     c->points[i].n.get(temp(i,3),temp(i,4),temp(i,5));
     temp(i,6) = c->points[i].kFriction;
-    if(bid < aid) {
+    if(bid < aid) {  //flip normals
       temp(i,3) = -temp(i,3);
       temp(i,4) = -temp(i,4);
       temp(i,5) = -temp(i,5);
@@ -6218,7 +6220,7 @@ void Simulator::getContactForces(int aid,int bid,double** out,int* m,int* n)
 {
   Klampt::ODEContactList* c=sim->GetContactList(aid,bid);
   if(!c) {
-    *out = NULL;
+    *out = (double*)malloc(0);
     *m = 0;
     *n = 0;
     return;
@@ -6945,7 +6947,7 @@ std::vector<std::string> SimRobotSensor::measurementNames()
 void SimRobotSensor::getMeasurements(double** out,int* m)
 {
   if(!sensor) {
-    *out = NULL;
+    *out = (double*)malloc(0);
     *m = 0;
     return;
   }
@@ -8064,12 +8066,13 @@ void Convert(const double* contacts,int m,int n,vector<ContactPoint>& cps)
 {
   if(n != 7)  throw PyException("Invalid size of contact point, must be in the format (x,y,z,nx,ny,nz,kFriction)");
   cps.resize(m);
-  for(int i=0;i<m;i+=n) {
-    if(contacts[i+6] < 0) throw PyException("Invalid contact point, negative friction coefficient");
-    cps[i].x.set(contacts[i+0],contacts[i+1],contacts[i+2]);
-    cps[i].n.set(contacts[i+3],contacts[i+4],contacts[i+5]);
+  int j=0;
+  for(int i=0;i<m;i++,j+=n) {
+    if(contacts[j+6] < 0) throw PyException("Invalid contact point, negative friction coefficient");
+    cps[i].x.set(contacts[j+0],contacts[j+1],contacts[j+2]);
+    cps[i].n.set(contacts[j+3],contacts[j+4],contacts[j+5]);
     if(!FuzzyEquals(cps[i].n.normSquared(),1.0,1e-5)) throw PyException("Invalid contact point, non-unit normal");
-    cps[i].kFriction = contacts[i+6];
+    cps[i].kFriction = contacts[j+6];
   }
 }
 
@@ -8077,11 +8080,12 @@ void Convert(const double* contacts,int m,int n,vector<ContactPoint2D>& cps)
 {
   if(n != 4) throw PyException("Invalid size of contact point, must be in the format (x,y,angle,kFriction)");
   cps.resize(m);
-  for(int i=0;i<m;i+=n) {
-    if(contacts[i+3] < 0) throw PyException("Invalid contact point, negative friction coefficient");
-    cps[i].x.set(contacts[i+0],contacts[i+1]);
-    cps[i].n.set(Cos(contacts[i+2]),Sin(contacts[i+2]));
-    cps[i].kFriction = contacts[i+3];
+  int j=0;
+  for(int i=0;i<m;i++,j+=n) {
+    if(contacts[j+3] < 0) throw PyException("Invalid contact point, negative friction coefficient");
+    cps[i].x.set(contacts[j+0],contacts[j+1]);
+    cps[i].n.set(Cos(contacts[j+2]),Sin(contacts[i+2]));
+    cps[i].kFriction = contacts[j+3];
   }
 }
 
