@@ -136,7 +136,7 @@ RigidTransform GetFloatingBase(const RobotModel& robot)
 }
 
 RobotLinkPoseWidget::RobotLinkPoseWidget()
-  :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1),draw(true)
+  :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1),affectedLink(-1),affectedDriver(-1),draw(true)
 {}
 
 RobotLinkPoseWidget::RobotLinkPoseWidget(RobotModel* _robot,ViewRobot* _viewRobot)
