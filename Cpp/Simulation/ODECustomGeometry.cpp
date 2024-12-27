@@ -41,7 +41,6 @@ int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
 {
   int m = (flags&0xffff);
   if(m == 0) m=1;
-  //printf("CustomGeometry collide\n");
   CustomGeometryData* d1 = dGetCustomGeometryData(o1);
   CustomGeometryData* d2 = dGetCustomGeometryData(o2);
   RigidTransform T1;
