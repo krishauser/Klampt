@@ -302,13 +302,13 @@ class RobotInterfaceBase(object):
         if part is None:
             m = self.klamptModel()
             if m is None:
-                raise NotImplementedError()
+                raise NotImplementedError("numJoints() not implemented by {} and klamptModel not defined".format(self))
             return m.numDrivers()
         return len(self.parts()[part])
 
     def jointName(self, joint_idx: int) -> str:
         """Returns a string naming the given joint"""
-        raise NotImplementedError()
+        raise NotImplementedError("jointName() not implemented by {}".format(self))
 
     @functools.lru_cache(maxsize=None)
     def parts(self) -> Dict[Any,List[int]]:
@@ -344,15 +344,15 @@ class RobotInterfaceBase(object):
         The part/joint controller should operate on exactly the DOFs specified
         by self.indices(part,joint_idx).
         """
-        raise NotImplementedError()
+        raise NotImplementedError("partInterface() not implemented by {}".format(self))
 
     def controlRate(self) -> float:
         """Returns the control rate, in Hz"""
-        raise NotImplementedError()
+        raise NotImplementedError("controlRate() not implemented by {}".format(self))
 
     def clock(self) -> float:
         """Returns the current time on the robot's clock, in seconds"""
-        raise NotImplementedError()
+        raise NotImplementedError("clock() not implemented by {}".format(self))
 
     def status(self, joint_idx: Optional[int] = None) -> str:
         """Returns a status string for the robot / given joint.  'ok' means
@@ -374,11 +374,11 @@ class RobotInterfaceBase(object):
         """If the robot has a non-normal status code, attempt to reset it
         to normal operation.  The caller should poll until status()=='ok'
         """
-        raise NotImplementedError("Reset is not implemented")
+        raise NotImplementedError("reset() is not implemented by {}".format(self))
 
     def getSettings(self) -> Dict[str,Any]:
         """Retrieves an implementation-dependent dict of possible settings."""
-        raise NotImplementedError("Settings are not implemented")
+        raise NotImplementedError("getSettings() is not implemented by {}".format(self))
 
     def getSetting(self, name : str):
         """Retrieves an implementation-dependent setting."""
@@ -390,11 +390,11 @@ class RobotInterfaceBase(object):
     
     def sensors(self) -> list:
         """Returns a list of names of possible sensors on this robot."""
-        raise NotImplementedError()
+        raise NotImplementedError("sensors() is not implemented by {}".format(self))
 
     def enabledSensors(self) -> list:
         """Returns a list of names of enabled sensors on this robot."""
-        raise NotImplementedError()
+        raise NotImplementedError("enabledSensors() is not implemented by {}".format(self))
 
     def hasSensor(self, sensor: str) -> bool:
         """Returns true if the given sensor can be enabled.
@@ -406,74 +406,74 @@ class RobotInterfaceBase(object):
         enabled: bool=True) -> bool:
         """Enables / disables a sensor. Returns true if successful.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("enableSensor() is not implemented by {}".format(self))
 
     def sensorMeasurements(self, name: str):
         """Returns the latest measurements from a sensor.  Interpretation of
         the result is sensor-dependent.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("sensorMeasurements() is not implemented by {}".format(self))
 
     def sensorUpdateTime(self, name: str) -> float:
         """Returns the clock time of the last sensor update."""
-        raise NotImplementedError()
+        raise NotImplementedError("sensorUpdateTime() is not implemented by {}".format(self))
     
     def setControlMode(self,mode,*args,**kwargs):
         """Enables a custom control mode."""
-        raise NotImplementedError()
+        raise NotImplementedError("setControlMode() is not implemented by {}".format(self))
 
     def functionCall(self,proc,*args,**kwargs):
         """Enables a custom one-off function call."""
-        raise NotImplementedError()
+        raise NotImplementedError("functionCall() is not implemented by {}".format(self))
 
     def isMoving(self, joint_idx: Optional[int] = None) -> bool:
         """Returns true if the robot / joint are currently moving"""
-        raise NotImplementedError()
+        raise NotImplementedError("isMoving() is not implemented by {}".format(self))
 
     def sensedPosition(self) -> Vector:
         """Retrieves the currently sensed joint position. 
         """
-        raise NotImplementedError()
+        raise NotImplementedError("sensedPosition() is not implemented by {}".format(self))
 
     def sensedVelocity(self) -> Vector:
         """Retrieves the currently sensed joint velocity. 
         """
-        raise NotImplementedError()
+        raise NotImplementedError("sensedVelocity() is not implemented by {}".format(self))
 
     def sensedTorque(self) -> Vector:
         """Retrieves the currently sensed joint torque. 
         """
-        raise NotImplementedError()
+        raise NotImplementedError("sensedTorque() is not implemented by {}".format(self))
 
     def commandedPosition(self) -> Vector:
         """Retrieves the currently commanded joint position. 
         """
-        raise NotImplementedError()
+        raise NotImplementedError("commandedPosition() is not implemented by {}".format(self))
 
     def commandedVelocity(self) -> Vector:
         """Retrieves the currently commanded joint velocity. 
         """
-        raise NotImplementedError()
+        raise NotImplementedError("commandedVelocity() is not implemented by {}".format(self))
 
     def commandedTorque(self) -> Vector:
         """Retrieves the currently commanded joint torque. 
         """
-        raise NotImplementedError()
+        raise NotImplementedError("commandedTorque() is not implemented by {}".format(self))
 
     def destinationPosition(self) -> Vector:
         """Retrieves the destination of a motion queue controller.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("destinationPosition() is not implemented by {}".format(self))
 
     def destinationVelocity(self) -> Vector:
         """Retrieves the final velocity of a motion queue controller.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("destinationVelocity() is not implemented by {}".format(self))
     
     def destinationTime(self) -> float:
         """Retrieves the final clock time of a motion queue controller.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("destinationTime() is not implemented by {}".format(self))
 
     def queuedTrajectory(self) -> tuple:
         """Returns a trajectory starting from the current time representing all
@@ -483,7 +483,7 @@ class RobotInterfaceBase(object):
             tuple: either (ts,qs) or (ts,qs,vs) representing a piecewise linear
             or a piecewise-cubic trajectory.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("queuedTrajectory() is not implemented by {}".format(self))
     
     def stateValue(self,name) -> Union[float,Vector]:
         """Retrieves some custom state value"""
@@ -502,7 +502,7 @@ class RobotInterfaceBase(object):
             Klampt se3 element: specifies end effector Cartesian transform
             relative to the given frame.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("cartesianPosition() is not implemented by {}".format(self))
 
     def cartesianVelocity(self,
             q: Vector,
@@ -523,7 +523,7 @@ class RobotInterfaceBase(object):
             (w,v): specifies end effector Cartesian angular velocity/velocity
             relative to the given frame.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("cartesianVelocity() is not implemented by {}".format(self))
 
     def cartesianForce(self,
             q: Vector,
@@ -541,7 +541,7 @@ class RobotInterfaceBase(object):
             (t,f): specifies end effector Cartesian torque/force relative to
             given frame.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("cartesianForce() is not implemented by {}".format(self))
 
     def sensedCartesianPosition(self, frame: str = 'world') -> RigidTransform:
         return self.cartesianPosition(self.sensedPosition(),frame)
@@ -575,7 +575,7 @@ class RobotInterfaceBase(object):
         Args:
             frame (str): either 'world', 'base', 'end effector', or 'tool'
         """
-        return self.cartesianVelocity(self.destinationPosition(),self.desinationVelocity())
+        return self.cartesianVelocity(self.destinationPosition(),self.destinationVelocity())
 
     def queuedCartesianTrajectory(self, frame: str = 'world') -> tuple:
         """Returns the Cartesian trajectory starting from the current time 
@@ -606,7 +606,7 @@ class RobotInterfaceBase(object):
             q (list of floats): A list of floats giving the desired
                 configuration of the robot.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setPosition() is not implemented by {}".format(self))
 
     def setVelocity(self,
             v: Vector,
@@ -619,7 +619,7 @@ class RobotInterfaceBase(object):
                 velocity of each joint.
             ttl (float, optional): A time-to-live for this command.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setVelocity() is not implemented by {}".format(self))
 
     def setTorque(self,
             t: Vector,
@@ -632,7 +632,7 @@ class RobotInterfaceBase(object):
                 torques at each joint.
             ttl (float, optional): A time-to-live for this command.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setTorque() is not implemented by {}".format(self))
 
     def setPID(self,
             q: Vector,
@@ -642,20 +642,20 @@ class RobotInterfaceBase(object):
         """Sets a PID command to configuration q, velocity dq, and feedforward
         torque t. 
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setPID() is not implemented by {}".format(self))
 
     def setPIDGains(self, kP: Vector, kI: Vector, kD: Vector) -> None:
         """Sets the PID gains.  Some controllers might not implement this even 
         if they implement setPID...
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setPIDGains() is not implemented by {}".format(self))
 
     def getPIDGains(self) -> Tuple[List[float],List[float],List[float]]:
         """Gets the PID gains (kP,kI,kD) as set to a prior call to setPIDGains.
         Some controllers might not implement this even if they implement
         setPIDGains...
         """
-        raise NotImplementedError()
+        raise NotImplementedError("getPIDGains() is not implemented by {}".format(self))
 
     def moveToPosition(self,
             q: Vector,
@@ -670,7 +670,7 @@ class RobotInterfaceBase(object):
             speed (float, optional): The speed at which the position
                 should be reached.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("moveToPosition() is not implemented by {}".format(self))
 
     def setPiecewiseLinear(self,
             ts: List[float],
@@ -689,7 +689,7 @@ class RobotInterfaceBase(object):
                 at current time 0.  Otherwise, they must all be greater than 
                 the current time retrieved by clock().
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setPiecewiseLinear() is not implemented by {}".format(self))
 
     def setPiecewiseCubic(self,
             ts: List[float],
@@ -710,17 +710,17 @@ class RobotInterfaceBase(object):
                 at current time 0.  Otherwise, they must all be greater than 
                 the current time retrieved by clock().
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setPiecewiseCubic() is not implemented by {}".format(self))
 
     def setToolCoordinates(self, xtool_local: Vector3) -> None:
         """Sets the tool coordinates of this robot relative to its end
         effector link."""
-        raise NotImplementedError()
+        raise NotImplementedError("setToolCoordinates() is not implemented by {}".format(self))
 
     def getToolCoordinates(self) -> Vector3:
         """Gets the tool coordinates of this robot relative to its end
         effector link."""
-        raise NotImplementedError()
+        raise NotImplementedError("getToolCoordinates() is not implemented by {}".format(self))
         
     def setGravityCompensation(self,
             gravity: Vector3=[0,0,-9.8],
@@ -738,12 +738,12 @@ class RobotInterfaceBase(object):
             load_com (list of 3 floats, optional): the COM of the load,
                 expressed relative to the end-effector link frame.
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setGravityCompensation() is not implemented by {}".format(self))
 
     def getGravityCompensation(self) -> tuple:
         """Gets (gravity,load,load_com) as from a prior call to
         setGravityCompensation."""
-        raise NotImplementedError()
+        raise NotImplementedError("getGravityCompensation() is not implemented by {}".format(self))
 
     def setCartesianPosition(self,
             xparams: Union[Vector,RigidTransform],
@@ -758,7 +758,7 @@ class RobotInterfaceBase(object):
             commands, or a 3-vector for position-only.
             frame (str): either 'world', 'base', 'end effector', or 'tool'
         """
-        raise NotImplementedError()
+        raise NotImplementedError("setCartesianPosition() is not implemented by {}".format(self))
 
     def moveToCartesianPosition(self,
             xparams: Union[Vector3,RigidTransform],
@@ -777,7 +777,7 @@ class RobotInterfaceBase(object):
                 should be reached.
             frame (str): either 'world', 'base', 'end effector', or 'tool'
         """
-        raise NotImplementedError()
+        raise NotImplementedError("moveToCartesianPosition() is not implemented by {}".format(self))
     
     def moveToCartesianPositionLinear(self,
             xparams: Union[Vector3,RigidTransform],

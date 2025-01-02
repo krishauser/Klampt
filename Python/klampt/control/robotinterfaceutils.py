@@ -686,6 +686,7 @@ def _gather_commands(part_commands : Sequence[Sequence[_RobotInterfaceCommand]],
                 cmd.indices = whole_inds
                 cmd.func = command.func
                 cmd.args = [copy.copy(a) for a in command.args]
+                cmd.promise = command.promise
                 res[command.func] = cmd
             else:
                 #func already exists, now add to it
@@ -694,6 +695,8 @@ def _gather_commands(part_commands : Sequence[Sequence[_RobotInterfaceCommand]],
                 if cmd.indices == whole_inds:
                     #more up-to-date version of same indices
                     cmd.args = [copy.copy(a) for a in command.args]
+                    if command.promise is not None:
+                        cmd.promise = command.promise
                 else:
                     #merge
                     if cmd.indices is not None:
@@ -707,6 +710,7 @@ def _gather_commands(part_commands : Sequence[Sequence[_RobotInterfaceCommand]],
                             assert len(a) == len(cmd.indices)
                         cmd.args[i].extend(a2)
                     cmd.indices += whole_inds
+                    #TODO: combine multiple promises
     return sorted(list(res.values()), key = lambda x:x.time)
 
 def _update_from_part_settings(interface : RobotInterfaceBase, settings : _RobotInterfacePartSettings, delta_settings : _RobotInterfacePartSettings):
@@ -751,6 +755,8 @@ def _update_from_part_settings(interface : RobotInterfaceBase, settings : _Robot
 def _update_from_settings(interface : RobotInterfaceBase,
                           settings : _RobotInterfaceSettings,
                           delta_settings : _RobotInterfaceSettings):
+    assert settings is not None
+    assert delta_settings is not None
     errors = []
     if delta_settings.kP is not None:
         assert delta_settings.kI is not None
@@ -910,14 +916,14 @@ def _try_methods(obj, fn: Union[str,List[str]], args, fallback : Callable = None
             if cache is not None:
                 cache[fn] = False
         except Exception as e:
-            print("Error",e,"received during call of",fn,"of base",str(obj))
+            print("Error '{}' received during first call of {} of base {}".format(e,fn,obj))
             raise
     if docall:
         try:
             res = getattr(obj,fn)(*args)
             return res
         except Exception as e:
-            print("Error",e,"received during later call of",fn,"of base",str(obj))
+            print("Error '{}' received during later call of {} of base {}".format(e,fn,obj))
             raise
     if fallback is None:
         raise NotImplementedError("Method {} is not defined by object {}, no fallback available".format(fn,obj))
@@ -1589,13 +1595,13 @@ class _RobotInterfaceStatefulWrapper(_RobotInterfaceStatefulBase):
                 return defaultValue
             except Exception as e:
                 if strict:
-                    print("Error",e,"received during first call of",fn,"of base",str(self._base))
+                    print("Error '{}' received during first call of {} of base {}".format(e,fn,self._base))
                     raise
                 else:
                     self._has[fn] = False
                     return defaultValue
         except Exception as e:
-            print("Error",e,"received during later call of",fn,"of base",str(self._base))
+            print("Error '{}' received during later call of {} of base {}".format(e,fn,self._base))
             raise
 
     def __str__(self):
@@ -1624,12 +1630,15 @@ class _RobotInterfaceStatefulWrapper(_RobotInterfaceStatefulBase):
             self._partInterfaces[p] = _RobotInterfaceStatefulWrapper(self._base.partInterface(p),base_initialized=True)
             self._partInterfaces[p].properties['name'] = p
             self._partInterfaces[p].properties['part'] = True
-            self._partInterfaces[p].initialize()
+            if not self._partInterfaces[p].initialize():
+                print("{}: Part {} failed to initialize".format(self,p))
+                return False
             if len(self._partInterfaces[p].parts()) > 1:
                 raise NotImplementedError("TODO: parts that have sub-parts")
         #read settings
         sensors = self._try('sensors',(),[])
         self._structure.sensors = sensors if sensors else None
+        assert self._settings is not None
         if sensors:
             self._settings.sensorEnabled = dict()
         for s in sensors:
@@ -2252,7 +2261,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
                 iface._delta_settings = _RobotInterfaceSettings()
             for (k,iface) in self._virtualParts.items():
                 iface._delta_settings = _RobotInterfaceSettings()
-        except Exception:
+        except Exception as e:
             for (k,iface) in self._physicalParts.items():
                 iface.endStep()
             raise
@@ -2515,6 +2524,8 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     """
     def __init__(self,base_interface : RobotInterfaceBase, base_initialized=False):
+        if isinstance(base_interface,RobotInterfaceCompleter):
+            raise ValueError("Can't wrap a RobotInterfaceCompleter with another completer")
         RobotInterfaceBase.__init__(self)
         self._base = base_interface
         self._baseInitialized  = base_initialized
@@ -2898,26 +2909,26 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         self._emulator.getGravityCompensation(self._indices)
 
     def setCartesianPosition(self,xparams,frame='world'):
-        assert len(xparams)==2 or len(xparams)==3, "Cartesian target must be a point or (R,t) transform"
+        assert len(xparams)==2 or len(xparams)==3, "Cartesian target must be a point or (R,t) transform, instead got {}".format(xparams)
         self._emulator.setCartesianPosition(self._indices,xparams,frame)
 
     def moveToCartesianPosition(self,xparams,speed=1.0,frame='world'):
-        assert len(xparams)==2 or len(xparams)==3, "Cartesian target must be a point or (R,t) transform"
+        assert len(xparams)==2 or len(xparams)==3, "Cartesian target must be a point or (R,t) transform, instead got {}".format(xparams)
         assert isinstance(speed,(float,int)),"Speed must be a number"
         self._emulator.moveToCartesianPosition(self._indices,xparams,speed,frame)
     
     def moveToCartesianPositionLinear(self,xparams,speed=1.0,frame='world'):
-        assert len(xparams)==2 or len(xparams)==3, "Cartesian target must be a point or (R,t) transform"
+        assert len(xparams)==2 or len(xparams)==3, "Cartesian target must be a point or (R,t) transform, instead got {}".format(xparams)
         assert isinstance(speed,(float,int)),"Speed must be a number"
         self._emulator.moveToCartesianPositionLinear(self._indices,xparams,speed,frame)
 
     def setCartesianVelocity(self,dxparams,ttl=None,frame='world'):
-        assert len(dxparams)==2 or len(dxparams)==3, "Cartesian velocity must be a velocity or (angularVelocity,velocity) pair"
+        assert len(dxparams)==2 or len(dxparams)==3, "Cartesian velocity must be a velocity or (angularVelocity,velocity) pair, instead got {}".format(dxparams)
         assert ttl is None or isinstance(ttl,(int,float)), "ttl must be None or a number"
         self._emulator.setCartesianVelocity(self._indices,dxparams,ttl,frame)
 
     def setCartesianForce(self,fparams,ttl=None,frame='world'):
-        assert len(fparams)==2 or len(fparams)==3, "Cartesian force must be a force or (torque,force) pair"
+        assert len(fparams)==2 or len(fparams)==3, "Cartesian force must be a force or (torque,force) pair, instead got {}".format(fparams)
         assert ttl is None or isinstance(ttl,(int,float)), "ttl must be None or a number"
         self._emulator.setCartesianForce(self._indices,fparams,ttl,frame)
 
@@ -3445,6 +3456,7 @@ class ThreadedRobotInterface(_RobotInterfaceStatefulBase):
         self._thread.daemon = True
         self._lock = RLock()
         self._initialized = None
+        self._exception = None
         self.properties = copy.deepcopy(self._interface.properties)
         if self.properties.get('asynchronous',False):
             warnings.warn("ThreadedRobotInterface: interface is already asynchronous?  Suggest not threading it")
@@ -3489,6 +3501,11 @@ class ThreadedRobotInterface(_RobotInterfaceStatefulBase):
             self._thread = None
         else:
             warnings.warn("close() called twice?")
+    
+    def status(self):
+        if self._exception is not None:
+            return "exception ({})".format(str(self._exception))
+        return super().status()
 
     def _threadFunc(self):
         assert self._initialized is None
@@ -3522,27 +3539,35 @@ class ThreadedRobotInterface(_RobotInterfaceStatefulBase):
         try:
             dt = 1.0/self._interface.controlRate()
         except Exception as e:
-            print("Error calling controlRate()",e)
+            print("ThreadedRobotInterface: Error calling controlRate()",e)
             self._initialized = False
             raise
+        self._exception = None
         self._initialized = True   #tell calling thread that it can continue with initialize()
         
         #begin control loop
         looper = TimedLooper(dt=dt,name='RobotInterfaceServer({})'.format(str(self._interface)),warning_printer=self.log)
         while looper:
-            with StepContext(self._interface,ignore=True):
-                if self._interface._commands:
-                    self.quit = True
-                    raise RuntimeError("Interface didn't clear command queue?")
-                #write state changes
-                with self._lock:
-                    self._state = copy.deepcopy(self._interface._state)
-                    self._split_state()
-                with self._lock:
-                    #read settings changes, command changes and pass to interface
-                    settings,cmds = self._advance_settings_and_commands()
-                    self._interface._delta_settings = settings
-                    self._interface._commands = cmds
+            try:
+                with StepContext(self._interface,ignore=False):
+                    if self._interface._commands:
+                        self.quit = True
+                        raise RuntimeError("Interface didn't clear command queue?")
+                    #write state changes
+                    with self._lock:
+                        self._state = copy.deepcopy(self._interface._state)
+                        self._split_state()
+                    with self._lock:
+                        #read settings changes, command changes and pass to interface
+                        settings,cmds = self._advance_settings_and_commands()
+                        self._interface._delta_settings = settings
+                        self._interface._commands = cmds
+            except Exception as e:
+                print("ThreadedRobotInterface: received exception {}".format(e))
+                import traceback
+                traceback.print_exc()
+                self._exception = e
+                break
             if self._quit:
                 break
         self._interface.close()
@@ -3576,7 +3601,7 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
         self._receiveQueue = receiveQueue
         self.properties = copy.deepcopy(interface.properties)
         if self.properties.get('asynchronous',False):
-            warnings.warn("ThreadedRobotInterface: interface is already asynchronous?  Suggest not threading it")
+            warnings.warn("MultiprocessingRobotInterface: interface is already asynchronous?  Suggest not threading it")
         self.properties['asynchronous'] = True
         self._shortcut_update = False   #changes will only be reflected on next time step
         
@@ -3602,7 +3627,7 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
             time.sleep(0.01)
             t1 = time.time()
             if t1 - t0 > 5:
-                print("Initialization is taking a long time...")
+                print("MultiprocessingRobotInterface: Initialization is taking a long time...")
                 t0 = t1
         return self._initialized
 
@@ -3652,7 +3677,7 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
             self._sendQueue.put(('updateSettingsAndCommands',(delta_settings,commands)))
             newState = self._receiveQueue.get()
             if newState is None:
-                print("Controller encountered an error, breaking out of thread.")
+                print("MultiprocessingRobotInterface: Controller encountered an error, breaking out of thread.")
                 errorMessage = self._receiveQueue.get()
                 print("  Error message:",errorMessage)
                 break
@@ -3711,7 +3736,7 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
                 sendQueue.put("Exception from interface: {}".format(str(e)))
                 break
             
-        print("Ending controller process")
+        print("MultiprocessingRobotInterface: Ending controller process")
 
 
 
@@ -5172,7 +5197,7 @@ class RobotInterfaceEmulator:
         except KeyError:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
-        raise NotImplementedError("TODO: implement cartesian force?")
+        raise NotImplementedError("TODO: implement cartesian force emulator?")
         qstart = [j.sensedPosition if j.commandedPosition is None else j.commandedPosition for j in self.jointData]
         c.setCartesianForce(qstart,fparams,ttl,frame)
 
@@ -5199,7 +5224,7 @@ class RobotInterfaceEmulator:
             c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianPosition(q,frame)
         except KeyError:
-            raise ValueError("Cartesian control not enabled for joint {}. Try setToolCoordinates(ee_coords_local)".format(indices[-1]))
+            raise ValueError("Cartesian control not enabled for joint {}. Try calling setToolCoordinates(...) first".format(indices[-1]))
 
     def cartesianVelocity(self,indices,q,dq,frame):
         """
@@ -5230,7 +5255,7 @@ class RobotInterfaceEmulator:
             c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianVelocity(q,dq,frame)
         except KeyError:
-            raise ValueError("Cartesian control not enabled for joint {}. Try setToolCoordinates(ee_coords_local)".format(indices[-1]))
+            raise ValueError("Cartesian control not enabled for joint {}. Try calling setToolCoordinates(...) first".format(indices[-1]))
 
     def cartesianForce(self,indices,q,t,frame):
         assert len(q) == len(self.jointData),"cartesianForce: must use full-body configuration, {} != {}".format(len(q),len(self.jointData))
@@ -5243,7 +5268,7 @@ class RobotInterfaceEmulator:
             c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianForce(q,t,frame)
         except KeyError:
-            raise ValueError("Cartesian control not enabled for joint {}. Try setToolCoordinates(ee_coords_local)".format(indices[-1]))
+            raise ValueError("Cartesian control not enabled for joint {}. Try calling setToolCoordinates(...) first".format(indices[-1]))
 
     def printStatus(self):
         joint_control = [True]*len(self.jointData)
