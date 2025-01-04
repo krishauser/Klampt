@@ -229,9 +229,10 @@ class KlamptWidget(widgets.DOMWidget):
             if isinstance(item,SE3Trajectory):
                 res = []
                 ttraj = []
-                for i in item.milestones:
-                    T = item.to_se3(item.milestones[i])
-                    res += self.add(name+"_milestone_"+str(i),T)
+                for i,q in enumerate(item.milestones):
+                    T = item.to_se3(q)
+                    xform_items = self.add(name+"_milestone_"+str(i),T,'RigidTransform')
+                    res += xform_items
                     ttraj.append(T[1])
                 res += self.add(name,ttraj,**kwargs)
                 self._extras[name] = ('Trajectory',res)

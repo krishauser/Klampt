@@ -49,7 +49,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             return self.addText(name,item,**kwargs)
         VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
         try:
-            KlamptWidget.add(self,name,item,**kwargs)
+            return KlamptWidget.add(self,name,item,**kwargs)
         except ValueError:
             raise ValueError("Can't draw items of type "+item.__class__.__name__+" in Jupyter notebook")
 
