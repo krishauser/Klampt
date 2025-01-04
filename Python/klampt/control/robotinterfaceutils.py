@@ -1754,10 +1754,12 @@ class _RobotInterfaceStatefulWrapper(_RobotInterfaceStatefulBase):
         for part,iface in self._partInterfaces.items(): 
             for cmd in iface._commands:
                 try:
-                    getattr(iface,cmd.func)(*cmd.args)
+                    r = getattr(iface,cmd.func)(*cmd.args)
+                    cmd.promise.callback(r)
                 except Exception as e:
                     if cmd.func in ['reset','estop','softStop']:   #bubble-up
-                        getattr(self._base,cmd.func)(*cmd.args)
+                        r = getattr(self._base,cmd.func)(*cmd.args)
+                        cmd.promise.callback(r)
                     else:
                         cmd.promise.errback(e)   #TODO: errbacks can add to command queue
                         errors.append(e)
@@ -1767,7 +1769,8 @@ class _RobotInterfaceStatefulWrapper(_RobotInterfaceStatefulBase):
             if cmd.indices is not None and len(cmd.indices) != self._structure.numJoints:
                 errors.append("Invalid number of indices")
             try:
-                getattr(self._base,cmd.func)(*cmd.args)
+                r = getattr(self._base,cmd.func)(*cmd.args)
+                cmd.promise.callback(r)
             except Exception as e:
                 cmd.promise.errback(e)   #TODO: errbacks can add to command queue
                 errors.append(e)
@@ -2613,7 +2616,8 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
             return False
         self._emulator = RobotInterfaceEmulator(self._base.numJoints(),self._base.klamptModel())
         self._emulator.curClock = curclock
-        print("RobotInterfaceCompleter({}): Starting with clock {}".format(self._base,curclock))
+        if curclock != 0:
+            print("RobotInterfaceCompleter({}): Starting with clock {}".format(self._base,curclock))
         assert curclock is not None
 
         self._warned = False
@@ -3237,12 +3241,12 @@ class CollisionFilter:
     def __call__(self,q):
         self.robot.setConfig(self.robot.configFromDrivers(q))
         for o in self.obstacles:
-            for g in self.robotGeoms:
+            for i,g in enumerate(self.robotGeoms):
                 if o.collides(g):
                     if self.op == 'stop':
-                        raise blocks.utils.BlockSignal('softStop','collision')
+                        raise blocks.utils.BlockSignal('softStop','collision with link {}'.format(self.robot.link(i).name))
                     else:
-                        raise blocks.utils.BlockSignal('warn','collision')
+                        raise blocks.utils.BlockSignal('warn','collision with link {}'.format(self.robot.link(i).name))
         return q
 
 
@@ -3457,6 +3461,7 @@ class ThreadedRobotInterface(_RobotInterfaceStatefulBase):
         self._lock = RLock()
         self._initialized = None
         self._exception = None
+        self._commands_processed = True
         self.properties = copy.deepcopy(self._interface.properties)
         if self.properties.get('asynchronous',False):
             warnings.warn("ThreadedRobotInterface: interface is already asynchronous?  Suggest not threading it")
@@ -3559,6 +3564,9 @@ class ThreadedRobotInterface(_RobotInterfaceStatefulBase):
                         self._split_state()
                     with self._lock:
                         #read settings changes, command changes and pass to interface
+                        self._commands_processed = True
+                        if len(self._commands) > 0:
+                            self._commands_processed = False
                         settings,cmds = self._advance_settings_and_commands()
                         self._interface._delta_settings = settings
                         self._interface._commands = cmds
@@ -3572,6 +3580,9 @@ class ThreadedRobotInterface(_RobotInterfaceStatefulBase):
                 break
         self._interface.close()
 
+    def isMoving(self):
+        """Ensures that moving=True if pending commands are still being processed"""
+        return len(self._commands) > 0 or not self._commands_processed or super().isMoving()
 
 
 class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
@@ -3599,6 +3610,7 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
         self._process = Process(target=self._processFunc,args=[interface,sendQueue,receiveQueue])
         self._sendQueue = sendQueue
         self._receiveQueue = receiveQueue
+        self._commands_processed = True
         self.properties = copy.deepcopy(interface.properties)
         if self.properties.get('asynchronous',False):
             warnings.warn("MultiprocessingRobotInterface: interface is already asynchronous?  Suggest not threading it")
@@ -3673,6 +3685,8 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
         self._initialized = True   #tell calling thread that it can continue with initialize()
         while True:
             with self._lock:
+                if len(self._commands) > 0:
+                    self._commands_processed = False
                 delta_settings,commands = self._advance_settings_and_commands()
             self._sendQueue.put(('updateSettingsAndCommands',(delta_settings,commands)))
             newState = self._receiveQueue.get()
@@ -3681,6 +3695,7 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
                 errorMessage = self._receiveQueue.get()
                 print("  Error message:",errorMessage)
                 break
+            self._commands_processed = True
             with self._lock:
                 self._state = newState
                 self._split_state()
@@ -3738,6 +3753,9 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
             
         print("MultiprocessingRobotInterface: Ending controller process")
 
+    def isMoving(self):
+        """Ensures that moving=True if pending commands are still being processed"""
+        return len(self._commands) > 0 or not self._commands_processed or super().isMoving()
 
 
 class _JointInterfaceEmulatorData:
@@ -4798,12 +4816,13 @@ class RobotInterfaceEmulator:
             return results
         except blocks.utils.BlockSignal as e:
             if e.signal == 'softStop':
+                print("Filter",name,"requests a soft stop")
                 self.softStop(indices)
                 return
             elif e.signal == 'warn':
-                print("Filter",name,"produced warning",e)
+                print("Filter {} produced warning '{}'".format(name,e))
             else:
-                print("Filter",name,"raised an unknown signal type?",e.type,e)
+                print("Filter {} raised an unknown signal type? {}:'{}'".format(name,e.type,e))
 
     def commandFilter(self,indices,item,value):
         if isinstance(indices,list):

@@ -1000,9 +1000,16 @@ class RobotInterfaceBase(object):
             float: the approximate time in s that was waited.
         """
         if condition is None: condition = lambda : not self.isMoving()
-        self.beginStep()
-        stop = condition()
-        self.endStep()
+        if self.properties['asynchronous']:
+            import time
+            # may need to wait some amount of time to ensure that previous commands were issued
+            # and that tested conditions are retrieved
+            time.sleep(2.0/self.controlRate())
+            stop = condition()
+        else:
+            self.beginStep()
+            stop = condition()
+            self.endStep()
         if stop: return 0
 
         dt = 1.0/pollRate if pollRate is not None else 1.0/self.controlRate()
