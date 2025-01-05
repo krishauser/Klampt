@@ -15,10 +15,10 @@ Time: 10-30 minutes
 
 To install the Klamp't Python bindings:
 
-1. Install Python 2.7+ or 3.7+ from [http://www.python.org/getit/](http://www.python.org/getit/).  Both 32-bit (x86) and 64-bit (x64) versions are supported.
+1. Install Python 3.7+ from [http://www.python.org/getit/](http://www.python.org/getit/).  Both 32-bit (x86) and 64-bit (x64) versions are supported.
 2. Install Klampt using `pip install klampt`
 3. Install PyOpenGL using `pip install PyOpenGL`, or use the Win32 installer from https://pypi.python.org/pypi/PyOpenGL/.
-4. Install PyQt5 or PyQt4.  In Python 3.x this is easy as `pip install PyQt5`, but users of Python 2.x will need to [download the appropriate unofficial PyQt4 build here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4).
+4. Install PyQt6 or PyQt5.  This is easy as `pip install PyQt6`.
 
 You're done! As a test, run "cmd" from the start menu, 
 
