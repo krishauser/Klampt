@@ -68525,30 +68525,23 @@ SWIGINTERN PyObject *_wrap_force_closure__SWIG_0(PyObject *SWIGUNUSEDPARM(self),
   double *arg1 = (double *) 0 ;
   int arg2 ;
   int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
   bool result;
   
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "force_closure" "', argument " "1"" of type '" "double *""'"); 
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0], NPY_DOUBLE,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 2) ||
+      !require_size(array1, size, 2)) SWIG_fail;
+    arg1 = (double*) array_data(array1);
+    arg2 = (int) array_size(array1,0);
+    arg3 = (int) array_size(array1,1);
   }
-  arg1 = reinterpret_cast< double * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "force_closure" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "force_closure" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
   {
     try {
       result = (bool)force_closure(arg1,arg2,arg3);
@@ -68563,8 +68556,20 @@ SWIGINTERN PyObject *_wrap_force_closure__SWIG_0(PyObject *SWIGUNUSEDPARM(self),
     }
   }
   resultobj = SWIG_From_bool(static_cast< bool >(result));
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   return resultobj;
 fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   return NULL;
 }
 
@@ -68626,12 +68631,27 @@ fail:
 
 SWIGINTERN PyObject *_wrap_force_closure(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[4] = {
+  PyObject *argv[3] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "force_closure", 0, 3, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "force_closure", 0, 2, argv))) SWIG_fail;
   --argc;
+  if (argc == 1) {
+    int _v;
+    {
+      _v = is_array(argv[0]) || PySequence_Check(argv[0]);
+    }
+    if (_v) {
+      if (argc <= 1) {
+        return _wrap_force_closure__SWIG_0(self, argc, argv);
+      }
+      if (argc <= 2) {
+        return _wrap_force_closure__SWIG_0(self, argc, argv);
+      }
+      return _wrap_force_closure__SWIG_0(self, argc, argv);
+    }
+  }
   if (argc == 2) {
     int _v;
     int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
@@ -68641,27 +68661,6 @@ SWIGINTERN PyObject *_wrap_force_closure(PyObject *self, PyObject *args) {
       _v = SWIG_CheckState(res);
       if (_v) {
         return _wrap_force_closure__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          return _wrap_force_closure__SWIG_0(self, argc, argv);
-        }
       }
     }
   }
@@ -68680,30 +68679,23 @@ SWIGINTERN PyObject *_wrap_force_closure_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(sel
   double *arg1 = (double *) 0 ;
   int arg2 ;
   int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
   bool result;
   
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "force_closure_2d" "', argument " "1"" of type '" "double *""'"); 
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0], NPY_DOUBLE,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 2) ||
+      !require_size(array1, size, 2)) SWIG_fail;
+    arg1 = (double*) array_data(array1);
+    arg2 = (int) array_size(array1,0);
+    arg3 = (int) array_size(array1,1);
   }
-  arg1 = reinterpret_cast< double * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "force_closure_2d" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "force_closure_2d" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
   {
     try {
       result = (bool)force_closure_2d(arg1,arg2,arg3);
@@ -68718,8 +68710,20 @@ SWIGINTERN PyObject *_wrap_force_closure_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(sel
     }
   }
   resultobj = SWIG_From_bool(static_cast< bool >(result));
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   return resultobj;
 fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   return NULL;
 }
 
@@ -68781,12 +68785,27 @@ fail:
 
 SWIGINTERN PyObject *_wrap_force_closure_2d(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[4] = {
+  PyObject *argv[3] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "force_closure_2d", 0, 3, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "force_closure_2d", 0, 2, argv))) SWIG_fail;
   --argc;
+  if (argc == 1) {
+    int _v;
+    {
+      _v = is_array(argv[0]) || PySequence_Check(argv[0]);
+    }
+    if (_v) {
+      if (argc <= 1) {
+        return _wrap_force_closure_2d__SWIG_0(self, argc, argv);
+      }
+      if (argc <= 2) {
+        return _wrap_force_closure_2d__SWIG_0(self, argc, argv);
+      }
+      return _wrap_force_closure_2d__SWIG_0(self, argc, argv);
+    }
+  }
   if (argc == 2) {
     int _v;
     int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
@@ -68796,27 +68815,6 @@ SWIGINTERN PyObject *_wrap_force_closure_2d(PyObject *self, PyObject *args) {
       _v = SWIG_CheckState(res);
       if (_v) {
         return _wrap_force_closure_2d__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          return _wrap_force_closure_2d__SWIG_0(self, argc, argv);
-        }
       }
     }
   }
@@ -68837,34 +68835,27 @@ SWIGINTERN PyObject *_wrap_com_equilibrium__SWIG_0(PyObject *SWIGUNUSEDPARM(self
   int arg3 ;
   std::vector< double,std::allocator< double > > *arg4 = 0 ;
   PyObject *arg5 = (PyObject *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
   int res4 = SWIG_OLDOBJ ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "com_equilibrium" "', argument " "1"" of type '" "double *""'"); 
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0], NPY_DOUBLE,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 2) ||
+      !require_size(array1, size, 2)) SWIG_fail;
+    arg1 = (double*) array_data(array1);
+    arg2 = (int) array_size(array1,0);
+    arg3 = (int) array_size(array1,1);
   }
-  arg1 = reinterpret_cast< double * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "com_equilibrium" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "com_equilibrium" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res4 = swig::asptr(swig_obj[3], &ptr);
+    res4 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res4)) {
       SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "com_equilibrium" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
@@ -68873,7 +68864,7 @@ SWIGINTERN PyObject *_wrap_com_equilibrium__SWIG_0(PyObject *SWIGUNUSEDPARM(self
     }
     arg4 = ptr;
   }
-  arg5 = swig_obj[4];
+  arg5 = swig_obj[2];
   {
     try {
       result = (PyObject *)com_equilibrium(arg1,arg2,arg3,(std::vector< double,std::allocator< double > > const &)*arg4,arg5);
@@ -68888,9 +68879,21 @@ SWIGINTERN PyObject *_wrap_com_equilibrium__SWIG_0(PyObject *SWIGUNUSEDPARM(self
     }
   }
   resultobj = result;
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   if (SWIG_IsNewObj(res4)) delete arg4;
   return resultobj;
 fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   if (SWIG_IsNewObj(res4)) delete arg4;
   return NULL;
 }
@@ -68970,12 +68973,28 @@ fail:
 
 SWIGINTERN PyObject *_wrap_com_equilibrium(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[6] = {
+  PyObject *argv[5] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "com_equilibrium", 0, 5, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "com_equilibrium", 0, 4, argv))) SWIG_fail;
   --argc;
+  if (argc == 3) {
+    int _v;
+    {
+      _v = is_array(argv[0]) || PySequence_Check(argv[0]);
+    }
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector< double,std::allocator< double > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        _v = (argv[2] != 0);
+        if (_v) {
+          return _wrap_com_equilibrium__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
   if (argc == 4) {
     int _v;
     int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
@@ -68990,34 +69009,6 @@ SWIGINTERN PyObject *_wrap_com_equilibrium(PyObject *self, PyObject *args) {
           _v = (argv[3] != 0);
           if (_v) {
             return _wrap_com_equilibrium__SWIG_1(self, argc, argv);
-          }
-        }
-      }
-    }
-  }
-  if (argc == 5) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            _v = (argv[4] != 0);
-            if (_v) {
-              return _wrap_com_equilibrium__SWIG_0(self, argc, argv);
-            }
           }
         }
       }
@@ -69040,34 +69031,27 @@ SWIGINTERN PyObject *_wrap_com_equilibrium_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(s
   int arg3 ;
   std::vector< double,std::allocator< double > > *arg4 = 0 ;
   PyObject *arg5 = (PyObject *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
   int res4 = SWIG_OLDOBJ ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "com_equilibrium_2d" "', argument " "1"" of type '" "double *""'"); 
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0], NPY_DOUBLE,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 2) ||
+      !require_size(array1, size, 2)) SWIG_fail;
+    arg1 = (double*) array_data(array1);
+    arg2 = (int) array_size(array1,0);
+    arg3 = (int) array_size(array1,1);
   }
-  arg1 = reinterpret_cast< double * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "com_equilibrium_2d" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "com_equilibrium_2d" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res4 = swig::asptr(swig_obj[3], &ptr);
+    res4 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res4)) {
       SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "com_equilibrium_2d" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
@@ -69076,7 +69060,7 @@ SWIGINTERN PyObject *_wrap_com_equilibrium_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(s
     }
     arg4 = ptr;
   }
-  arg5 = swig_obj[4];
+  arg5 = swig_obj[2];
   {
     try {
       result = (PyObject *)com_equilibrium_2d(arg1,arg2,arg3,(std::vector< double,std::allocator< double > > const &)*arg4,arg5);
@@ -69091,9 +69075,21 @@ SWIGINTERN PyObject *_wrap_com_equilibrium_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(s
     }
   }
   resultobj = result;
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   if (SWIG_IsNewObj(res4)) delete arg4;
   return resultobj;
 fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   if (SWIG_IsNewObj(res4)) delete arg4;
   return NULL;
 }
@@ -69173,12 +69169,28 @@ fail:
 
 SWIGINTERN PyObject *_wrap_com_equilibrium_2d(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[6] = {
+  PyObject *argv[5] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "com_equilibrium_2d", 0, 5, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "com_equilibrium_2d", 0, 4, argv))) SWIG_fail;
   --argc;
+  if (argc == 3) {
+    int _v;
+    {
+      _v = is_array(argv[0]) || PySequence_Check(argv[0]);
+    }
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector< double,std::allocator< double > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        _v = (argv[2] != 0);
+        if (_v) {
+          return _wrap_com_equilibrium_2d__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
   if (argc == 4) {
     int _v;
     int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
@@ -69193,34 +69205,6 @@ SWIGINTERN PyObject *_wrap_com_equilibrium_2d(PyObject *self, PyObject *args) {
           _v = (argv[3] != 0);
           if (_v) {
             return _wrap_com_equilibrium_2d__SWIG_1(self, argc, argv);
-          }
-        }
-      }
-    }
-  }
-  if (argc == 5) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            _v = (argv[4] != 0);
-            if (_v) {
-              return _wrap_com_equilibrium_2d__SWIG_0(self, argc, argv);
-            }
           }
         }
       }
@@ -69241,30 +69225,23 @@ SWIGINTERN PyObject *_wrap_support_polygon__SWIG_0(PyObject *SWIGUNUSEDPARM(self
   double *arg1 = (double *) 0 ;
   int arg2 ;
   int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "support_polygon" "', argument " "1"" of type '" "double *""'"); 
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0], NPY_DOUBLE,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 2) ||
+      !require_size(array1, size, 2)) SWIG_fail;
+    arg1 = (double*) array_data(array1);
+    arg2 = (int) array_size(array1,0);
+    arg3 = (int) array_size(array1,1);
   }
-  arg1 = reinterpret_cast< double * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "support_polygon" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "support_polygon" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
   {
     try {
       result = (PyObject *)support_polygon(arg1,arg2,arg3);
@@ -69279,8 +69256,20 @@ SWIGINTERN PyObject *_wrap_support_polygon__SWIG_0(PyObject *SWIGUNUSEDPARM(self
     }
   }
   resultobj = result;
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   return resultobj;
 fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   return NULL;
 }
 
@@ -69342,12 +69331,27 @@ fail:
 
 SWIGINTERN PyObject *_wrap_support_polygon(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[4] = {
+  PyObject *argv[3] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "support_polygon", 0, 3, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "support_polygon", 0, 2, argv))) SWIG_fail;
   --argc;
+  if (argc == 1) {
+    int _v;
+    {
+      _v = is_array(argv[0]) || PySequence_Check(argv[0]);
+    }
+    if (_v) {
+      if (argc <= 1) {
+        return _wrap_support_polygon__SWIG_0(self, argc, argv);
+      }
+      if (argc <= 2) {
+        return _wrap_support_polygon__SWIG_0(self, argc, argv);
+      }
+      return _wrap_support_polygon__SWIG_0(self, argc, argv);
+    }
+  }
   if (argc == 2) {
     int _v;
     int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
@@ -69357,27 +69361,6 @@ SWIGINTERN PyObject *_wrap_support_polygon(PyObject *self, PyObject *args) {
       _v = SWIG_CheckState(res);
       if (_v) {
         return _wrap_support_polygon__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          return _wrap_support_polygon__SWIG_0(self, argc, argv);
-        }
       }
     }
   }
@@ -69396,30 +69379,23 @@ SWIGINTERN PyObject *_wrap_support_polygon_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(s
   double *arg1 = (double *) 0 ;
   int arg2 ;
   int arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "support_polygon_2d" "', argument " "1"" of type '" "double *""'"); 
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0], NPY_DOUBLE,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 2) ||
+      !require_size(array1, size, 2)) SWIG_fail;
+    arg1 = (double*) array_data(array1);
+    arg2 = (int) array_size(array1,0);
+    arg3 = (int) array_size(array1,1);
   }
-  arg1 = reinterpret_cast< double * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "support_polygon_2d" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "support_polygon_2d" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
   {
     try {
       result = (PyObject *)support_polygon_2d(arg1,arg2,arg3);
@@ -69434,8 +69410,20 @@ SWIGINTERN PyObject *_wrap_support_polygon_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(s
     }
   }
   resultobj = result;
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   return resultobj;
 fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
   return NULL;
 }
 
@@ -69497,12 +69485,27 @@ fail:
 
 SWIGINTERN PyObject *_wrap_support_polygon_2d(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[4] = {
+  PyObject *argv[3] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "support_polygon_2d", 0, 3, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "support_polygon_2d", 0, 2, argv))) SWIG_fail;
   --argc;
+  if (argc == 1) {
+    int _v;
+    {
+      _v = is_array(argv[0]) || PySequence_Check(argv[0]);
+    }
+    if (_v) {
+      if (argc <= 1) {
+        return _wrap_support_polygon_2d__SWIG_0(self, argc, argv);
+      }
+      if (argc <= 2) {
+        return _wrap_support_polygon_2d__SWIG_0(self, argc, argv);
+      }
+      return _wrap_support_polygon_2d__SWIG_0(self, argc, argv);
+    }
+  }
   if (argc == 2) {
     int _v;
     int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
@@ -69512,27 +69515,6 @@ SWIGINTERN PyObject *_wrap_support_polygon_2d(PyObject *self, PyObject *args) {
       _v = SWIG_CheckState(res);
       if (_v) {
         return _wrap_support_polygon_2d__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          return _wrap_support_polygon_2d__SWIG_0(self, argc, argv);
-        }
       }
     }
   }
@@ -69557,19 +69539,15 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_0(PyObject *SWIGUNUSEDPARM(
   double arg7 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
   int res5 = SWIG_OLDOBJ ;
   int res6 = SWIG_OLDOBJ ;
   double val7 ;
   int ecode7 = 0 ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 7) || (nobjs > 7)) SWIG_fail;
+  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
@@ -69578,24 +69556,21 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_0(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibrium_torques" "', argument " "2"" of type '" "double *""'"); 
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "equilibrium_torques" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
-  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "equilibrium_torques" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
-    res5 = swig::asptr(swig_obj[4], &ptr);
+    res5 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res5)) {
       SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
@@ -69606,7 +69581,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_0(PyObject *SWIGUNUSEDPARM(
   }
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res6 = swig::asptr(swig_obj[5], &ptr);
+    res6 = swig::asptr(swig_obj[3], &ptr);
     if (!SWIG_IsOK(res6)) {
       SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
@@ -69615,7 +69590,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_0(PyObject *SWIGUNUSEDPARM(
     }
     arg6 = ptr;
   }
-  ecode7 = SWIG_AsVal_double(swig_obj[6], &val7);
+  ecode7 = SWIG_AsVal_double(swig_obj[4], &val7);
   if (!SWIG_IsOK(ecode7)) {
     SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "equilibrium_torques" "', argument " "7"" of type '" "double""'");
   } 
@@ -69634,10 +69609,22 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_0(PyObject *SWIGUNUSEDPARM(
     }
   }
   resultobj = result;
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   if (SWIG_IsNewObj(res5)) delete arg5;
   if (SWIG_IsNewObj(res6)) delete arg6;
   return resultobj;
 fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   if (SWIG_IsNewObj(res5)) delete arg5;
   if (SWIG_IsNewObj(res6)) delete arg6;
   return NULL;
@@ -69654,17 +69641,13 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_1(PyObject *SWIGUNUSEDPARM(
   std::vector< double,std::allocator< double > > *arg6 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
   int res5 = SWIG_OLDOBJ ;
   int res6 = SWIG_OLDOBJ ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 6) || (nobjs > 6)) SWIG_fail;
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
@@ -69673,24 +69656,21 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_1(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibrium_torques" "', argument " "2"" of type '" "double *""'"); 
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "equilibrium_torques" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
-  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "equilibrium_torques" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
-    res5 = swig::asptr(swig_obj[4], &ptr);
+    res5 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res5)) {
       SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
@@ -69701,7 +69681,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_1(PyObject *SWIGUNUSEDPARM(
   }
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res6 = swig::asptr(swig_obj[5], &ptr);
+    res6 = swig::asptr(swig_obj[3], &ptr);
     if (!SWIG_IsOK(res6)) {
       SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
@@ -69724,10 +69704,22 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_1(PyObject *SWIGUNUSEDPARM(
     }
   }
   resultobj = result;
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   if (SWIG_IsNewObj(res5)) delete arg5;
   if (SWIG_IsNewObj(res6)) delete arg6;
   return resultobj;
 fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   if (SWIG_IsNewObj(res5)) delete arg5;
   if (SWIG_IsNewObj(res6)) delete arg6;
   return NULL;
@@ -69746,12 +69738,8 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_2(PyObject *SWIGUNUSEDPARM(
   double arg8 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
   int res5 = SWIG_OLDOBJ ;
   int res6 = SWIG_OLDOBJ ;
   int res7 = SWIG_OLDOBJ ;
@@ -69759,7 +69747,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_2(PyObject *SWIGUNUSEDPARM(
   int ecode8 = 0 ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 8) || (nobjs > 8)) SWIG_fail;
+  if ((nobjs < 6) || (nobjs > 6)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
@@ -69768,24 +69756,21 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_2(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibrium_torques" "', argument " "2"" of type '" "double *""'"); 
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "equilibrium_torques" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
-  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "equilibrium_torques" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
-    res5 = swig::asptr(swig_obj[4], &ptr);
+    res5 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res5)) {
       SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
@@ -69796,7 +69781,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_2(PyObject *SWIGUNUSEDPARM(
   }
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res6 = swig::asptr(swig_obj[5], &ptr);
+    res6 = swig::asptr(swig_obj[3], &ptr);
     if (!SWIG_IsOK(res6)) {
       SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
@@ -69807,7 +69792,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_2(PyObject *SWIGUNUSEDPARM(
   }
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res7 = swig::asptr(swig_obj[6], &ptr);
+    res7 = swig::asptr(swig_obj[4], &ptr);
     if (!SWIG_IsOK(res7)) {
       SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "equilibrium_torques" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
@@ -69816,7 +69801,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_2(PyObject *SWIGUNUSEDPARM(
     }
     arg7 = ptr;
   }
-  ecode8 = SWIG_AsVal_double(swig_obj[7], &val8);
+  ecode8 = SWIG_AsVal_double(swig_obj[5], &val8);
   if (!SWIG_IsOK(ecode8)) {
     SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "equilibrium_torques" "', argument " "8"" of type '" "double""'");
   } 
@@ -69835,11 +69820,23 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_2(PyObject *SWIGUNUSEDPARM(
     }
   }
   resultobj = result;
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   if (SWIG_IsNewObj(res5)) delete arg5;
   if (SWIG_IsNewObj(res6)) delete arg6;
   if (SWIG_IsNewObj(res7)) delete arg7;
   return resultobj;
 fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   if (SWIG_IsNewObj(res5)) delete arg5;
   if (SWIG_IsNewObj(res6)) delete arg6;
   if (SWIG_IsNewObj(res7)) delete arg7;
@@ -69858,18 +69855,14 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_3(PyObject *SWIGUNUSEDPARM(
   std::vector< double,std::allocator< double > > *arg7 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int val4 ;
-  int ecode4 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
   int res5 = SWIG_OLDOBJ ;
   int res6 = SWIG_OLDOBJ ;
   int res7 = SWIG_OLDOBJ ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 7) || (nobjs > 7)) SWIG_fail;
+  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
@@ -69878,24 +69871,21 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_3(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibrium_torques" "', argument " "2"" of type '" "double *""'"); 
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
   }
-  arg2 = reinterpret_cast< double * >(argp2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "equilibrium_torques" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
-  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "equilibrium_torques" "', argument " "4"" of type '" "int""'");
-  } 
-  arg4 = static_cast< int >(val4);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
-    res5 = swig::asptr(swig_obj[4], &ptr);
+    res5 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res5)) {
       SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
@@ -69906,7 +69896,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_3(PyObject *SWIGUNUSEDPARM(
   }
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res6 = swig::asptr(swig_obj[5], &ptr);
+    res6 = swig::asptr(swig_obj[3], &ptr);
     if (!SWIG_IsOK(res6)) {
       SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
@@ -69917,7 +69907,7 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_3(PyObject *SWIGUNUSEDPARM(
   }
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res7 = swig::asptr(swig_obj[6], &ptr);
+    res7 = swig::asptr(swig_obj[4], &ptr);
     if (!SWIG_IsOK(res7)) {
       SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "equilibrium_torques" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
@@ -69940,11 +69930,23 @@ SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_3(PyObject *SWIGUNUSEDPARM(
     }
   }
   resultobj = result;
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   if (SWIG_IsNewObj(res5)) delete arg5;
   if (SWIG_IsNewObj(res6)) delete arg6;
   if (SWIG_IsNewObj(res7)) delete arg7;
   return resultobj;
 fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   if (SWIG_IsNewObj(res5)) delete arg5;
   if (SWIG_IsNewObj(res6)) delete arg6;
   if (SWIG_IsNewObj(res7)) delete arg7;
@@ -69954,157 +69956,109 @@ fail:
 
 SWIGINTERN PyObject *_wrap_equilibrium_torques(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[9] = {
+  PyObject *argv[7] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "equilibrium_torques", 0, 8, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "equilibrium_torques", 0, 6, argv))) SWIG_fail;
   --argc;
+  if (argc == 4) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector< int,std::allocator< int > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            return _wrap_equilibrium_torques__SWIG_1(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector< int,std::allocator< int > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            {
+              int res = SWIG_AsVal_double(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              return _wrap_equilibrium_torques__SWIG_0(self, argc, argv);
+            }
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector< int,std::allocator< int > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            int res = swig::asptr(argv[4], (std::vector< double,std::allocator< double > >**)(0));
+            _v = SWIG_CheckState(res);
+            if (_v) {
+              return _wrap_equilibrium_torques__SWIG_3(self, argc, argv);
+            }
+          }
+        }
+      }
+    }
+  }
   if (argc == 6) {
     int _v;
     int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          {
-            int res = SWIG_AsVal_int(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            int res = swig::asptr(argv[4], (std::vector< int,std::allocator< int > >**)(0));
-            _v = SWIG_CheckState(res);
-            if (_v) {
-              int res = swig::asptr(argv[5], (std::vector< double,std::allocator< double > >**)(0));
-              _v = SWIG_CheckState(res);
-              if (_v) {
-                return _wrap_equilibrium_torques__SWIG_1(self, argc, argv);
-              }
-            }
-          }
-        }
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
       }
-    }
-  }
-  if (argc == 7) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
-      _v = SWIG_CheckState(res);
       if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
+        int res = swig::asptr(argv[2], (std::vector< int,std::allocator< int > >**)(0));
+        _v = SWIG_CheckState(res);
         if (_v) {
-          {
-            int res = SWIG_AsVal_int(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
+          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
+          _v = SWIG_CheckState(res);
           if (_v) {
-            int res = swig::asptr(argv[4], (std::vector< int,std::allocator< int > >**)(0));
+            int res = swig::asptr(argv[4], (std::vector< double,std::allocator< double > >**)(0));
             _v = SWIG_CheckState(res);
             if (_v) {
-              int res = swig::asptr(argv[5], (std::vector< double,std::allocator< double > >**)(0));
-              _v = SWIG_CheckState(res);
-              if (_v) {
-                {
-                  int res = SWIG_AsVal_double(argv[6], NULL);
-                  _v = SWIG_CheckState(res);
-                }
-                if (_v) {
-                  return _wrap_equilibrium_torques__SWIG_0(self, argc, argv);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  if (argc == 7) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          {
-            int res = SWIG_AsVal_int(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            int res = swig::asptr(argv[4], (std::vector< int,std::allocator< int > >**)(0));
-            _v = SWIG_CheckState(res);
-            if (_v) {
-              int res = swig::asptr(argv[5], (std::vector< double,std::allocator< double > >**)(0));
-              _v = SWIG_CheckState(res);
-              if (_v) {
-                int res = swig::asptr(argv[6], (std::vector< double,std::allocator< double > >**)(0));
+              {
+                int res = SWIG_AsVal_double(argv[5], NULL);
                 _v = SWIG_CheckState(res);
-                if (_v) {
-                  return _wrap_equilibrium_torques__SWIG_3(self, argc, argv);
-                }
               }
-            }
-          }
-        }
-      }
-    }
-  }
-  if (argc == 8) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          {
-            int res = SWIG_AsVal_int(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            int res = swig::asptr(argv[4], (std::vector< int,std::allocator< int > >**)(0));
-            _v = SWIG_CheckState(res);
-            if (_v) {
-              int res = swig::asptr(argv[5], (std::vector< double,std::allocator< double > >**)(0));
-              _v = SWIG_CheckState(res);
               if (_v) {
-                int res = swig::asptr(argv[6], (std::vector< double,std::allocator< double > >**)(0));
-                _v = SWIG_CheckState(res);
-                if (_v) {
-                  {
-                    int res = SWIG_AsVal_double(argv[7], NULL);
-                    _v = SWIG_CheckState(res);
-                  }
-                  if (_v) {
-                    return _wrap_equilibrium_torques__SWIG_2(self, argc, argv);
-                  }
-                }
+                return _wrap_equilibrium_torques__SWIG_2(self, argc, argv);
               }
             }
           }
@@ -76052,7 +76006,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "force_closure", _wrap_force_closure, METH_VARARGS, "\n"
-		"force_closure(double * contacts, int m, int n) -> bool\n"
+		"force_closure(double * np_array2) -> bool\n"
 		"force_closure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool\n"
 		"\n"
 		"\n"
@@ -76087,7 +76041,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "force_closure_2d", _wrap_force_closure_2d, METH_VARARGS, "\n"
-		"force_closure_2d(double * contacts, int m, int n) -> bool\n"
+		"force_closure_2d(double * np_array2) -> bool\n"
 		"force_closure_2d(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool\n"
 		"\n"
 		"\n"
@@ -76120,7 +76074,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "com_equilibrium", _wrap_com_equilibrium, METH_VARARGS, "\n"
-		"com_equilibrium(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject\n"
+		"com_equilibrium(double * np_array2, doubleVector fext, PyObject * com) -> PyObject\n"
 		"com_equilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *\n"
 		"\n"
 		"\n"
@@ -76159,7 +76113,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "com_equilibrium_2d", _wrap_com_equilibrium_2d, METH_VARARGS, "\n"
-		"com_equilibrium_2d(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject\n"
+		"com_equilibrium_2d(double * np_array2, doubleVector fext, PyObject * com) -> PyObject\n"
 		"com_equilibrium_2d(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *\n"
 		"\n"
 		"\n"
@@ -76201,7 +76155,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "support_polygon", _wrap_support_polygon, METH_VARARGS, "\n"
-		"support_polygon(double * contacts, int m, int n) -> PyObject\n"
+		"support_polygon(double * np_array2) -> PyObject\n"
 		"support_polygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *\n"
 		"\n"
 		"\n"
@@ -76248,7 +76202,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "support_polygon_2d", _wrap_support_polygon_2d, METH_VARARGS, "\n"
-		"support_polygon_2d(double * contacts, int m, int n) -> PyObject\n"
+		"support_polygon_2d(double * np_array2) -> PyObject\n"
 		"support_polygon_2d(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *\n"
 		"\n"
 		"\n"
@@ -76282,8 +76236,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "equilibrium_torques", _wrap_equilibrium_torques, METH_VARARGS, "\n"
-		"equilibrium_torques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, double norm=0) -> PyObject\n"
-		"equilibrium_torques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject\n"
+		"equilibrium_torques(RobotModel robot, double * np_array2, intVector links, doubleVector fext, double norm=0) -> PyObject\n"
+		"equilibrium_torques(RobotModel robot, double * np_array2, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject\n"
 		"\n"
 		"\n"
 		"Solves for the torques / forces that keep the robot balanced against gravity.  \n"

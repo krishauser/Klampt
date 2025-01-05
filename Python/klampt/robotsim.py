@@ -2512,7 +2512,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:obj:`Heightmap` or :class:`~klampt.ConvexHull` or :class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D`, optional): 
+            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.ConvexHull` or :class:`~klampt.VolumeGrid` or :obj:`Heightmap` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -6594,7 +6594,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6732,7 +6732,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7515,7 +7515,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -9260,7 +9260,7 @@ def force_closure(*args) ->bool:
     r"""
     Returns true if the list of contact points has force closure.  
 
-    force_closure (contacts,m,n): bool
+    force_closure (np_array2): bool
 
     force_closure (contactPositions,frictionCones): bool
 
@@ -9302,7 +9302,7 @@ def force_closure_2d(*args) ->bool:
     r"""
     Returns true if the list of 2D contact points has force closure.  
 
-    force_closure_2d (contacts,m,n): bool
+    force_closure_2d (np_array2): bool
 
     force_closure_2d (contactPositions,frictionCones): bool
 
@@ -9343,7 +9343,7 @@ def com_equilibrium(*args) ->object:
     Tests whether the given COM com is stable for the given contacts and the given
     external force fext.  
 
-    com_equilibrium (contacts,m,n,fext,com): :obj:`object`
+    com_equilibrium (np_array2,fext,com): :obj:`object`
 
     com_equilibrium (contactPositions,frictionCones,fext,com): :obj:`object`
 
@@ -9386,7 +9386,7 @@ def com_equilibrium_2d(*args) ->object:
     Tests whether the given COM com is stable for the given contacts and the given
     external force fext.  
 
-    com_equilibrium_2d (contacts,m,n,fext,com): :obj:`object`
+    com_equilibrium_2d (np_array2,fext,com): :obj:`object`
 
     com_equilibrium_2d (contactPositions,frictionCones,fext,com): :obj:`object`
 
@@ -9432,7 +9432,7 @@ def support_polygon(*args) ->object:
     Calculates the support polygon for a given set of contacts and a downward
     external force (0,0,-g).  
 
-    support_polygon (contacts,m,n): :obj:`object`
+    support_polygon (np_array2): :obj:`object`
 
     support_polygon (contactPositions,frictionCones): :obj:`object`
 
@@ -9483,7 +9483,7 @@ def support_polygon_2d(*args) ->object:
     Calculates the support polygon (interval) for a given set of contacts and a
     downward external force (0,-g).  
 
-    support_polygon_2d (contacts,m,n): :obj:`object`
+    support_polygon_2d (np_array2): :obj:`object`
 
     support_polygon_2d (contacts,frictionCones): :obj:`object`
 
@@ -9520,9 +9520,9 @@ def equilibrium_torques(*args) ->object:
     r"""
     Solves for the torques / forces that keep the robot balanced against gravity.  
 
-    equilibrium_torques (robot,contacts,m,n,links,fext,norm=0): :obj:`object`
+    equilibrium_torques (robot,np_array2,links,fext,norm=0): :obj:`object`
 
-    equilibrium_torques (robot,contacts,m,n,links,fext,internalTorques,norm=0): :obj:`object`
+    equilibrium_torques (robot,np_array2,links,fext,internalTorques,norm=0): :obj:`object`
 
 
     The problem being solved is  

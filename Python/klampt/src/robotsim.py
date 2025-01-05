@@ -9717,7 +9717,7 @@ def set_friction_cone_approximation_edges(numEdges: "int") -> "void":
 
 def force_closure(*args) -> "bool":
     r"""
-    force_closure(double * contacts, int m, int n) -> bool
+    force_closure(double * np_array2) -> bool
     force_closure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
 
 
@@ -9755,7 +9755,7 @@ def force_closure(*args) -> "bool":
 
 def force_closure_2d(*args) -> "bool":
     r"""
-    force_closure_2d(double * contacts, int m, int n) -> bool
+    force_closure_2d(double * np_array2) -> bool
     force_closure_2d(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
 
 
@@ -9791,7 +9791,7 @@ def force_closure_2d(*args) -> "bool":
 
 def com_equilibrium(*args) -> "PyObject *":
     r"""
-    com_equilibrium(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject
+    com_equilibrium(double * np_array2, doubleVector fext, PyObject * com) -> PyObject
     com_equilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
 
 
@@ -9833,7 +9833,7 @@ def com_equilibrium(*args) -> "PyObject *":
 
 def com_equilibrium_2d(*args) -> "PyObject *":
     r"""
-    com_equilibrium_2d(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject
+    com_equilibrium_2d(double * np_array2, doubleVector fext, PyObject * com) -> PyObject
     com_equilibrium_2d(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
 
 
@@ -9878,7 +9878,7 @@ def com_equilibrium_2d(*args) -> "PyObject *":
 
 def support_polygon(*args) -> "PyObject *":
     r"""
-    support_polygon(double * contacts, int m, int n) -> PyObject
+    support_polygon(double * np_array2) -> PyObject
     support_polygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *
 
 
@@ -9928,7 +9928,7 @@ def support_polygon(*args) -> "PyObject *":
 
 def support_polygon_2d(*args) -> "PyObject *":
     r"""
-    support_polygon_2d(double * contacts, int m, int n) -> PyObject
+    support_polygon_2d(double * np_array2) -> PyObject
     support_polygon_2d(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *
 
 
@@ -9965,8 +9965,8 @@ def support_polygon_2d(*args) -> "PyObject *":
 
 def equilibrium_torques(*args) -> "PyObject *":
     r"""
-    equilibrium_torques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, double norm=0) -> PyObject
-    equilibrium_torques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject
+    equilibrium_torques(RobotModel robot, double * np_array2, intVector links, doubleVector fext, double norm=0) -> PyObject
+    equilibrium_torques(RobotModel robot, double * np_array2, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject
 
 
     Solves for the torques / forces that keep the robot balanced against gravity.  
