@@ -169,7 +169,7 @@ You can call ``spin`` and ``dialog`` multiple times in a row.  If you have PyQt
 installed, and want to customize the UI, you can use the method
 
 -  ``vis.customUI(makefunc)``: takes a 1-parameter function
-   makefunc(glwidget) that takes the Klampt QGLWidget as an argument,
+   makefunc(glwidget) that takes the Klampt QOpenGLWidget as an argument,
    creates a QWindow or QDialog to be shown, and returns it.
 
 Multithreaded mode
