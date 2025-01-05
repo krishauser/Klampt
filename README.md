@@ -115,6 +115,7 @@ Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the 
 -   Python API: Mouse wheel events can now be captured in visualization (Qt and GLUT backends).
 -   Python API: `SimBody.applyForceAtLocalPoint` will be deprecated, and is split into `SimBody.applyForceAtCOMLocalPoint` and `SimBody.applyForceAtObjectLocalPoint` to help users avoid bugs in COM-local or object-local coordinate conventions.
 -   Python API: minor bug fixes.
+-   Klampt-examples: moved "boring" Python tests to the `Klampt-examples/Python3/testing/pytest` folder and made compatible with pytest.
 
 **0.9.1** (10/30/2023)
 -   Removed GLUI dependency in default build mode.
