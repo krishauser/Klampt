@@ -175,6 +175,9 @@ class GLUTWindow:
         for c in text:
             glutBitmapCharacter(font, ctypes.c_int( ord(c) ))
 
+    def points_to_pixels(self,pts):
+        return pts
+
     def close(self):
         if self.index is not None:
             self._closefunc()
