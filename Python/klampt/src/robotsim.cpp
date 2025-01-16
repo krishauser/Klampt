@@ -2541,6 +2541,9 @@ void Appearance::setCreaseAngle(float creaseAngleRads)
       app = geom.Appearance();
     }
   }
+
+  if(creaseAngleRads != app->creaseAngle)
+    app->faceDisplayList.erase();
   app->creaseAngle = creaseAngleRads;
 }
 
@@ -2556,6 +2559,8 @@ void Appearance::setSilhouette(float radius,float r,float g,float b,float a)
       app = geom.Appearance();
     }
   }
+  if(radius != app->silhouetteRadius)
+    app->silhouetteDisplayList.erase();
   app->silhouetteRadius = radius;
   app->silhouetteColor.rgba[0] = r;
   app->silhouetteColor.rgba[1] = g;
@@ -2577,6 +2582,7 @@ void Appearance::drawWorldGL(Geometry3D& g)
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
   if(!geom) return;
   if(!app) {
+    fprintf(stderr,"Appearance::drawGL(): warning, appearance was free()-d, reconstructing and setting up default appearance\n");
     app = make_shared<GLDraw::GeometryAppearance>();
     Klampt::SetupDefaultAppearance(*app);
   }
@@ -2602,6 +2608,7 @@ void Appearance::drawGL(Geometry3D& g)
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
   if(!geom) return;
   if(!app) {
+    fprintf(stderr,"Appearance::drawGL(): warning, appearance was free()-d, reconstructing and setting up default appearance\n");
     app = make_shared<GLDraw::GeometryAppearance>();
     Klampt::SetupDefaultAppearance(*app);
   }

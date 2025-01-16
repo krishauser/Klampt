@@ -544,14 +544,17 @@ class QtGLWindow(QOpenGLWidget):
             else:
                 glColor4f(*color)
 
-        font = QtGui.QFont()
-        font.setPixelSize(size)
+        font = QtGui.QFont('Arial')
+        #font.setPixelSize(size)
+        font.setPointSize(size)
         glPixelStorei(GL_UNPACK_ALIGNMENT,4)   # Needed for correct font rendering?
         if len(point) == 2:
             self.renderText(point[0],point[1],0,text,font)
         else:
             self.renderText(point[0],point[1],point[2],text,font)
 
+    def points_to_pixels(self,pts):
+        return pts*QtGui.QGuiApplication.primaryScreen().physicalDotsPerInch()/72
 
 class QtBackend:
     """

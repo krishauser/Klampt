@@ -22,6 +22,16 @@ else:
     raise RuntimeError("Can't load vis_qt without previously initializing with glinit module")
 
 
+def first_nonexistent_file(pattern, start_index=0):
+    """Finds the first file in a sequence that doesn't exist."""
+    import os
+    while start_index < 999:
+        file_name = pattern % start_index
+        if not os.path.exists(file_name):
+            return file_name
+        start_index += 1
+    raise RuntimeError("Too many files in sequence")
+
 class MyQThread(QThread):
     def __init__(self,func,*args):
         self.func = func
@@ -576,6 +586,7 @@ class _MyWindow(QMainWindow):
         self.movie_timer.timeout.connect(self.movie_update)
         self.movie_frame = 0
         self.movie_time_last = 0
+        self.movie_writer = None
         self.saving_html = False
         self.html_saver = None
         self.html_start_time = 0
@@ -664,7 +675,7 @@ class _MyWindow(QMainWindow):
         fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
             fn = fn[0]
-        if fn is None:
+        if fn is None or len(fn) == 0:
             return
         v = scene.getViewport()
         v.save_file(fn)
@@ -676,7 +687,7 @@ class _MyWindow(QMainWindow):
         fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
             fn = fn[0]
-        if fn is None:
+        if fn is None or len(fn) == 0:
             return
         v.load_file(fn)
         scene.setViewport(v)
@@ -726,36 +737,68 @@ class _MyWindow(QMainWindow):
             time_source = self.getTimeSource()
             if time_source is not None:
                 self.movie_time_last = time_source()
+            try:
+                import imageio
+                fn = first_nonexistent_file('klampt_record_%04d.mp4')
+                print("Saving movie to",fn)
+                try:
+                    self.movie_writer = imageio.get_writer(fn,fps=30,codec='libx264')
+                except Exception as e:
+                    print("Error creating movie writer, trying ffmpeg method")
+                    self.movie_writer = None
+            except ImportError:
+                pass
         else:
             self.movie_timer.stop()
-            dlg =  QInputDialog(self)                 
-            dlg.setInputMode( QInputDialog.TextInput) 
-            dlg.setLabelText("Command")
-            dlg.setTextValue('ffmpeg -y -i image%04d.png -vcodec libx264 -pix_fmt yuv420p klampt_record.mp4')
-            dlg.resize(600,100)          
-            if PYQT_VERSION >= 5: 
-                ok = dlg.exec()
+            if self.movie_writer is None:
+                print("imageio library not available, using backup ffmpeg method")
+                dlg =  QInputDialog(self)
+                dlg.setInputMode( QInputDialog.TextInput) 
+                dlg.setLabelText("Command")
+                fn = first_nonexistent_file('klampt_record_%04d.mp4')
+                dlg.setTextValue('ffmpeg -y -i image%04d.png -vcodec libx264 -pix_fmt yuv420p '+fn)
+                dlg.resize(600,100)                             
+                if PYQT_VERSION >= 5: 
+                    ok = dlg.exec()
+                else:
+                    ok = dlg.exec_()
+                cmd = dlg.textValue()
+                #(cmd,ok) = QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                if ok:
+                    import os,glob
+                    os.system(str(cmd))
+                    print("Removing temporary files")
+                    for fn in glob.glob('image*.png'):
+                        os.remove(fn)
             else:
-                ok = dlg.exec_()
-            cmd = dlg.textValue()
-            #(cmd,ok) = QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
-            if ok:
-                import os,glob
-                os.system(str(cmd))
-                print("Removing temporary files")
-                for fn in glob.glob('image*.png'):
-                    os.remove(fn)
+                print("... done saving movie.")
+                self.movie_writer.close()
+                self.movie_writer = None
     
+    def write_movie_image(self,frame_index):
+        if self.movie_writer is None:
+            #save to image
+            self.glwidget.program.save_screen('image%04d.png'%(frame_index))
+        else:
+            #write to imageio writer
+            image = self.glwidget.program.get_screen('numpy')
+            try:
+                self.movie_writer.append_data(image)
+            except Exception:
+                print("Unable to write image to movie writer, saving to image file instead")
+                self.glwidget.program.save_screen('image%04d.png'%(frame_index))
+                self.movie_writer = None
+
     def movie_update(self):
         time_source = self.getTimeSource()
         if time_source is not None:
             tnow = time_source()
             while tnow >= self.movie_time_last + 1.0/30.0:
-                self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
+                self.write_movie_image(self.movie_frame)
                 self.movie_frame += 1
                 self.movie_time_last += 1.0/30.0
         else:
-            self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
+            self.write_movie_image(self.movie_frame)
             self.movie_frame += 1
     
     def toggle_html_mode(self):

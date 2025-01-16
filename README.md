@@ -107,6 +107,11 @@ Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the 
 -   Python API: Added Rerun.io visualization frontend.  Try `vis.init('Rerun')`.  Unsupported functions: multi-window, coordinates module items, ContactPoints, Holds.
 -   Python API: Added Geometry3D `merge` function that can be used for SDF and heightmap fusion.
 -   Python API: can control draw order of transparent objects with `draw_order` attribute.
+-   Python API: Text and plots are drawn at a more sensible size (points rather than pixels) for high-resolution screens.
+-   Klampt-examples: moved "boring" Python tests to the `Klampt-examples/Python3/testing/pytest` folder and made compatible with pytest.
+
+**0.9.2** (8/13/2024)
+-   Python API: pip packages now built with Numpy 2+.
 -   Python API: Improved calibration routines in `klampt.model.calibrate`.
 -   Python API: Added surface sampling and vertex normals to `klampt.model.geometry`.
 -   Python API: Added visibility fraction determination to `klampt.model.sensing`.
@@ -115,7 +120,6 @@ Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the 
 -   Python API: Mouse wheel events can now be captured in visualization (Qt and GLUT backends).
 -   Python API: `SimBody.applyForceAtLocalPoint` will be deprecated, and is split into `SimBody.applyForceAtCOMLocalPoint` and `SimBody.applyForceAtObjectLocalPoint` to help users avoid bugs in COM-local or object-local coordinate conventions.
 -   Python API: minor bug fixes.
--   Klampt-examples: moved "boring" Python tests to the `Klampt-examples/Python3/testing/pytest` folder and made compatible with pytest.
 
 **0.9.1** (10/30/2023)
 -   Removed GLUI dependency in default build mode.

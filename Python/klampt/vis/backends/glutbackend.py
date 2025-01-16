@@ -175,6 +175,9 @@ class GLUTWindow:
         for c in text:
             glutBitmapCharacter(font, ctypes.c_int( ord(c) ))
 
+    def points_to_pixels(self,pts):
+        return pts
+
     def get_screen(self, format, want_depth):
         glReadBuffer(GL_FRONT)
         x,y,w,h = self.program.view.x*self.program.view.screenDeviceScale,self.program.view.y*self.program.view.screenDeviceScale,self.program.view.w*self.program.view.screenDeviceScale,self.program.view.h*self.program.view.screenDeviceScale
@@ -221,7 +224,7 @@ class GLUTWindow:
             return (rgb,depth)
         else:
             return rgb
-
+        
     def close(self):
         if self.index is not None:
             self._closefunc()

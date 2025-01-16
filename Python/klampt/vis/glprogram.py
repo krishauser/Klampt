@@ -301,6 +301,7 @@ class GLNavigationProgram(GLProgram):
         self.refresh()
         return True
 
+
 class GLRealtimeProgram(GLNavigationProgram):
     """A GLNavigationProgram that refreshes the screen at a given frame rate.
 
@@ -339,6 +340,7 @@ class GLRealtimeProgram(GLNavigationProgram):
 
     def idle(self):
         pass
+
 
 class GLPluginProgram(GLRealtimeProgram):
     """This base class should be used with a GLPluginBase object to handle the

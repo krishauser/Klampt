@@ -17,7 +17,7 @@ import random
 
 Key = Union[int,str]
 
-def robot_sensors(robot : RobotModel, type = None):
+def robot_sensors(robot : RobotModel, type : Optional[str] = None):
     """Returns all sensors on the robot of the given type."""
     res = []
     sindex = 0
@@ -42,7 +42,7 @@ class PointMarker:
         variable (bool): whether this should be optimized
 
     """
-    def __init__(self,link=None,local_coordinates=None):
+    def __init__(self,link : Optional[Key]=None, local_coordinates : Optional[Vector3]=None):
         self.link = link                             # type: Optional[Key]
         self.size = 0.01                             # type: float
         self.local_coordinates = local_coordinates   # type: Vector3
@@ -62,7 +62,9 @@ class TransformMarker:
         variable (bool): whether this should be optimized
         
     """
-    def __init__(self,link=None,local_coordinates=None,local_features=None):
+    def __init__(self, link : Optional[Key]=None,
+                 local_coordinates : Optional[RigidTransform]=None,
+                 local_features : Optional[List[Vector3]]=None):
         self.link = link                            # type: Optional[Key]
         self.size = 0.1                             # type: float
         self.local_coordinates = local_coordinates  # type: RigidTransform
@@ -70,7 +72,7 @@ class TransformMarker:
         self.variable = True                        # type: bool
 
     @staticmethod
-    def chessboard(nrows,ncols,square_size,link=None):
+    def chessboard(nrows:int, ncols:int ,square_size:float, link:Optional[Key]=None):
         """Creates a chessboard marker with the given number of rows and
         columns, and the given square size.
         
@@ -99,7 +101,9 @@ class CameraInfo:
         variable (bool): whether this should be optimized
 
     """
-    def __init__(self,link,intrinsics=None,local_coordinates=None):
+    def __init__(self,link:Optional[Key],
+                 intrinsics : Optional[dict] = None,
+                 local_coordinates : Optional[RigidTransform]=None):
         self.link = link                            # type: Optional[Key]
         self.intrinsics = intrinsics                # type: dict
         self.local_coordinates = local_coordinates  # type: RigidTransform
@@ -111,7 +115,7 @@ class PointObservation:
 
     X is to the right, Y is down, Z is forward.  Units are in m.
     """
-    def __init__(self,value,camera_id,frame_id,marker_id,feature_id=None):
+    def __init__(self, value : Vector3, camera_id : Key, frame_id : int, marker_id : Key, feature_id : Optional[int]=None):
         self.camera_id = camera_id
         self.frame_id = frame_id
         self.marker_id = marker_id
@@ -126,7 +130,7 @@ class TransformObservation:
 
     X is to the right, Y is down, Z is forward.  Translation units are in m.
     """
-    def __init__(self,value,camera_id,frame_id,marker_id):
+    def __init__(self, value: RigidTransform, camera_id : Key, frame_id : int, marker_id : Key,):
         self.camera_id = camera_id
         self.frame_id = frame_id
         self.marker_id = marker_id
@@ -140,7 +144,7 @@ class PixelObservation:
 
     X is to the right, Y is down.  Units are in pixels.
     """
-    def __init__(self,value,camera_id,frame_id,marker_id,feature_id=None):
+    def __init__(self, value : Vector2, camera_id : Key, frame_id : int, marker_id : Key, feature_id : Optional[int]=None):
         self.camera_id = camera_id
         self.frame_id = frame_id
         self.marker_id = marker_id
@@ -152,7 +156,8 @@ class PixelObservation:
 
 class RobotExtrinsicCalibration:
     """Stores a calibration dataset and helps perform extrinsic (hand-eye)
-    calibration.
+    calibration.  Supports multiple cameras, both eye in hand and fixed camera
+    setups, and multiple marker types (pixels, 3d points, QR / Aruco tags).
 
     Examples
     ------------
@@ -640,14 +645,18 @@ class RobotExtrinsicCalibration:
                 if isinstance(det,(PixelObservation,PointObservation,TransformObservation)):
                     det.camera_id = camera_id
                     det.frame_id = frame_id
-                    self.robot.setConfig(q)
-                    camera_link = self.cameras[camera_id].link
-                    if det.marker_id not in self.markers:
-                        print("Uh... invalid marker?",det.marker_id,list(self.markers.keys()))
-                    marker_link = self.markers[det.marker_id].link
-                    camera_link_transform = _linkTransform(camera_link,self.robot)
-                    marker_link_transform = _linkTransform(marker_link,self.robot)
-                    det.hand_eye_transform = se3.mul(se3.inv(camera_link_transform),marker_link_transform)
+                    if q is not None:
+                        self.robot.setConfig(q)
+                        camera_link = self.cameras[camera_id].link
+                        if det.marker_id not in self.markers:
+                            print("Uh... invalid marker?",det.marker_id,list(self.markers.keys()))
+                        marker_link = self.markers[det.marker_id].link
+                        camera_link_transform = _linkTransform(camera_link,self.robot)
+                        marker_link_transform = _linkTransform(marker_link,self.robot)
+                        det.hand_eye_transform = se3.mul(se3.inv(camera_link_transform),marker_link_transform)
+                    else:
+                        if det.hand_eye_transform is not None:
+                            raise ValueError("Need to provide a hand-eye transform or configuration to determine the camera / marker transforms")
                     self.observations.append(det)
                 else:
                     marker,value = det

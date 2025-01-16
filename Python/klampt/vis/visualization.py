@@ -2158,6 +2158,10 @@ class VisPlot:
         if GL is None: raise RuntimeError("OpenGL wasn't initialized yet?")
         if vmin is None:
             vmin,vmax = self.autoRange()
+        x = window.points_to_pixels(x)
+        y = window.points_to_pixels(y)
+        w = window.points_to_pixels(w)
+        h = window.points_to_pixels(h)
         import random
         while len(self.colors) < len(self.items):
             c = (random.uniform(0.01,1),random.uniform(0.01,1),random.uniform(0.01,1))
@@ -2170,8 +2174,8 @@ class VisPlot:
         GL.glVertex2f(x+w,y+h)
         GL.glVertex2f(x,y+h)
         GL.glEnd()
-        window.draw_text((x-18,y+4),'%.2f'%(vmax,),9)
-        window.draw_text((x-18,y+h+4),'%.2f'%(vmin,),9)
+        window.draw_text((x-window.points_to_pixels(18),y+window.points_to_pixels(4)),'%.2f'%(vmax,),9)
+        window.draw_text((x-window.points_to_pixels(18),y+h+window.points_to_pixels(4)),'%.2f'%(vmin,),9)
         tmax = 0
         for i in self.items:
             for trace in i.traces:
@@ -2188,7 +2192,7 @@ class VisPlot:
                 labelheight = (labelheight - vmin)/(vmax-vmin)
                 labelheight = y + h - h*labelheight
                 GL.glColor3fv(vectorops.mul(self.colors[i],item.luminosity[j]))
-                window.draw_text((x+w+3,labelheight+4),label,9)
+                window.draw_text((x+w+window.points_to_pixels(3),labelheight+window.points_to_pixels(4)),label,9)
                 GL.glBegin(GL.GL_LINE_STRIP)
                 for k in range(len(trace)-1):
                     if trace[k+1][0] > tmax-duration:
@@ -2217,7 +2221,7 @@ class VisPlot:
                     labelx = x + w*labelx
                     c = self.eventColors[e]
                     GL.glColor4f(c[0]*0.5,c[1]*0.5,c[2]*0.5,c[3])
-                    window.draw_text((labelx,y+h+12),e,9)
+                    window.draw_text((labelx,y+h+window.points_to_pixels(12)),e,9)
             GL.glEnable(GL.GL_BLEND)
             GL.glBlendFunc(GL.GL_SRC_ALPHA,GL.GL_ONE_MINUS_SRC_ALPHA)
             GL.glBegin(GL.GL_LINES)
@@ -3303,6 +3307,7 @@ class VisAppearance:
                             centroid = item[0] + [0]*(3-len(item[0]))
                             if name is not None:
                                 self.drawText(name,centroid)
+                            return
                         else:
                             warnings.warn("Configs items aren't the right size for the robot")
                     if not self.useDefaultAppearance:
@@ -4237,7 +4242,7 @@ class VisualizationScene:
                 size = v.attributes['size']
                 if pos is None:
                     #draw at console
-                    window.draw_text((cx,cy+size),v.item,size,col)
+                    window.draw_text((self.window.points_to_pixels(cx),self.window.points_to_pixels(cy+size)),v.item,size,col)
                     cy += (size*15)/10
                 elif len(pos)==2:
                     x = pos[0]
@@ -4246,19 +4251,20 @@ class VisualizationScene:
                         x = view.w + x
                     if y < 0:
                         y = view.h + y
-                    window.draw_text((x,y+size),v.item,size,col)
+                    window.draw_text((self.window.points_to_pixels(x),self.window.points_to_pixels(y+size)),v.item,size,col)
         GL.glEnable(GL.GL_DEPTH_TEST)
 
     def _renderGLLabelRaw(self,view,point,textList,colorList):
         #assert not self.makingDisplayList,"drawText must be called outside of display list"
         assert self.window is not None
-        invCameraRot = so3.inv(view.controller.matrix()[0])
+        invCameraRot = view.camera.matrix()[0]
         for i,(text,c) in enumerate(zip(textList,colorList)):
             if i+1 < len(textList): text = text+","
 
             projpt = view.project(point,clip=False)
-            if projpt[2] > view.n:
-                d = float(12)/float(view.w)*projpt[2]*0.7
+            if projpt[2] > view.clippingplanes[0]:
+                d = float(self.window.points_to_pixels(12))/float(view.w)*projpt[2]*0.4
+                #d = float(12)/float(view.w)*projpt[2]*0.4
                 point = vectorops.add(point,so3.apply(invCameraRot,(0,-d,0)))
 
             GL.glDisable(GL.GL_LIGHTING)
