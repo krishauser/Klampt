@@ -1,9 +1,10 @@
 # Klamp't Manual: Geometry and Appearance
 
 * [Geometries and collision geometries](#geometries-and-collision-geometries)
+    + [Geometric representations](#geometric-representations)
     + [Geometric operation support](#geometric-operation-support)
-    + [Geometry caching](#geometry-caching)
     + [API summary](#api-summary)
+    + [Geometry caching](#geometry-caching)
 * [Appearance](#appearance)
 
 Klamp't uses a variety of geometry types to define geometric primitives, triangulated meshes, and point clouds.  Each geometry may also be associated with an [Appearance](#appearance).
@@ -15,7 +16,7 @@ Klamp't stores Geometry datain an object's local frame.
 
 The notion of a _collision geometry_ combines some underlying geometric data with transformations and collision acceleration structures. Collision geometries have a _current transformation_ that sets where they exist in space, and is used for collision testing. Collision geometries also support an additional, nonnegative margin setting that &quot;expands&quot; the underlying geometry when performing collision testing.  The margin does not actually affect the geometric data, but rather it changes the distance threshold that is used to consider colliding vs. noncolliding geometries.
 
-### Geometric representations and operation support
+### Geometric representations
 
 The following geometric representations are currently supported:
 - _Geometric primitive_ (``Primitive``): axis-aligned boxes, oriented boxes, lines, rays, segments, triangles, planar polygons, spheres, ellipsoids, and planar circles.
@@ -26,17 +27,28 @@ The following geometric representations are currently supported:
 - _Occupancy map voxel grid_ (``OccupancyGrid``): a volumetric representation where values > 0.5 (or some other value) are occupied.
 - _Height map / depth map_ (``Heightmap``): an elevation map or a perspective depth map.  Can also contain color and other properties.
 
-The following operations are supported.  (Here, 🕑 means support is on the TODO list for the near future.)
+In addition, there is a notion of a geometry *Group*, which can combine multiple
+sub-geometries.
+
+### Geometric operation support
+
+Not all representations support all operations, and some representations yield much better performance (speed and accuracy) than others. To get optimal performance from your program, you should learn which  [operations are suited for which representations](https://motion.cs.illinois.edu/RoboticSystems/Geometry.html). 
+
+To get a better sense of how operations affect the geometries, the ``geometrytest.py`` test program in ``Klampt-examples`` can be used.  This allows you to convert any two geometries into any supported format and perform various queries.  Use the Actions menu to convert and switch between proximity query modes.  Klampt-examples and [geometrytest.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/geometry/geometrytest.py) on Github.
+
+![geometrytest.py](images/geometrytest.png)
+
+The rest of this section provides detailed information about Klampt's support for various geometry operations.  (Here, 🕑 means support is on the TODO list for the near future.)
 
 #### Loading / Saving
 
 All types supported.
 
-Triangle meshes can be saved/loaded from nearly all types (STL, OBJ, OFF, PLY, GLTF, etc), unless Assimp support is turned off.
+Triangle meshes can be saved/loaded from nearly all types (STL, OBJ, OFF, PLY, GLTF, etc), unless you are building from source and Assimp is unavailable at build time.
 
 Point clouds can be saved/loaded from PCL format. 
 
-Others use custom formats. 
+Primitives, convex hulls, and voxel grids use custom formats. 
 
 Heightmaps are stored in a custom JSON format. Heightmap images can be loaded from many image file formats on Windows or if ImageMagick was installed while KrisLibrary is built; otherwise, only BMP, TGA, and PPM are supported.  
 
@@ -48,7 +60,7 @@ Heightmaps are stored in a custom JSON format. Heightmap images can be loaded fr
 
 #### Type conversions
 
-Converting from the type listed in column to type listed in row.
+(Converting from the type listed in column to type listed in row.)
 
 | From → / To ↓ | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap | 
 |-------|----|----|----|----|----|----|----|
@@ -60,7 +72,7 @@ Converting from the type listed in column to type listed in row.
 |**OG** | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  |    | ✔️  |
 |**HM** | ✔️  | ❌ | ✔️  | ✔️  | ✔️  | ✔️  |    |
 
-1. Convex decomposition can be performed with an appropriate parameter to the convert function.
+1. Convex decomposition of a non-convex watertight mesh can be performed with an appropriate parameter to the convert function.
 
 These are shown in the following image:
 
@@ -69,6 +81,12 @@ These are shown in the following image:
 Note that a depth map is considered to be viewed from the "bottom up", so the occupied space is considered to be any space above the map.  Here, the depth values outside of the sphere are assumed invalid.
 
 Indirect conversions to a third type can be used to do some unsupported conversions.  For example, convex polytope -> triangle mesh -> heightmap can replace the unsupported convex polytope -> heightmap conversion. Occupancy grid -> triangle mesh -> implicit surface can replace the unsupported occupancy grid -> implicit surface conversion.
+
+Many conversions (mesh -> convex polytope, implicit surface, occupancy grid, heightmap) also depend on a resolution parameter.  If the resolution is set too low, then the fidelity of the resulting geometry may suffer.  As an example, the below image shows a CAD model of the Boston Dynamics Atlas torso converted to an implicit surface at two different resolutions:
+
+![Implicit surface conversion image](images/conversion_resolution.png)
+
+If in doubt, you should visualize the result (in Python, you can simply run `from klampt import vis; vis.debug(geom)`).
 
 We perform computation speed tests to profile the performance of geometric operations.  The test set contains both simple and complex geometries and is tested on a machine with specs... TODO.  Simple test geometries are approximately spherical, have unit size, and have the following complexity: 
 - GP: sphere
@@ -86,7 +104,7 @@ While complex test geometries have the following complexity:
 - HM: 2,048 x 2,048 grid
 
 
-Conversion speeds are shown below (in ms).  Algorithmic complexity is approximately linear in the number of elements for all representations except for Convex Polytope, which is superlinear.  Conversions are listed from the type listed in column to type listed in row. 
+Example conversion speeds are shown below (in ms).  Algorithmic complexity is approximately linear in the number of elements for all representations except for Convex Polytope, which is superlinear.  Conversions are listed from the type listed in column to type listed in row. 
 
 *Simple geometries*:
 
@@ -128,10 +146,10 @@ However, the data structures must be refreshed if the geometry data is changed. 
 | **Triangle mesh**       | PQP bounding volume hierarchy |
 | **Point cloud**         | Sparse voxel grid and octree |
 | **Implicit surface**    | Octree |
-| **Occupancy grid**      | List of occupied cells |
+| **Occupancy grid**      | List of occupied and surface cells |
 | **Heightmap**           | None |
 
-Precomputation speeds are shown below (in ms):
+Example precomputation speeds are shown below (in ms):
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap | 
 |------------|-------|-------|-------|-------|-------|-------|-------|
@@ -141,9 +159,13 @@ Precomputation speeds are shown below (in ms):
 
 #### Miscellaneous queries
 
-Bounding box queries yield an axis-aligned or oriented bounding box.
+Bounding box queries yield an axis-aligned (C++ and Python) or oriented bounding box (C++ only).
+
+![Bounding boxes](images/bounding_boxes.png)
 
 Ray casts find the first point of intersection between the geometry and a ray.
+
+![Ray cast](images/raycast.png)
 
 Support queries find the farthest point on the geometry in some direction.
 
@@ -168,7 +190,16 @@ Support queries find the farthest point on the geometry in some direction.
 1. uses a heuristic to determine inside/outside.
 2. signed distance supported.
 
-Computation speeds are shown below (in ms):
+An example of point containment queries is shown below. 
+
+![Point containment](images/contains_point.png)
+
+An example of a point distace query is shown below with the query asking for the distance and closest point on the red geometry to the center of the green circle. 
+
+![Point distance](images/point_distance.png)
+
+
+Example computation speeds are shown below (in ms):
 
 *Simple geometries*
 
@@ -196,92 +227,101 @@ Computation speeds are shown below (in ms):
 
 #### Collision detection
 
-Collision detection detects whether two objects overlap.  The extended version returns the element indices that overlap, and costs no more time than the simple (boolean) version. 
+Collision detection detects whether two objects overlap.  The extended version returns the element indices that overlap  up to some number of max contacts, and if max contacts = 1 this costs no more time than the simple (boolean) version.  Below, the orange triangles on the red object collide with the green triangles on the yellow object.
+
+![Collision detection example](images/collision.png)
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |-------|----|----|----|----|----|----|----|
-|**GP** | ✔️  | ✔️¹ | ✔️² | ✔️  | ✔️¹ | ✔️² | ✔️³ |
-|**CP** | ✔️¹ | ✔️  | ✔️  | ✔️  | ❌ | ✔️³ | ✔️³ |
+|**GP** | ✔️² | ✔️² | ✔️² | ✔️² | ✔️¹ | ✔️² | ✔️³ |
+|**CP** | ✔️² | ✔️  | ✔️  | ✔️  | ❌ | ✔️³ | ✔️³ |
 |**TM** | ✔️² | ✔️  | ✔️  | ✔️  | ✔️³ | ✔️³ | ✔️³ |
 |**PC** | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ✔️³ | ✔️  |
 |**IS** | ✔️¹ | ❌ | ✔️³ | ✔️  | ✔️³ | ✔️³ | ✔️³ |
 |**OG** | ✔️² | ✔️³ | ✔️³ | ✔️³ | ✔️³ | ✔️³ | ✔️  |
-|**HM** | ✔️³ | ❌ | ✔️³ | ✔️  | ✔️³ | ✔️  | 🕑 |
+|**HM** | ✔️³ | ✔️³ | ✔️³ | ✔️  | ✔️³ | ✔️  | 🕑 |
 
 1. for a couple geometric primitives (usually point and sphere).
 2. for common geometric primitives (usually point, sphere, box, and triangle)
 3. not accelerated, or scaling to large geometries is poor.
 
 
-Within-distance detection is a boolearn query that detects whether two objects are within a given distance from one another.  It is usually faster than distance calculation.  The extended version returns the element indices that overlap, and costs no more time than the simple (boolean) version.  
+Within-distance detection is a boolearn query that detects whether two objects are within a given distance from one another.  It is usually faster than distance calculation.  The extended version returns the element indices that overlap up to some number of max contacts, and if the max contacts = 1 then this costs no more time than the simple (boolean) version.   Below, the orange triangles on the red object are within 0.1 units from the green triangles on the yellow object.
+
+![Within distance example](images/within_distance.png)
+
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |-------|----|----|----|----|----|----|----|
-|**GP** | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ❌ | 
-|**CP** | ✔️  | ✔️  | ✔️  | ✔️  | ❌ | ❌ | ❌ | 
-|**TM** | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ❌ | 
-|**PC** | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ❌ | 
-|**IS** | ✔️  | ❌ | ✔️  | ✔️  | ✔️  | ✔️  | ❌ | 
-|**OG** | ✔️  | ❌ | ✔️  | ✔️  | ✔️  | ❌ | ❌ | 
+|**GP** | ✔️² | ✔️² | ✔️² | ✔️² | ✔️¹ | ✔️² | ❌ | 
+|**CP** | ✔️² | ✔️  | ✔️  | ✔️  | ❌ | ✔️³ | ❌ | 
+|**TM** | ✔️² | ✔️  | ✔️  | ✔️  | ✔️³ | ✔️³ | ❌ | 
+|**PC** | ✔️² | ✔️  | ✔️  | ✔️  | ✔️  | ✔️³ | ❌ | 
+|**IS** | ✔️¹ | ❌ | ✔️³ | ✔️  | ✔️³ | ✔️³ | ❌ | 
+|**OG** | ✔️² | ✔️³ | ✔️³ | ✔️³ | ✔️³ | ❌ | ❌ | 
 |**HM** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 
 
 1. for a couple geometric primitives (usually point and sphere).
 2. for common geometric primitives (usually point, sphere, box, and triangle)
 3. not accelerated, or scaling to large geometries is poor.
 
-Computation speeds are shown below (in ms) for some example collision queries.  Note that speeds vary significantly on the relative pose, size, and resolution of the objects, where performance worsens with close-but-not-colliding, highly overlapping, similar sized, and high-resolution objects.
+Example computation speeds are shown below (in ms).  Note that speeds vary significantly on the relative pose, size, and resolution of the objects, where performance worsens with close-but-not-colliding, highly overlapping, similar sized, and high-resolution objects.
 
 *Simple geometries*
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |-------|-------|-------|-------|-------|-------|-------|-------|
-|**GP** | 0.000 | 0.003 | 0.001 | 0.014 | 0.001 | 0.045 | 1.037 | 
-|**CP** | 0.003 | 0.002 | 0.011 | 0.014 |       |       | 0.072 | 
-|**TM** | 0.001 | 0.011 | 0.012 | 0.437 | 0.124 | 0.050 | 0.274 | 
-|**PC** | 0.014 | 0.014 | 0.437 | 0.170 | 0.039 | 0.090 | 0.016 | 
-|**IS** | 0.001 |       | 0.124 | 0.039 | 8.439 | 2.128 | 0.499 | 
-|**OG** | 0.045 |       | 0.050 | 0.090 | 2.128 | 0.006 | 0.017 | 
-|**HM** | 1.037 | 0.072 | 0.274 | 0.016 | 0.499 | 0.017 |       | 
+|**GP** | 0.000 | 0.003 | 0.001 | 0.014 | 0.001 | 0.007 | 0.011 | 
+|**CP** | 0.003 | 0.002 | 0.011 | 0.014 |       | 0.004 | 0.072 | 
+|**TM** | 0.001 | 0.011 | 0.012 | 0.437 | 0.124 | 0.617 | 0.029 | 
+|**PC** | 0.014 | 0.014 | 0.437 | 0.170 | 0.039 | 8.042 | 0.016 | 
+|**IS** | 0.001 |       | 0.124 | 0.039 | 8.439 | 1.314 | 0.499 | 
+|**OG** | 0.007 | 0.004 | 0.617 | 8.042 | 1.314 | 1.396 | 0.932 | 
+|**HM** | 0.011 | 0.072 | 0.029 | 0.016 | 0.499 | 0.932 |       | 
 
 *Complex geometries*
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |-------|-------|-------|-------|-------|-------|-------|-------|
-|**GP** | 0.001 |       | 0.002 | 0.438 |       | 0.062 | 25.625 | 
-|**CP** |       | 0.005 | 0.085 | 2.278 |       |       | 76.179 | 
-|**TM** | 0.002 | 0.085 | 0.012 | 12.619 | 0.862 | 0.055 | 10.762 | 
-|**PC** | 0.438 | 2.278 | 12.619 | 11.499 | 4.829 | 0.114 | 3.484 | 
-|**IS** |       |       | 0.862 | 4.829 | 437.211 | 106.239 | 19.049 | 
-|**OG** | 0.062 |       | 0.055 | 0.114 | 106.239 | 0.004 | 0.012 | 
-|**HM**  | 25.625 | 76.179 | 10.762 | 3.484 | 19.049 | 0.012 |       | 
+|**GP** | 0.001 | 0.007 | 0.002 | 0.313 |       | 0.005 | 0.001 | 
+|**CP** | 0.007 | 0.006 | 8.827 | 28.404|       | 0.089 | 63.090| 
+|**TM** | 0.002 | 8.827 | 0.011 | 2.295 | 4.608 | 31.010| 0.884 | 
+|**PC** | 0.313 | 28.404| 2.295 | 4.537 | 1.905 |560.186| 0.021 | 
+|**IS** |       |       | 4.608 | 1.905 | 7.504 | 87.130| 3.685 | 
+|**OG** | 0.005 | 0.089 |31.010 |560.186| 87.130| 27.407| 12.617|  
+|**HM** | 0.001 |63.090 | 0.884 | 0.021 | 3.685 |12.617 |       |
+
+
 
 #### Distance query
 
 Distance queries determine the minimium distance between objects.  Some geometry pairs also support signed distance queries, which return the negative penetration depth if the objects are overlapping.  
 
+![Distance example](images/distance.png)
+
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |-------|----|----|----|----|----|----|----|
-|**GP** | ✔️  | ✔️¹ | ✔️² | ✔️  | ✔️¹ | ❌ | ❌ |
-|**CP** | ✔️¹ | ✔️  | ❌ | ✔️  | ❌ | ❌ | ❌ |
+|**GP** | ✔️² | ✔️² | ✔️² | ✔️  | ✔️¹ | ❌ | ❌ |
+|**CP** | ✔️² | ✔️  | ❌ | ✔️  | ❌ | ❌ | ❌ |
 |**TM** | ✔️² | ❌ | ✔️  | ✔️  | 🕑 | ❌ | ❌ |
 |**PC** | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ❌ | ❌ |
 |**IS** | ✔️¹ | ❌ | 🕑 | ✔️  | ❌ | ❌ | ❌ |
 |**OG** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 |**HM** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
-1. for a few primitives (usually point and sphere).
+1. for a couple of primitives (usually point and sphere).
 2. for common geometric primitives (usually point, sphere, box, and triangle)
 
-Computation speeds are given below (in ms):
+Example computation speeds are given below (in ms):
 
 *Simple geometries*
 
-|  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
+|    | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |----------------|-------|-------|-------|-------|-------|-------|-------|
-| Primitive      | 0.000 | 0.005 | 0.003 | 0.003 | 0.001 |       |       | 
-| ConvexHull     | 0.005 | 0.006 |       | 2.045 |       |       |       | 
-| TriangleMesh   | 0.003 |       | 0.168 | 0.651 |       |       |       | 
-| PointCloud     | 0.003 | 2.045 | 0.651 | 0.121 | 0.046 |       |       | 
+| Primitive      | 0.001 | 0.006 | 0.003 | 0.003 | 0.001 |       |       | 
+| ConvexHull     | 0.006 | 0.005 |       | 0.034 |       |       |       | 
+| TriangleMesh   | 0.003 |       | 0.186 | 0.762 |       |       |       | 
+| PointCloud     | 0.003 | 0.034 | 0.762 | 0.138 | 0.046 |       |       | 
 | ImplicitSurface| 0.001 |       |       | 0.046 |       |       |       | 
 | OccupancyGrid  |       |       |       |       |       |       |       | 
 | Heightmap      |       |       |       |       |       |       |       | 
@@ -290,25 +330,28 @@ Computation speeds are given below (in ms):
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |----------------|-------|-------|-------|-------|-------|-------|-------|
-| Primitive      | 0.000 |       | 0.005 | 3.352 |       |       |       | 
-| ConvexHull     |       | 0.046 |       | 881.310 |       |       |       | 
-| TriangleMesh   | 0.005 |       | 0.376 | 12.540 |       |       |       | 
-| PointCloud     | 3.352 | 881.310 | 12.540 | 43.918 | 2.404 |       |       | 
-| ImplicitSurface|       |       |       | 2.404 |       |       |       | 
+| Primitive      |       | 0.028 | 58.720 | 3.375 |       |       |       | 
+| ConvexHull     | 0.028 | 0.065 |       | 1.124 |       |       |       | 
+| TriangleMesh   | 58.720 |       | 0.351 | 11.014 |       |       |       | 
+| PointCloud     | 3.375 | 1.124 | 11.014 | 37.619 | 2.434 |       |       | 
+| ImplicitSurface|       |       |       | 2.434 |       |       |       | 
 | OccupancyGrid  |       |       |       |       |       |       |       | 
 | Heightmap      |       |       |       |       |       |       |       | 
 
 
 #### Contact detection
 
-Contact detection is used in physics simulation and stability prediction to produce accurate estimates of **all** the contact points that would be active between two objects that are touching.
+Contact detection is used in physics simulation and stability prediction to produce accurate estimates of **all** the contact points that would be active between two objects that are touching.  Below, the contact points are shown as orange points and normals are shown as red lines.
+
+![Contacts example](images/contacts.png)
+
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |-------|----|----|----|----|----|----|----|
-|**GP** | ✔️² | ❌ | ✔️¹ | ✔️  | ✔️² | ❌ | ❌ |
-|**CP** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+|**GP** | ✔️² | ✔️  | ✔️¹ | ✔️  | ✔️² | ❌ | ❌ |
+|**CP** | ✔️  | ✔️  | ❌ | ✔️  | ❌ | ❌ | ❌ |
 |**TM** | ✔️¹ | ❌ | ✔️  | ✔️  | ✔️  | ❌ | ❌ |
-|**PC** | ✔️  | ❌ | ✔️  | ✔️  | ✔️  | ❌ | ❌ |
+|**PC** | ✔️  | ✔️  | ✔️  | ✔️  | ✔️  | ❌ | ❌ |
 |**IS** | ✔️² | ❌ | ✔️  | ✔️  | ❌ | ❌ | ❌ |
 |**OG** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 |**HM** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
@@ -316,17 +359,49 @@ Contact detection is used in physics simulation and stability prediction to prod
 1. Only produces a single contact point, may lead to inaccurate simulations.
 2. For some primitives.
 
+Example computation speeds are given below (in ms):
+
+*Simple geometries*
+
+|  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
+|----------------|-------|-------|-------|-------|-------|-------|-------|
+| Primitive      | 0.000 | 0.005 | 0.001 | 0.001 | 0.001 |       |       | 
+| ConvexHull     | 0.005 | 0.001 |       |       |       |       |       | 
+| TriangleMesh   | 0.001 |       | 0.018 | 0.631 | 0.192 |       |       | 
+| PointCloud     | 0.001 |       | 0.631 | 0.252 | 0.004 |       |       | 
+| ImplicitSurface| 0.001 |       | 0.192 | 0.004 |       |       |       | 
+| OccupancyGrid  |       |       |       |       |       |       |       | 
+| Heightmap      |       |       |       |       |       |       |       | 
+
+
+*Complex geometries*
+
+|  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
+|----------------|-------|-------|-------|-------|-------|-------|-------|
+| Primitive      |       | 0.017 | 7.516 | 0.001 |       |       |       | 
+| ConvexHull     | 0.017 | 0.003 |       |       |       |       |       | 
+| TriangleMesh   | 7.516 |       | 0.009 | 9.136 | 21.625 |       |       | 
+| PointCloud     | 0.001 |       | 9.136 | 29.329 | 0.006 |       |       | 
+| ImplicitSurface|       |       | 21.625 | 0.006 |       |       |       | 
+| OccupancyGrid  |       |       |       |       |       |       |       | 
+| Heightmap      |       |       |       |       |       |       |       | 
+
+
 #### Geometric operations
 
-*Transforms* here refer to transforming the underlying geometry.  All collision objects have a *current transform* which can be set with nearly zero overhead.
+*Transforms* here refer to transforming the underlying geometry by translation, rotation, and/or scaling.  (Recall that all collision objects have a *current transform* which can be set with nearly zero overhead.)
 
 *Remesh* operations refine the representation to a specified coarser or finer resolution.
 
 *Union* operations gather multiple objects of the same type into a single object.  If a union cannot be performed, then a Group geometry is produced by the union operation.
 
-*Extract ROI* operations extract a region (bounding box) from the object to produce an object of the same type.
+*Extract ROI* operations extract a region (bounding box) from the object to produce an object of the same type.  The below ROI of a mesh was computed and then the original mesh was moved to the left for visualization clarity.
+
+![Extract ROI example](images/geometry_roi.png)
 
 *Slice* operations take a planar slice through the object.
+
+![Extract slice example](images/geometry_slice.png)
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |----------|----|----|----|----|----|----|----|
@@ -356,6 +431,10 @@ Contact detection is used in physics simulation and stability prediction to prod
 1. domains must be aligned.  Support for unaligned domains is 🕑.
 
 For triangle mesh and point cloud targets, it is recommended that you first convert the merged geometry into the desired type before merging.
+
+Below is an illustration of a geometric primitive (sphere) being merged into a heightmap of a lunar terrain.  For visualization clarity, the primitive was moved to the right after merging.
+
+![Merge example](images/geometry_merge.png)
 
 
 Computation speeds are shown below (in ms):
@@ -402,7 +481,11 @@ Computation speeds are shown below (in ms):
 
 ### API summary
 
-Geometry data is stored in the `AnyGeometry3D` type and collision geometries are stored in the `AnyCollisionGeometry3D` type. These are essentially container types that abstract the underlying geometry and collision acceleration data structures. To operate on the data therein, users will need to inspect the geometry's type and cast to the appropriate type. Detailed documentation can be found in the following files:
+#### C++
+
+Geometry data is stored in the `AnyGeometry3D` type and collision geometries are stored in the `AnyCollisionGeometry3D` type. These are essentially container types that abstract the underlying geometry and collision acceleration data structures. To operate on the data therein, users will need to inspect the geometry's type and cast to the appropriate type. The data contained within an `AnyGeometry3D` is an instance of a ``Geometry3D[X]`` object.  The collision data contained within an `AnyCollisionGeometry3D` is stored in an instance of a ``Collider3D[X]`` object.
+
+Detailed datatype documentation can be found in the following files:
 
 - ``KrisLibrary/math3d/geometry3d.h`` defines 3D geometric primitives, including `Point3D`, `Segment3D`, `Triangle3D`, `AABB3D`, `Box3D`, `Sphere3D`, and `Ellipsoid3D`.  There is also a `GeometricPrimitive3D` class that abstracts common operations on any geometric primitive.
 - ``KrisLibrary/meshing/TriMesh.h`` defines 3D triangle meshes.
@@ -436,6 +519,52 @@ Silhouette data and mesh creasing require some precomputation overhead, which ca
 
 Some geometry types (TriangleMesh, PointCloud, Heightmap) can also contain appearance data.  An appearance created from these objects will load the associated apperance data upon initialization. 
 
-All geometry types except for point clouds are converted to a triangle mesh for rendering.  This mesh is cached; if you change the geometry data, `Appearance.Refresh()` (C++) / `Appearance.refresh()` (Python) will need to be called.  Note that this will read the geometry's appearance again. If you change the geometry data but want to keep your manually-specified changes to the appearance, you will need to call `Appearance.RefreshGeometry()` (C++).  TODO: The Python API does not have a version of this yet.
+All geometry types except for point clouds are converted to a triangle mesh for rendering.  This mesh is cached; if you change the geometry data, `GeometryAppearance.Refresh()` (C++) / `Appearance.refresh()` (Python) will need to be called.  Note that this will read the geometry's appearance again. If you change the geometry data but want to keep your manually-specified changes to the appearance, you will need to call `GeometryAppearance.RefreshGeometry()` (C++).  TODO: The Python API does not have a version of this yet.
 
 Proper rendering of transparent objects requires some care to draw objects from back to front.  The `WorldModel.DrawGL()` method (C++) and the Python ``vis`` module handle this automatically. Artifacts may still appear between elements within an object, which are not automatically ordered.
+
+
+## Known issues and plans
+
+### Collisions
+
+Availability
+- ImplicitSurface - ConvexHull isn't implemented.  Could iterate over cells that the ConvexHull's bounding box overlaps, or use hierarchy.
+- ImplicitSurface - box isn't implemented.  Could iterate over cells that the box's bounding box overlaps, or use hierarchy.
+
+Speed
+- ImplicitSurface - OccupancyGrid slow when close but not colliding
+- OccupancyGrid - OccupancyGrid slow when close but not colliding
+- Primitive - Heightmap is slow for perspective heightmaps when the primitive is near origin
+- ConvexHull - Heightmap is slow for perspective heightmaps when the convex hull is near origin
+- PointCloud - ImplicitSurface is slow when colliding
+- PointCloud - OccupancyGrid is slow when colliding
+
+Correctness
+- TriangleMesh - perspective Heightmap can incorrectly return no collision for very large triangles that pass from behind the origin to collide with the heightmap. 
+
+### Within distance
+
+Availability (in addition to collision detection issues) 
+- Primitive box - OccupancyGrid isn't implemented (requires box-box distance computation)
+- OccupancyGrid - OccupancyGrid isn't implemented (requires box-box distance computation)
+- Heightmap - anything isn't implemented 
+
+Correctness
+- Reported implicit surface elements can be outside of the actual geometry by tolerance
+
+Speed (in addition to collision detection issues)
+- PointCloud - PointCloud is slow
+
+
+### Distance
+
+Availability
+- OccupancyGrid - anything isn't implemented.  Could implement brute-force detection at least for primitives and convex hulls.
+- Heightmap - anything isn't implemented.  Could implement iterative detection for primitives and convex hulls.
+
+Speed
+- Primitive - TriangleMesh is slow 
+- Primitive - PointCloud is slow
+- point cloud - point cloud is slow
+- point cloud - convex hull is slow
