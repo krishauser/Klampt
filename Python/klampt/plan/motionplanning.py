@@ -445,12 +445,10 @@ def destroy() -> None:
     return _motionplanning.destroy()
 class CSpaceInterface(object):
     r"""
+    A raw interface for a configuration space.  
 
 
     Args:
-
-
-    A raw interface for a configuration space.  
 
     ..note::  
 
@@ -822,13 +820,11 @@ _motionplanning.CSpaceInterface_swigregister(CSpaceInterface)
 
 class PlannerInterface(object):
     r"""
+    An interface for a kinematic motion planner. The :class:`MotionPlan` interface
+    in cspace.py is somewhat easier to use.  
 
 
     Args:
-
-
-    An interface for a kinematic motion planner. The :class:`MotionPlan` interface
-    in cspace.py is somewhat easier to use.  
 
     On construction, uses the planner type specified by setPlanType and the settings
     currently specified by calls to setPlanSetting.  

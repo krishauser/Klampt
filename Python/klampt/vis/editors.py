@@ -903,26 +903,53 @@ class SelectionEditor(VisualEditorBase):
         self.refresh()
 
     def add_selection(self,id):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtCore import QItemSelectionModel
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtCore import QItemSelectionModel
+
         self.selectionListChangeFlag = True
         if id not in self.value:
-            self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Select)
+            if glinit.active() == 'PyQt6':
+                self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.SelectionFlag.Select)
+            else:
+                self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Select)
             self.value.append(id)
         self.selectionListChangeFlag = False
 
     def remove_selection(self,id):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtCore import QItemSelectionModel
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtCore import QItemSelectionModel
+
         self.selectionListChangeFlag = False
         if id in self.value:
             self.value.remove(id)
-            self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Deselect)
+            if glinit.active() == 'PyQt6':
+                self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.SelectionFlag.Deselect)
+            else:
+                self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Deselect)
         self.selectionListChangeFlag = True
 
     def toggle_selection(self,id):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtCore import QItemSelectionModel
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtCore import QItemSelectionModel
+
         self.selectionListChangeFlag = True
         if id in self.value:
             self.value.remove(id)
-            self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Deselect)
+            if glinit.active() == 'PyQt6':
+                self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.SelectionFlag.Deselect)
+            else:
+                self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Deselect)
         else:
-            self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Select)
+            if glinit.active() == 'PyQt6':
+                self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.SelectionFlag.Select)
+            else:
+                self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Select)
             self.value.append(id)
         self.selectionListChangeFlag = False
 
@@ -985,9 +1012,17 @@ class SelectionEditor(VisualEditorBase):
         glDisable(GL_BLEND)
 
     def update_gui_from_value(self):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtCore import QItemSelectionModel
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtCore import QItemSelectionModel
+
         self.selectionList.clearSelection()
         for i in self.value:
-            self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
+            if glinit.active() == 'PyQt6':
+                self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.SelectionFlag.Select)
+            else:
+                self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
 
 
 class PointEditor(VisualEditorBase):
@@ -1190,13 +1225,13 @@ class GeometricPrimitiveEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame is None else frame
-        if value.type == 'Point':
+        if value.type == 'point':
             self.poser = PointPoser()
-        elif value.type == 'Sphere':
+        elif value.type == 'sphere':
             self.poser = SpherePoser()
-        elif value.type == 'AABB':
+        elif value.type == 'aabb':
             self.poser = AABBPoser()
-        elif value.type == 'Box':
+        elif value.type == 'box':
             self.poser = BoxPoser()
         else:
             raise NotImplementedError("Can't edit GeometricPrimitive of type "+value.type+" yet")
@@ -1208,16 +1243,16 @@ class GeometricPrimitiveEditor(VisualEditorBase):
 
     def mousefunc(self,button,state,x,y):
         if self.poser.hasFocus():
-            if self.value.type == 'Point':
+            if self.value.type == 'point':
                 p = self.poser.get()
                 self.value.setPoint(se3.apply(se3.inv(self.frame),p))
-            elif self.value.type == 'Sphere':
+            elif self.value.type == 'sphere':
                 cr = self.poser.get()
                 self.value.setSphere(se3.apply(se3.inv(self.frame),cr[:3]),cr[3])
-            elif self.value.type == 'AABB':
+            elif self.value.type == 'aabb':
                 bmin,bmax = self.poser.get()
                 self.value.setAABB(bmin,bmax)
-            elif self.value.type == 'Box':
+            elif self.value.type == 'box':
                 Tw = self.poser.getTransform()
                 Rl,tl = se3.mul(se3.inv(self.frame),Tw)
                 dims = self.poser.getDims()
@@ -1227,20 +1262,20 @@ class GeometricPrimitiveEditor(VisualEditorBase):
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
     def update_gui_from_value(self):
-        if self.value.type == 'Point':
+        if self.value.type == 'point':
             c = self.value.properties[0:3]
             self.poser.set(se3.apply(self.frame,c))
             self.poser.setAxes(self.frame[0])
-        elif self.value.type == 'Sphere':
+        elif self.value.type == 'sphere':
             c = self.value.properties[0:3]
             r = self.value.properties[3]
             self.poser.set(se3.apply(self.frame,c) + [r])
-        elif self.value.type == 'AABB':
+        elif self.value.type == 'aabb':
             bmin = self.value.properties[0:3]
             bmax = self.value.properties[3:6]
             self.poser.set(bmin,bmax)
             self.poser.setFrame(self.frame[0],self.frame[1])
-        elif self.value.type == 'Box':
+        elif self.value.type == 'box':
             t = self.value.properties[0:3]
             R = self.value.properties[3:12]
             dims = self.value.properties[12:15]
@@ -1419,6 +1454,11 @@ class SensorEditor(RigidTransformEditor):
         self.editBox.setText(value)
 
     def on_setting_edited(self):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtWidgets import QMessageBox
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtWidgets import QMessageBox
+
         if self.selectionList.currentRow() < 0:
             return
         value = str(self.editBox.text())

@@ -767,7 +767,9 @@ def point_cloud_set_colors(pc : PointCloud, colors, color_format='rgb',pc_proper
             if len(packed)==4:
                 pc.addProperty('a',packed[3])
         else:
-            pc.properties[:,pc_property] = packed
+            propind = pc.addProperty(pc_property,packed)
+            assert isinstance(propind,int)
+            pc.properties[:,propind] = packed
 
 
 def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:

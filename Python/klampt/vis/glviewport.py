@@ -19,8 +19,8 @@ class GLViewport(Viewport):
     klampt.Viewport with a camera controller and some Mac OpenGL information.
 
     Attributes:
-        x,y,w,h,n,f,fx,fy,cx,cy (from Viewport): the image box, projection,
-            and clipping planes.
+        x,y,w,h,n,f,fx,fy,cx,cy,ori,xform (from Viewport): the image box, projection,
+            clipping planes, intrinsics, and orientation.
         screenDeviceScale (float): if not 1, multiply screen pixel coordinates
             by this to get OpenGL pixel coordinates (usually Mac Retina
             displays)
@@ -30,10 +30,7 @@ class GLViewport(Viewport):
     """
     def __init__(self):
         Viewport.__init__(self)
-        self.perspective = True
-        self.x,self.y = 0,0
-        self.w,self.h = 640,480
-        self.cx,self.cy = 320.0,240.0
+        self.ori = 'opengl'
         self.setFOV(math.radians(60.0))
         #near and far clipping planes
         self.n = 0.2

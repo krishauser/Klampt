@@ -1013,6 +1013,7 @@ class TerrainModel
  *     (use ``WorldModel.copy()``) or ``config.getConfig(world)`` using the
  *     :mod:`klampt.model.config` module.
  *
+ * 
  * Every robot/robot link/terrain/rigid object is given a unique ID in the
  * world.  This is potentially a source of confusion because some functions
  * take IDs and some take indices.  Only the WorldModel and Simulator

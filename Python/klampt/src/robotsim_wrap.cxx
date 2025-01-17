@@ -39903,6 +39903,31 @@ SWIGINTERN PyObject *SpherePoser_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Python_InitShadowInstance(args);
 }
 
+SWIGINTERN PyObject *_wrap_new_Viewport(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Viewport *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "new_Viewport", 0, 0, 0)) SWIG_fail;
+  {
+    try {
+      result = (Viewport *)new Viewport();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Viewport, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Viewport_fromJson(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Viewport *arg1 = (Viewport *) 0 ;
@@ -41416,31 +41441,6 @@ SWIGINTERN PyObject *_wrap_Viewport_ori_get(PyObject *SWIGUNUSEDPARM(self), PyOb
   arg1 = reinterpret_cast< Viewport * >(argp1);
   result = (std::string *) & ((arg1)->ori);
   resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_Viewport(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Viewport *result = 0 ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "new_Viewport", 0, 0, 0)) SWIG_fail;
-  {
-    try {
-      result = (Viewport *)new Viewport();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Viewport, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -71495,6 +71495,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Adds a point. Sets all its properties to 0.  \n"
 		"\n"
+		"Slow if properties are already set. Setting the points and properties as\n"
+		"matrices is faster.  \n"
+		"\n"
 		"Returns the point's index.  \n"
 		"\n"
 		""},
@@ -73557,6 +73560,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "delete_SpherePoser", _wrap_delete_SpherePoser, METH_O, "delete_SpherePoser(SpherePoser self)"},
 	 { "SpherePoser_swigregister", SpherePoser_swigregister, METH_O, NULL},
 	 { "SpherePoser_swiginit", SpherePoser_swiginit, METH_VARARGS, NULL},
+	 { "new_Viewport", _wrap_new_Viewport, METH_NOARGS, "new_Viewport() -> Viewport"},
 	 { "Viewport_fromJson", _wrap_Viewport_fromJson, METH_VARARGS, "Viewport_fromJson(Viewport self, std::string const & str) -> bool"},
 	 { "Viewport_toJson", _wrap_Viewport_toJson, METH_O, "Viewport_toJson(Viewport self) -> std::string"},
 	 { "Viewport_fromText", _wrap_Viewport_fromText, METH_VARARGS, "Viewport_fromText(Viewport self, std::string const & str) -> bool"},
@@ -73597,7 +73601,6 @@ static PyMethodDef SwigMethods[] = {
 	 { "Viewport_xform_get", _wrap_Viewport_xform_get, METH_O, "Viewport_xform_get(Viewport self) -> doubleVector"},
 	 { "Viewport_ori_set", _wrap_Viewport_ori_set, METH_VARARGS, "Viewport_ori_set(Viewport self, std::string const & ori)"},
 	 { "Viewport_ori_get", _wrap_Viewport_ori_get, METH_O, "Viewport_ori_get(Viewport self) -> std::string const &"},
-	 { "new_Viewport", _wrap_new_Viewport, METH_NOARGS, "new_Viewport() -> Viewport"},
 	 { "delete_Viewport", _wrap_delete_Viewport, METH_O, "delete_Viewport(Viewport self)"},
 	 { "Viewport_swigregister", Viewport_swigregister, METH_O, NULL},
 	 { "Viewport_swiginit", Viewport_swiginit, METH_VARARGS, NULL},

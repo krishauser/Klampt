@@ -2578,6 +2578,9 @@ Sets all the points to the given nx3 Numpy array.
 
 Adds a point. Sets all its properties to 0.  
 
+Slow if properties are already set. Setting the points and properties as
+matrices is faster.  
+
 Returns the point's index.  
 ";
 
@@ -5417,8 +5420,9 @@ geometry.
 
     To keep around some \"authoritative\" world, you can keep around a copy
     (use ``WorldModel.copy()``) or ``config.getConfig(world)`` using the
-    :mod:`klampt.model.config` module.
- Every robot/robot link/terrain/rigid object is given a unique ID in the world.
+    :mod:`klampt.model.config` module.  
+
+Every robot/robot link/terrain/rigid object is given a unique ID in the world.
 This is potentially a source of confusion because some functions take IDs and
 some take indices. Only the WorldModel and Simulator classes use IDs when the
 argument has 'id' as a suffix, e.g., geometry(), appearance(),

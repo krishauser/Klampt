@@ -3083,7 +3083,7 @@ int PointCloud::addProperty(const std::string& pname,double* values,int numvals)
   assert(numvals == n);
   size_t m=pc.propertyNames.size();
   pc.propertyNames.push_back(pname);
-  pc.properties.resizePersist(pc.properties.m,pc.properties.n+1,0.0);
+  pc.properties.resizePersist(pc.points.size(),pc.properties.n+1,0.0);
   return (int)m;
 }
 

@@ -98,7 +98,8 @@ def smart_split(string : str, delim=',', quotes='"'):
             if string[i:].startswith(start):
                 ever_quoted = True
                 if in_quote:
-                    eprint("Adding quote at position",i)
+                    #eprint("Adding quote at position",i)
+                    pass
                 else:
                     quote_parts.append(string[last:i])
                     last = i
@@ -110,11 +111,11 @@ def smart_split(string : str, delim=',', quotes='"'):
                     assert num_quotes == 0
                     raise RuntimeError("End terminator '{}' encountered at position {} outside of quote: {}".format(end,i,string))
                 num_quotes -= 1
-                eprint("Removing quote at position",i)
+                #eprint("Removing quote at position",i)
                 i += len(end)
                 if num_quotes == 0:
                     in_quote = False
-                    eprint("Ended quoted region",string[last:i])
+                    #eprint("Ended quoted region",string[last:i])
                     quote_parts.append(string[last:i])
                     last = i
             else:
@@ -216,6 +217,7 @@ def print_definition(defn : str, indent0 : str, documented_return_type : Optiona
             ret = prefix + suffix
     eprint("Parsed function",fn)
     print("{}{}({}){}".format(indent0,fn,','.join(args),ret))
+
 
 def print_signature(siglist,indent0,docstring):
     """Converts a SWIG signature in a docstring to Google
@@ -431,8 +433,9 @@ def main(f):
                     #now parse the docstring
                     print_parsed_function_def(last_defn,outer_indent,current_docstring)
                     last_defn = None
-                else:
-                    print_signature([],outer_indent,current_docstring)
+                else:                        
+                    print(current_docstring[0])
+                    print_signature([],outer_indent,current_docstring[1:])
                 print(ln)
             else:
                 #add to docstring

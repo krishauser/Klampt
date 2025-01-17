@@ -855,12 +855,10 @@ _robotsim.stringMap_swigregister(stringMap)
 
 class TriangleMesh(object):
     r"""
+    A 3D indexed triangle mesh class.  
 
 
     Args:
-
-
-    A 3D indexed triangle mesh class.  
 
     Attributes:  
 
@@ -1021,14 +1019,12 @@ _robotsim.TriangleMesh_swigregister(TriangleMesh)
 
 class ConvexHull(object):
     r"""
-
-
-    Args:
-
-
     Stores a set of points to be set into a ConvexHull type. Note: These may not
     actually be the vertices of the convex hull; the actual convex hull may be
     computed internally for some datatypes.  
+
+
+    Args:
 
     Attributes:  
 
@@ -1139,12 +1135,10 @@ _robotsim.ConvexHull_swigregister(ConvexHull)
 
 class PointCloud(object):
     r"""
+    A 3D point cloud class.  
 
 
     Args:
-
-
-    A 3D point cloud class.  
 
     Attributes:  
 
@@ -1261,6 +1255,9 @@ class PointCloud(object):
 
         Args:
             p (:obj:`list of 3 floats`)
+
+        Slow if properties are already set. Setting the points and properties as
+        matrices is faster.  
 
         Returns the point's index.  
         """
@@ -1660,13 +1657,11 @@ _robotsim.PointCloud_swigregister(PointCloud)
 
 class GeometricPrimitive(object):
     r"""
+    A geometric primitive. So far only points, spheres, segments, and AABBs can be
+    constructed manually in the Python API.  
 
 
     Args:
-
-
-    A geometric primitive. So far only points, spheres, segments, and AABBs can be
-    constructed manually in the Python API.  
 
     Attributes:  
 
@@ -1820,14 +1815,12 @@ _robotsim.GeometricPrimitive_swigregister(GeometricPrimitive)
 
 class VolumeGrid(object):
     r"""
-
-
-    Args:
-
-
     An axis-aligned volumetric grid, typically a signed distance transform with > 0
     indicating outside and < 0 indicating inside. Can also store an occupancy grid
     with 1 indicating inside and 0 indicating outside.  
+
+
+    Args:
 
     In general, values are associated with cells rather than vertices. So, cell
     (i,j,k) is associated with a single value, and has size (w,d,h) =
@@ -2027,12 +2020,10 @@ _robotsim.VolumeGrid_swigregister(VolumeGrid)
 
 class Heightmap(object):
     r"""
+    A height (elevation) map or a depth map.  
 
 
     Args:
-
-
-    A height (elevation) map or a depth map.  
 
     In elevation-map form (`viewport.perspective=false`), the values are the
     z-height of the terrain at each grid point. In depth-map form
@@ -2459,12 +2450,10 @@ _robotsim.Heightmap_swigregister(Heightmap)
 
 class DistanceQuerySettings(object):
     r"""
+    Configures the _ext distance queries of :class:`~klampt.Geometry3D`.  
 
 
     Args:
-
-
-    Configures the _ext distance queries of :class:`~klampt.Geometry3D`.  
 
     The calculated result satisfies :math:`Dcalc \leq D(1+relErr) + absErr` unless
     :math:`D \geq upperBound`, in which case Dcalc=upperBound may be returned.  
@@ -2500,12 +2489,10 @@ _robotsim.DistanceQuerySettings_swigregister(DistanceQuerySettings)
 
 class DistanceQueryResult(object):
     r"""
+    The result from a "fancy" distance query of :class:`~klampt.Geometry3D`.  
 
 
     Args:
-
-
-    The result from a "fancy" distance query of :class:`~klampt.Geometry3D`.  
 
     Attributes:  
 
@@ -2554,13 +2541,11 @@ _robotsim.DistanceQueryResult_swigregister(DistanceQueryResult)
 
 class ContactQueryResult(object):
     r"""
+    The result from a contact query of :class:`~klampt.Geometry3D`. The number of
+    contacts n is variable.  
 
 
     Args:
-
-
-    The result from a contact query of :class:`~klampt.Geometry3D`. The number of
-    contacts n is variable.  
 
     Attributes:  
 
@@ -2604,12 +2589,10 @@ _robotsim.ContactQueryResult_swigregister(ContactQueryResult)
 
 class Geometry3D(object):
     r"""
+    The three-D geometry container used throughout Klampt.  
 
 
     Args:
-
-
-    The three-D geometry container used throughout Klampt.  
 
     There are eight currently supported types of geometry:  
 
@@ -2712,7 +2695,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.ConvexHull` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:class:`~klampt.ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :obj:`Heightmap` or :class:`~klampt.VolumeGrid`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -3510,14 +3493,12 @@ _robotsim.Geometry3D_swigregister(Geometry3D)
 
 class Appearance(object):
     r"""
-
-
-    Args:
-
-
     Geometry appearance information. Supports vertex/edge/face rendering, per-vertex
     color, and basic color texture mapping. Uses OpenGL display lists, so repeated
     calls are fast.  
+
+
+    Args:
 
     For more complex appearances, you will need to call your own OpenGL calls.  
 
@@ -4149,10 +4130,7 @@ _robotsim.Appearance_swigregister(Appearance)
 class Widget(object):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4237,10 +4215,7 @@ _robotsim.Widget_swigregister(Widget)
 class WidgetSet(Widget):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4280,10 +4255,7 @@ _robotsim.WidgetSet_swigregister(WidgetSet)
 class PointPoser(Widget):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4331,10 +4303,7 @@ _robotsim.PointPoser_swigregister(PointPoser)
 class TransformPoser(Widget):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4397,10 +4366,7 @@ _robotsim.TransformPoser_swigregister(TransformPoser)
 class ObjectPoser(Widget):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4433,10 +4399,7 @@ _robotsim.ObjectPoser_swigregister(ObjectPoser)
 class RobotPoser(Widget):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4494,10 +4457,7 @@ _robotsim.RobotPoser_swigregister(RobotPoser)
 class AABBPoser(Widget):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4536,10 +4496,7 @@ _robotsim.AABBPoser_swigregister(AABBPoser)
 class BoxPoser(Widget):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4591,10 +4548,7 @@ _robotsim.BoxPoser_swigregister(BoxPoser)
 class SpherePoser(Widget):
     r"""
 
-
     Args:
-
-
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4626,6 +4580,10 @@ class Viewport(object):
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
+
+    def __init__(self):
+        r"""__init__(Viewport self) -> Viewport"""
+        _robotsim.Viewport_swiginit(self, _robotsim.new_Viewport())
 
     def fromJson(self, str: str) -> bool:
         r"""fromJson(Viewport self, std::string const & str) -> bool"""
@@ -4714,10 +4672,6 @@ class Viewport(object):
     clippingPlanes = property(getClippingPlanes, setClippingPlanes)
     """Klampt 0.9 backwards compatibility accessor for the (n, f) pair."""
 
-
-    def __init__(self):
-        r"""__init__(Viewport self) -> Viewport"""
-        _robotsim.Viewport_swiginit(self, _robotsim.new_Viewport())
     __swig_destroy__ = _robotsim.delete_Viewport
 
 # Register Viewport in _robotsim:
@@ -4725,12 +4679,10 @@ _robotsim.Viewport_swigregister(Viewport)
 
 class Mass(object):
     r"""
+    Stores mass information for a rigid body or robot link.  
 
 
     Args:
-
-
-    Stores mass information for a rigid body or robot link.  
 
     .. note::  
 
@@ -4835,13 +4787,11 @@ _robotsim.Mass_swigregister(Mass)
 
 class ContactParameters(object):
     r"""
+    Stores contact parameters for an entity. Currently only used for simulation, but
+    could be used for contact mechanics in the future.  
 
 
     Args:
-
-
-    Stores contact parameters for an entity. Currently only used for simulation, but
-    could be used for contact mechanics in the future.  
 
     Attributes:  
 
@@ -4876,12 +4826,10 @@ _robotsim.ContactParameters_swigregister(ContactParameters)
 
 class RobotModelLink(object):
     r"""
+    A reference to a link of a RobotModel.  
 
 
     Args:
-
-
-    A reference to a link of a RobotModel.  
 
     The link stores many mostly-constant items (id, name, parent, geometry,
     appearance, mass, joint axes). There are two exceptions:  
@@ -5437,12 +5385,10 @@ _robotsim.RobotModelLink_swigregister(RobotModelLink)
 
 class RobotModelDriver(object):
     r"""
+    A reference to a driver of a RobotModel.  
 
 
     Args:
-
-
-    A reference to a driver of a RobotModel.  
 
     A driver corresponds to one of the robot's actuators and encodes how its forces
     are transmitted to joints.  
@@ -5605,12 +5551,10 @@ _robotsim.RobotModelDriver_swigregister(RobotModelDriver)
 
 class RobotModel(object):
     r"""
+    A model of a dynamic and kinematic robot.  
 
 
     Args:
-
-
-    A model of a dynamic and kinematic robot.  
 
     Stores both constant information, like the reference placement of the links,
     joint limits, velocity limits, etc, as well as a *current configuration* and
@@ -6352,12 +6296,10 @@ _robotsim.RobotModel_swigregister(RobotModel)
 
 class RigidObjectModel(object):
     r"""
+    A rigid movable object.  
 
 
     Args:
-
-
-    A rigid movable object.  
 
     A rigid object has a name, geometry, appearance, mass, surface properties, and
     current transform / velocity.  
@@ -6558,12 +6500,10 @@ _robotsim.RigidObjectModel_swigregister(RigidObjectModel)
 
 class TerrainModel(object):
     r"""
+    Static environment geometry.  
 
 
     Args:
-
-
-    Static environment geometry.  
 
     C++ includes: robotmodel.h
 
@@ -6674,13 +6614,11 @@ _robotsim.TerrainModel_swigregister(TerrainModel)
 
 class WorldModel(object):
     r"""
+    The main world class, containing robots, rigid objects, and static environment
+    geometry.  
 
 
     Args:
-
-
-    The main world class, containing robots, rigid objects, and static environment
-    geometry.  
 
     .. note:  
 
@@ -6692,8 +6630,9 @@ class WorldModel(object):
 
         To keep around some "authoritative" world, you can keep around a copy
         (use ``WorldModel.copy()``) or ``config.getConfig(world)`` using the
-        :mod:`klampt.model.config` module.
-     Every robot/robot link/terrain/rigid object is given a unique ID in the world.
+        :mod:`klampt.model.config` module.  
+
+    Every robot/robot link/terrain/rigid object is given a unique ID in the world.
     This is potentially a source of confusion because some functions take IDs and
     some take indices. Only the WorldModel and Simulator classes use IDs when the
     argument has 'id' as a suffix, e.g., geometry(), appearance(),
@@ -6853,7 +6792,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -7007,7 +6946,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
+            (:class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7108,14 +7047,12 @@ _robotsim.WorldModel_swigregister(WorldModel)
 
 class IKObjective(object):
     r"""
-
-
-    Args:
-
-
     A class defining an inverse kinematic target. Either a link on a robot can take
     on a fixed position/orientation in the world frame, or a relative
     position/orientation to another frame.  
+
+
+    Args:
 
     The positionScale and orientationScale attributes scale the solver's residual
     vector. This affects whether the convergence tolerance is met, and also controls
@@ -7456,12 +7393,10 @@ _robotsim.IKObjective_swigregister(IKObjective)
 
 class IKSolver(object):
     r"""
+    An inverse kinematics solver based on the Newton-Raphson technique.  
 
 
     Args:
-
-
-    An inverse kinematics solver based on the Newton-Raphson technique.  
 
     Typical calling pattern is::  
 
@@ -7763,13 +7698,11 @@ _robotsim.IKSolver_swigregister(IKSolver)
 
 class GeneralizedIKObjective(object):
     r"""
+    An inverse kinematics target for matching points between two robots and/or
+    objects.  
 
 
     Args:
-
-
-    An inverse kinematics target for matching points between two robots and/or
-    objects.  
 
     The objects are chosen upon construction, so the following are valid:  
 
@@ -7804,7 +7737,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7856,13 +7789,11 @@ _robotsim.GeneralizedIKObjective_swigregister(GeneralizedIKObjective)
 
 class GeneralizedIKSolver(object):
     r"""
+    An inverse kinematics solver between multiple robots and/or objects. NOT
+    IMPLEMENTED YET.  
 
 
     Args:
-
-
-    An inverse kinematics solver between multiple robots and/or objects. NOT
-    IMPLEMENTED YET.  
 
     C++ includes: robotik.h
 
@@ -7949,16 +7880,14 @@ _robotsim.GeneralizedIKSolver_swigregister(GeneralizedIKSolver)
 
 class SimRobotSensor(object):
     r"""
-
-
-    Args:
-
-
     A sensor on a simulated robot. Retrieve one from the controller using
     :meth:`SimRobotController.sensor`, or create a new one using
     :meth:`SimRobotController.addSensor`. You may also use kinematically-simulated
     sensors using :meth:`RobotModel.sensor` or create a new one using
     :meth:`RobotModel.addSensor`.  
+
+
+    Args:
 
     Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
@@ -8198,12 +8127,10 @@ _robotsim.SimRobotSensor_swigregister(SimRobotSensor)
 
 class SimRobotController(object):
     r"""
+    A controller for a simulated robot.  
 
 
     Args:
-
-
-    A controller for a simulated robot.  
 
     By default a SimRobotController has three possible modes:  
 
@@ -8620,13 +8547,11 @@ _robotsim.SimRobotController_swigregister(SimRobotController)
 
 class SimBody(object):
     r"""
+    A reference to a rigid body inside a Simulator (either a RigidObjectModel,
+    TerrainModel, or a link of a RobotModel).  
 
 
     Args:
-
-
-    A reference to a rigid body inside a Simulator (either a RigidObjectModel,
-    TerrainModel, or a link of a RobotModel).  
 
     Can use this class to directly apply forces to or control positions / velocities
     of objects in the simulation.  
@@ -8904,14 +8829,12 @@ _robotsim.SimBody_swigregister(SimBody)
 
 class SimJoint(object):
     r"""
-
-
-    Args:
-
-
     An interface to ODE's hinge and slider joints. You may use this to create custom
     objects, e.g., drawers, doors, cabinets, etc. It can also be used to attach
     objects together, e.g., an object to a robot's gripper.  
+
+
+    Args:
 
     C++ includes: robotsim.h
 
@@ -9021,12 +8944,10 @@ _robotsim.SimJoint_swigregister(SimJoint)
 
 class Simulator(object):
     r"""
+    A dynamics simulator for a WorldModel.  
 
 
     Args:
-
-
-    A dynamics simulator for a WorldModel.  
 
     C++ includes: robotsim.h
 
@@ -9316,7 +9237,7 @@ class Simulator(object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             SimRobotController:
