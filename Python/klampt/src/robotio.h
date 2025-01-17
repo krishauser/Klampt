@@ -31,6 +31,7 @@ class WorldModel;
  *         to be subscribed to. If not, tries to determine the type
  *         automatically.
  *
+ * 
  * Returns:
  * 
  *     bool: True if successful.
@@ -48,6 +49,7 @@ bool detach_from_stream(const char* protocol,const char* name);
  * 
  *     protocol (str): either name the protocol to be updated, or "all" for
  *         updating all subscribed streams
+ * 
  * 
  * Returns:
  * 

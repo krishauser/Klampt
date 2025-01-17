@@ -2695,7 +2695,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :obj:`Heightmap` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:class:`~klampt.Geometry3D` or :obj:`Heightmap` or :class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -6946,7 +6946,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7737,7 +7737,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -8041,7 +8041,7 @@ class SimRobotSensor(object):
 
 
         Args:
-            link (int or :class:`~klampt.RobotModelLink`): 
+            link (:class:`~klampt.RobotModelLink` or int): 
         """
         return _robotsim.SimRobotSensor_setLink(self, *args)
 
@@ -9237,7 +9237,7 @@ class Simulator(object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             SimRobotController:
@@ -9413,8 +9413,9 @@ def subscribe_to_stream(*args) -> bool:
         name (str): the name of the stream, i.e., ROS topic.
         type (str, optional): If provided, specifies the format of the data
             to be subscribed to. If not, tries to determine the type
-            automatically.
-     Returns:  
+            automatically.  
+
+    Returns:  
 
         bool: True if successful.
     """
@@ -9439,8 +9440,9 @@ def process_streams(*args) -> bool:
     Args:  
 
         protocol (str): either name the protocol to be updated, or "all" for
-            updating all subscribed streams
-     Returns:  
+            updating all subscribed streams  
+
+    Returns:  
 
         bool: True if any stream was updated.
     """

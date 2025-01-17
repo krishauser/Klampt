@@ -5810,8 +5810,9 @@ Args:
     name (str): the name of the stream, i.e., ROS topic.
     type (str, optional): If provided, specifies the format of the data
         to be subscribed to. If not, tries to determine the type
-        automatically.
- Returns:  
+        automatically.  
+
+Returns:  
 
     bool: True if successful.
   
@@ -5830,8 +5831,9 @@ Does some processing on stream subscriptions.
 Args:  
 
     protocol (str): either name the protocol to be updated, or \"all\" for
-        updating all subscribed streams
- Returns:  
+        updating all subscribed streams  
+
+Returns:  
 
     bool: True if any stream was updated.
   
