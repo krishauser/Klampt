@@ -9,6 +9,7 @@ It can be installed using pip as follows::
 
 import open3d
 from klampt import PointCloud,TriangleMesh,VolumeGrid,Geometry3D
+from ..math import se3
 from ..model import geometry
 
 def to_open3d(obj):
@@ -24,28 +25,29 @@ def to_open3d(obj):
     """
     if isinstance(obj,PointCloud):
         pc = open3d.geometry.PointCloud()
-        pc.points = open3d.utility.Vector3dVector(obj.getPoints())
+        pc.points = open3d.utility.Vector3dVector(obj.points)
         #TODO: other properties
         colors = geometry.point_cloud_colors(obj,('r','g','b'))
         if colors is not None:
-            for i in range(obj.numPoints()):
+            for i in range(len(obj.points)):
                 pc.colors.append(colors[i])
         return pc
     elif isinstance(obj,TriangleMesh):
         m = open3d.geometry.TriangleMesh()
-        m.vertices = open3d.utility.Vector3dVector(obj.getVertices())
-        m.triangles = open3d.utility.Vector3iVector(obj.getIndices())
+        m.vertices = open3d.utility.Vector3dVector(obj.vertices)
+        m.triangles = open3d.utility.Vector3iVector(obj.indices)
         return m
     elif isinstance(obj,VolumeGrid):
         import numpy as np
 
-        origin = np.array([obj.bbox[0],obj.bbox[1],obj.bbox[2]])
-        cx = (obj.bbox[3]-obj.bbox[0])/obj.dims[0]
-        cy = (obj.bbox[4]-obj.bbox[1])/obj.dims[1]
-        cz = (obj.bbox[5]-obj.bbox[2])/obj.dims[2]
+        origin = obj.bmin
+        dims = obj.values.shape
+        cx = (obj.bmax[0]-obj.bmin[0])/dims[0]
+        cy = (obj.bmax[1]-obj.bmin[1])/dims[1]
+        cz = (obj.bmax[2]-obj.bmin[2])/dims[2]
         voxel_size = pow(cx*cy*cz,1.0/3.0)
         
-        values = obj.getValues()
+        values = obj.values
         vrange = np.min(values),np.min(values)
         if vrange[0] < 0 or vrange[1] > 1:
             #treat as SDF
@@ -56,7 +58,7 @@ def to_open3d(obj):
 
         pc = open3d.geometry.PointCloud()
         for i in indices[0]:
-            cell = np.array([i//(obj.dims[2]*obj.dims[1]), (i//obj.dims[2]) % obj.dims[1], i%obj.dims[2]])
+            cell = np.array([i//(dims[2]*dims[1]), (i//dims[2]) % dims[1], i%dims[2]])
             pt = (cell + 0.5)*voxel_size + origin
             pc.points.append(pt)
         vg = open3d.geometry.VoxelGrid()
@@ -66,13 +68,15 @@ def to_open3d(obj):
         #return open3d.geometry.create_surface_voxel_grid_from_point_cloud(pc,voxel_size)
     elif isinstance(obj,Geometry3D):
         if obj.type() == 'PointCloud':
-            pc = obj.getPointCloud()
+            pc = obj.copy().getPointCloud()
             pc.transform(*obj.getCurrentTransform())
             return to_open3d(pc)
         elif obj.type() == 'TriangleMesh':
-            m = obj.getTriangleMesh()
+            m = obj.copy().getTriangleMesh()
             m.transform(*obj.getCurrentTransform())
             return to_open3d(m)
+        else:
+            raise ValueError("Can't convert Geometry3D of type "+obj.type()+" yet")
     raise TypeError("Invalid type")
 
 def from_open3d(obj):
@@ -81,7 +85,7 @@ def from_open3d(obj):
     if isinstance(obj,open3d.geometry.PointCloud):
         import numpy as np
         pc = PointCloud()
-        pc.setPoints(np.asarray(obj.points))
+        pc.points = np.asarray(obj.points)
         if obj.has_colors():
             geometry.point_cloud_set_colors(pc,np.asarray(obj.colors),('r','g','b'),'rgb')
         #TODO: other properties
@@ -89,8 +93,8 @@ def from_open3d(obj):
     elif isinstance(obj,open3d.geometry.TriangleMesh):
         import numpy as np
         m = TriangleMesh()
-        m.setVertices(np.asarray(obj.vertices))
-        m.setIndices(np.asarray(obj.triangles))
+        m.vertices = np.asarray(obj.vertices)
+        m.indices = np.asarray(obj.triangles)
         return m
     elif isinstance(obj,open3d.geometry.VoxelGrid):
         grid = VolumeGrid()
@@ -107,17 +111,13 @@ def from_open3d(obj):
         imax = np.max(occupied,axis=0)
         assert imin.shape == (3,)
         assert imax.shape == (3,)
+        #TODO: fix this up
+        import warnings
+        warnings.warn("from_open3d: VoxelGrid conversion may not be correct")
         bmin = obj.origin + (imin-1)*obj.voxel_size
         bmax = obj.origin + (imax+2)*obj.voxel_size
-        grid.bbox.append(bmin[0])
-        grid.bbox.append(bmin[1])
-        grid.bbox.append(bmin[2])
-        grid.bbox.append(bmax[0])
-        grid.bbox.append(bmax[1])
-        grid.bbox.append(bmax[2])
-        grid.dims.append(imax[0]-imin[0]+3)
-        grid.dims.append(imax[1]-imin[1]+3)
-        grid.dims.append(imax[2]-imin[2]+3)
-        grid.setValues(occupied.astype(float))
+        grid.bmin = bmin
+        grid.bmax = bmax
+        grid.values = occupied.astype(float)
         return grid
     raise TypeError("Invalid type")

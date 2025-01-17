@@ -164,15 +164,15 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
     N = 0
     if feature == 'vertices':
         if isinstance(geometrydata,PointCloud):
-            N = geometrydata.numPoints()
+            N = len(geometrydata.points)
         elif isinstance(geometrydata,Heightmap):
             N = geometrydata.viewport.w*geometrydata.viewport.h
         else:
-            N = len(geometrydata.vertices)//3
+            N = len(geometrydata.vertices)
     elif feature == 'faces':
         if not isinstance(geometrydata,TriangleMesh):
             raise ValueError("Triangle meshes are the only geometries that can use the 'faces' feature")
-        N = len(geometrydata.indices)//3
+        N = len(geometrydata.indices)
 
     #check if values needs transforming
     if isinstance(value,str):
@@ -182,11 +182,11 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
                 N = geometrydata.viewport.w*geometrydata.viewport.h
             elif not isinstance(colormap,str) or colormap != 'random' or isinstance(geometrydata,PointCloud):
                 feature = 'vertices'
-                N = len(geometrydata.vertices)//3
+                N = len(geometrydata.vertices)
             else:
                 #random face colors
                 feature = 'faces'
-                N = len(geometrydata.indices)//3
+                N = len(geometrydata.indices)
                 value = 'index'
         if geometrydata is None:
             raise ValueError("Can't assign colors based on a named value to an Appearance")
@@ -202,11 +202,10 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
                     vname = 'normal_y'
                 elif vname == 'nz':
                     vname = 'normal_z'
-                for i in range(geometrydata.numProperties()):
-                    if value == geometrydata.propertyNames[i]:
-                        found = True
-                        value = geometrydata.getProperties(i)
-                        break
+                i = geometrydata.propertyIndex(vname)
+                if i >= 0:
+                    found = True
+                    value = geometrydata.properties[:,i]
             elif isinstance(geometrydata,Heightmap):
                 if value == 'height' or value == 'z':
                     found = True
@@ -220,44 +219,47 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
             if found:
                 assert value is not None
                 assert len(value) == N,"Feature is "+feature+" with length "+str(N)+" but extracted values of size "+str(len(value))
+                assert len(np.asarray(value).shape)==1,"Invalid value shape "+str(np.asarray(value).shape)
     else:
         if not hasattr(value,'__iter__'):
             raise ValueError("Provided an invalid value "+str(value))
-
+        
         #it's a list
         if feature == None:
             if isinstance(geometrydata,PointCloud):
                 feature = 'vertices'
-                N = geometrydata.numPoints()
+                N = len(geometrydata.points)
             elif isinstance(geometrydata,Heightmap):
                 feature = 'height'
                 N = geometrydata.viewport.w*geometrydata.viewport.h
             else:
                 assert isinstance(geometrydata,TriangleMesh)
-                if len(value)*3 == len(geometrydata.indices):
+                if len(value) == len(geometrydata.indices):
                     feature = 'faces'
-                    N = len(geometrydata.indices)//3
-                elif len(value)*3 == len(geometrydata.vertices):
+                    N = len(geometrydata.indices)
+                elif len(value) == len(geometrydata.vertices):
                     feature = 'vertices'
-                    N = len(geometrydata.vertices)//3
+                    N = len(geometrydata.vertices)
                 else:
-                    raise ValueError("The number of values (%d) does not match the number of vertices (%d) or faces (%d) of the mesh"%(len(value),len(geometrydata.vertices)//3),len(geometrydata.indices)//3)
+                    raise ValueError("The number of values (%d) does not match the number of vertices (%d) or faces (%d) of the mesh"%(len(value),len(geometrydata.vertices)),len(geometrydata.indices))
         if len(value) != N:
             raise ValueError("The number of values does not match the number of features: %d != %d"%(len(value),N))
+        if len(np.asarray(value).shape)!=1:
+            raise ValueError("Invalid value shape "+str(np.asarray(value).shape))
 
     shading = None
     if isinstance(value,str) or lighting is not None:
         #need positions / normals -- compute them for the indicated features
         if isinstance(geometrydata,PointCloud):
-            positions = geometrydata.getPoints()
+            positions = geometrydata.points
         elif isinstance(geometrydata,Heightmap):
             if isinstance(geometry,Geometry3D):
-                positions = geometry.convert('PointCloud').getPointCloud().getPoints()
+                positions = geometry.convert('PointCloud').getPointCloud().points
             else:
-                positions = Geometry3D(geometrydata).convert('PointCloud').getPointCloud().getPoints()
+                positions = Geometry3D(geometrydata).convert('PointCloud').getPointCloud().points
         else:
             assert isinstance(geometrydata,TriangleMesh)
-            positions = geometrydata.getVertices()
+            positions = geometrydata.vertices
         normals = None
         if lighting is not None or value in ['n','normal','nx','ny','nz']:
             if isinstance(geometrydata,PointCloud):
@@ -278,7 +280,7 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
             assert isinstance(geometrydata,TriangleMesh)
             if lighting is not None or value in ['position','x','y','z']:
                 #compute positions = triangle centroids
-                tris = geometrydata.getIndices()
+                tris = geometrydata.indices
                 A = positions[tris[:,0]]
                 B = positions[tris[:,1]]
                 C = positions[tris[:,2]]
@@ -331,7 +333,7 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
     #now map values to colors
     colors = None
     if colormap == 'random':
-        vunique,vinds = np.unique(value,return_inverse=True)
+        vunique,vinds = np.unique(value,return_inverse=True,axis=0)
         if len(vunique) < len(value):
             cmap = np.random.rand(len(vunique),3).astype(np.float32)
             colors = cmap[vinds]
@@ -364,9 +366,9 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
         hascolor = -1
         prop = None
         for i in range(appearance.numProperties()):
-            if appearance.propertyNames[i] in ['rgb','rgba','r']:
+            if appearance.getPropertyName(i) in ['rgb','rgba','r']:
                 hascolor = i
-                prop = appearance.propertyNames[i]
+                prop = appearance.getPropertyName(i)
                 break
         if hascolor < 0:
             hascolor = appearance.numProperties()
@@ -377,17 +379,17 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
                 prop = 'rgba'
                 appearance.addProperty(prop)
         if prop == 'r':
-            assert appearance.propertyNames[hascolor+1] == 'g'
-            assert appearance.propertyNames[hascolor+2] == 'b'
-            appearance.setProperties(hascolor,colors[:,0])
-            appearance.setProperties(hascolor+1,colors[:,1])
-            appearance.setProperties(hascolor+2,colors[:,2])
+            assert appearance.getPropertyName(hascolor+1) == 'g'
+            assert appearance.getPropertyName(hascolor+2) == 'b'
+            appearance.properties[:,hascolor] = colors[:,0]
+            appearance.properties[:,hascolor+1] = colors[:,1]
+            appearance.properties[:,hascolor+2] = colors[:,2]
         elif prop == 'rgb':
             r = np.rint(colors[:,0]*255.0).astype(np.uint32)
             g = np.rint(colors[:,1]*255.0).astype(np.uint32)
             b = np.rint(colors[:,2]*255.0).astype(np.uint32)
             rgb = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b))
-            appearance.setProperties(hascolor,rgb)
+            appearance.properties[:,hascolor] = rgb
         elif prop == 'rgba':
             r = np.rint(colors[:,0]*255.0).astype(np.uint32)
             g = np.rint(colors[:,1]*255.0).astype(np.uint32)
@@ -398,7 +400,7 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
                 a = np.rint(colors[:,3]*255.0).astype(np.uint32)
             rgba = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),
                                         np.left_shift(a,24),b))
-            appearance.setProperties(hascolor,rgba)
+            appearance.properties[:,hascolor] = rgba
         if isinstance(geometry,Geometry3D):
             #write it back to the geometry
             geometry.setPointCloud(appearance)

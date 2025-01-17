@@ -317,8 +317,8 @@ class QtGLWindow(QOpenGLWidget):
         return QSize(self.width,self.height)
 
     def get_screen(self,format,want_depth):
-        if want_depth:
-            raise NotImplementedError("Depth screenshots not supported in Qt")
+        # if want_depth:
+        #     raise NotImplementedError("Depth screenshots not supported in Qt")
         if PYQT_VERSION == 4:
             raise NotImplementedError("Screenshots no longer supported in PyQt4 version")
         import io
@@ -341,7 +341,7 @@ class QtGLWindow(QOpenGLWidget):
             ptr = qimg.bits()
             ptr.setsize(height * width * 4)
             rgb = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
-            return rgb
+            rgb = rgb[:,:,:3][:,:,::-1]
         elif format == 'Image':
             from PIL import Image
             buffer = QBuffer()
@@ -350,13 +350,51 @@ class QtGLWindow(QOpenGLWidget):
             else:
                 buffer.open(QBuffer.OpenModeFlag.ReadWrite)
             qimg.save(buffer, "PNG")
-            pil_im = Image.open(io.BytesIO(buffer.data()))
-            return pil_im
+            rgb = Image.open(io.BytesIO(buffer.data()))
         else:
             width = qimg.width()
             height = qimg.height()
-            return (width,height,qimg.bits().tobytes())
-    
+            rgb = (width,height,qimg.bits().tobytes())
+
+        if want_depth:
+            self.makeCurrent()
+            x,y,w,h = self.program.view.x*self.program.view.screenDeviceScale,self.program.view.y*self.program.view.screenDeviceScale,self.program.view.w*self.program.view.screenDeviceScale,self.program.view.h*self.program.view.screenDeviceScale
+            n,f = self.program.view.n,self.program.view.f
+            try:
+                depthdata = glReadPixels( x, y, w, h, GL_DEPTH_COMPONENT, GL_FLOAT)
+            except OpenGL.error.GLError:
+                import numpy as np
+                import warnings
+                warnings.warn("Depth screenshots not supported in Qt")
+                depth = np.zeros((h,w),np.float32)
+                if format == 'Image':
+                    from PIL import Image
+                    depth = Image.fromarray(depth)
+                elif format == 'numpy':
+                    pass
+                else:
+                    depth = (w,h,depth.flatten().tolist())
+                return (rgb,depth)
+            if format == 'numpy':
+                import numpy as np
+                depth = np.frombuffer(depthdata,dtype=np.float32).reshape((h,w))
+                depth = np.flip(depth,0)
+                depth = (n*f)/(f - depth*(f-n))
+            elif format == 'Image':
+                from PIL import Image,ImageMath
+                depth = Image.frombuffer("F", (w, h), depthdata, "raw", "F", 0, 0)
+                depth = depth.transpose(Image.FLIP_TOP_BOTTOM)
+                depth = ImageMath.eval("%f / (%f - a*%f)"%(n*f,f,f-n),a=depth)
+            else:
+                import struct
+                deptharray = [struct.unpack("<f",depthdata[i:i+4]) for i in range(0,w*h*4,4)] 
+                for i in range(w*h):
+                    deptharray[i] = n*f/(f - deptharray[i]*(f-n))
+                depth = (w,h,deptharray)
+            return (rgb,depth)
+        return rgb
+
+
     #QtGLWidget bindings
     def initializeGL(self):
         print("######### QtGLWindow Initialize GL ###############")
@@ -570,7 +608,6 @@ class QtBackend:
 
     def initialize(self,program_name):
         if self.app == None:
-            print("QtBackend: initializing app as",program_name)
             #this is needed for some X11 multithreading bug 
             if PYQT_VERSION == 4:
                 QCoreApplication.setAttribute(Attribute.AA_X11InitThreads | Attribute.AA_ShareOpenGLContexts )

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..visualization import _globalLock,VisualizationScene
 from .. import glcommon
 import weakref
@@ -7,7 +8,7 @@ import warnings
 
 class WindowInfo:
     """Mode can be hidden, shown, or dialog"""
-    def __init__(self,name,frontend,glwindow=None):
+    def __init__(self,name : str, frontend : GLVisualizationFrontend, glwindow=None):
         self.name = name
         self.frontend = frontend
         self.glwindow = glwindow

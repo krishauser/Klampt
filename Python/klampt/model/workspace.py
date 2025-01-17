@@ -101,8 +101,9 @@ def compute_occupancy_grid(points : Sequence[Vector3],
         if value == 'probability' and len(points)>0:
             reachable *= 1.0/len(points)
     vg = VolumeGrid()
-    vg.setBounds(lower_corner,upper_corner)
-    vg.setValues(reachable)
+    vg.bmin = lower_corner
+    vg.bmax = upper_corner
+    vg.values = reachable
     return vg
 
 
@@ -244,8 +245,9 @@ def compute_field_grid(points : Sequence[Vector3],
         else:
             result = value_grid
     vg = VolumeGrid()
-    vg.setBounds(lower_corner,upper_corner)
-    vg.setValues(result)
+    vg.bmin = lower_corner
+    vg.bmax = upper_corner
+    vg.values = result
     return vg
 
 

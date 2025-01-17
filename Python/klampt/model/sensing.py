@@ -398,12 +398,14 @@ def image_to_points(depth : ImageLike, color : ImageLike,
         res.setPoints(pts)
         if color_format == 'rgb':
             res.addProperty('rgb')
-            res.setProperties(color)
+            assert color.shape == (len(pts),1)
+            res.properties = color
         elif color_format == 'channels':
             res.addProperty('r')
             res.addProperty('g')
             res.addProperty('b')
-            res.setProperties(color)
+            assert color.shape == (len(pts),3)
+            res.properties = color
         if points_format == 'PointCloud':
             return res
         else:
@@ -556,12 +558,12 @@ def camera_to_points(camera : SimRobotSensor,
         res.setPoints(pts[:,0:3])
         if color_format == 'rgb':
             res.addProperty('rgb')
-            res.setProperties(pts[:,3:4])
+            res.properties = pts[:,3:4]
         elif color_format == 'channels':
             res.addProperty('r')
             res.addProperty('g')
             res.addProperty('b')
-            res.setProperties(pts[:,3:6])
+            res.properties = pts[:,3:6]
         elif color_format == 'bgr':
             raise ValueError("bgr color format not supported with PointCloud output")
         if points_format == 'PointCloud':

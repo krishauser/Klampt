@@ -26,7 +26,7 @@ def trimesh_to_rr(mesh : klampt.TriangleMesh, appearance : klampt.Appearance = N
         if vertex_colors.shape[0] == 1:  #no vertex colors
             if appearance.getColor() is not None:
                 # uniform color
-                vertex_colors = np.array([appearance.getColor()]*mesh.getVertices().shape[0]) 
+                vertex_colors = np.array([appearance.getColor()]*len(mesh.vertices)) 
         fmt = appearance.getTexture2D_format()
         if fmt:
             try:
@@ -35,7 +35,7 @@ def trimesh_to_rr(mesh : klampt.TriangleMesh, appearance : klampt.Appearance = N
                 vertex_texgen = appearance.getTexgenMatrix()
                 if vertex_texgen.shape[0] != 2:
                     raise ValueError("Texture gen matrix must be 2x4")
-                v = mesh.getVertices()
+                v = mesh.vertices
                 v4 = np.hstack((v,np.ones((v.shape[0],1))))
                 vertex_texcoords = np.dot(v4,vertex_texgen.T)
             albedo_texture = appearance.getTexture2D_channels()
@@ -72,13 +72,13 @@ def point_cloud_to_rr(pc : klampt.PointCloud, appearance : klampt.Appearance = N
             point_colors = appearance.getColors(klampt.Appearance.VERTICES)
         except Exception:
             if appearance.getColor() is not None:
-                point_colors = np.array([appearance.getColor()]*pc.numPoints())
+                point_colors = np.array([appearance.getColor()]*len(pc.points))
     pc_colors = point_cloud_colors(pc,('r','g','b'))
     if point_colors is None:
         point_colors = pc_colors
     elif pc_colors is not None:
         point_colors = np.multiply(point_colors,pc_colors)
-    return rr.Points3D(positions = pc.getPoints(), colors = point_colors)
+    return rr.Points3D(positions = pc.points, colors = point_colors)
 
 def geom_to_rr(geom : klampt.Geometry3D, appearance : klampt.Appearance = None) -> Union[rr.Mesh3D,rr.Points3D]:
     """Returns a rerun archetype corresponding to the given geometry.

@@ -3250,7 +3250,8 @@ class VisAppearance:
             if name is not None:
                 bmin,bmax = geometry.getBB()
                 wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
-                self.drawText(name,wp)
+                if all(math.isfinite(v) for v in wp):  #empty geometry boxes are returned as inf to -inf
+                    self.drawText(name,wp)
         else:
             try:
                 itypes = self.attributes['type']
@@ -4254,15 +4255,15 @@ class VisualizationScene:
                     window.draw_text((self.window.points_to_pixels(x),self.window.points_to_pixels(y+size)),v.item,size,col)
         GL.glEnable(GL.GL_DEPTH_TEST)
 
-    def _renderGLLabelRaw(self,view,point,textList,colorList):
+    def _renderGLLabelRaw(self,view:GLViewport,point,textList,colorList):
         #assert not self.makingDisplayList,"drawText must be called outside of display list"
         assert self.window is not None
-        invCameraRot = view.camera.matrix()[0]
+        invCameraRot = view.controller.matrix()[0]
         for i,(text,c) in enumerate(zip(textList,colorList)):
             if i+1 < len(textList): text = text+","
 
             projpt = view.project(point,clip=False)
-            if projpt[2] > view.clippingplanes[0]:
+            if projpt[2] > view.clippingPlanes[0]:
                 d = float(self.window.points_to_pixels(12))/float(view.w)*projpt[2]*0.4
                 #d = float(12)/float(view.w)*projpt[2]*0.4
                 point = vectorops.add(point,so3.apply(invCameraRot,(0,-d,0)))

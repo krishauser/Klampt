@@ -218,22 +218,22 @@ def point_cloud_normals(pc : Union[Geometry3D,PointCloud], estimation_radius=Non
     props = ['normal_x','normal_y','normal_z']
     for i in range(pc.numProperties()):
         try:
-            ind = props.index(pc.propertyNames[i])
+            ind = props.index(pc.getPropertyName(i))
             inds[ind] = i
         except ValueError:
             pass
     if all(i>=0 for i in inds):
         #has the properties!
-        normal_x = pc.getProperties(inds[0])
-        normal_y = pc.getProperties(inds[1])
-        normal_z = pc.getProperties(inds[2])
+        normal_x = pc.properties[:,inds[0]]
+        normal_y = pc.properties[:,inds[1]]
+        normal_z = pc.properties[:,inds[2]]
         return np.column_stack([normal_x,normal_y,normal_z])
 
     if not all(i < 0 for i in inds):
         raise ValueError("Point cloud has some normal components but not all of them?")
     #need to estimate normals
     _try_scipy_import()
-    positions = pc.getPoints()
+    positions = pc.points
     N = positions.shape[0]
     if estimation_radius is None and estimation_knn is None:
         R = max(positions.max(axis=0)-positions.min(axis=0))
@@ -365,9 +365,9 @@ def align_points_rotation(apts,bpts) -> Rotation:
         squared errors ||R*ai-bi||^2.
     """
     if isinstance(apts, PointCloud):
-        apts = apts.getPoints()
+        apts = apts.points
     if isinstance(bpts, PointCloud):
-        bpts = bpts.getPoints()
+        bpts = bpts.points
     assert len(apts)==len(bpts)
 
     C = np.dot(np.asarray(apts).T,np.asarray(bpts))
@@ -412,9 +412,9 @@ def align_points(apts,bpts) -> RigidTransform:
         squared errors ||T*ai-bi||^2.
     """
     if isinstance(apts, PointCloud):
-        apts = apts.getPoints()
+        apts = apts.points
     if isinstance(bpts, PointCloud):
-        bpts = bpts.getPoints()
+        bpts = bpts.points
     assert len(apts)==len(bpts)
     apts = np.asarray(apts)
     bpts = np.asarray(bpts)
@@ -568,13 +568,14 @@ def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
             - 'opacity': returns opacity only, in the range [0,1].
 
     Returns:
-        A an array of pc.numPoints() colors corresponding to 
+        A an array of len(pc.points) colors corresponding to 
         the points in the point cloud.  If format='channels', the return
         value is a tuple (r,g,b) or (r,g,b,a).
     """
     rgbchannels = []
     alphachannel = None
-    for i,prop in enumerate(pc.propertyNames):
+    for i in range(pc.numProperties()):
+        prop = pc.getPropertyName(i)
         if prop in ['r','g','b','rgb']:
             rgbchannels.append((prop,i))
         elif prop == 'rgba':
@@ -587,7 +588,7 @@ def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
     if len(rgbchannels)==0 and alphachannel is None:
         return
     if len(rgbchannels)==1:
-        rgb = pc.getProperties(rgbchannels[0][1])
+        rgb = pc.properties[:,rgbchannels[0][1]]
         if format == 'rgb' and rgbchannels[0][0] == 'rgb':
             return rgb
         if format == 'argb' and rgbchannels[0][0] == 'rgba':
@@ -600,10 +601,10 @@ def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
             if alphachannel[0] == 'rgba':
                 a = np.right_shift(np.bitwise_and(rgb,0xff000000),24)
             elif alphachannel[0] == 'opacity':
-                a = pc.getProperties(alphachannel[0][1])
+                a = pc.properties[:,alphachannel[0][1]]
                 a = np.rint(np.asarray(a)*255).astype(np.uint32)
             elif alphachannel[0] == 'c':
-                a = pc.getProperties(alphachannel[0][1])
+                a = pc.properties[:,alphachannel[0][1]]
             else:
                 raise ValueError("Weird type of alpha channel? "+alphachannel[0])
             return _color_format_from_uint8_channels(format,r,g,b,a)
@@ -615,11 +616,11 @@ def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
         b=None
         for (name,index) in rgbchannels:
             if name=='r':
-                r = pc.getProperties(index)
+                r = pc.properties[:,index]
             elif name=='g':
-                g = pc.getProperties(index)
+                g = pc.properties[:,index]
             elif name=='b':
-                b = pc.getProperties(index)
+                b = pc.properties[:,index]
             else:
                 raise ValueError("Strange, have some subset of r,g,b and other channels in point cloud? "+name)
         if r is None or g is None or b is None:
@@ -627,10 +628,10 @@ def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
         if alphachannel is None:
             a = 1.0
         elif alphachannel[0] == 'opacity':
-            a = pc.getProperties(alphachannel[0][1])
+            a = pc.properties[:,alphachannel[0][1]]
         elif alphachannel[0] == 'c':
             one_255 = 1.0/255.0
-            a = (np.asarray(pc.getProperties(alphachannel[0][1]))*one_255)
+            a = pc.properties[:,alphachannel[0][1]]*one_255
         else:
             raise ValueError("Weird type of alpha channel? "+alphachannel[0])
         if format=='channels':
@@ -642,7 +643,7 @@ def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
             return list(zip(r,g,b))
         elif isinstance(format,(list,tuple)) and tuple(format)==('r','g','b','a'):
             if alphachannel is None:
-                a = np.full(pc.numPoints(),1.0)
+                a = np.full(len(pc.points),1.0)
             return np.column_stack((r,g,b,a))
         
         r = np.rint(np.asarray(r)*255.0).astype(np.uint32)
@@ -655,13 +656,13 @@ def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
             return _color_format_from_uint8_channels(format,r,g,b)
     elif len(rgbchannels)==0 and alphachannel is not None:
         if alphachannel[0] == 'opacity':
-            a = pc.getProperties(alphachannel[0][1])
+            a = pc.properties[:,alphachannel[0][1]]
             a = (np.asarray(a)*255).astype(np.uint32)
         elif alphachannel[0] == 'c':
-            a = pc.getProperties(alphachannel[0][1])
+            a = pc.properties[:,alphachannel[0][1]]
         else:
             raise ValueError("Weird type of alpha channel? "+alphachannel[0])
-        r = [0xff]*pc.numPoints()
+        r = [0xff]*len(pc.points)
         return _color_format_from_uint8_channels(format,r,r,r,a)
     else:
         raise ValueError("Invalid colors in point cloud? found "+str(len(rgbchannels))+" color channels")
@@ -702,7 +703,8 @@ def point_cloud_set_colors(pc : PointCloud, colors, color_format='rgb',pc_proper
     """
     rgbchannels = []
     alphachannel = None
-    for i,prop in enumerate(pc.propertyNames):
+    for i in range(pc.numProperties()):
+        prop = pc.getPropertyName(i)
         if prop in ['r','g','b','rgb']:
             rgbchannels.append((prop,i))
         elif prop == 'rgba':
@@ -738,26 +740,26 @@ def point_cloud_set_colors(pc : PointCloud, colors, color_format='rgb',pc_proper
             assert len(colors)==3 or len(colors)==4,'Channels must give a 3-tuple or 4-tuple'
             for c,values in zip('rgb',colors):
                 if c in rgbdict:
-                    pc.setProperties(rgbdict[c],values)
+                    pc.properties[:,rgbdict[c]] = values
                 else:
                     pc.addProperty(c,values)
             if len(colors)==4:
                 if alphachannel[0] == 'a':
-                    pc.setProperties(alphachannel[1],colors[3])
+                    pc.properties[:,alphachannel[1]] = colors[3]
                 else:
                     pc.addProperty('a',colors[3])
         else:
             if color_format in rgbdict:
-                pc.setProperties(rgbdict[color_format],colors)
+                pc.properties[:,rgbdict[color_format]] = colors
             else:
                 pc.addProperty(color_format,colors)
     else:
         channels = _color_format_to_uint8_channels(color_format,colors)
         packed = _color_format_from_uint8_channels(pc_color_format,*channels)
         if pc_property in rgbdict:
-            pc.setProperties(rgbdict[pc_property],packed)
+            pc.properties[:,rgbdict[pc_property]] = packed
         elif alphachannel is not None and pc_property == alphachannel[0]:
-            pc.setProperties(alphachannel[1],packed)
+            pc.properties[:,alphachannel[1]] = packed
         elif pc_property == 'channels':
             pc.addProperty('r',packed[0])
             pc.addProperty('g',packed[1])
@@ -765,7 +767,7 @@ def point_cloud_set_colors(pc : PointCloud, colors, color_format='rgb',pc_proper
             if len(packed)==4:
                 pc.addProperty('a',packed[3])
         else:
-            pc.addProperty(pc_property,packed)
+            pc.properties[:,pc_property] = packed
 
 
 def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:
@@ -783,8 +785,8 @@ def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:
         assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to triangle_normals"
         trimesh = trimesh.getTriangleMesh()
     assert isinstance(trimesh,TriangleMesh),"Must provide a TriangleMesh to triangle_normals"
-    verts=trimesh.getVertices()
-    tris=trimesh.getIndices()
+    verts=trimesh.vertices
+    tris=trimesh.indices
     #normals = np.zeros(tris.shape)
     dba = verts[tris[:,1]]-verts[tris[:,0]]
     dca = verts[tris[:,2]]-verts[tris[:,0]]
@@ -810,8 +812,8 @@ def vertex_normals(trimesh : Union[TriangleMesh,Geometry3D], area_weighted=True)
         assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to vertex_normals"
         trimesh = trimesh.getTriangleMesh()
     assert isinstance(trimesh,TriangleMesh),"Must provide a TriangleMesh to vertex_normals"
-    verts=trimesh.getVertices()
-    tris=trimesh.getIndices()
+    verts=trimesh.vertices
+    tris=trimesh.indices
     dba = verts[tris[:,1]]-verts[tris[:,0]]
     dca = verts[tris[:,2]]-verts[tris[:,0]]
     n = np.cross(dba,dca)
@@ -933,8 +935,8 @@ def sample_surface(geom : Geometry3D,
     normals = None
     if geom.type() == 'TriangleMesh':
         tm = geom.getTriangleMesh()
-        verts = tm.getVertices()
-        tris = tm.getIndices()
+        verts = tm.vertices
+        tris = tm.indices
         if num_samples is None:
             points = verts
             if want_elements:
@@ -971,7 +973,7 @@ def sample_surface(geom : Geometry3D,
                 normals.append(n)
             elements = sample
     elif geom.type() == 'PointCloud':
-        allPoints = geom.getPointCloud().getPoints()
+        allPoints = geom.getPointCloud().points
         if num_samples is None:
             points = allPoints
             if want_elements:

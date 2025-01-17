@@ -19,7 +19,7 @@ def to_trimesh(geom : Union[TriangleMesh,Geometry3D,WorldModel], appearance:Opti
         scene.
     """
     if isinstance(geom,TriangleMesh):
-        res = trimesh.Trimesh(vertices=geom.getVertices(),faces=geom.getIndices())
+        res = trimesh.Trimesh(vertices=geom.vertices,faces=geom.indices)
         if appearance is not None:
             col = appearance.getColor()
             #TODO: textured objects

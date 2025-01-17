@@ -402,10 +402,10 @@ class TrajectoryEditor(VisualEditorBase):
 
     def add_dialog_items(self,parent,ui='qt'):
         if glinit.active() == 'PyQt6':
-            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox
+            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QDoubleSpinBox,QPushButton,QSlider,QComboBox
             from PyQt6.QtCore import Qt
         elif glinit.active() == 'PyQt5':
-            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox
+            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QDoubleSpinBox,QPushButton,QSlider,QComboBox
             from PyQt5.QtCore import Qt
 
         vlayout = QVBoxLayout(parent)
@@ -445,7 +445,10 @@ class TrajectoryEditor(VisualEditorBase):
 
         #playback
         self.timeDriver = QSlider()
-        self.timeDriver.setOrientation(Qt.Horizontal)
+        if glinit.active() == 'PyQt6':
+            self.timeDriver.setOrientation(Qt.Orientation.Horizontal)
+        else:
+            self.timeDriver.setOrientation(Qt.Horizontal)
         self.timeDriver.setRange(0,1000)
         self.timeDriver.valueChanged.connect(self.time_driver_changed)
         self.playButton = QPushButton("Play")
@@ -805,11 +808,11 @@ class SelectionEditor(VisualEditorBase):
 
     def add_dialog_items(self,parent,ui='qt'):
         if glinit.active() == 'PyQt6':
-            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox,QListWidget,QAbstractItemView
-            from PyQt6.QtCore import Qt
+            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox,QListWidget,QAbstractItemView,QMessageBox
+            from PyQt6.QtCore import Qt,QItemSelectionModel
         elif glinit.active() == 'PyQt5':
-            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox,QListWidget,QAbstractItemView
-            from PyQt5.QtCore import Qt
+            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QSlider,QComboBox,QListWidget,QAbstractItemView,QMessageBox
+            from PyQt5.QtCore import Qt,QItemSelectionModel
 
         layout = QHBoxLayout(parent)
         self.clearButton = QPushButton("Clear")
@@ -840,6 +843,11 @@ class SelectionEditor(VisualEditorBase):
         self.refresh()
 
     def select_all(self):
+        if glinit.active() == 'PyQt6':
+            from PyQt6.QtCore import QItemSelectionModel
+        elif glinit.active() == 'PyQt5':
+            from PyQt5.QtCore import QItemSelectionModel
+
         if self.robot is None:
             #select all ids in the world
             self.value = list(range(self.world.numIDs()))
@@ -847,7 +855,10 @@ class SelectionEditor(VisualEditorBase):
             self.value = list(range(self.robot.numLinks()))
         self.selectionListChangeFlag = True
         for i in self.value:
-            self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
+            if glinit.active() == 'PyQt6':
+                self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.SelectionFlag.Select)
+            else:
+                self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
         self.selectionListChangeFlag = False
         self.refresh()        
 
@@ -1367,10 +1378,10 @@ class SensorEditor(RigidTransformEditor):
     
     def add_dialog_items(self,parent,ui='qt'):
         if glinit.active() == 'PyQt6':
-            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QListWidget,QLineEdit
+            from PyQt6.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QListWidget,QLineEdit,QMessageBox
             from PyQt6.QtCore import Qt
         elif glinit.active() == 'PyQt5':
-            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QListWidget,QLineEdit
+            from PyQt5.QtWidgets import QVBoxLayout,QHBoxLayout,QLabel,QSpinBox,QPushButton,QListWidget,QLineEdit,QMessageBox
             from PyQt5.QtCore import Qt
         layout = QHBoxLayout(parent)
         self.selectionList = QListWidget()

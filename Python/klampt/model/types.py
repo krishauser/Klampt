@@ -276,13 +276,13 @@ def info(object,world=None) -> dict:
         res["position dimensions constrained"] = object.numPosDims()
         res["rotation dimensions constrained"] = object.numRotDims()
     elif otype == "TriangleMesh":
-        res["vertices"] = len(object.vertices)//3
-        res["triangles"] = len(object.indices)//3
+        res["vertices"] = len(object.vertices)
+        res["triangles"] = len(object.indices)
         bmin,bmax = Geometry3D(object).getBBTight()
         res["lower bound"] = bmin
         res["upper bound"] = bmax
     elif otype == "PointCloud":
-        res["points"] = object.numPoints()
+        res["points"] = len(object.points)
         res["properties"] = object.numProperties()
         bmin,bmax = Geometry3D(object).getBBTight()
         res["lower bound"] = bmin
@@ -292,8 +292,8 @@ def info(object,world=None) -> dict:
         if len(object.values) > 0:
             res["minimum value"] = min(object.values)
             res["maximum value"] = max(object.values)
-        res["lower bound"] = [object.bbox[0],object.bbox[1],object.bbox[2]]
-        res["upper bound"] = [object.bbox[3],object.bbox[4],object.bbox[5]]
+        res["lower bound"] = object.bmin
+        res["upper bound"] = object.bmax
     elif otype == "Geometry3D":
         res["geometry type"] = object.type()
         res["#elements"] = object.numElements()

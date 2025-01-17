@@ -412,12 +412,10 @@ def to_Mesh(klampt_mesh):
             mesh.transform(*T)
         klampt_mesh = mesh
     ros_mesh = Mesh()
-    for i in range(len(klampt_mesh.vertices)//3):
-        k = i*3
-        ros_mesh.vertices.append(Vector3(klampt_mesh.vertices[k],klampt_mesh.vertices[k+1],klampt_mesh.vertices[k+2]))
-    for i in range(len(klampt_mesh.indices)//3):
-        k = i*3
-        ros_mesh.triangles.append(MeshTriangle([klampt_mesh.indices[k],klampt_mesh.indices[k+1],klampt_mesh.indices[k+2]]))
+    for p in klampt_mesh.vertices.tolist():
+        ros_mesh.vertices.append(Vector3(*p))
+    for t in klampt_mesh.indices.tolist():
+        ros_mesh.triangles.append(MeshTriangle(t))
     return ros_mesh
 
 def from_PointCloud2(ros_pc):
@@ -425,6 +423,7 @@ def from_PointCloud2(ros_pc):
     from klampt import PointCloud
     from sensor_msgs.msg import PointField
     from sensor_msgs import point_cloud2
+    import numpy as np
     pc = PointCloud()
     if ros_pc.header.seq > 0:
         pc.setSetting("id",str(ros_pc.header.seq))
@@ -440,10 +439,10 @@ def from_PointCloud2(ros_pc):
         pc.settings.set("width",str(pc.width))
         pc.settings.set("height",str(pc.height))
     for p in point_cloud2.read_points(ros_pc):
-        plist += [p[0],p[1],p[2]]
-        proplist += [float(v) for v in p[3:]]
-    pc.setPoints(len(plist)//3,plist)
-    pc.setProperties(proplist)
+        plist.append([p[0],p[1],p[2]])
+        proplist.append([float(v) for v in p[3:]])
+    pc.points = np.array(plist)
+    pc.properties = np.array(proplist)
     return pc
 
 def to_PointCloud2(klampt_pc,frame='0',stamp='now'):
@@ -475,13 +474,13 @@ def to_PointCloud2(klampt_pc,frame='0',stamp='now'):
     fields = [PointField('x', 0, PointField.FLOAT32, 1),
               PointField('y', 4, PointField.FLOAT32, 1),
               PointField('z', 8, PointField.FLOAT32, 1)]
-    for i in range(len(klampt_pc.propertyNames)):
-        fields.append(PointField(klampt_pc.propertyNames[i],12+i*4,PointField.FLOAT32,1))
+    for i in range(len(klampt_pc.numProperties())):
+        fields.append(PointField(klampt_pc.getPropertyName(i),12+i*4,PointField.FLOAT32,1))
     import numpy
-    points = numpy.array(klampt_pc.vertices).reshape((klampt_pc.numPoints(),3))
+    points = klampt_pc.points
     alldata = points
     if len(fields) > 3:
-        properties = numpy.array(klampt_pc.properties).reshape((klampt_pc.numPoints(),len(klampt_pc.propertyNames)))
+        properties = klampt_pc.properties
         alldata = numpy.hstack((points,properties))
     seq_no = 0
     try:
@@ -496,7 +495,7 @@ def to_PointCloud2(klampt_pc,frame='0',stamp='now'):
         ros_pc.height = int(h)
     except:
         ros_pc.height = 1
-        ros_pc.width = klampt_pc.numPoints()
+        ros_pc.width = len(klampt_pc.points)
     return ros_pc
 
 

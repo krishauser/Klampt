@@ -5,6 +5,7 @@ import sys
 import weakref
 import time
 import threading
+from typing import Optional,List
 
 if not glinit.available('PyQt'):
     raise ImportError("Can't import vis_qt without first calling glinit.init() or vis.init()")
@@ -44,10 +45,9 @@ class MyQThread(QThread):
 class QtWindowManager(_ThreadedWindowManager):
     def __init__(self):
         self._frontend = GLVisualizationFrontend()
-        #list of WindowInfo's
-        self.windows = []
+        self.windows = []   # type : List[WindowInfo]
         #the index of the current window
-        self.current_window = None
+        self.current_window = None # type: Optional[int]
         #the name of a window, if no windows exist yet
         self.window_title = "Klamp't visualizer (%s)"%(sys.argv[0],)
         #the current temp frontend if len(self.windows)=0, or windows[current_window].frontend
@@ -498,7 +498,7 @@ class QtWindowManager(_ThreadedWindowManager):
     def screenshot(self,format,want_depth):
         if not self.multithreaded() or self.in_vis_loop or (self.in_app_thread and threading.current_thread().__class__.__name__ != '_MainThread'):
             #already in visualization loop -- just get the image
-            return self.current_window.get_screen(format,want_depth)
+            return self.windows[self.current_window].glwindow.get_screen(format,want_depth)
         if not self.vis_thread_running:
             raise RuntimeError("Can't call screenshot until the thread is running")
         return_values = []
@@ -526,7 +526,7 @@ class QtWindowManager(_ThreadedWindowManager):
             if not self._frontend.rendered:
                 self.threadCall(do_screenshot_callback)
                 return
-            res = self.current_window.gget_screen(format,want_depth)
+            res = self.windows[self.current_window].glwindow.get_screen(format,want_depth)
             self._frontend.rendered = False  #don't do this callback until another frame is drawn
             if want_depth:
                 fn(*res)

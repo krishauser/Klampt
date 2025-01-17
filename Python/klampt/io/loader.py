@@ -825,36 +825,25 @@ def to_json(obj,type='auto'):
             pass
         return res
     elif type == 'TriangleMesh':
-        inds = list(obj.indices)
-        inds = [inds[i*3:i*3+3] for i in range(len(inds)//3)]
-        verts = list(obj.vertices)
-        verts = [verts[i*3:i*3+3] for i in range(len(verts)//3)]
-        return {'type':type,'indices':inds,'vertices':verts}
+        return {'type':type,'indices':obj.indices.tolist(),'vertices':obj.vertices.tolist()}
     elif type == 'PointCloud':
-        verts = list(obj.vertices)
-        verts = [verts[i*3:i*3+3] for i in range(len(verts)//3)]
-        res = {'type':type,'vertices':verts}
-        propNames = list(obj.propertyNames)
-        if len(propNames) > 0:
-            res['propertyNames'] = propNames
-        if len(verts) * len(propNames) > 0:
-            n = len(verts)
-            k = len(propNames)
-            props = list(obj.properties)
-            props = [props[i*k:i*k+k] for i in range(n)]
-            res['properties'] = props
+        points = obj.points.tolist()
+        res = {'type':type,'points':points}
+        if obj.numProperties() > 0:
+            res['propertyNames'] = [obj.propertyName(i) for i in range(obj.numProperties())]
+        if len(points) * obj.numProperties() > 0:
+            res['properties'] = obj.properties.tolist()
         #TODO: settings
         return res
     elif type == 'VolumeGrid':
         res = {'type':type}
-        res['bmin'] = [obj.bbox[i] for i in range(3)]
-        res['bmax'] = [obj.bbox[i] for i in range(3,6)]
-        res['dims'] = list(obj.dims)
-        res['values'] = list(obj.values)
+        res['bmin'] = [v for v in obj.bmin]
+        res['bmax'] = [v for v in obj.bmax]
+        res['dims'] = obj.values.shape
+        res['values'] = obj.values.flatten().tolist()
         return res
     elif type == 'ConvexHull':
-        points = [[obj.points[i],obj.points[i+1],obj.points[i+2]] for i in range(0,len(obj.points),3)]
-        return {'type':type,'points':points}
+        return {'type':type,'points':obj.points.tolist()}
     elif type == 'Geometry3D':
         data = None
         gtype = obj.type()
@@ -978,54 +967,40 @@ def from_json(jsonobj,type='auto'):
         else:
             raise ValueError("Invalid IK rotation constraint "+rotConstraint)
     elif type == 'TriangleMesh':
-        inds = sum(jsonobj['indices'],[])
-        verts = sum(jsonobj['vertices'],[])
+        import numpy as np
+        inds = np.array(jsonobj['indices'])
+        verts = np.array(jsonobj['vertices'])
         mesh = TriangleMesh()
-        mesh.indices.resize(len(inds))
-        mesh.vertices.resize(len(verts))
-        for i,v in enumerate(inds):
-            mesh.indices[i] = v
-        for i,v in enumerate(verts):
-            mesh.vertices[i] = v
+        mesh.indices = inds
+        mesh.vertices = verts
         return mesh
     elif type == 'PointCloud':
+        import numpy as np
         pc = PointCloud()
-        verts = sum(jsonobj['vertices'],[])
-        pc.vertices.resize(len(verts))
-        for i,v in enumerate(verts):
-            pc.vertices[i] = v
+        verts = np.array(jsonobj['points'])
+        pc.points = verts
         if 'propertyNames' in jsonobj:
             propNames = jsonobj['propertyNames']
-            pc.propertyNames.resize(len(propNames))
             for i,v in enumerate(propNames):
-                pc.propertyNames[i] = v
+                pc.addProperty(v)
             if 'properties' in jsonobj:
-                props = sum(jsonobj['properties'])
-                pc.properties.resize(len(props))
-                for i,v in enumerate(props):
-                    pc.properties[i] = v
+                props = np.array(jsonobj['properties'])
+                pc.properties = props
         #TODO: settings
         return pc
     elif type == 'VolumeGrid':
+        import numpy as np
         vg = VolumeGrid()
-        bbox = jsonobj['bmin'] + jsonobj['bmax']
-        vg.bbox.resize(6)
-        for i,v in enumerate(bbox):
-            vg.bbox[i] = v
-        vg.dims.resize(3)
-        for i,v in enumerate(jsonobj['dims']):
-            vg.dims[i] = v
-        values = jsonobj['values']
-        vg.values.resize(len(values))
-        for i,v in enumerate(values):
-            vg.values[i] = v
+        vg.bmin = jsonobj['bmin']
+        vg.bmax = jsonobj['bmax']
+        dims = jsonobj['dims']
+        values = np.array(jsonobj['values']).reshape(dims)
+        vg.values = values
         return vg
     elif type == 'ConvexHull':
+        import numpy as np
         ch = ConvexHull()
-        points = sum(jsonobj['points'])
-        ch.points.resize(len(points))
-        for i,v in enumerate(points):
-            ch.points[i] = v
+        ch.points = np.array(jsonobj['points'])
         return ch
     elif type == 'Geometry3D':
         gtype = jsonobj['datatype']

@@ -1,7 +1,7 @@
 """
 Implementation of TrajOpt algorithm in klampt.
 """
-from collections import Iterable
+from collections.abc import Iterable
 import numpy as np
 import cvxpy as cp
 

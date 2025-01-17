@@ -53,7 +53,7 @@ def to_numpy(obj,type='auto'):
             R = to_numpy(obj.getCurrentTransform()[0],'Matrix3')
             t = to_numpy(obj.getCurrentTransform()[1],'Vector3')
             return (np.dot(R,res[0])+t,res[1])
-        return (obj.getVertices(),obj.getIndices())
+        return (obj.vertices,obj.indices)
     elif type == 'PointCloud':
         from klampt import Geometry3D
         if isinstance(obj,Geometry3D):
@@ -63,15 +63,15 @@ def to_numpy(obj,type='auto'):
             t = to_numpy(obj.getCurrentTransform()[1],'Vector3')
             res[:,:3] = np.dot(R,res[:,:3])+t
             return res
-        points = obj.getPoints()
-        if obj.numProperties() == 0:
+        points = obj.points
+        properties = obj.properties
+        if len(properties) == 0:
             return points
-        properties = obj.getAllProperties()
         return np.hstack((points,properties))
     elif type == 'VolumeGrid':
-        bmin = np.array(obj.bbox)[:3]
-        bmax = np.array(obj.bbox)[3:]
-        values = obj.getValues()
+        bmin = np.array(obj.bmin)
+        bmax = np.array(obj.bmax)
+        values = obj.values
         return (bmin,bmax,values)
     elif type == 'Geometry3D':
         if obj.type() == 'PointCloud':
@@ -183,18 +183,13 @@ def from_numpy(obj,type='auto',template=None):
         #res.setPoints(points)
         res.setPointsAndProperties(obj.astype(float))
         if template is not None:
-            if len(template.propertyNames) != numproperties:
+            if template.numProperties() != numproperties:
                 raise ValueError("Template object doesn't have the same properties as the numpy object")
-            res.propertyNames.resize(len(template.propertyNames))
-            for i in range(len(template.propertyNames)):
-                res.propertyNames[i] = template.propertyNames[i]
+            for i in range(template.numProperties()):
+                res.setPropertyName(i,template.getPropertyName(i))
         else:
             #properties are already indicated with setPointsAndProperties
             pass
-        #if len(res.propertyNames) > 0:
-        #    res.properties.resize(len(res.propertyNames)*points.shape[0])
-        #if obj.shape[1] >= 3:
-        #    res.setProperties(properties)
         return res
     elif type == 'VolumeGrid':
         from klampt import VolumeGrid

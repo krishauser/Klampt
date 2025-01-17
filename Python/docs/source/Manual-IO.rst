@@ -260,7 +260,7 @@ following lines:
     while True:
         processed = io.ProcessStreams()
         if processed:
-            print("Received a PointCloud on",topic,"with",g.getPointCloud().numPoints(),"points")
+            print("Received a PointCloud on",topic,"with",len(g.getPointCloud().points),"points")
             numReceived += 1
         time.sleep(0.01)
     

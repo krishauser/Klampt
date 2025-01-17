@@ -21,7 +21,7 @@ try:
 except ImportError:
     import __builtin__
 
-from typing import Sequence,Tuple,Iterator
+from typing import Sequence,List,Tuple,Iterator
 from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
 
 
@@ -75,52 +75,52 @@ class SwigPyIterator(object):
     __repr__ = _swig_repr
     __swig_destroy__ = _motionplanning.delete_SwigPyIterator
 
-    def value(self) ->object:
+    def value(self) -> object:
         return _motionplanning.SwigPyIterator_value(self)
 
-    def incr(self, n: int=1) ->Iterator:
+    def incr(self, n: int=1) -> Iterator:
         return _motionplanning.SwigPyIterator_incr(self, n)
 
-    def decr(self, n: int=1) ->Iterator:
+    def decr(self, n: int=1) -> Iterator:
         return _motionplanning.SwigPyIterator_decr(self, n)
 
-    def distance(self, x: Iterator) ->int:
+    def distance(self, x: Iterator) -> int:
         return _motionplanning.SwigPyIterator_distance(self, x)
 
-    def equal(self, x: Iterator) ->bool:
+    def equal(self, x: Iterator) -> bool:
         return _motionplanning.SwigPyIterator_equal(self, x)
 
-    def copy(self) ->Iterator:
+    def copy(self) -> Iterator:
         return _motionplanning.SwigPyIterator_copy(self)
 
-    def next(self) ->object:
+    def next(self) -> object:
         return _motionplanning.SwigPyIterator_next(self)
 
-    def __next__(self) ->object:
+    def __next__(self) -> object:
         return _motionplanning.SwigPyIterator___next__(self)
 
-    def previous(self) ->object:
+    def previous(self) -> object:
         return _motionplanning.SwigPyIterator_previous(self)
 
-    def advance(self, n: int) ->Iterator:
+    def advance(self, n: int) -> Iterator:
         return _motionplanning.SwigPyIterator_advance(self, n)
 
-    def __eq__(self, x: Iterator) ->bool:
+    def __eq__(self, x: Iterator) -> bool:
         return _motionplanning.SwigPyIterator___eq__(self, x)
 
-    def __ne__(self, x: Iterator) ->bool:
+    def __ne__(self, x: Iterator) -> bool:
         return _motionplanning.SwigPyIterator___ne__(self, x)
 
-    def __iadd__(self, n: int) ->Iterator:
+    def __iadd__(self, n: int) -> Iterator:
         return _motionplanning.SwigPyIterator___iadd__(self, n)
 
-    def __isub__(self, n: int) ->Iterator:
+    def __isub__(self, n: int) -> Iterator:
         return _motionplanning.SwigPyIterator___isub__(self, n)
 
-    def __add__(self, n: int) ->Iterator:
+    def __add__(self, n: int) -> Iterator:
         return _motionplanning.SwigPyIterator___add__(self, n)
 
-    def __sub__(self, *args) ->int:
+    def __sub__(self, *args) -> int:
         return _motionplanning.SwigPyIterator___sub__(self, *args)
     def __iter__(self):
         return self
@@ -132,102 +132,102 @@ class doubleVector(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
-    def iterator(self) ->Iterator:
+    def iterator(self) -> Iterator:
         return _motionplanning.doubleVector_iterator(self)
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self) ->bool:
+    def __nonzero__(self) -> bool:
         return _motionplanning.doubleVector___nonzero__(self)
 
-    def __bool__(self) ->bool:
+    def __bool__(self) -> bool:
         return _motionplanning.doubleVector___bool__(self)
 
-    def __len__(self) ->int:
+    def __len__(self) -> int:
         return _motionplanning.doubleVector___len__(self)
 
-    def __getslice__(self, i: int, j: int) ->"doubleVector":
+    def __getslice__(self, i: int, j: int) -> "doubleVector":
         return _motionplanning.doubleVector___getslice__(self, i, j)
 
-    def __setslice__(self, *args) ->None:
+    def __setslice__(self, *args) -> None:
         return _motionplanning.doubleVector___setslice__(self, *args)
 
-    def __delslice__(self, i: int, j: int) ->None:
+    def __delslice__(self, i: int, j: int) -> None:
         return _motionplanning.doubleVector___delslice__(self, i, j)
 
-    def __delitem__(self, *args) ->None:
+    def __delitem__(self, *args) -> None:
         return _motionplanning.doubleVector___delitem__(self, *args)
 
-    def __getitem__(self, *args) ->float:
+    def __getitem__(self, *args) -> float:
         return _motionplanning.doubleVector___getitem__(self, *args)
 
-    def __setitem__(self, *args) ->None:
+    def __setitem__(self, *args) -> None:
         return _motionplanning.doubleVector___setitem__(self, *args)
 
-    def pop(self) ->float:
+    def pop(self) -> float:
         return _motionplanning.doubleVector_pop(self)
 
-    def append(self, x: float) ->None:
+    def append(self, x: float) -> None:
         return _motionplanning.doubleVector_append(self, x)
 
-    def empty(self) ->bool:
+    def empty(self) -> bool:
         return _motionplanning.doubleVector_empty(self)
 
-    def size(self) ->int:
+    def size(self) -> int:
         return _motionplanning.doubleVector_size(self)
 
-    def swap(self, v: Vector) ->None:
+    def swap(self, v: Vector) -> None:
         return _motionplanning.doubleVector_swap(self, v)
 
-    def begin(self) ->Iterator:
+    def begin(self) -> Iterator:
         return _motionplanning.doubleVector_begin(self)
 
-    def end(self) ->Iterator:
+    def end(self) -> Iterator:
         return _motionplanning.doubleVector_end(self)
 
-    def rbegin(self) ->Iterator:
+    def rbegin(self) -> Iterator:
         return _motionplanning.doubleVector_rbegin(self)
 
-    def rend(self) ->Iterator:
+    def rend(self) -> Iterator:
         return _motionplanning.doubleVector_rend(self)
 
-    def clear(self) ->None:
+    def clear(self) -> None:
         return _motionplanning.doubleVector_clear(self)
 
     def get_allocator(self) :
         return _motionplanning.doubleVector_get_allocator(self)
 
-    def pop_back(self) ->None:
+    def pop_back(self) -> None:
         return _motionplanning.doubleVector_pop_back(self)
 
-    def erase(self, *args) ->Iterator:
+    def erase(self, *args) -> Iterator:
         return _motionplanning.doubleVector_erase(self, *args)
 
     def __init__(self, *args):
         _motionplanning.doubleVector_swiginit(self, _motionplanning.new_doubleVector(*args))
 
-    def push_back(self, x: float) ->None:
+    def push_back(self, x: float) -> None:
         return _motionplanning.doubleVector_push_back(self, x)
 
-    def front(self) ->float:
+    def front(self) -> float:
         return _motionplanning.doubleVector_front(self)
 
-    def back(self) ->float:
+    def back(self) -> float:
         return _motionplanning.doubleVector_back(self)
 
-    def assign(self, n: int, x: float) ->None:
+    def assign(self, n: int, x: float) -> None:
         return _motionplanning.doubleVector_assign(self, n, x)
 
-    def resize(self, *args) ->None:
+    def resize(self, *args) -> None:
         return _motionplanning.doubleVector_resize(self, *args)
 
-    def insert(self, *args) ->None:
+    def insert(self, *args) -> None:
         return _motionplanning.doubleVector_insert(self, *args)
 
-    def reserve(self, n: int) ->None:
+    def reserve(self, n: int) -> None:
         return _motionplanning.doubleVector_reserve(self, n)
 
-    def capacity(self) ->int:
+    def capacity(self) -> int:
         return _motionplanning.doubleVector_capacity(self)
     __swig_destroy__ = _motionplanning.delete_doubleVector
 
@@ -238,102 +238,102 @@ class doubleMatrix(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
-    def iterator(self) ->Iterator:
+    def iterator(self) -> Iterator:
         return _motionplanning.doubleMatrix_iterator(self)
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self) ->bool:
+    def __nonzero__(self) -> bool:
         return _motionplanning.doubleMatrix___nonzero__(self)
 
-    def __bool__(self) ->bool:
+    def __bool__(self) -> bool:
         return _motionplanning.doubleMatrix___bool__(self)
 
-    def __len__(self) ->int:
+    def __len__(self) -> int:
         return _motionplanning.doubleMatrix___len__(self)
 
-    def __getslice__(self, i: int, j: int) ->"doubleMatrix":
+    def __getslice__(self, i: int, j: int) -> "doubleMatrix":
         return _motionplanning.doubleMatrix___getslice__(self, i, j)
 
-    def __setslice__(self, *args) ->None:
+    def __setslice__(self, *args) -> None:
         return _motionplanning.doubleMatrix___setslice__(self, *args)
 
-    def __delslice__(self, i: int, j: int) ->None:
+    def __delslice__(self, i: int, j: int) -> None:
         return _motionplanning.doubleMatrix___delslice__(self, i, j)
 
-    def __delitem__(self, *args) ->None:
+    def __delitem__(self, *args) -> None:
         return _motionplanning.doubleMatrix___delitem__(self, *args)
 
-    def __getitem__(self, *args) ->Vector:
+    def __getitem__(self, *args) -> Vector:
         return _motionplanning.doubleMatrix___getitem__(self, *args)
 
-    def __setitem__(self, *args) ->None:
+    def __setitem__(self, *args) -> None:
         return _motionplanning.doubleMatrix___setitem__(self, *args)
 
-    def pop(self) ->Vector:
+    def pop(self) -> Vector:
         return _motionplanning.doubleMatrix_pop(self)
 
-    def append(self, x: Vector) ->None:
+    def append(self, x: Vector) -> None:
         return _motionplanning.doubleMatrix_append(self, x)
 
-    def empty(self) ->bool:
+    def empty(self) -> bool:
         return _motionplanning.doubleMatrix_empty(self)
 
-    def size(self) ->int:
+    def size(self) -> int:
         return _motionplanning.doubleMatrix_size(self)
 
-    def swap(self, v: Sequence[Sequence[float]]) ->None:
+    def swap(self, v: Sequence[Sequence[float]]) -> None:
         return _motionplanning.doubleMatrix_swap(self, v)
 
-    def begin(self) ->Iterator:
+    def begin(self) -> Iterator:
         return _motionplanning.doubleMatrix_begin(self)
 
-    def end(self) ->Iterator:
+    def end(self) -> Iterator:
         return _motionplanning.doubleMatrix_end(self)
 
-    def rbegin(self) ->Iterator:
+    def rbegin(self) -> Iterator:
         return _motionplanning.doubleMatrix_rbegin(self)
 
-    def rend(self) ->Iterator:
+    def rend(self) -> Iterator:
         return _motionplanning.doubleMatrix_rend(self)
 
-    def clear(self) ->None:
+    def clear(self) -> None:
         return _motionplanning.doubleMatrix_clear(self)
 
     def get_allocator(self) :
         return _motionplanning.doubleMatrix_get_allocator(self)
 
-    def pop_back(self) ->None:
+    def pop_back(self) -> None:
         return _motionplanning.doubleMatrix_pop_back(self)
 
-    def erase(self, *args) ->Iterator:
+    def erase(self, *args) -> Iterator:
         return _motionplanning.doubleMatrix_erase(self, *args)
 
     def __init__(self, *args):
         _motionplanning.doubleMatrix_swiginit(self, _motionplanning.new_doubleMatrix(*args))
 
-    def push_back(self, x: Vector) ->None:
+    def push_back(self, x: Vector) -> None:
         return _motionplanning.doubleMatrix_push_back(self, x)
 
-    def front(self) ->Vector:
+    def front(self) -> Vector:
         return _motionplanning.doubleMatrix_front(self)
 
-    def back(self) ->Vector:
+    def back(self) -> Vector:
         return _motionplanning.doubleMatrix_back(self)
 
-    def assign(self, n: int, x: Vector) ->None:
+    def assign(self, n: int, x: Vector) -> None:
         return _motionplanning.doubleMatrix_assign(self, n, x)
 
-    def resize(self, *args) ->None:
+    def resize(self, *args) -> None:
         return _motionplanning.doubleMatrix_resize(self, *args)
 
-    def insert(self, *args) ->None:
+    def insert(self, *args) -> None:
         return _motionplanning.doubleMatrix_insert(self, *args)
 
-    def reserve(self, n: int) ->None:
+    def reserve(self, n: int) -> None:
         return _motionplanning.doubleMatrix_reserve(self, n)
 
-    def capacity(self) ->int:
+    def capacity(self) -> int:
         return _motionplanning.doubleMatrix_capacity(self)
     __swig_destroy__ = _motionplanning.delete_doubleMatrix
 
@@ -341,7 +341,7 @@ class doubleMatrix(object):
 _motionplanning.doubleMatrix_swigregister(doubleMatrix)
 
 
-def set_random_seed(seed: int) ->None:
+def set_random_seed(seed: int) -> None:
     r"""
     Sets the random seed used by the motion planner.  
 
@@ -350,7 +350,7 @@ def set_random_seed(seed: int) ->None:
     """
     return _motionplanning.set_random_seed(seed)
 
-def set_plan_json_string(string: str) ->None:
+def set_plan_json_string(string: str) -> None:
     r"""
     Loads planner values from a JSON string.  
 
@@ -359,14 +359,14 @@ def set_plan_json_string(string: str) ->None:
     """
     return _motionplanning.set_plan_json_string(string)
 
-def get_plan_json_string() ->str:
+def get_plan_json_string() -> str:
     r"""
     Saves planner values to a JSON string.  
 
     """
     return _motionplanning.get_plan_json_string()
 
-def set_plan_type(type: str) ->None:
+def set_plan_type(type: str) -> None:
     r"""
     Sets the planner type.  
 
@@ -387,11 +387,10 @@ def set_plan_type(type: str) ->None:
     *   fmm: the fast marching method algorithm for resolution-complete optimal
         motion planning  
     *   fmm*: an anytime fast marching method algorithm for optimal motion planning  
-
     """
     return _motionplanning.set_plan_type(type)
 
-def set_plan_setting(*args) ->None:
+def set_plan_setting(*args) -> None:
     r"""
     Sets a numeric or string-valued setting for the planner.  
 
@@ -400,7 +399,7 @@ def set_plan_setting(*args) ->None:
 
     Args:
         setting (str): 
-        value (str or float): 
+        value (float or str): 
 
     Valid numeric values are:  
 
@@ -435,11 +434,10 @@ def set_plan_setting(*args) ->None:
         To restart after a certain amount of time has elasped, use
         "{timeLimit:X}". If you are using an optimizing planner, e.g.,
         shortcutting, you should set foundSolution:0.  
-
     """
     return _motionplanning.set_plan_setting(*args)
 
-def destroy() ->None:
+def destroy() -> None:
     r"""
     destroys internal data structures  
 
@@ -447,6 +445,9 @@ def destroy() ->None:
     return _motionplanning.destroy()
 class CSpaceInterface(object):
     r"""
+
+
+    Args:
 
 
     A raw interface for a configuration space.  
@@ -492,19 +493,19 @@ class CSpaceInterface(object):
         _motionplanning.CSpaceInterface_swiginit(self, _motionplanning.new_CSpaceInterface(*args))
     __swig_destroy__ = _motionplanning.delete_CSpaceInterface
 
-    def destroy(self) ->None:
+    def destroy(self) -> None:
         r"""
         """
         return _motionplanning.CSpaceInterface_destroy(self)
 
-    def setFeasibility(self, pyFeas: object) ->None:
+    def setFeasibility(self, pyFeas: object) -> None:
         r"""
         Args:
             pyFeas (:obj:`object`)
         """
         return _motionplanning.CSpaceInterface_setFeasibility(self, pyFeas)
 
-    def addFeasibilityTest(self, name: str, pyFeas: object) ->None:
+    def addFeasibilityTest(self, name: str, pyFeas: object) -> None:
         r"""
         Args:
             name (str)
@@ -512,14 +513,14 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_addFeasibilityTest(self, name, pyFeas)
 
-    def setVisibility(self, pyVisible: object) ->None:
+    def setVisibility(self, pyVisible: object) -> None:
         r"""
         Args:
             pyVisible (:obj:`object`)
         """
         return _motionplanning.CSpaceInterface_setVisibility(self, pyVisible)
 
-    def addVisibilityTest(self, name: str, pyVisible: object) ->None:
+    def addVisibilityTest(self, name: str, pyVisible: object) -> None:
         r"""
         Args:
             name (str)
@@ -527,42 +528,42 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_addVisibilityTest(self, name, pyVisible)
 
-    def setVisibilityEpsilon(self, eps: float) ->None:
+    def setVisibilityEpsilon(self, eps: float) -> None:
         r"""
         Args:
             eps (float)
         """
         return _motionplanning.CSpaceInterface_setVisibilityEpsilon(self, eps)
 
-    def setSampler(self, pySamp: object) ->None:
+    def setSampler(self, pySamp: object) -> None:
         r"""
         Args:
             pySamp (:obj:`object`)
         """
         return _motionplanning.CSpaceInterface_setSampler(self, pySamp)
 
-    def setNeighborhoodSampler(self, pySamp: object) ->None:
+    def setNeighborhoodSampler(self, pySamp: object) -> None:
         r"""
         Args:
             pySamp (:obj:`object`)
         """
         return _motionplanning.CSpaceInterface_setNeighborhoodSampler(self, pySamp)
 
-    def setDistance(self, pyDist: object) ->None:
+    def setDistance(self, pyDist: object) -> None:
         r"""
         Args:
             pyDist (:obj:`object`)
         """
         return _motionplanning.CSpaceInterface_setDistance(self, pyDist)
 
-    def setInterpolate(self, pyInterp: object) ->None:
+    def setInterpolate(self, pyInterp: object) -> None:
         r"""
         Args:
             pyInterp (:obj:`object`)
         """
         return _motionplanning.CSpaceInterface_setInterpolate(self, pyInterp)
 
-    def setProperty(self, key: str, value: str) ->None:
+    def setProperty(self, key: str, value: str) -> None:
         r"""
         Args:
             key (str)
@@ -570,14 +571,14 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setProperty(self, key, value)
 
-    def getProperty(self, key: str) ->str:
+    def getProperty(self, key: str) -> str:
         r"""
         Args:
             key (str)
         """
         return _motionplanning.CSpaceInterface_getProperty(self, key)
 
-    def isFeasible(self, q: object) ->bool:
+    def isFeasible(self, q: object) -> bool:
         r"""
         Queries whether a given configuration is feasible.  
 
@@ -586,7 +587,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_isFeasible(self, q)
 
-    def isVisible(self, a: object, b: object) ->bool:
+    def isVisible(self, a: object, b: object) -> bool:
         r"""
         Queries whether two configurations are visible.  
 
@@ -596,7 +597,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_isVisible(self, a, b)
 
-    def testFeasibility(self, name: str, q: object) ->bool:
+    def testFeasibility(self, name: str, q: object) -> bool:
         r"""
         Queries whether a given configuration is feasible with respect to a given
         constraint.  
@@ -607,7 +608,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_testFeasibility(self, name, q)
 
-    def testVisibility(self, name: str, a: object, b: object) ->bool:
+    def testVisibility(self, name: str, a: object, b: object) -> bool:
         r"""
         Queries whether two configurations are visible with respect to a given
         constraint.  
@@ -619,33 +620,42 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_testVisibility(self, name, a, b)
 
-    def feasibilityFailures(self, q: object) ->object:
+    def feasibilityFailures(self, q: object) -> object:
         r"""
         Returns a list of all failed feasibility constraints.  
 
         Args:
             q (:obj:`object`)
+
+        Returns:
+            object:
         """
         return _motionplanning.CSpaceInterface_feasibilityFailures(self, q)
 
-    def visibilityFailures(self, a: object, b: object) ->object:
+    def visibilityFailures(self, a: object, b: object) -> object:
         r"""
         Returns a list of all failed visibility constraints.  
 
         Args:
             a (:obj:`object`)
             b (:obj:`object`)
+
+        Returns:
+            object:
         """
         return _motionplanning.CSpaceInterface_visibilityFailures(self, a, b)
 
-    def sample(self) ->object:
+    def sample(self) -> object:
         r"""
         Samples a configuration.  
 
+
+        Returns:
+            object:
         """
         return _motionplanning.CSpaceInterface_sample(self)
 
-    def distance(self, a: object, b: object) ->float:
+    def distance(self, a: object, b: object) -> float:
         r"""
         Returns the distance between two configurations.  
 
@@ -655,7 +665,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_distance(self, a, b)
 
-    def interpolate(self, a: object, b: object, u: float) ->object:
+    def interpolate(self, a: object, b: object, u: float) -> object:
         r"""
         Interpolates between two configurations.  
 
@@ -663,10 +673,13 @@ class CSpaceInterface(object):
             a (:obj:`object`)
             b (:obj:`object`)
             u (float)
+
+        Returns:
+            object:
         """
         return _motionplanning.CSpaceInterface_interpolate(self, a, b, u)
 
-    def adaptiveQueriesEnabled(self) ->bool:
+    def adaptiveQueriesEnabled(self) -> bool:
         r"""
         optional: adaptive queries can be used to automatically minimize the total cost
         of testing feasibility / visibility using empirical estimates. Off by default.  
@@ -674,7 +687,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_adaptiveQueriesEnabled(self)
 
-    def enableAdaptiveQueries(self, enabled: bool=True) ->None:
+    def enableAdaptiveQueries(self, enabled: bool=True) -> None:
         r"""
         Call this to enable adaptive queries. (It has a small overhead.)  
 
@@ -683,14 +696,14 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_enableAdaptiveQueries(self, enabled)
 
-    def optimizeQueryOrder(self) ->None:
+    def optimizeQueryOrder(self) -> None:
         r"""
         Call this to optimize the feasibility / visibility testing order.  
 
         """
         return _motionplanning.CSpaceInterface_optimizeQueryOrder(self)
 
-    def setFeasibilityDependency(self, name: str, precedingTest: str) ->None:
+    def setFeasibilityDependency(self, name: str, precedingTest: str) -> None:
         r"""
         Marks that a certain feasibility test must be performed before another.  
 
@@ -700,7 +713,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setFeasibilityDependency(self, name, precedingTest)
 
-    def setFeasibilityPrior(self, name: str, costPrior: float=0.0, feasibilityProbability: float=0.0, evidenceStrength: float=1.0) ->None:
+    def setFeasibilityPrior(self, name: str, costPrior: float=0.0, feasibilityProbability: float=0.0, evidenceStrength: float=1.0) -> None:
         r"""
         Resets the data for a certain feasibility test. Default values give a data-
         gathering behavior.  
@@ -713,7 +726,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setFeasibilityPrior(self, name, costPrior, feasibilityProbability, evidenceStrength)
 
-    def setVisibilityDependency(self, name: str, precedingTest: str) ->None:
+    def setVisibilityDependency(self, name: str, precedingTest: str) -> None:
         r"""
         Marks that a certain feasibility test must be performed before another.  
 
@@ -723,7 +736,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setVisibilityDependency(self, name, precedingTest)
 
-    def setVisibilityPrior(self, name: str, costPrior: float=0.0, visibilityProbability: float=0.0, evidenceStrength: float=1.0) ->None:
+    def setVisibilityPrior(self, name: str, costPrior: float=0.0, visibilityProbability: float=0.0, evidenceStrength: float=1.0) -> None:
         r"""
         Resets the data for a certain visibility test. Default values give a data-
         gathering behavior.  
@@ -736,7 +749,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setVisibilityPrior(self, name, costPrior, visibilityProbability, evidenceStrength)
 
-    def feasibilityCost(self, name: str) ->float:
+    def feasibilityCost(self, name: str) -> float:
         r"""
         Retrieves the empirical average cost of a given feasibility test.  
 
@@ -745,7 +758,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_feasibilityCost(self, name)
 
-    def feasibilityProbability(self, name: str) ->float:
+    def feasibilityProbability(self, name: str) -> float:
         r"""
         Retrieves the empirical average success rate of a given feasibility test.  
 
@@ -754,7 +767,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_feasibilityProbability(self, name)
 
-    def visibilityCost(self, name: str) ->float:
+    def visibilityCost(self, name: str) -> float:
         r"""
         Retrieves the empirical average cost of a given visibility test.  
 
@@ -763,7 +776,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_visibilityCost(self, name)
 
-    def visibilityProbability(self, name: str) ->float:
+    def visibilityProbability(self, name: str) -> float:
         r"""
         Retrieves the empirical average success rate of a given visibility test.  
 
@@ -772,25 +785,34 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_visibilityProbability(self, name)
 
-    def feasibilityQueryOrder(self) ->object:
+    def feasibilityQueryOrder(self) -> object:
         r"""
         Retrieves the current order of feasibility tests.  
 
+
+        Returns:
+            object:
         """
         return _motionplanning.CSpaceInterface_feasibilityQueryOrder(self)
 
-    def visibilityQueryOrder(self) ->object:
+    def visibilityQueryOrder(self) -> object:
         r"""
         Retrieves the current order of visibility tests.  
 
+
+        Returns:
+            object:
         """
         return _motionplanning.CSpaceInterface_visibilityQueryOrder(self)
 
-    def getStats(self) ->object:
+    def getStats(self) -> object:
         r"""
         Returns constraint testing statistics. If adaptive queries are enabled, this
         returns the stats on each constraint.  
 
+
+        Returns:
+            object:
         """
         return _motionplanning.CSpaceInterface_getStats(self)
     index = property(_motionplanning.CSpaceInterface_index_get, _motionplanning.CSpaceInterface_index_set, doc=r"""index : int""")
@@ -800,6 +822,9 @@ _motionplanning.CSpaceInterface_swigregister(CSpaceInterface)
 
 class PlannerInterface(object):
     r"""
+
+
+    Args:
 
 
     An interface for a kinematic motion planner. The :class:`MotionPlan` interface
@@ -858,12 +883,12 @@ class PlannerInterface(object):
         _motionplanning.PlannerInterface_swiginit(self, _motionplanning.new_PlannerInterface(cspace))
     __swig_destroy__ = _motionplanning.delete_PlannerInterface
 
-    def destroy(self) ->None:
+    def destroy(self) -> None:
         r"""
         """
         return _motionplanning.PlannerInterface_destroy(self)
 
-    def setEndpoints(self, start: object, goal: object) ->bool:
+    def setEndpoints(self, start: object, goal: object) -> bool:
         r"""
         Args:
             start (:obj:`object`)
@@ -871,7 +896,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_setEndpoints(self, start, goal)
 
-    def setEndpointSet(self, start: object, goal: object, goalSample: object=None) ->bool:
+    def setEndpointSet(self, start: object, goal: object, goalSample: object=None) -> bool:
         r"""
         Args:
             start (:obj:`object`)
@@ -880,7 +905,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_setEndpointSet(self, start, goal, goalSample)
 
-    def setCostFunction(self, edgeCost: object=None, terminalCost: object=None) ->None:
+    def setCostFunction(self, edgeCost: object=None, terminalCost: object=None) -> None:
         r"""
         Args:
             edgeCost (:obj:`object`, optional): default value None
@@ -888,40 +913,46 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_setCostFunction(self, edgeCost, terminalCost)
 
-    def addMilestone(self, milestone: object) ->int:
+    def addMilestone(self, milestone: object) -> int:
         r"""
         Args:
             milestone (:obj:`object`)
         """
         return _motionplanning.PlannerInterface_addMilestone(self, milestone)
 
-    def getClosestMilestone(self, config: object) ->int:
+    def getClosestMilestone(self, config: object) -> int:
         r"""
         Args:
             config (:obj:`object`)
         """
         return _motionplanning.PlannerInterface_getClosestMilestone(self, config)
 
-    def getMilestone(self, arg2: int) ->object:
+    def getMilestone(self, arg2: int) -> object:
         r"""
         Args:
             arg2 (int)
+
+        Returns:
+            object:
         """
         return _motionplanning.PlannerInterface_getMilestone(self, arg2)
 
-    def planMore(self, iterations: int) ->None:
+    def planMore(self, iterations: int) -> None:
         r"""
         Args:
             iterations (int)
         """
         return _motionplanning.PlannerInterface_planMore(self, iterations)
 
-    def getSolutionPath(self) ->object:
+    def getSolutionPath(self) -> object:
         r"""
+
+        Returns:
+            object:
         """
         return _motionplanning.PlannerInterface_getSolutionPath(self)
 
-    def getPath(self, *args) ->object:
+    def getPath(self, *args) -> object:
         r"""
         getPath (milestone1,milestone2): :obj:`object`
 
@@ -934,28 +965,34 @@ class PlannerInterface(object):
             goalMilestones (:obj:`std::vector"< int,std::allocator< int > >"`, optional): 
 
         Returns:
-            :obj:`object`:
+            object:
         """
         return _motionplanning.PlannerInterface_getPath(self, *args)
 
-    def getData(self, setting: str) ->float:
+    def getData(self, setting: str) -> float:
         r"""
         Args:
             setting (str)
         """
         return _motionplanning.PlannerInterface_getData(self, setting)
 
-    def getStats(self) ->object:
+    def getStats(self) -> object:
         r"""
+
+        Returns:
+            object:
         """
         return _motionplanning.PlannerInterface_getStats(self)
 
-    def getRoadmap(self) ->object:
+    def getRoadmap(self) -> object:
         r"""
+
+        Returns:
+            object:
         """
         return _motionplanning.PlannerInterface_getRoadmap(self)
 
-    def dump(self, fn: str) ->None:
+    def dump(self, fn: str) -> None:
         r"""
         Args:
             fn (str)
@@ -968,35 +1005,35 @@ class PlannerInterface(object):
 _motionplanning.PlannerInterface_swigregister(PlannerInterface)
 
 
-def interpolate_1d_min_time(x0: float, v0: float, x1: float, v1: float, xmin: float, xmax: float, vmax: float, amax: float) ->Tuple[Vector,Vector,Vector]:
+def interpolate_1d_min_time(x0: float, v0: float, x1: float, v1: float, xmin: float, xmax: float, vmax: float, amax: float) -> Tuple[Vector,Vector,Vector]:
     r"""interpolate_1d_min_time(double x0, double v0, double x1, double v1, double xmin, double xmax, double vmax, double amax)"""
     return _motionplanning.interpolate_1d_min_time(x0, v0, x1, v1, xmin, xmax, vmax, amax)
 
-def interpolate_1d_min_accel(x0: float, v0: float, x1: float, v1: float, endTime: float, xmin: float, xmax: float, vmax: float) ->Tuple[Vector,Vector,Vector]:
+def interpolate_1d_min_accel(x0: float, v0: float, x1: float, v1: float, endTime: float, xmin: float, xmax: float, vmax: float) -> Tuple[Vector,Vector,Vector]:
     r"""interpolate_1d_min_accel(double x0, double v0, double x1, double v1, double endTime, double xmin, double xmax, double vmax)"""
     return _motionplanning.interpolate_1d_min_accel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
 
-def interpolate_nd_min_time(x0: Vector, v0: Vector, x1: Vector, v1: Vector, xmin: Vector, xmax: Vector, vmax: Vector, amax: Vector) ->Tuple[Sequence[Vector],Sequence[Vector],Sequence[Vector]]:
+def interpolate_nd_min_time(x0: Vector, v0: Vector, x1: Vector, v1: Vector, xmin: Vector, xmax: Vector, vmax: Vector, amax: Vector) -> Tuple[Sequence[Vector],Sequence[Vector],Sequence[Vector]]:
     r"""interpolate_nd_min_time(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, doubleVector xmin, doubleVector xmax, doubleVector vmax, doubleVector amax)"""
     return _motionplanning.interpolate_nd_min_time(x0, v0, x1, v1, xmin, xmax, vmax, amax)
 
-def interpolate_nd_min_accel(x0: Vector, v0: Vector, x1: Vector, v1: Vector, endTime: float, xmin: Vector, xmax: Vector, vmax: Vector) ->Tuple[Sequence[Vector],Sequence[Vector],Sequence[Vector]]:
+def interpolate_nd_min_accel(x0: Vector, v0: Vector, x1: Vector, v1: Vector, endTime: float, xmin: Vector, xmax: Vector, vmax: Vector) -> Tuple[Sequence[Vector],Sequence[Vector],Sequence[Vector]]:
     r"""interpolate_nd_min_accel(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, double endTime, doubleVector xmin, doubleVector xmax, doubleVector vmax)"""
     return _motionplanning.interpolate_nd_min_accel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
 
-def interpolate_nd_min_time_linear(x0: Vector, x1: Vector, vmax: Vector, amax: Vector) ->Tuple[Vector,Sequence[Vector],Sequence[Vector]]:
+def interpolate_nd_min_time_linear(x0: Vector, x1: Vector, vmax: Vector, amax: Vector) -> Tuple[Vector,Sequence[Vector],Sequence[Vector]]:
     r"""interpolate_nd_min_time_linear(doubleVector x0, doubleVector x1, doubleVector vmax, doubleVector amax)"""
     return _motionplanning.interpolate_nd_min_time_linear(x0, x1, vmax, amax)
 
-def brake_1d(x0: float, v0: float, amax: float) ->Tuple[Vector,Vector,Vector]:
+def brake_1d(x0: float, v0: float, amax: float) -> Tuple[Vector,Vector,Vector]:
     r"""brake_1d(double x0, double v0, double amax)"""
     return _motionplanning.brake_1d(x0, v0, amax)
 
-def brake_nd(x0: Vector, v0: Vector, xmin: Vector, xmax: Vector, amax: Vector) ->Tuple[Sequence[Vector],Sequence[Vector],Sequence[Vector]]:
+def brake_nd(x0: Vector, v0: Vector, xmin: Vector, xmax: Vector, amax: Vector) -> Tuple[Sequence[Vector],Sequence[Vector],Sequence[Vector]]:
     r"""brake_nd(doubleVector x0, doubleVector v0, doubleVector xmin, doubleVector xmax, doubleVector amax)"""
     return _motionplanning.brake_nd(x0, v0, xmin, xmax, amax)
 
-def combine_nd_cubic(times: Sequence[Sequence[float]], positions: Sequence[Sequence[float]], velocities: Sequence[Sequence[float]]) ->Tuple[Vector,Sequence[Vector],Sequence[Vector]]:
+def combine_nd_cubic(times: Sequence[Sequence[float]], positions: Sequence[Sequence[float]], velocities: Sequence[Sequence[float]]) -> Tuple[Vector,Sequence[Vector],Sequence[Vector]]:
     r"""combine_nd_cubic(doubleMatrix times, doubleMatrix positions, doubleMatrix velocities)"""
     return _motionplanning.combine_nd_cubic(times, positions, velocities)
 
