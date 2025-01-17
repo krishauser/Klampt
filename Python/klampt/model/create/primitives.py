@@ -19,8 +19,8 @@ def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=f
             will be rotated and shifted by this transform.
         world (WorldModel, optional): If given, then the box will be a
             RigidObjectModel or TerrainModel will be created in this world
-        name (str, optional): If world is given, this is the name of the object. 
-            Default is 'box'.
+        name (str, optional): If world is given, this is the name of the 
+            object. Default is 'box'.
         mass (float, optional): If world is given and this is inf, then a
             TerrainModel will be created. Otherwise, a RigidObjectModel
             will be created with automatically determined inertia.
@@ -65,23 +65,26 @@ def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=f
         tobj.geometry().set(geom)
         return tobj
 
-def sphere(radius,center=None,R=None,t=None,world=None,name=None,mass=float('inf'),type='TriangleMesh'):
+def sphere(radius,center=None,R=None,t=None,world=None,name=None,mass=float('inf'),resolution=0.0,type='TriangleMesh'):
     """Makes a sphere with the given radius
 
     Args:
         radius (float): radius of the sphere
         center (list of 3 floats, optional): if None (typical), the *geometry*
             of the sphere is centered at 0. Otherwise, the *geometry* of
-            the sphere is shifted relative to the sphere's local coordinate system.
+            the sphere is shifted relative to the sphere's local coordinate
+            system.
         R,t (se3 transform, optional): if given, the sphere's world coordinates
             will be rotated and shifted by this transform.
         world (WorldModel, optional): If given, then the sphere will be a
             RigidObjectModel or TerrainModel will be created in this world
-        name (str, optional): If world is given, this is the name of the object. 
-            Default is 'sphere'.
+        name (str, optional): If world is given, this is the name of the
+            object. Default is 'sphere'.
         mass (float, optional): If world is given and this is inf, then a
             TerrainModel will be created. Otherwise, a RigidObjectModel
             will be created with automatically determined inertia.
+        resolution (float, optional): if non-zero, the sphere will be
+            discretized at the given resolution rather than the default.
         type (str, optional): the geometry type.  Defaults to 'TriangleMesh',
             but also 'GeometricPrimitive' and 'VolumeGrid' are accepted.
 
@@ -96,7 +99,7 @@ def sphere(radius,center=None,R=None,t=None,world=None,name=None,mass=float('inf
     prim.setSphere(center,radius)
     geom = Geometry3D(prim)
     if type != 'GeometricPrimitive':
-        geom = geom.convert(type)
+        geom = geom.convert(type,resolution)
     if world is None:
         if R is not None and t is not None:
             geom.setCurrentTransform(R,t)
@@ -133,8 +136,8 @@ def bbox(bmin,bmax,R=None,t=None,world=None,name=None,mass=float('inf'),type='Tr
             will be rotated and shifted by this transform.
         world (WorldModel, optional): If given, then the box will be a
             RigidObjectModel or TerrainModel will be created in this world
-        name (str, optional): If world is given, this is the name of the object. 
-            Default is 'box'.
+        name (str, optional): If world is given, this is the name of the  
+            object. Default is 'box'.
         mass (float, optional): If world is given and this is inf, then a
             TerrainModel will be created. Otherwise, a RigidObjectModel
             will be created with automatically determined inertia.

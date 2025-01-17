@@ -693,8 +693,9 @@ void GetHeightmap(const Heightmap& hm, Meshing::Heightmap& khm)
     :dataPtr(NULL),isStandalone(true) \
   { \
     shared_ptr<AnyCollisionGeometry3D>* data = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(rhs.dataPtr); \
-    if(*data != NULL) \
+    if(*data != NULL) { \
       dataPtr = new shared_ptr<AnyCollisionGeometry3D>(*data); \
+    } \
     else { \
       dataPtr = new shared_ptr<AnyCollisionGeometry3D>(); \
       auto& ptr = GET_GEOMDATA_PTR(this,InternalType); \
@@ -713,7 +714,11 @@ void GetHeightmap(const Heightmap& hm, Meshing::Heightmap& khm)
     Class res(*this); \
     return res; \
   } \
-  void Class::operator = (const Class& rhs) { set(rhs); } \
+  void Class::operator = (const Class& rhs) { \
+    shared_ptr<AnyCollisionGeometry3D>& data = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(dataPtr); \
+    const shared_ptr<AnyCollisionGeometry3D>& gdata = *reinterpret_cast<const shared_ptr<AnyCollisionGeometry3D>*>(rhs.dataPtr); \ 
+    data = gdata; \
+  } \
   void Class::set(const Class& g) \
   { \
     shared_ptr<AnyCollisionGeometry3D>& data = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(dataPtr); \

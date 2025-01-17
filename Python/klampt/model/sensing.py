@@ -7,8 +7,7 @@ Sensor transforms
 =================
 
 The :func:`get_sensor_xform`/:func:`set_sensor_xform` functions are used to
-interface cleanly with the klampt :mod:`klampt.math.se3` transform
-representation.
+conveniently get and set the transform of a sensor.
 
 Getting images and point clouds
 ===============================
@@ -118,9 +117,6 @@ def set_sensor_xform(sensor : SimRobotSensor, T : RigidTransform, link : Optiona
     Another way to set a sensor is to give a coordinates.Frame object.  This
     frame must either be associated with a RobotModelLink or its parent should
     be associated with  one.
-
-    (the reason why you should use this is that the Tsensor attribute has a
-    particular format using the loader.write_se3 function.)
     """
     if isinstance(T,coordinates.Frame):
         if isinstance(T._data,RobotModelLink):
