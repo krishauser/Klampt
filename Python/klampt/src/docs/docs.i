@@ -115,6 +115,8 @@ ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.
 ";
 
 %feature("docstring") Appearance::getColor "
+
+Return type: Tuple[float,float,float,float].  
 ";
 
 %feature("docstring") Appearance::getColor "
@@ -125,6 +127,8 @@ If 0 arguments are given, retrieves the main object color.
 
 If 1 arguments are given, returns the color of the given feature. feature.
 feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  
+
+Return type: Tuple[float,float,float,float]  
 ";
 
 %feature("docstring") Appearance::setColors "
@@ -144,6 +148,8 @@ Only supports feature=VERTICES and feature=FACES
 Retrieves per-element color for elements of the given feature type. If per-
 element colors are not enabled, then a 1 x 4 array is returned. Otherwise,
 returns an m x 4 array, where m is the number of featuress of that type.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Appearance::setTintColor "
@@ -155,6 +161,8 @@ works with both flat colors and per-vertex / per-face colors.
 %feature("docstring") Appearance::getTintColor "
 
 Retrieves the tint color.  
+
+Return type: Tuple[float,float,float,float]  
 ";
 
 %feature("docstring") Appearance::getTintStrength "
@@ -182,6 +190,8 @@ Sets the per-element color for the given feature.
 %feature("docstring") Appearance::getElementColor "
 
 Gets the per-element color for the given feature.  
+
+Return type: Tuple[float,float,float,float]  
 ";
 
 %feature("docstring") Appearance::setTexture1D_b "
@@ -229,6 +239,8 @@ Retrieves a 1D texture format, returning '' if the texture is not set.
 
 Retrieves a view into the 1D texture data. If the texture is not set, throws an
 exception.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Appearance::setTexture2D_b "
@@ -267,6 +279,8 @@ Retrieves a 2D texture format, returning '' if the texture is not set.
 
 Retrieves a view into the 2D texture data. If the texture is not set, throws an
 exception.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Appearance::setTexcoords1D "
@@ -280,6 +294,8 @@ You may also set uvs to be empty, which turns off texture mapping altogether.
 
 Gets per-vertex texture coordinates for a 1D texture. If no 1D texture is set,
 throws an exception.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Appearance::setTexcoords2D "
@@ -294,6 +310,8 @@ You may also set uvs to be empty, which turns off texture mapping altogether.
 
 Gets per-vertex texture coordinates for a 2D texture. If no 2D texture is set,
 throws an exception.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Appearance::setTexgen "
@@ -307,6 +325,8 @@ coordinates rather than object coordinates.
 
 Retrieves the texture generation. The array will be size m x 4, with m in the
 range 0,...,4. The texture generation is performed in  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Appearance::isTexgenWorld "
@@ -457,8 +477,7 @@ computed internally for some datatypes.
 
 Attributes:  
 
-    points (SWIG vector of floats): a list of points, given  as a flattened
-        coordinate list [x1,y1,z1,x2,y2,...]
+    points (numpy array): an nx3 numpy array of points.
   
 
 C++ includes: geometry.h
@@ -467,9 +486,20 @@ C++ includes: geometry.h
 %feature("docstring") ConvexHull::ConvexHull "
 ";
 
-%feature("docstring") ConvexHull::numPoints "
+%feature("docstring") ConvexHull::ConvexHull "
+";
 
-Returns the # of points.  
+%feature("docstring") ConvexHull::~ConvexHull "
+";
+
+%feature("docstring") ConvexHull::copy "
+
+Creates a standalone object that is a copy of this.  
+";
+
+%feature("docstring") ConvexHull::set "
+
+Copies the data of the argument into this.  
 ";
 
 %feature("docstring") ConvexHull::getPoints "
@@ -480,7 +510,7 @@ Returns:
 
     ndarray: an nx3 Numpy array. Setting elements of this array will
     change the points.
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") ConvexHull::setPoints "
@@ -491,11 +521,6 @@ Sets all points to the given nx3 Numpy array.
 %feature("docstring") ConvexHull::addPoint "
 
 Adds a point.  
-";
-
-%feature("docstring") ConvexHull::getPoint "
-
-Retrieves a point.  
 ";
 
 %feature("docstring") ConvexHull::translate "
@@ -888,7 +913,7 @@ Attributes:
     type (str): Can be \"Point\", \"Sphere\", \"Segment\", \"Triangle\",
         \"Polygon\", \"AABB\", and \"Box\".  Semi-supported types include
         \"Ellipsoid\", and \"Cylinder\".
-    properties (SWIG vector): a list of parameters defining the
+    properties (numpy array): a list of parameters defining the
         primitive. The interpretation is type-specific.
   
 
@@ -896,6 +921,22 @@ C++ includes: geometry.h
 ";
 
 %feature("docstring") GeometricPrimitive::GeometricPrimitive "
+";
+
+%feature("docstring") GeometricPrimitive::GeometricPrimitive "
+";
+
+%feature("docstring") GeometricPrimitive::~GeometricPrimitive "
+";
+
+%feature("docstring") GeometricPrimitive::copy "
+
+Creates a standalone object that is a copy of this.  
+";
+
+%feature("docstring") GeometricPrimitive::set "
+
+Copies the data of the argument into this.  
 ";
 
 %feature("docstring") GeometricPrimitive::setPoint "
@@ -917,6 +958,15 @@ C++ includes: geometry.h
 ";
 
 %feature("docstring") GeometricPrimitive::setBox "
+";
+
+%feature("docstring") GeometricPrimitive::getType "
+";
+
+%feature("docstring") GeometricPrimitive::getProperties "
+";
+
+%feature("docstring") GeometricPrimitive::setProperties "
 ";
 
 %feature("docstring") GeometricPrimitive::loadString "
@@ -1216,6 +1266,8 @@ Sets the current transformation (not modifying the underlying data)
 %feature("docstring") Geometry3D::getCurrentTransform "
 
 Gets the current transformation.  
+
+Return type: RigidTransform  
 ";
 
 %feature("docstring") Geometry3D::translate "
@@ -1264,12 +1316,16 @@ Returns the padding around the base geometry. Default 0.
 Returns an axis-aligned bounding box of the object as a tuple (bmin,bmax).  
 
 Note: O(1) time, but may not be tight  
+
+Return type: Tuple[Vector3,Vector3]  
 ";
 
 %feature("docstring") Geometry3D::getBBTight "
 
 Computes a tighter axis-aligned bounding box of the object than
 :meth:`Geometry3D.getBB`. Worst case O(n) time.  
+
+Return type: Tuple[Vector3,Vector3]  
 ";
 
 %feature("docstring") Geometry3D::convert "
@@ -1301,6 +1357,15 @@ Available conversions are:
     Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
 ";
 
+%feature("docstring") Geometry3D::contains_point "
+
+Returns true if this geometry contains the given point.  
+
+An approximate method is used for TriangleMesh. For PointCloud, the point is
+considered to be contained if it is one of the points in the cloud, or if points
+have a radius attribute, within the given radius.  
+";
+
 %feature("docstring") Geometry3D::collides "
 
 Returns true if this geometry collides with the other.  
@@ -1313,14 +1378,35 @@ Unsupported types:
 *   ConvexHull - anything else besides ConvexHull  
 ";
 
+%feature("docstring") Geometry3D::collides_ext "
+
+Same as collide, but will also return the elements of each geometry that
+collide.  
+
+Returns: (elem1, elem2) where elem1 and elem2 are the indices of the elements
+that collide. If len(elem1) == 0, then there is no detected collision.  
+
+Return type: Tuple[list,list]  
+";
+
 %feature("docstring") Geometry3D::withinDistance "
 
 Returns true if this geometry is within distance `tol` to other.  
 ";
 
-%feature("docstring") Geometry3D::distance_simple "
+%feature("docstring") Geometry3D::withinDistance_ext "
 
-Version 0.8: this is the same as the old distance() function.  
+Same as withinDistance, but will also return the elements of each geometry that
+are within distance tol.  
+
+Returns: (elem1, elem2) where elem1 and elem2 are the indices of the elements
+that are within distance tol. If len(elem1) == 0, then there is no detected
+proximity.  
+
+Return type: Tuple[list,list]  
+";
+
+%feature("docstring") Geometry3D::distance_simple "
 
 Returns the distance from this geometry to the other. If either geometry
 contains volume information, this value may be negative to indicate penetration.
@@ -1417,7 +1503,7 @@ Returns:
     (hit,pt) where hit is true if the ray starting at s and pointing
     in direction d hits the geometry (given in world coordinates); pt is
     the hit point, in world coordinates.
-  
+ Return type: Tuple[bool,Vector3]  
 ";
 
 %feature("docstring") Geometry3D::rayCast_ext "
@@ -1443,7 +1529,7 @@ Returns:
       index of the element (triangle, point, sub-object) that was hit.  
       For geometric primitives, this will be 0.
     - pt is the hit point, in world coordinates.
-  
+ Return type: Tuple[int,Vector3]  
 ";
 
 %feature("docstring") Geometry3D::contacts "
@@ -1476,6 +1562,8 @@ Calculates the furthest point on this geometry in the direction dir.
 Supported types:  
 
 *   ConvexHull  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") Geometry3D::slice "
@@ -1538,14 +1626,20 @@ performs a TSDF-style merge
 
 A height (elevation) map or a depth map.  
 
-In elevation-map form (viewport.perspective=false), the values are the z-height
-of the terrain at each grid point. In depth-map form
-(viewport.perspective=true), the values are the depths of each grid point (not
+In elevation-map form (`viewport.perspective=false`), the values are the
+z-height of the terrain at each grid point. In depth-map form
+(`viewport.perspective=true`), the values are the depths of each grid point (not
 distance) from the origin in the +z direction.  
 
 Note that unlike VolumeGrid types, each grid entry is defined at a vertex, not a
-cell. The (i,j) cell is associated with the vertex
-((i+0.5-cx)/fx,(j+0.5-cy)/fy,heights[i,j]) in elevation map mode.  
+cell. In elevation map form, the (i,j) cell is associated with the vertex
+((i-cx)/fx,(n-1-j-cy)/fy,heights[i,j]) where n is `heights.shape[1]`. Note that
+the y-axis is flipped in the heightmap compared to the viewport such that the
+image is given in standard top-down convention.  
+
+In depth map form, the (i,j) cell is associated with the vertex
+(d*(i-cx)/fx,d*(j-cy)/fy,d) where d=heights[i,j]. Note that the y-axis is not
+flipped in this convention.  
 
 Attributes:  
 
@@ -1553,24 +1647,24 @@ Attributes:
          intrinsics (fx,fy,cx,cy), and pose (pose) of the heightmap
          reference coordinate system.
     heights (SWIG vector of floats): contains a 2D array of
-         ``dims[0]*dims[1]`` values from the bottom left to the upper
-         right (row major, i.e., x order, then y order).
+         ``dims[0]*dims[1]`` values from the upper left to the bottom
+         right (image scan-line convention)
 
-         The vertex index (i,j) is flattened to
+         The vertex index (i,j) indicates (x index, y index) and is flattened to
          ``i*dims[1] + j``.
 
-         The array index i is associated to vertex index
-         ``(i/dims[1], i % dims[0])``
+         The array index k is associated to vertex index (x index,y index)
+         ``(k/dims[1], k % dims[0])``
 
      colors (SWIG vector of floats): contains a 2D array of colors in
          grayscale (w*h), RGB (3*w*h), or RGBA (4*w*h) form.  The layout
-         is row major in the space (i,j,channel), i.e., the index of
+         is row major in the space (row,col,channel), i.e., the index of
          (i,j,channel) is ``i*h*C + j*C + channel`` where C is 1, 3, or 4.
 
      properties (SWIG vector of floats): contains a 3D array of properties
          (w*h*p) where p is the number of properties.  p matches the length
-        of propertyNames.  Layout is row-major with (property, i, j), i.e., p
-order,
+        of propertyNames.  Layout is row-major with (property, row, col), i.e.,
+p order,
         w order, then h order.  Property p at index (i,j) is flattened to
        ``p*w*h + i*h + j``.
 
@@ -1613,12 +1707,14 @@ Sets all elements to a uniform value (e.g., 0)
 
 %feature("docstring") Heightmap::set "
 
-Sets the height of a vertex.  
+Sets the height of a vertex (note, indices are x and y units, which is reversed
+from image convention)  
 ";
 
 %feature("docstring") Heightmap::get "
 
-Gets the height of a vertex.  
+Gets the height of a vertex (note, indices are x and y units, which is reversed
+from image convention)  
 ";
 
 %feature("docstring") Heightmap::shift "
@@ -1633,33 +1729,34 @@ Scales the height uniformly.
 
 %feature("docstring") Heightmap::getHeights "
 
-Returns a 2D Numpy array view of the values of size (w x h) PROBLEM: numpy
-stores in row-major order i*h + j.  
+Returns a 2D Numpy array view of the values. Result has shape w x h.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Heightmap::setHeights "
 
-Sets the values to 2D numpy array of size (w x h)  
+Sets the values to 2D numpy array of shape w x h.  
 ";
 
 %feature("docstring") Heightmap::setHeightImage_d "
 
-Sets values to an image with size (h x w) with rows ordered top to bottom.  
+Sets values to an image with size (h, w) with rows ordered top to bottom.  
 ";
 
 %feature("docstring") Heightmap::setHeightImage_f "
 
-Sets values to an image with size (h x w) with rows ordered top to bottom.  
+Sets values to an image with size (h, w) with rows ordered top to bottom.  
 ";
 
 %feature("docstring") Heightmap::setHeightImage_s "
 
-Sets values to an image with size (h x w) with rows ordered top to bottom.  
+Sets values to an image with size (h, w) with rows ordered top to bottom.  
 ";
 
 %feature("docstring") Heightmap::setHeightImage_b "
 
-Sets values to an image with size (h x w) with rows ordered top to bottom.  
+Sets values to an image with size (h, w) with rows ordered top to bottom.  
 ";
 
 %feature("docstring") Heightmap::clearColors "
@@ -1691,11 +1788,15 @@ Gets the RGBA color of a cell.
 %feature("docstring") Heightmap::getColor "
 
 Gets the RGBA color of a cell.  
+
+Return type: Tuple[float,float,float,float]  
 ";
 
 %feature("docstring") Heightmap::getColors "
 
 Returns a 3D Numpy array view of the colors (w x h x 1, 3, or 4)  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Heightmap::setColors "
@@ -1738,6 +1839,8 @@ Sets an individual pixel's property vector.
 %feature("docstring") Heightmap::getProperty "
 
 Retrieves an individual pixel's property vector.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Heightmap::setProperties "
@@ -1748,6 +1851,8 @@ Sets a property to an array of size (w x h)
 %feature("docstring") Heightmap::getProperties "
 
 Retrieves a view of the property of size (w x h)  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Heightmap::setPropertyImage "
@@ -1888,26 +1993,36 @@ Manual: Sets an axial rotation constraint.
 %feature("docstring") IKObjective::getPosition "
 
 Returns the local and global position of the position constraint.  
+
+Return type: Tuple[Vector3,Vector3]  
 ";
 
 %feature("docstring") IKObjective::getPositionDirection "
 
 For linear and planar constraints, returns the direction.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") IKObjective::getRotation "
 
 For fixed rotation constraints, returns the orientation.  
+
+Return type: Matrix3  
 ";
 
 %feature("docstring") IKObjective::getRotationAxis "
 
 For axis rotation constraints, returns the local and global axes.  
+
+Return type: Tuple[Vector3,Vector3]  
 ";
 
 %feature("docstring") IKObjective::getTransform "
 
 For fixed-transform constraints, returns the transform (R,t)  
+
+Return type: RigidTransform  
 ";
 
 %feature("docstring") IKObjective::transform "
@@ -1932,12 +2047,16 @@ current position/rotation constraint types are kept.
 
 Gets the transform T that's closest to the transform (R,t) and that satisfies
 the IK goal's constraints.  
+
+Return type: RigidTransform  
 ";
 
 %feature("docstring") IKObjective::sampleTransform "
 
 Returns a transformation (R,t) from link relative to link2, sampled at random
 from the space of transforms that satisfies the objective obj.  
+
+Return type: RigidTransform  
 ";
 
 %feature("docstring") IKObjective::loadString "
@@ -2050,6 +2169,8 @@ Sets the active degrees of freedom.
 %feature("docstring") IKSolver::getActiveDofs "
 
 Returns the active degrees of freedom.  
+
+Return type: List[int]  
 ";
 
 %feature("docstring") IKSolver::setJointLimits "
@@ -2061,6 +2182,8 @@ Sets limits on the robot's configuration. If empty, this turns off joint limits.
 
 Returns the limits on the robot's configuration (by default this is the robot's
 joint limits.  
+
+Return type: Tuple[Vector,Vector]  
 ";
 
 %feature("docstring") IKSolver::setBiasConfig "
@@ -2072,6 +2195,8 @@ clears the bias term.
 %feature("docstring") IKSolver::getBiasConfig "
 
 Returns the solvers' bias configuration.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") IKSolver::isSolved "
@@ -2083,18 +2208,24 @@ Returns True if the current configuration residual is less than tol.
 
 Returns the vector describing the error of the objective at the current
 configuration.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") IKSolver::getJacobian "
 
 Computes the matrix describing the instantaneous derivative of the objective
 with respect to the active Dofs.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") IKSolver::getSecondaryResidual "
 
 Returns the vector describing the error of the secondary objective at the
 current configuration.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") IKSolver::solve "
@@ -2209,7 +2340,9 @@ C++ includes: robotmodel.h
 
 %feature("docstring") Mass::getCom "
 
-Returns the COM as a list of 3 floats.  
+Returns the COM.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") Mass::setInertia "
@@ -2220,6 +2353,8 @@ Sets an inertia matrix.
 %feature("docstring") Mass::getInertia "
 
 Returns the inertia matrix as a list of 3 floats or 9 floats.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") Mass::estimate "
@@ -2354,22 +2489,10 @@ A 3D point cloud class.
 
 Attributes:  
 
-    vertices (SWIG vector of floats): a list of vertices, given as a
-        list [x1, y1, z1, x2, y2, ... zn]
-    properties (SWIG vector of floats): a list of vertex properties,
-       given as a list [p11, p21, ..., pk1,  p12, p22, ..., pk2, ...,
-       p1n, p2n, ..., pkn] where each vertex has k properties.  The
-       name of each property is given by the ``propertyNames`` member.
-    propertyNames (SWIG vector of strs): a list of the names of each
-       property
-    settings (SWIG map of strs to strs): a general property map .
- .. note::  
-
-    Because the bindings are generated by SWIG, you can access the members
-    via some automatically generated accessors / modifiers.  In particular
-    len(), append(), and indexing via [] are useful. Some other methods like
-    resize() and iterators are also provided.  However, you CANNOT set these
-    items via assignment, i.e., ``pc.vertices = [0,0,0]`` is not allowed.
+    vertices (numpy array): a n x 3 array of vertices.
+    properties (numpy array): a n x k array of vertex properties.  The
+       name of each property is either anonymous or retrieved by
+       `getPropertyName`.
  Property names are usually lowercase but follow PCL naming convention, and
 often include:  
 
@@ -2397,30 +2520,20 @@ include:
 Examples::  
 
     pc = PointCloud()
-    pc.propertyNames.append('rgb')
+    pc.addProperty('rgb')
     #add 1 point with coordinates (0,0,0) and color #000000 (black)
-    pc.vertices.append(0)
-    pc.vertices.append(0)
-    pc.vertices.append(0)
-    pc.properties.append(0)
-    print(len(pc.vertices)) #prints 3
-    print(pc.numPoints())   #prints 1
+    pc.addPoint((0,0,0))
+    pc.setProperty(0,0)
+    print(len(pc.points)) # prints 1
     #add another point with coordinates (1,2,3)
     pc.addPoint([1,2,3])
     #this prints 2
-    print(pc.numPoints() )
-    print(pc.getPoints())   #prints [[0,0,0],[1,2,3]]
-    #this prints 2, because there is 1 property category x 2 points
-    print(pc.properties.size())
-    assert pc.propertyNames.size() == pc.getAllProperties().shape[1]
-    #this prints 0; this is the default value added when addPoint is called
+    print(len(pc.points))
+    print(pc.points)   #prints [[0,0,0],[1,2,3]]
+    #this prints (2,1), because there is 1 property category x 2 points
+    print(pc.properties.shape)
+    #this prints 0; this is the default value added when addPoint was called
     print(pc.getProperty(1,0) )
- To get all points as an n x 3 numpy array::  
-
-    points = pc.getPoints()
- To get all properties as a n x k numpy array::  
-
-    properties = pc.getAllProperties()
   
 
 C++ includes: geometry.h
@@ -2429,14 +2542,20 @@ C++ includes: geometry.h
 %feature("docstring") PointCloud::PointCloud "
 ";
 
-%feature("docstring") PointCloud::numPoints "
-
-Returns the number of points.  
+%feature("docstring") PointCloud::PointCloud "
 ";
 
-%feature("docstring") PointCloud::numProperties "
+%feature("docstring") PointCloud::~PointCloud "
+";
 
-Returns the number of properties.  
+%feature("docstring") PointCloud::copy "
+
+Creates a standalone object that is a copy of this.  
+";
+
+%feature("docstring") PointCloud::set "
+
+Copies the data of the argument into this.  
 ";
 
 %feature("docstring") PointCloud::getPoints "
@@ -2447,17 +2566,12 @@ Returns:
 
     ndarray: an nx3 Numpy array. Setting elements of this array will
     change the points.
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") PointCloud::setPoints "
 
 Sets all the points to the given nx3 Numpy array.  
-";
-
-%feature("docstring") PointCloud::setPointsAndProperties "
-
-Sets all the points and m properties from the given n x (3+m) array.  
 ";
 
 %feature("docstring") PointCloud::addPoint "
@@ -2475,6 +2589,18 @@ Sets the position of the point at the given index to p.
 %feature("docstring") PointCloud::getPoint "
 
 Returns the position of the point at the given index.  
+
+Return type: Vector3  
+";
+
+%feature("docstring") PointCloud::numProperties "
+
+Returns the number of properties.  
+";
+
+%feature("docstring") PointCloud::setPointsAndProperties "
+
+Sets all the points and m properties from the given n x (3+k) array.  
 ";
 
 %feature("docstring") PointCloud::setProperties "
@@ -2482,9 +2608,15 @@ Returns the position of the point at the given index.
 Sets all the properties of all points to the given nxk array.  
 ";
 
-%feature("docstring") PointCloud::setProperties "
+%feature("docstring") PointCloud::getProperties "
 
-Sets property pindex of all points to the given length-n array.  
+Returns all the properties of all points as an array view.  
+
+Returns:  
+
+    ndarray: an nxk Numpy array. Setting elements of this array will
+    change the vertices.
+ Return type: ndarray  
 ";
 
 %feature("docstring") PointCloud::addProperty "
@@ -2496,6 +2628,21 @@ Adds a new property. All values for this property are set to 0.
 
 Adds a new property with name pname, and sets values for this property to the
 given length-n array.  
+";
+
+%feature("docstring") PointCloud::setPropertyName "
+
+Sets the name of a given property.  
+";
+
+%feature("docstring") PointCloud::getPropertyName "
+
+Returns the name of a given property.  
+";
+
+%feature("docstring") PointCloud::propertyIndex "
+
+Returns the index of a named property or -1 if it does not exist.  
 ";
 
 %feature("docstring") PointCloud::setProperty "
@@ -2516,37 +2663,6 @@ Returns property pindex of point index.
 %feature("docstring") PointCloud::getProperty "
 
 Returns the property named pname of point index.  
-";
-
-%feature("docstring") PointCloud::getProperties "
-
-Returns property pindex of all points as an array.  
-
-Returns:  
-
-    ndarray: an n-D Numpy array.
-  
-";
-
-%feature("docstring") PointCloud::getProperties "
-
-Returns property named pname of all points as an array.  
-
-Returns:  
-
-    ndarray: an n-D Numpy array.
-  
-";
-
-%feature("docstring") PointCloud::getAllProperties "
-
-Returns all the properties of all points as an array view.  
-
-Returns:  
-
-    ndarray: an nxk Numpy array. Setting elements of this array will
-    change the vertices.
-  
 ";
 
 %feature("docstring") PointCloud::translate "
@@ -2750,7 +2866,7 @@ Returns:
 
     se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,
     giving the transform to world coordinates.
-  
+ Return type: RigidTransform  
 ";
 
 %feature("docstring") RigidObjectModel::setTransform "
@@ -2767,7 +2883,7 @@ Returns:
     A pair of 3-lists (w,v) where w is the angular velocity
     vector and v is the translational velocity vector (both in world
     coordinates)
-  
+ Return type: Tuple[Vector3,Vector3]  
 ";
 
 %feature("docstring") RigidObjectModel::setVelocity "
@@ -2922,11 +3038,15 @@ link is identified by index or by name.
 %feature("docstring") RobotModel::getConfig "
 
 Retrieves the current configuration of the robot model.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::getVelocity "
 
 Retreives the current velocity of the robot model.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::setConfig "
@@ -2951,6 +3071,8 @@ also essentially a temporary variable.
 %feature("docstring") RobotModel::getJointLimits "
 
 Returns a pair (qmin,qmax) of min/max joint limit vectors.  
+
+Return type: Tuple[Vector,Vector]  
 ";
 
 %feature("docstring") RobotModel::setJointLimits "
@@ -2962,6 +3084,8 @@ Sets the min/max joint limit vectors (must have length numLinks())
 
 Returns the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq
 vmax[i]`  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::setVelocityLimits "
@@ -2974,6 +3098,8 @@ vmax[i]`
 
 Returns the acceleration limit vector amax, the constraint is :math:`|ddq[i]|
 \\leq amax[i]`  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::setAccelerationLimits "
@@ -2986,6 +3112,8 @@ amax[i]`
 
 Returns the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq
 tmax[i]`  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::setTorqueLimits "
@@ -3030,11 +3158,15 @@ Returns a single DOF's position (by name)
 %feature("docstring") RobotModel::getCom "
 
 Returns the 3D center of mass at the current config.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") RobotModel::getComVelocity "
 
 Returns the 3D velocity of the center of mass at the current config / velocity.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") RobotModel::getComJacobian "
@@ -3045,7 +3177,7 @@ Returns:
 
     ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
     COM velocity at the currene configuration
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModel::getComJacobianCols "
@@ -3058,17 +3190,21 @@ Returns:
     ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
     gives the COM velocity at the current configuration, and dqlinks
     is the array of velocities of the links given by `links`
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModel::getLinearMomentum "
 
 Computes the 3D linear momentum vector.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") RobotModel::getAngularMomentum "
 
 Computes the 3D angular momentum vector.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") RobotModel::getKineticEnergy "
@@ -3079,6 +3215,8 @@ Computes the kinetic energy at the current config / velocity.
 %feature("docstring") RobotModel::getTotalInertia "
 
 Computes the 3x3 total inertia matrix of the robot.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") RobotModel::getMassMatrix "
@@ -3086,6 +3224,8 @@ Computes the 3x3 total inertia matrix of the robot.
 Computes the nxn mass matrix B(q).  
 
 Takes O(n^2) time  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") RobotModel::getMassMatrixInv "
@@ -3094,6 +3234,8 @@ Computes the inverse of the nxn mass matrix B(q)^-1.
 
 Takes O(n^2) time, which is much faster than inverting the result of
 getMassMatrix  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") RobotModel::getMassMatrixDeriv "
@@ -3101,6 +3243,8 @@ getMassMatrix
 Computes the derivative of the nxn mass matrix with respect to q_i.  
 
 Takes O(n^3) time.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") RobotModel::getMassMatrixTimeDeriv "
@@ -3109,6 +3253,8 @@ Computes the derivative of the nxn mass matrix with respect to t, given the
 robot's current velocity.  
 
 Takes O(n^4) time.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") RobotModel::getCoriolisForceMatrix "
@@ -3116,6 +3262,8 @@ Takes O(n^4) time.
 Computes the Coriolis force matrix C(q,dq) for current config and velocity.  
 
 Takes O(n^2) time.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") RobotModel::getCoriolisForces "
@@ -3125,6 +3273,8 @@ Computes the Coriolis forces C(q,dq)*dq for current config and velocity.
 Takes O(n) time, which is faster than computing matrix and doing the product.  
 
 (\"Forces\" is somewhat of a misnomer; the result is a joint torque vector)  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::getGravityForces "
@@ -3140,7 +3290,7 @@ vector g (usually (0,0,-9.8)).
 
     list of floats: the n-element generalized gravity vector at the
     robot's current configuration.
-  
+ Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::torquesFromAccel "
@@ -3161,7 +3311,7 @@ Specifically, solves for :math:`\\tau` in the (partial) dynamics equation:
 
     list of floats: the n-element torque vector that would produce
     the joint accelerations ddq in the absence of external forces.
-  
+ Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::accelFromTorques "
@@ -3182,7 +3332,7 @@ Specifically, solves for :math:`\\ddot{q}` in the (partial) dynamics equation:
 
     list of floats: the n-element joint acceleration vector that would
     result from joint torques t in the absence of external forces.
-  
+ Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::interpolate "
@@ -3193,7 +3343,7 @@ nonstandard joints.
 Returns:  
 
     The n-element configuration that is u fraction of the way from a to b.
-  
+ Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::distance "
@@ -3206,6 +3356,8 @@ nonstandard joints.
 
 Returns the configuration derivative at a as you interpolate toward b at unit
 speed.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::randomizeConfig "
@@ -3224,24 +3376,32 @@ Laplacian distribution with the given scaling term.
 
 Converts a full configuration (length numLinks()) to a list of driver values
 (length numDrivers()).  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::velocityToDrivers "
 
 Converts a full velocity vector (length numLinks()) to a list of driver
 velocities (length numDrivers()).  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::configFromDrivers "
 
 Converts a list of driver values (length numDrivers()) to a full configuration
 (length numLinks()).  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::velocityFromDrivers "
 
 Converts a list of driver velocities (length numDrivers()) to a full velocity
 vector (length numLinks()).  
+
+Return type: Vector  
 ";
 
 %feature("docstring") RobotModel::selfCollisionEnabled "
@@ -3276,6 +3436,8 @@ The return value is a map from the original robot DOF indices to the reduced
 DOFs.  
 
 Note that any geometries fixed to the world will disappear.  
+
+Return type: List[int]  
 ";
 
 %feature("docstring") RobotModel::mount "
@@ -3362,6 +3524,8 @@ Returns the single affected link for \"normal\" links.
 %feature("docstring") RobotModelDriver::getAffectedLinks "
 
 Returns the indices of the driver's affected links.  
+
+Return type: List[int]  
 ";
 
 %feature("docstring") RobotModelDriver::getAffineCoeffs "
@@ -3370,6 +3534,8 @@ For \"affine\" links, returns the scale and offset of the driver value mapped to
 the world.  
 
 Returns a pair (scale,offset), each of length len(getAffectedLinks()).  
+
+Return type: Tuple[Vector,Vector]  
 ";
 
 %feature("docstring") RobotModelDriver::setValue "
@@ -3406,16 +3572,22 @@ Returns value limits [xmin,xmax].
 %feature("docstring") RobotModelDriver::getVelocityLimits "
 
 Returns velocity limits [vmin,vmax].  
+
+Return type: Tuple[float,float]  
 ";
 
 %feature("docstring") RobotModelDriver::getAccelerationLimits "
 
 Returns acceleration limits [amin,amax].  
+
+Return type: Tuple[float,float]  
 ";
 
 %feature("docstring") RobotModelDriver::getTorqueLimits "
 
 Returns generalized torque limits [tmin,tmax].  
+
+Return type: Tuple[float,float]  
 ";
 
 // File: classRobotModelLink.xml
@@ -3527,7 +3699,7 @@ Returns:
     se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,
     giving the local transform from this link to its parent, in the
     reference (zero) configuration.
-  
+ Return type: RigidTransform  
 ";
 
 %feature("docstring") RobotModelLink::setParentTransform "
@@ -3538,6 +3710,8 @@ Sets transformation (R,t) to the parent link.
 %feature("docstring") RobotModelLink::getAxis "
 
 Gets the local rotational / translational axis.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::setAxis "
@@ -3567,7 +3741,7 @@ Converts point from local to world coordinates.
 Returns:  
 
     list of 3 floats: the world coordinates of the local point plocal
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getWorldDirection "
@@ -3578,7 +3752,7 @@ Returns:
 
     list of 3 floats: the world coordinates of the local direction
     vlocal
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getLocalPosition "
@@ -3588,7 +3762,7 @@ Converts point from world to local coordinates.
 Returns:  
 
     list of 3 floats: the local coordinates of the world point pworld
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getLocalDirection "
@@ -3599,7 +3773,7 @@ Returns:
 
     list of 3 floats: the local coordinates of the world direction
     vworld
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getTransform "
@@ -3609,7 +3783,7 @@ Gets the link's current transformation (R,t) to the world frame.
 Returns:  
 
     se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats.
-  
+ Return type: RigidTransform  
 ";
 
 %feature("docstring") RobotModelLink::setTransform "
@@ -3632,7 +3806,7 @@ Returns:
 
     list of 3 floats: the current velocity of the link's origin, in
     world coordinates
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getAngularVelocity "
@@ -3644,7 +3818,7 @@ Returns:
 
     list of 3 floats: the current angular velocity of the link, in world
     coordinates
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getPointVelocity "
@@ -3656,7 +3830,7 @@ Returns:
 
     list of 3 floats: the current velocity of the point, in
     world coordinates.
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getJacobian "
@@ -3671,7 +3845,7 @@ Returns:
 
     ndarray: the 6xn total Jacobian matrix of the
     point given by local coordinates plocal.  
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getPositionJacobian "
@@ -3686,7 +3860,7 @@ Returns:
 
     ndarray: the 3xn Jacobian matrix of the
     point given by local coordinates plocal.  
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getOrientationJacobian "
@@ -3700,7 +3874,7 @@ np.dot(J,dq), where dq is the robot's joint velocities.
 Returns:  
 
     ndarray:: the 3xn orientation Jacobian matrix of the link.  
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getJacobianCols "
@@ -3715,7 +3889,7 @@ Returns:
 
     ndarray: the 6xlen(links) Jacobian matrix of the
     point given by local coordinates plocal.
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getPositionJacobianCols "
@@ -3731,7 +3905,7 @@ Returns:
 
     ndarray: the 3xlen(links) position Jacobian matrix of the
     point given by local coordinates plocal.
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getOrientationJacobianCols "
@@ -3747,7 +3921,7 @@ Returns:
 
     ndarray: the 3xlen(links) orientation Jacobian matrix of the
     link.
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getAcceleration "
@@ -3762,7 +3936,7 @@ Returns:
 
     list of 3 floats: the acceleration of the link's origin, in
     world coordinates.
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getPointAcceleration "
@@ -3774,7 +3948,7 @@ Returns:
 
     list of 3 floats: the acceleration of the point, in
     world coordinates.
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getAngularAcceleration "
@@ -3786,7 +3960,7 @@ Returns:
 
     list of 3 floats: the angular acceleration of the link, in
     world coordinates.
-  
+ Return type: Vector3  
 ";
 
 %feature("docstring") RobotModelLink::getPositionHessian "
@@ -3798,7 +3972,7 @@ Returns:
 
     ndarray: a 3xnxn array with each of the elements in the first axis
     corresponding respectively, to the (x,y,z) components of the Hessian.
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getOrientationHessian "
@@ -3812,7 +3986,7 @@ Returns:
     ndarray: a 3xnxn array with each of the elements in the first axis
     corresponding, respectively, to the (wx,wy,wz) components of the
     pseudo-Hessian.
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") RobotModelLink::drawLocalGL "
@@ -3947,6 +4121,8 @@ of-mass centered coordinates).
 
 Gets the body's transformation at the current simulation time step (in center-
 of-mass centered coordinates).  
+
+Return type: RigidTransform  
 ";
 
 %feature("docstring") SimBody::setObjectTransform "
@@ -3959,6 +4135,8 @@ native coordinates)
 
 Gets the body's transformation at the current simulation time step (in object-
 native coordinates).  
+
+Return type: RigidTransform  
 ";
 
 %feature("docstring") SimBody::setVelocity "
@@ -3970,6 +4148,8 @@ simulation time step.
 %feature("docstring") SimBody::getVelocity "
 
 Returns the angular velocity and translational velocity (of the COM)  
+
+Return type: Tuple[Vector3,Vector3]  
 ";
 
 %feature("docstring") SimBody::setObjectVelocity "
@@ -3981,6 +4161,8 @@ the current simulation time step.
 %feature("docstring") SimBody::getObjectVelocity "
 
 Returns the angular velocity and translational velocity (of the object origin)  
+
+Return type: Tuple[Vector3,Vector3]  
 ";
 
 %feature("docstring") SimBody::setCollisionPadding "
@@ -4446,6 +4628,8 @@ Returns a list of names for the measurements (one per measurement).
 
 Returns an array of measurements from the previous simulation (or
 kinematicSimulate) timestep.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") SimRobotSensor::settings "
@@ -4496,6 +4680,8 @@ getSetting)
 
 If the sensor doesn't have a transform (such as a joint position or torque
 sensor) an exception will be raised.  
+
+Return type: RigidTransform  
 ";
 
 %feature("docstring") SimRobotSensor::getTransformWorld "
@@ -4505,6 +4691,8 @@ configuration. (helper for getSetting)
 
 If the sensor doesn't have a transform (such as a joint position or torque
 sensor) an exception will be raised.  
+
+Return type: RigidTransform  
 ";
 
 %feature("docstring") SimRobotSensor::setTransform "
@@ -4592,7 +4780,7 @@ Returns:
 
     A pair of lists of integers, giving the pairs of object ids that
     are overlapping.
-  
+ Return type: Tuple[list,list]  
 ";
 
 %feature("docstring") Simulator::getState "
@@ -4638,16 +4826,22 @@ state.
 %feature("docstring") Simulator::getActualConfig "
 
 Returns the current actual configuration of the robot from the simulator.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") Simulator::getActualVelocity "
 
 Returns the current actual velocity of the robot from the simulator.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") Simulator::getActualTorque "
 
 Returns the current actual torques on the robot's drivers from the simulator.  
+
+Return type: Vector  
 ";
 
 %feature("docstring") Simulator::enableContactFeedback "
@@ -4677,24 +4871,32 @@ with any object.
 Returns the nx7 list of contacts (x,n,kFriction) at the last time step. Normals
 point into object `a`. Each contact point (x,n,kFriction) is represented as a
 7-element vector.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Simulator::getContactForces "
 
 Returns the list of contact forces on object a at the last time step. Result is
 an nx3 array.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") Simulator::contactForce "
 
 Returns the contact force on object a at the last time step. You can set bid to
 -1 to get the overall contact force on object a.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") Simulator::contactTorque "
 
 Returns the contact force on object `a` (about `a`'s origin) at the last time
 step. You can set `bid` to -1 to get the overall contact force on object `a`.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") Simulator::hadContact "
@@ -4723,6 +4925,8 @@ can set `aid=bid=-1` to determine whether any object is penetrating any other
 %feature("docstring") Simulator::meanContactForce "
 
 Returns the average contact force on object a over the last simulate() call.  
+
+Return type: Vector3  
 ";
 
 %feature("docstring") Simulator::controller "
@@ -4758,7 +4962,7 @@ force-torque sensor mounted at the given link's origin.
 Returns:  
 
     6 entries of the wrench (fx,fy,fz,mx,my,mz)
-  
+ Return type: Vector  
 ";
 
 %feature("docstring") Simulator::setGravity "
@@ -4943,37 +5147,40 @@ A 3D indexed triangle mesh class.
 
 Attributes:  
 
-    vertices (SWIG vector of floats):  a list of vertices, given as
-        a flattened coordinate list [x1, y1, z1, x2, y2, ...]
-    indices (SWIG vector of ints): a list of triangle vertices given
-        as indices into the vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
- Note: because the bindings are generated by SWIG, you can access the indices /
-vertices members via some automatically generated accessors / modifiers. In
-particular len(), append(), and indexing via [] are useful. Some other methods
-like resize() are also provided. However, you CANNOT set these items via
-assignment.  
-
-Examples::  
+    vertices (numpy array):  an n x 3 array of vertices.
+    indices (numpy int32 array): an m x 3 list of triangle vertices, given
+        as indices into the vertices list, i.e., [[a1,b1,c2], [a2,b2,c2], ...]
+ Examples::  
 
     m = TriangleMesh()
-    m.vertices.append(0)
-    m.vertices.append(0)
-    m.vertices.append(0)
+    m.addVertex((0,0,0))
+    m.addVertex((1,0,0))
+    m.addVertex((0,1,0))
+    m.addTriangle(0,1,2)
     print(len(m.vertices))  #prints 3
-    m.vertices = [0,0,0]   #this is an error
-    m.vertices += [1,2,3]   #this is also an error
- To get all vertices as a numpy array::  
-
-    verts = m.getVertices()
- To get all indices as a numpy array::  
-
-    inds = m.getIndices()
+    print(len(m.indices))   #prints 1
   
 
 C++ includes: geometry.h
 ";
 
 %feature("docstring") TriangleMesh::TriangleMesh "
+";
+
+%feature("docstring") TriangleMesh::TriangleMesh "
+";
+
+%feature("docstring") TriangleMesh::~TriangleMesh "
+";
+
+%feature("docstring") TriangleMesh::copy "
+
+Creates a standalone object that is a copy of this.  
+";
+
+%feature("docstring") TriangleMesh::set "
+
+Copies the data of the argument into this.  
 ";
 
 %feature("docstring") TriangleMesh::getVertices "
@@ -4984,12 +5191,17 @@ Returns:
 
     ndarray: an nx3 Numpy array. Setting elements of this array will
     change the vertices.
-  
+ Return type: ndarray  
 ";
 
 %feature("docstring") TriangleMesh::setVertices "
 
 Sets all vertices to the given nx3 Numpy array.  
+";
+
+%feature("docstring") TriangleMesh::addVertex "
+
+Adds a new vertex.  
 ";
 
 %feature("docstring") TriangleMesh::getIndices "
@@ -4999,13 +5211,18 @@ Retrieves an array view of the triangle indices.
 Returns:  
 
     ndarray: an mx3 Numpy array of int32 type. Setting elements of this
-    array will change the indices.
-  
+    array will change the triangle indices.
+ Return type: ndarray  
 ";
 
 %feature("docstring") TriangleMesh::setIndices "
 
 Sets all indices to the given mx3 Numpy array.  
+";
+
+%feature("docstring") TriangleMesh::addTriangleIndices "
+
+Adds a new triangle.  
 ";
 
 %feature("docstring") TriangleMesh::translate "
@@ -5038,17 +5255,12 @@ the **centers** of cells. I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).
 
 Attributes:  
 
-    bbox (SWIG vector of 6 doubles): contains min and max bounds
-        (xmin,ymin,zmin),(xmax,ymax,zmax)
-    dims (SWIG vector of  of 3 ints): size of grid in each of 3 dimensions
-    values (SWIG vector of doubles): contains a 3D array of
-         ``dims[0]*dims[1]*dims[2]`` values.
+    bmin (array of 3 doubles): contains the minimum bounds.
 
-         The cell index (i,j,k) is flattened to
-         ``i*dims[1]*dims[2] + j*dims[2] + k``.
+    bmax (array of 3 doubles): contains the maximum bounds.
 
-         The array index i is associated to cell index
-         ``(i/(dims[1]*dims[2]), (i/dims[2]) % dims[1], i%dims[2])``
+    values (numpy array): contains a 3D array of
+         ``dims[0] x dims[1] x dims[2]`` values.
   
 
 C++ includes: geometry.h
@@ -5057,14 +5269,20 @@ C++ includes: geometry.h
 %feature("docstring") VolumeGrid::VolumeGrid "
 ";
 
-%feature("docstring") VolumeGrid::setBounds "
-
-Sets the min / max bounds for this volume.  
+%feature("docstring") VolumeGrid::VolumeGrid "
 ";
 
-%feature("docstring") VolumeGrid::resize "
+%feature("docstring") VolumeGrid::~VolumeGrid "
+";
 
-Resizes the x, y, and z dimensions of the grid.  
+%feature("docstring") VolumeGrid::copy "
+
+Creates a standalone object that is a copy of this.  
+";
+
+%feature("docstring") VolumeGrid::set "
+
+Copies the data of the argument into this.  
 ";
 
 %feature("docstring") VolumeGrid::set "
@@ -5075,6 +5293,23 @@ Sets all elements to a uniform value (e.g., 0)
 %feature("docstring") VolumeGrid::set "
 
 Sets a specific element of a cell.  
+";
+
+%feature("docstring") VolumeGrid::getBmin "
+";
+
+%feature("docstring") VolumeGrid::setBmin "
+";
+
+%feature("docstring") VolumeGrid::getBmax "
+";
+
+%feature("docstring") VolumeGrid::setBmax "
+";
+
+%feature("docstring") VolumeGrid::resize "
+
+Resizes the x, y, and z dimensions of the grid.  
 ";
 
 %feature("docstring") VolumeGrid::get "
@@ -5095,6 +5330,8 @@ Scales the value uniformly.
 %feature("docstring") VolumeGrid::getValues "
 
 Returns a 3D Numpy array view of the values.  
+
+Return type: ndarray  
 ";
 
 %feature("docstring") VolumeGrid::setValues "
@@ -5554,6 +5791,14 @@ Performs cleanup of all created spaces and planners.
 
 Subscribes a Geometry3D to a stream.  
 
+Only ROS point clouds (PointCloud2) are supported for now. Note that you can
+also call `Geometry3D.loadFile(\"ros://[ROS_TOPIC]\")` or
+`Geometry3D.loadFile(\"ros:PointCloud2//[ROS_TOPIC]\")` to accomplish the same
+thing.  
+
+TODO: It has not yet been determined whether this interferes with Rospy, i.e.,
+klampt.io.ros.  
+
 Args:  
 
     g (Geometry3D): the geometry that will be updated
@@ -5562,15 +5807,10 @@ Args:
     type (str, optional): If provided, specifies the format of the data
         to be subscribed to. If not, tries to determine the type
         automatically.
- Only ROS point clouds (PointCloud2) are supported for now. Note that you can
-also call `Geometry3D.loadFile(\"ros://[ROS_TOPIC]\")` or
-`Geometry3D.loadFile(\"ros:PointCloud2//[ROS_TOPIC]\")` to accomplish the same
-thing.  
+ Returns:  
 
-TODO: It has not yet been determined whether this interferes with Rospy, i.e.,
-klampt.io.ros.  
-
-Returns: (bool): True if successful.  
+    bool: True if successful.
+  
 ";
 
 %feature("docstring") detach_from_stream "
@@ -5587,16 +5827,19 @@ Args:
 
     protocol (str): either name the protocol to be updated, or \"all\" for
         updating all subscribed streams
- Returns: (bool): True if any stream was updated.  
+ Returns:  
+
+    bool: True if any stream was updated.
+  
 ";
 
 %feature("docstring") wait_for_stream "
 
 Waits up to timeout seconds for an update on the given stream.  
 
-Return:  
+Returns:  
 
-    (bool): True if the stream was updated.
+    bool: True if the stream was updated.
   
 ";
 
@@ -5797,24 +6040,29 @@ external force fext.
 The 2-argument version is a \"fancy\" version that allows more control over the
 constraint planes.  
 
-Args: contacts (list of 7-float lists or tuples): the list of contacts, each
-specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:  
+Args:  
 
-    * (x,y,z): the contact position
-    * (nx,ny,nz): the contact normal
-    * k: the coefficient of friction (>= 0)
- contactPositions (list of 3-float lists or tuples): the list of contact point
-positions. frictionCones (list of lists): Each item of this list specifies
-linear inequalities that must be met of the force at the corresponding contact
-point. The item must have length k*4 where k is an integer, and each inequality
-gives the entries (ax,ay,az,b) of a constraint ax*fx+ay*fy+az*fz <= b that
-limits the contact force (fx,fy,fz) at the i'th contact. Each of the k 4-tuples
-is laid out sequentially per-contact. fext (3-tuple or list): the external force
-vector. com (3-tuple or list, or None): the center of mass coordinates. If None,
-assumes that you want to test whether ANY COM may be in equilibrium for the
-given contacts.  
+     contacts (list of 7-float lists or tuples): the list of contacts, each
+         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
 
-Returns:  
+             * (x,y,z): the contact position
+             * (nx,ny,nz): the contact normal
+             * k: the coefficient of friction (>= 0)
+
+     contactPositions (list of 3-float lists or tuples): the list of contact
+         point positions.
+     frictionCones (list of lists): Each item of this list specifies linear
+         inequalities that must be met of the force at the corresponding
+         contact point.  The item must have length k*4 where k is an integer,
+         and each inequality gives the entries (ax,ay,az,b) of a constraint
+         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
+         the i'th contact.  Each of the k 4-tuples is laid out sequentially
+         per-contact.
+     fext (3-tuple or list): the external force vector.
+     com (3-tuple or list, or None): the center of mass coordinates.  If
+         None, assumes that you want to test whether ANY COM may be in
+         equilibrium for the given contacts.
+ Returns:  
 
     bool, None, or list: if com is given, and there are feasible
     equilibrium forces, this returns a list of 3 tuples giving

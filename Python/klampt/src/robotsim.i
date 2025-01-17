@@ -404,6 +404,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %apply (unsigned char* IN_ARRAY1,int DIM1) {(unsigned char* np_array,int m)};
 %apply (unsigned char* IN_ARRAY2,int DIM1,int DIM2) {(unsigned char* np_array2, int m, int n)};
 %apply (unsigned char* IN_ARRAY3,int DIM1,int DIM2,int DIM3) {(unsigned char* np_array3, int m, int n,int p)};
+%apply (unsigned char** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(unsigned char** np_view2,int* m, int *n)};
 %apply (unsigned char** ARGOUTVIEW_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(unsigned char** np_view3,int* m, int *n, int* p)};
 %apply (unsigned short* IN_ARRAY2,int DIM1,int DIM2) {(unsigned short* np_array2, int m, int n)};
 %apply (unsigned int* IN_ARRAY1,int DIM1) {(unsigned int* np_array, int m)};
@@ -431,6 +432,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %apply (float* IN_ARRAY2,int DIM1,int DIM2) {(float* np_depth2, int m2, int n2)};
 %apply (double* IN_ARRAY2,int DIM1,int DIM2) {(double* np_depth2, int m2, int n2)};
 
+%feature("python:annotations", "python");
 %feature("autodoc","1");
 %include "docs/docs.i"
 
@@ -492,34 +494,12 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 }
 
-%extend VolumeGrid { 
-%pythoncode {
-    values = property(getValues, setValues)
-    """The 3D array of values in the grid (numpy.ndarray)"""
-
-    def __reduce__(self):
-        from klampt.io import loader
-        jsonobj = loader.to_json(self,'VolumeGrid')
-        return (loader.from_json,(jsonobj,'VolumeGrid'))
-
-}
-}
-
 %extend IKObjective {
 %pythoncode {
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'IKObjective')
         return (loader.from_json,(jsonobj,'IKObjective'))
-}
-}
-
-%extend Geometry3D {
-%pythoncode {        
-    def __reduce__(self):
-        from klampt.io import loader
-        jsonobj = loader.to_json(self,'Geometry3D')
-        return (loader.from_json,(jsonobj,'Geometry3D'))
 }
 }
 
@@ -621,6 +601,18 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend TriangleMesh {
 %pythoncode {
+    vertices = property(getVertices, setVertices)
+    """The vertices of the mesh."""
+
+    indices = property(getIndices, setIndices)
+    """The triangles of the mesh, given as indices into the vertices array."""
+
+    def triangle(self, i) -> Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
+        """Returns the i'th triangle of the mesh as a tuple of 3 3-tuples."""
+        a,b,c = self.indices[i]
+        v = self.vertices
+        return (v[a],v[b],v[c])
+
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'TriangleMesh')
@@ -630,6 +622,16 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend PointCloud {
 %pythoncode {
+    points = property(getPoints, setPoints)
+    """The points of the point cloud."""
+
+    properties = property(getProperties, setProperties)
+    """The properties of the point cloud."""
+
+    def getPropertyNames(self) -> List[str]:
+        """Returns the names of the properties."""
+        return [self.getPropertyName(i) for i in range(self.numProperties())]
+
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'PointCloud')
@@ -707,6 +709,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend ConvexHull {
 %pythoncode {
+    points = property(getPoints, setPoints)
+    """The points of the convex hull."""
+
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'ConvexHull')
@@ -716,10 +721,57 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend GeometricPrimitive {
 %pythoncode {
+    type = property(getType)
+    """The type of the geometric primitive."""
+
+    properties = property(getProperties, setProperties)
+    """The properties of the geometric primitive.  Type dependent."""
+
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'GeometricPrimitive')
         return (loader.from_json,(jsonobj,'GeometricPrimitive'))
+}
+}
+
+%extend VolumeGrid { 
+%pythoncode {
+    bmin = property(getBmin, setBmin)
+    """The lower bound of the domain."""
+
+    bmax = property(getBmax, setBmax)
+    """The upper bound of the domain."""
+
+    def setBounds(self, bounds):
+        """@deprecated
+        
+        Provided for backwards compatibility
+        """
+        import warnings
+        warnings.warn("VolumeGrid. setBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        self.bmin = bounds[0:3]
+        self.bmax = bounds[3:6]
+    
+    def getBounds(self):
+        """@deprecated
+        
+        Provided for backwards compatibility
+        """
+        import warnings
+        warnings.warn("VolumeGrid. getBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        return list(self.bmin) + list(self.bmax)
+    
+    bounds = property(getBounds, setBounds)
+    """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
+
+    values = property(getValues, setValues)
+    """The 3D array of values in the grid (numpy.ndarray)"""
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.to_json(self,'VolumeGrid')
+        return (loader.from_json,(jsonobj,'VolumeGrid'))
+
 }
 }
 
@@ -783,6 +835,16 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
                 return self.setColors(img)
             else:
                 raise ValueError("Invalid dtype for the height image, can use float or np.uint8")
+}
+}
+
+
+%extend Geometry3D {
+%pythoncode {        
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.to_json(self,'Geometry3D')
+        return (loader.from_json,(jsonobj,'Geometry3D'))
 }
 }
 

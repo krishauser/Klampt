@@ -54,12 +54,15 @@ public:
   void setMass(double _mass) { mass=_mass; }
   double getMass() const { return mass; }
   void setCom(const std::vector<double>& _com) { com = _com; }
-  ///Returns the COM as a list of 3 floats
+  ///Returns the COM 
+  ///
+  ///Return type: Vector3
   void getCom(std::vector<double>& out) const { out = com; }
   ///Sets an inertia matrix.
   void setInertia(const std::vector<double>& _inertia) { inertia = _inertia; }
   ///Returns the inertia matrix as a list of 3 floats or 9 floats
-  ///     
+  /// 
+  ///Return type: Vector
   void getInertia(std::vector<double>& out) const { out=inertia; }
   ///Estimates the com and inertia of a geometry, with a given total mass. 
   ///
@@ -157,10 +160,13 @@ class RobotModelLink
   ///    giving the local transform from this link to its parent, in the
   ///    reference (zero) configuration.
   ///     
+  ///Return type: RigidTransform
   void getParentTransform(double out[9],double out2[3]);
   ///Sets transformation (R,t) to the parent link
   void setParentTransform(const double R[9],const double t[3]);
   ///Gets the local rotational / translational axis
+  ///
+  ///Return type: Vector3
   void getAxis(double out[3]);
   ///Sets the local rotational / translational axis
   void setAxis(const double axis[3]);
@@ -176,7 +182,8 @@ class RobotModelLink
   ///Returns:
   ///
   ///    list of 3 floats: the world coordinates of the local point plocal
-  ///     
+  /// 
+  ///Return type: Vector3
   void getWorldPosition(const double plocal[3],double out[3]);
   ///Converts direction from local to world coordinates 
   ///
@@ -184,14 +191,16 @@ class RobotModelLink
   ///
   ///    list of 3 floats: the world coordinates of the local direction
   ///    vlocal
-  ///     
+  /// 
+  ///Return type: Vector3
   void getWorldDirection(const double vlocal[3],double out[3]);
   ///Converts point from world to local coordinates 
   ///
   ///Returns:
   ///
   ///    list of 3 floats: the local coordinates of the world point pworld
-  ///     
+  /// 
+  ///Return type: Vector3    
   void getLocalPosition(const double pworld[3],double out[3]);
   ///Converts direction from world to local coordinates 
   ///
@@ -199,14 +208,16 @@ class RobotModelLink
   ///
   ///    list of 3 floats: the local coordinates of the world direction
   ///    vworld
-  ///     
+  /// 
+  ///Return type: Vector3
   void getLocalDirection(const double vworld[3],double out[3]);
   ///Gets the link's current transformation (R,t) to the world frame
   ///
   ///Returns:
   ///
   ///    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats.
-  ///     
+  /// 
+  ///Return type: RigidTransform
   void getTransform(double out[9],double out2[3]);
   ///Sets the link's current transformation (R,t) to the world frame. 
   ///
@@ -223,7 +234,8 @@ class RobotModelLink
   ///  
   ///    list of 3 floats: the current velocity of the link's origin, in
   ///    world coordinates
-  ///     
+  ///
+  ///Return type: Vector3
   void getVelocity(double out[3]);
   ///Computes the angular velocity of the link given the robot's current joint
   ///configuration and velocities
@@ -233,6 +245,7 @@ class RobotModelLink
   ///    list of 3 floats: the current angular velocity of the link, in world
   ///    coordinates
   ///     
+  ///Return type: Vector3
   void getAngularVelocity(double out[3]);
   ///Computes the world velocity of a point attached to the link, given the
   ///robot's current joint configuration and velocities
@@ -242,6 +255,7 @@ class RobotModelLink
   ///    list of 3 floats: the current velocity of the point, in
   ///    world coordinates.
   ///     
+  ///Return type: Vector3
   void getPointVelocity(const double plocal[3],double out[3]);
   ///Computes the total jacobian of a point on this link w.r.t. the robot's
   ///configuration q.
@@ -254,6 +268,7 @@ class RobotModelLink
   ///    ndarray: the 6xn total Jacobian matrix of the
   ///    point given by local coordinates plocal.  
   ///
+  ///Return type: ndarray
   void getJacobian(const double plocal[3],double** np_out2,int* m,int* n);
   ///Computes the position jacobian of a point on this link  w.r.t. the robot's
   ///configuration q.
@@ -266,6 +281,7 @@ class RobotModelLink
   ///    ndarray: the 3xn Jacobian matrix of the
   ///    point given by local coordinates plocal.  
   ///  
+  ///Return type: ndarray
   void getPositionJacobian(const double plocal[3],double** np_out2,int* m,int* n);
   ///Computes the orientation jacobian of this link  w.r.t. the robot's
   ///configuration q.
@@ -277,6 +293,7 @@ class RobotModelLink
   /// 
   ///    ndarray:: the 3xn orientation Jacobian matrix of the link.  
   ///     
+  ///Return type: ndarray
   void getOrientationJacobian(double** np_out2,int* m,int* n);
   ///Returns the jacobian of a point on this link  w.r.t. specified entries of 
   ///the robot's configuration q given by `links`.
@@ -289,6 +306,7 @@ class RobotModelLink
   ///    ndarray: the 6xlen(links) Jacobian matrix of the
   ///    point given by local coordinates plocal. 
   ///
+  ///Return type: ndarray
   void getJacobianCols(const double plocal[3],const std::vector<int>& links,double** np_out2,int* m,int* n);
   ///Returns the position jacobian of a point on this link  w.r.t. specified entries of 
   ///the robot's configuration q given by `links`.
@@ -302,6 +320,7 @@ class RobotModelLink
   ///    ndarray: the 3xlen(links) position Jacobian matrix of the
   ///    point given by local coordinates plocal. 
   ///
+  ///Return type: ndarray
   void getPositionJacobianCols(const double plocal[3],const std::vector<int>& links,double** np_out2,int* m,int* n);
   ///Returns the orientation jacobian this link  w.r.t. specified entries of 
   ///the robot's configuration q given by `links`.
@@ -315,6 +334,7 @@ class RobotModelLink
   ///    ndarray: the 3xlen(links) orientation Jacobian matrix of the
   ///    link.
   ///
+  ///Return type: ndarray
   void getOrientationJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
 
   ///Computes the acceleration of the link origin given the robot's current
@@ -327,6 +347,8 @@ class RobotModelLink
   /// 
   ///    list of 3 floats: the acceleration of the link's origin, in
   ///    world coordinates.
+  ///
+  ///Return type: Vector3
   void getAcceleration(const std::vector<double>& ddq,double out[3]);
   ///Computes the acceleration of the point given the robot's current
   ///joint configuration and velocities, and the joint accelerations ddq.
@@ -335,7 +357,8 @@ class RobotModelLink
   /// 
   ///    list of 3 floats: the acceleration of the point, in
   ///    world coordinates.
-  /// 
+  ///
+  ///Return type: Vector3 
   void getPointAcceleration(const double plocal[3],const std::vector<double>& ddq,double out[3]);
   ///Computes the angular acceleration of the link given the robot's current
   ///joint configuration and velocities, and the joint accelerations ddq.
@@ -345,6 +368,7 @@ class RobotModelLink
   ///    list of 3 floats: the angular acceleration of the link, in
   ///    world coordinates.
   /// 
+  ///Return type: Vector3
   void getAngularAcceleration(const std::vector<double>& ddq,double out[3]);
   ///Computes the Hessians of each component of the position p w.r.t the
   ///robot's configuration q.
@@ -354,6 +378,7 @@ class RobotModelLink
   ///    ndarray: a 3xnxn array with each of the elements in the first axis
   ///    corresponding respectively, to the (x,y,z) components of the Hessian.
   /// 
+  ///Return type: ndarray
   void getPositionHessian(const double plocal[3],double** np_out3,int* m,int* n,int* p);
   ///Computes the pseudo-Hessians of each orientation component of the link 
   ///w.r.t the robot's configuration q.  The pseudo-Hessian is the derivative
@@ -365,6 +390,7 @@ class RobotModelLink
   ///    corresponding, respectively, to the (wx,wy,wz) components of the 
   ///    pseudo-Hessian.
   /// 
+  ///Return type: ndarray
   void getOrientationHessian(double** np_out3,int* m,int* n,int* p);
   ///Draws the link's geometry in its local frame.  If keepAppearance=true, the
   ///current Appearance is honored.  Otherwise, just the geometry is drawn.
@@ -405,11 +431,15 @@ class RobotModelDriver
   ///Returns the single affected link for "normal" links
   int getAffectedLink();
   ///Returns the indices of the driver's affected links
+  ///
+  ///Return type: List[int]
   void getAffectedLinks(std::vector<int>& out);
   ///For "affine" links, returns the scale and offset of the driver value mapped
   ///to the world.
   ///
   ///Returns a pair (scale,offset), each of length len(getAffectedLinks()).
+  ///
+  ///Return type: Tuple[Vector,Vector]
   void getAffineCoeffs(std::vector<double>& out,std::vector<double>& out2);
   ///Sets the robot's config to correspond to the given driver value.
   ///
@@ -428,10 +458,16 @@ class RobotModelDriver
   ///Returns value limits [xmin,xmax]
   void getLimits(double out[2]);
   ///Returns velocity limits [vmin,vmax]
+  ///
+  ///Return type: Tuple[float,float]
   void getVelocityLimits(double out[2]);
   ///Returns acceleration limits [amin,amax]
+  ///
+  ///Return type: Tuple[float,float]
   void getAccelerationLimits(double out[2]);
   ///Returns generalized torque limits [tmin,tmax]
+  ///
+  ///Return type: Tuple[float,float]
   void getTorqueLimits(double out[2]);
 
   int world;
@@ -536,8 +572,12 @@ class RobotModel
 
   //kinematic and dynamic properties
   ///Retrieves the current configuration of the robot model.
+  ///
+  ///Return type: Vector
   void getConfig(std::vector<double>& out);
   ///Retreives the current velocity of the robot model.
+  ///
+  ///Return type: Vector
   void getVelocity(std::vector<double>& out);
   ///Sets the current configuration of the robot.  Input q is a vector of length numLinks().  This also updates forward kinematics of all links.
   ///
@@ -549,18 +589,26 @@ class RobotModel
   ///Sets the current velocity of the robot model.  Like the configuration, this is also essentially a temporary variable. 
   void setVelocity(const std::vector<double>& dq);
   ///Returns a pair (qmin,qmax) of min/max joint limit vectors
+  ///
+  ///Return type: Tuple[Vector,Vector]
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
   ///Sets the min/max joint limit vectors (must have length numLinks())
   void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
   ///Returns the velocity limit vector vmax, the constraint is :math:`|dq[i]| \leq vmax[i]`
+  ///
+  ///Return type: Vector
   void getVelocityLimits(std::vector<double>& out);
   ///Sets the velocity limit vector vmax, the constraint is :math:`|dq[i]| \leq vmax[i]`
   void setVelocityLimits(const std::vector<double>& vmax);
   ///Returns the acceleration limit vector amax, the constraint is :math:`|ddq[i]| \leq amax[i]`
+  ///
+  ///Return type: Vector
   void getAccelerationLimits(std::vector<double>& out);
   ///Sets the acceleration limit vector amax, the constraint is :math:`|ddq[i]| \leq amax[i]`
   void setAccelerationLimits(const std::vector<double>& amax);
   ///Returns the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq tmax[i]`
+  ///
+  ///Return type: Vector
   void getTorqueLimits(std::vector<double>& out);
   ///Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq tmax[i]`
   void setTorqueLimits(const std::vector<double>& tmax);
@@ -589,8 +637,12 @@ class RobotModel
 
   //dynamics functions
   ///Returns the 3D center of mass at the current config
+  ///
+  ///Return type: Vector3
   void getCom(double out[3]);
   ///Returns the 3D velocity of the center of mass at the current config / velocity
+  ///
+  ///Return type: Vector3
   void getComVelocity(double out[3]);
   ///Computes the Jacobian matrix of the current center of mass
   ///
@@ -599,6 +651,7 @@ class RobotModel
   ///    ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
   ///    COM velocity at the currene configuration
   /// 
+  ///Return type: ndarray
   void getComJacobian(double** np_out2,int* m,int* n);
   ///Returns the Jacobian matrix of the current center of mass w.r.t. some
   ///links of the robot
@@ -608,41 +661,61 @@ class RobotModel
   ///    ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
   ///    gives the COM velocity at the current configuration, and dqlinks
   ///    is the array of velocities of the links given by `links`
+  ///
+  ///Return type: ndarray
   void getComJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
   ///Computes the 3D linear momentum vector
+  ///
+  ///Return type: Vector3
   void getLinearMomentum(double out[3]);
   ///Computes the 3D angular momentum vector
+  ///
+  ///Return type: Vector3
   void getAngularMomentum(double out[3]);
   ///Computes the kinetic energy at the current config / velocity
   double getKineticEnergy();
   ///Computes the 3x3 total inertia matrix of the robot
+  ///
+  ///Return type: ndarray
   void getTotalInertia(double** np_out2,int* m,int* n);
   ///Computes the nxn mass matrix B(q).
   ///
   ///Takes O(n^2) time
+  ///
+  ///Return type: ndarray
   void getMassMatrix(double** np_out2,int* m,int* n);
   ///Computes the inverse of the nxn mass matrix B(q)^-1.
   ///
   ///Takes O(n^2) time, which is much faster than inverting the result of getMassMatrix
+  ///
+  ///Return type: ndarray
   void getMassMatrixInv(double** np_out2,int* m,int* n);
   ///Computes the derivative of the nxn mass matrix with respect to q_i.
   ///
   ///Takes O(n^3) time.
+  ///
+  ///Return type: ndarray
   void getMassMatrixDeriv(int i,double** np_out2,int* m,int* n);
   ///Computes the derivative of the nxn mass matrix with respect to t, given the
   ///robot's current velocity.
   ///
   ///Takes O(n^4) time.
+  ///
+  ///Return type: ndarray
   void getMassMatrixTimeDeriv(double** np_out2,int* m,int* n);
   ///Computes the Coriolis force matrix C(q,dq) for current config and velocity.
   ///
   ///Takes O(n^2) time.
+  ///
+  ///Return type: ndarray
   void getCoriolisForceMatrix(double** np_out2,int* m,int* n);
   ///Computes the Coriolis forces C(q,dq)*dq for current config and velocity.
   ///
   ///Takes O(n) time, which is faster than computing matrix and doing the product.
   ///
   ///("Forces" is somewhat of a misnomer; the result is a joint torque vector)
+  ///
+  ///Return type: Vector
   void getCoriolisForces(std::vector<double>& out);
   ///Computes the generalized gravity vector G(q) for the given workspace
   ///gravity vector g (usually (0,0,-9.8)). 
@@ -657,6 +730,7 @@ class RobotModel
   ///    list of floats: the n-element generalized gravity vector at the
   ///    robot's current configuration.
   ///
+  ///Return type: Vector
   void getGravityForces(const double g[3],std::vector<double>& out);
   ///Computes the inverse dynamics.  Uses Recursive Newton Euler solver and
   ///takes O(n) time.
@@ -676,7 +750,8 @@ class RobotModel
   ///
   ///    list of floats: the n-element torque vector that would produce
   ///    the joint accelerations ddq in the absence of external forces.
-  /// 
+  ///
+  ///Return type: Vector 
   void torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out);
   ///Computes the foward dynamics.  Uses Recursive Newton Euler solver and
   ///takes O(n) time.
@@ -697,7 +772,8 @@ class RobotModel
   /// 
   ///    list of floats: the n-element joint acceleration vector that would
   ///    result from joint torques t in the absence of external forces.
-  /// 
+  ///
+  ///Return type: Vector
   void accelFromTorques(const std::vector<double>& t,std::vector<double>& out);
 
   ///Interpolates smoothly between two configurations, properly taking into
@@ -706,12 +782,15 @@ class RobotModel
   ///Returns:
   /// 
   ///    The n-element configuration that is u fraction of the way from a to b.
-  /// 
+  ///
+  ///Return type: Vector
   void interpolate(const std::vector<double>& a,const std::vector<double>& b,double u,std::vector<double>& out);
   ///Computes a distance between two configurations, properly taking into account nonstandard joints
   double distance(const std::vector<double>& a,const std::vector<double>& b);
   ///Returns the configuration derivative at a as you interpolate toward
   ///b at unit speed.
+  ///
+  ///Return type: Vector
   void interpolateDeriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& out);
 
   ///Samples a random configuration and updates the robot's pose.  Properly
@@ -726,15 +805,23 @@ class RobotModel
 
   ///Converts a full configuration (length numLinks()) to a list of driver values
   ///(length numDrivers()).
+  ///
+  ///Return type: Vector
   void configToDrivers(const std::vector<double>& config,std::vector<double>& out);
   ///Converts a full velocity vector (length numLinks()) to a list of driver
   ///velocities (length numDrivers()).
+  ///
+  ///Return type: Vector
   void velocityToDrivers(const std::vector<double>& velocities,std::vector<double>& out);
   ///Converts a list of driver values (length numDrivers()) to a full configuration
   ///(length numLinks()).
+  ///
+  ///Return type: Vector
   void configFromDrivers(const std::vector<double>& driverValues,std::vector<double>& out);
   ///Converts a list of driver velocities (length numDrivers()) to a full velocity
   ///vector (length numLinks()).
+  ///
+  ///Return type: Vector
   void velocityFromDrivers(const std::vector<double>& driverVelocities,std::vector<double>& out);
 
   //geometry functions
@@ -758,6 +845,8 @@ class RobotModel
   ///DOFs.
   ///
   ///Note that any geometries fixed to the world will disappear.
+  ///
+  ///Return type: List[int]
   void reduce(const RobotModel& robot,std::vector<int>& out);
   ///Mounts a sub-robot onto a link, with its origin at a given local transform (R,t).
   ///The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
@@ -843,6 +932,7 @@ class RigidObjectModel
   ///    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,
   ///    giving the transform to world coordinates.
   /// 
+  ///Return type: RigidTransform
   void getTransform(double out[9],double out2[3]);
   ///Sets the rotation / translation (R,t) of the rigid object
   void setTransform(const double R[9],const double t[3]);
@@ -854,6 +944,7 @@ class RigidObjectModel
   ///    vector and v is the translational velocity vector (both in world
   ///    coordinates)
   /// 
+  ///Return type: Tuple[Vector3,Vector3]
   void getVelocity(double out[3],double out2[3]);
   ///Sets the (angular velocity, velocity) of the rigid object.
   void setVelocity(const double angularVelocity[3],const double velocity[3]);

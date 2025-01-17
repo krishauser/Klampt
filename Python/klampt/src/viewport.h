@@ -16,6 +16,7 @@
 class Viewport
 {
  public:
+  Viewport();
   bool fromJson(const std::string& str);
   std::string toJson() const;
   bool fromText(const std::string& str);
@@ -32,14 +33,24 @@ class Viewport
   /// Sets the pose of the camera
   void setPose(const double R[9],const double t[3]);
   /// Gets the pose of the camera
+  ///
+  ///Return type: RigidTransform
   void getPose(double out[9],double out2[3]) const;
   ///Gets the viewing rectangle (xmin,ymin,xmax,ymax) at a given depth
+  ///
+  ///Return type: Tuple[float,float,float,float]
   void viewRectangle(double depth, double out[4]) const;
   ///Projects into image coordinates
+  ///
+  ///Return type: Vector3
   void project(const double pt[3],double out[3]) const;
   /// Provides the source of a ray for an image coordinate (x,y) 
+  ///
+  ///Return type: Vector3
   void clickSource(double x, double y, double out[3]) const;
   /// Provides the direction of a ray for an image coordinate (x,y)
+  ///
+  ///Return type: Vector
   void clickDirection(double x, double y, double out[3]) const;
 
   bool perspective;

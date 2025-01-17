@@ -256,28 +256,7 @@ void set_random_seed(int seed)
 }
 
 
-/***************************  GEOMETRY CODE ***************************************/
-
-Klampt::ManagedGeometry& GetManagedGeometry(Klampt::WorldModel& world,int id)
-{
-  if(id < 0) {
-    fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
-    return world.robots[0]->geomManagers[0];
-  }
-  int terrain = world.IsTerrain(id);
-  if(terrain >= 0)
-    return world.terrains[terrain]->geometry;
-  int rigidObject = world.IsRigidObject(id);
-  if(rigidObject >= 0)
-    return world.rigidObjects[rigidObject]->geometry;
-  pair<int,int> robotLink = world.IsRobotLink(id);
-  if(robotLink.first >= 0) {
-    return world.robots[robotLink.first]->geomManagers[robotLink.second];
-  }
-  fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
-  return world.robots[0]->geomManagers[0];
-}
-
+/***************************  MANUAL OVERRIDE CONTROLLER CODE ***************************************/
 
 class ManualOverrideController : public Klampt::RobotController
 {
@@ -371,6 +350,22 @@ inline Klampt::PolynomialMotionQueue* GetMotionQueue(Klampt::RobotController* co
   return GetPathController(controller);
 }
 
+void UpdateRobotSensorsProperty(int world,int robot)
+{
+  shared_ptr<WorldData> worldData = worlds[world];
+  if(robot >= (int)worldData->robotSensors.size()) return;  //no change
+  Klampt::RobotSensors* sensors = worldData->robotSensors[robot].get();
+  Assert(sensors != NULL);
+  TiXmlDocument doc;
+  sensors->SaveSettings(doc.RootElement());
+  stringstream ss;
+  ss<<doc;
+  worldData->world->robots[robot]->properties.set("sensors",ss.str());
+}
+
+
+/***************************  CAMERA CODE ***************************************/
+
 
 Camera::Viewport GetCameraViewport(const Viewport& viewport)
 {
@@ -386,6 +381,8 @@ Camera::Viewport GetCameraViewport(const Viewport& viewport)
   vp.fy = viewport.fy;
   vp.cx = viewport.cx;
   vp.cy = viewport.cy;
+  if(viewport.xform.size() != 16)
+    throw PyException("Viewport xform member was not set as a 4x4 matrix (was setPose not called?)");
   Assert(viewport.xform.size()==16);
   vp.pose.set(Matrix4(&viewport.xform[0]));
   if(viewport.ori == "opencv" || viewport.ori == "ros")
@@ -415,6 +412,30 @@ Viewport SetCameraViewport(const Camera::Viewport& viewport)
   return vp;
 }
 
+/***************************  GEOMETRY CODE ***************************************/
+
+Klampt::ManagedGeometry& GetManagedGeometry(Klampt::WorldModel& world,int id)
+{
+  if(id < 0) {
+    fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
+    return world.robots[0]->geomManagers[0];
+  }
+  int terrain = world.IsTerrain(id);
+  if(terrain >= 0)
+    return world.terrains[terrain]->geometry;
+  int rigidObject = world.IsRigidObject(id);
+  if(rigidObject >= 0)
+    return world.rigidObjects[rigidObject]->geometry;
+  pair<int,int> robotLink = world.IsRobotLink(id);
+  if(robotLink.first >= 0) {
+    return world.robots[robotLink.first]->geomManagers[robotLink.second];
+  }
+  fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
+  return world.robots[0]->geomManagers[0];
+}
+
+
+/*
 void GetMesh(const AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
 {
   Assert(geom.type == AnyGeometry3D::Type::TriangleMesh);
@@ -539,6 +560,7 @@ void GetVolumeGrid(const VolumeGrid& grid,AnyCollisionGeometry3D& geom)
   }
   geom.ClearCollisionData();
 }
+*/
 
 void GetHeightmap(const Meshing::Heightmap& khm,Heightmap& hm)
 {
@@ -621,56 +643,242 @@ void GetHeightmap(const Heightmap& hm, Meshing::Heightmap& khm)
       throw PyException("Heightmap: unable to initialize colors");
     colors.blit(khm.colors);
   }
-
 }
 
 
-void UpdateRobotSensorsProperty(int world,int robot)
+//returns a shared_ptr<InternalType>&
+#define GET_GEOMDATA_PTR(ptr,InternalType) (*reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>((ptr)->dataPtr))
+
+//returns a const shared_ptr<InternalType>&
+#define GET_CONST_GEOMDATA_PTR(ptr,InternalType) (*reinterpret_cast<const shared_ptr<AnyCollisionGeometry3D>*>((ptr)->dataPtr))
+
+#define GET_GEOMDATA_DATA(ptr,InternalType,varname) \
+  Assert((ptr)->dataPtr != NULL); \
+  const shared_ptr<AnyCollisionGeometry3D>& gptr##varname = GET_GEOMDATA_PTR(ptr,InternalType); \
+  Assert(gptr##varname != NULL); \
+  Assert(gptr##varname->data != NULL); \
+  if(gptr##varname->type != AnyCollisionGeometry3D::Type::InternalType) { \
+    stringstream ss; \
+    ss<<"Geometry is not of the right type: expected "<<AnyCollisionGeometry3D::TypeName(AnyCollisionGeometry3D::Type::InternalType)<<", got "<<gptr##varname->TypeName(); \
+    throw PyException(ss.str()); \
+  } \
+  auto& varname = gptr##varname->As##InternalType();
+
+#define GET_GEOMDATA_COLLISIONDATA(ptr,InternalType,varname) \
+  const shared_ptr<AnyCollisionGeometry3D>& gptr##varname = GET_GEOMDATA_PTR(ptr,InternalType); \
+  Assert(gptr##varname != NULL); \
+  if(gptr##varname->type != AnyCollisionGeometry3D::Type::InternalType) { \
+    stringstream ss; \
+    ss<<"Geometry is not of the right type: expected "<<AnyCollisionGeometry3D::TypeName(AnyCollisionGeometry3D::Type::InternalType)<<", got "<<gptr##varname->TypeName(); \
+    throw PyException(ss.str()); \
+  } \
+  auto& varname = gptr##varname->InternalType##CollisionData();
+
+//sets this to reference an existing shared_ptr<AnyCollisionGeometry3D> stored elsewhere
+#define SET_GEOMDATA_TO_REFERENCE(ptr,InternalType,collision_geom_shared_ptr) \
+  *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>((ptr)->dataPtr) = collision_geom_shared_ptr; \
+  (ptr)->isStandalone = false; 
+
+#define DEFINE_GEOMDATA_CLASS(Class,InternalType) \
+  Class::Class() \
+    :dataPtr(NULL),isStandalone(true) \
+  { \
+    dataPtr = new shared_ptr<AnyCollisionGeometry3D>(); \
+    auto& ptr = GET_GEOMDATA_PTR(this,InternalType); \
+    ptr = make_shared<AnyCollisionGeometry3D>(); \
+    ptr->type = AnyCollisionGeometry3D::Type::InternalType; \
+    ptr->data.reset(Geometry::Geometry3D::Make(ptr->type)); \
+  } \
+  Class::Class(const Class& rhs) \
+    :dataPtr(NULL),isStandalone(true) \
+  { \
+    shared_ptr<AnyCollisionGeometry3D>* data = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(rhs.dataPtr); \
+    if(*data != NULL) \
+      dataPtr = new shared_ptr<AnyCollisionGeometry3D>(*data); \
+    else { \
+      dataPtr = new shared_ptr<AnyCollisionGeometry3D>(); \
+      auto& ptr = GET_GEOMDATA_PTR(this,InternalType); \
+      ptr->type = AnyCollisionGeometry3D::Type::InternalType; \
+      ptr->data.reset(Geometry::Geometry3D::Make(ptr->type)); \
+    } \
+  } \
+  Class::~Class() \
+  { \
+    shared_ptr<AnyCollisionGeometry3D>* data = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(dataPtr); \
+    *data = NULL; \
+    delete data; \
+  } \
+  Class Class::copy() const \
+  { \
+    Class res(*this); \
+    return res; \
+  } \
+  void Class::operator = (const Class& rhs) { set(rhs); } \
+  void Class::set(const Class& g) \
+  { \
+    shared_ptr<AnyCollisionGeometry3D>& data = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(dataPtr); \
+    const shared_ptr<AnyCollisionGeometry3D>& gdata = *reinterpret_cast<const shared_ptr<AnyCollisionGeometry3D>*>(g.dataPtr); \
+    if(gdata == data) return; \
+    if(gdata != NULL) { \
+      data = make_shared<AnyCollisionGeometry3D>(*gdata); \
+    } \
+    else \
+      data = NULL; \
+  }
+
+DEFINE_GEOMDATA_CLASS(GeometricPrimitive,Primitive)
+
+std::string GeometricPrimitive::getType() const
 {
-  shared_ptr<WorldData> worldData = worlds[world];
-  if(robot >= (int)worldData->robotSensors.size()) return;  //no change
-  Klampt::RobotSensors* sensors = worldData->robotSensors[robot].get();
-  Assert(sensors != NULL);
-  TiXmlDocument doc;
-  sensors->SaveSettings(doc.RootElement());
-  stringstream ss;
-  ss<<doc;
-  worldData->world->robots[robot]->properties.set("sensors",ss.str());
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  return primdata.TypeName();
 }
 
-GeometricPrimitive::GeometricPrimitive()
-{}
+void GeometricPrimitive::getProperties(double** np_out, int* m) const
+{
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  if(primdata.type == GeometricPrimitive3D::Point) {
+    const Vector3& p = *AnyCast<Vector3>(&primdata.data);
+    *m = 3;
+    *np_out = (double*)malloc(sizeof(double)*(*m));
+    p.get(*np_out);
+  }
+  else if(primdata.type == GeometricPrimitive3D::Sphere) {
+    const Sphere3D& s = *AnyCast<Sphere3D>(&primdata.data);
+    *m = 4;
+    *np_out = (double*)malloc(sizeof(double)*(*m));
+    s.center.get(*np_out);
+    (*np_out)[3] = s.radius;
+  }
+  else if(primdata.type == GeometricPrimitive3D::Segment) {
+    const Segment3D& s = *AnyCast<Segment3D>(&primdata.data);
+    *m = 6;
+    *np_out = (double*)malloc(sizeof(double)*(*m));
+    s.a.get(*np_out);
+    s.b.get(*np_out+3);
+  }
+  else if(primdata.type == GeometricPrimitive3D::Triangle) {
+    const Triangle3D& t = *AnyCast<Triangle3D>(&primdata.data);
+    *m = 9;
+    *np_out = (double*)malloc(sizeof(double)*(*m));
+    t.a.get(*np_out);
+    t.b.get(*np_out+3);
+    t.c.get(*np_out+6);
+  }
+  else if(primdata.type == GeometricPrimitive3D::AABB) {
+    const AABB3D& b = *AnyCast<AABB3D>(&primdata.data);
+    *m = 6;
+    *np_out = (double*)malloc(sizeof(double)*(*m));
+    b.bmin.get(*np_out);
+    b.bmax.get(*np_out+3);
+  }
+  else if(primdata.type == GeometricPrimitive3D::Box) {
+    const Box3D& b = *AnyCast<Box3D>(&primdata.data);
+    *m = 15;
+    *np_out = (double*)malloc(sizeof(double)*(*m));
+    b.origin.get(*np_out);
+    b.xbasis.get(*np_out+3);
+    b.ybasis.get(*np_out+6);
+    b.zbasis.get(*np_out+9);
+    b.dims.get(*np_out+12);
+  }
+  else {
+    throw PyException("GeometricPrimitive::getProperties: unsupported type");
+  }
+}
+
+void GeometricPrimitive::setProperties(double* np_array, int m)
+{
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  if(np_array == NULL) {
+    throw PyException("GeometricPrimitive::setProperties: array is NULL");
+  }
+  if(primdata.type == GeometricPrimitive3D::Point) {
+    if(m != 3) {
+      throw PyException("GeometricPrimitive::setProperties: Point type requires 3 elements");
+    }
+    primdata = GeometricPrimitive3D(Vector3(np_array));
+  }
+  else if(primdata.type == GeometricPrimitive3D::Sphere) {
+    if(m != 4) {
+      throw PyException("GeometricPrimitive::setProperties: Sphere type requires 4 elements");
+    }
+    primdata = GeometricPrimitive3D(Sphere3D(Vector3(np_array),np_array[3]));
+  }
+  else if(primdata.type == GeometricPrimitive3D::Segment) {
+    if(m != 6) {
+      throw PyException("GeometricPrimitive::setProperties: Segment type requires 6 elements");
+    }
+    Segment3D s;
+    s.a.set(np_array);
+    s.b.set(np_array+3);
+    primdata = GeometricPrimitive3D(s);
+  }
+  else if(primdata.type == GeometricPrimitive3D::Triangle) {
+    if(m != 9) {
+      throw PyException("GeometricPrimitive::setProperties: Triangle type requires 9 elements");
+    }
+    Triangle3D t;
+    t.a.set(np_array);
+    t.b.set(np_array+3);
+    t.c.set(np_array+6);
+    primdata = GeometricPrimitive3D(t);
+  }
+  else if(primdata.type == GeometricPrimitive3D::AABB) {
+    if(m != 6) {
+      throw PyException("GeometricPrimitive::setProperties: AABB type requires 6 elements");
+    }
+    AABB3D b;
+    b.bmin.set(np_array);
+    b.bmax.set(np_array+3);
+    primdata = GeometricPrimitive3D(b);
+  }
+  else if(primdata.type == GeometricPrimitive3D::Box) {
+    if(m != 15) {
+      throw PyException("GeometricPrimitive::setProperties: Box type requires 15 elements");
+    }
+    Box3D b;
+    b.origin.set(np_array);
+    b.xbasis.set(np_array+3);
+    b.ybasis.set(np_array+6);
+    b.zbasis.set(np_array+9);
+    b.dims.set(np_array+12);
+    primdata = GeometricPrimitive3D(b);
+  }
+  else {
+    throw PyException("GeometricPrimitive::setProperties: unsupported type");
+  }
+}
 
 void GeometricPrimitive::setPoint(const double pt[3])
 {
-  type = "Point";
-  properties.resize(3);
-  copy(pt,pt+3,properties.begin());
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  primdata = GeometricPrimitive3D(Vector3(pt));
 }
 
 void GeometricPrimitive::setSphere(const double c[3],double r)
 {
-  type = "Sphere";
-  properties.resize(4);
-  copy(c,c+3,properties.begin());
-  properties[3] = r;
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  primdata = GeometricPrimitive3D(Sphere3D(Vector3(c),r));
 }
 
 void GeometricPrimitive::setSegment(const double a[3],const double b[3])
 {
-  type = "Segment";
-  properties.resize(6);
-  copy(a,a+3,properties.begin());
-  copy(b,b+3,properties.begin()+3);
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  Segment3D s;
+  s.a.set(a);
+  s.b.set(b);
+  primdata = GeometricPrimitive3D(s);
 }
 
 void GeometricPrimitive::setTriangle(const double a[3],const double b[3],const double c[3])
 {
-  type = "Triangle";
-  properties.resize(9);
-  copy(a,a+3,properties.begin());
-  copy(b,b+3,properties.begin()+3);
-  copy(c,c+3,properties.begin()+6);
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  Triangle3D t;
+  t.a.set(a);
+  t.b.set(b);
+  t.c.set(c);
+  primdata = GeometricPrimitive3D(t);
 }
 
 void GeometricPrimitive::setPolygon(const std::vector<double>& verts)
@@ -679,53 +887,53 @@ void GeometricPrimitive::setPolygon(const std::vector<double>& verts)
     throw PyException("setPolygon requires a list of concatenated 3D vertices");
   if(verts.size() < 9)
     throw PyException("setPolygon requires at least 3 vertices (9 elements in list)");
-  type = "Polygon";
-  properties.resize(verts.size()+1);
-  properties[0] = verts.size()/3;
-  copy(verts.begin(),verts.end(),properties.begin()+1);
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  Polygon3D p;
+  p.vertices.resize(verts.size()/3);
+  for(size_t i=0;i<p.vertices.size();i++)
+    p.vertices[i].set(&verts[i*3]);
+  primdata = GeometricPrimitive3D(p);
 }
 
 void GeometricPrimitive::setAABB(const double bmin[3],const double bmax[3])
 {
-  type = "AABB";
-  properties.resize(6);
-  copy(bmin,bmin+3,properties.begin());
-  copy(bmax,bmax+3,properties.begin()+3);
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  AABB3D b;
+  b.bmin.set(bmin);
+  b.bmax.set(bmax); 
+  primdata = GeometricPrimitive3D(b);
 }
 
 void GeometricPrimitive::setBox(const double ori[3],const double R[9],const double dims[3])
 {
-  type = "Box";
-  properties.resize(15);
-  copy(ori,ori+3,properties.begin());
-  copy(R,R+9,properties.begin()+3);
-  copy(dims,dims+3,properties.begin()+12);
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  Box3D b;
+  b.origin.set(ori);
+  Matrix3 Rm(R);
+  Rm.getCol1(b.xbasis);
+  Rm.getCol2(b.ybasis);
+  Rm.getCol3(b.zbasis);
+  b.dims.set(dims);
+  primdata = GeometricPrimitive3D(b);
 }
 
 bool GeometricPrimitive::loadString(const char* str)
 {
-  vector<string> items = Split(str," \t\n");
-  if(items.size() == 0) {
-    type = "";
-    properties.resize(0);
-    return true;
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
+  stringstream ss(str);
+  ss >> primdata;
+  if(ss.fail()) {
+    fprintf(stderr,"GeometricPrimitive.loadString: could not parse string \"%s\"\n",str);
+    return false;
   }
-  type = items[0];
-  properties.resize(items.size()-1);
-  for(size_t i=1;i<items.size();i++)
-    if(!LexicalCast<double>(items[i],properties[i-1])) {
-      fprintf(stderr,"GeometricPrimitive.loadString: could not parse item %d: \"%s\"\n",(int)i,items[i].c_str());
-      return false;
-    }
   return true;
 }
 
 std::string GeometricPrimitive::saveString() const
 {
+  GET_GEOMDATA_DATA(this,Primitive,primdata);
   stringstream ss;
-  ss<<type<<" ";
-  for(size_t i=0;i<properties.size();i++)
-    ss<<properties[i]<<" ";
+  ss<<primdata;
   return ss.str();
 }
 
@@ -740,8 +948,10 @@ Geometry3D::Geometry3D(const Geometry3D& rhs)
   :world(rhs.world),id(rhs.id),geomPtr(NULL)
 {
   shared_ptr<AnyCollisionGeometry3D>* geom = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(rhs.geomPtr);
-  if(*geom != NULL)
+  if(*geom != NULL) {
     geomPtr = new shared_ptr<AnyCollisionGeometry3D>(*geom);
+    shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  }
   else
     geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
 }
@@ -840,8 +1050,10 @@ void Geometry3D::set(const Geometry3D& g)
     else
       geom = make_shared<AnyCollisionGeometry3D>();
   }
-  else
-    Assert(&*geom == &*(*mgeom));
+  else {
+    if(mgeom)
+      Assert(&*geom == &*(*mgeom));
+  }
   *geom = *ggeom;
   //geom->ClearCollisionData();
   if(mgeom) {
@@ -883,50 +1095,87 @@ bool Geometry3D::empty()
   return false;
 }
 
-TriangleMesh Geometry3D::getTriangleMesh()
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  TriangleMesh mesh;
-  if(!geom) return mesh;
-  if(geom->type != AnyGeometry3D::Type::TriangleMesh) {
-    throw PyException("Geometry3D is not TriangleMesh type");
-  }
-  GetMesh(*geom,mesh);
-  return mesh;
-}
 
 GeometricPrimitive Geometry3D::getGeometricPrimitive()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return GeometricPrimitive();
+  GeometricPrimitive prim;
+  SET_GEOMDATA_TO_REFERENCE(&prim,Primitive,geom);
+  if(!geom) return prim;
   if(geom->type != AnyGeometry3D::Type::Primitive) {
     throw PyException("Geometry3D is not GeometricPrimitive type");
   }
-  stringstream ss;
-  ss<<geom->AsPrimitive();
-  GeometricPrimitive prim;
-  bool res=prim.loadString(ss.str().c_str());
-  if(!res) {
-    throw PyException("Internal error, geometric primitive conversion");
-  }
   return prim;
+}
+
+TriangleMesh Geometry3D::getTriangleMesh()
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  TriangleMesh mesh;
+  SET_GEOMDATA_TO_REFERENCE(&mesh,TriangleMesh,geom);
+  if(!geom) return mesh;
+  if(geom->type != AnyGeometry3D::Type::TriangleMesh) {
+    throw PyException("Geometry3D is not TriangleMesh type");
+  }
+  return mesh;
+}
+
+PointCloud Geometry3D::getPointCloud()
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  PointCloud pc;
+  SET_GEOMDATA_TO_REFERENCE(&pc,PointCloud,geom);
+  if(!geom) return pc;
+  if(geom->type != AnyGeometry3D::Type::PointCloud) {
+    throw PyException("Geometry3D is not PointCloud type");
+  }
+  return pc;
+}
+
+VolumeGrid Geometry3D::getVolumeGrid()
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  VolumeGrid grid;
+  SET_GEOMDATA_TO_REFERENCE(&grid,ImplicitSurface,geom);
+  if(!geom) return grid;
+  if(geom->type != AnyGeometry3D::Type::ImplicitSurface && geom->type != AnyGeometry3D::Type::OccupancyGrid) {
+    throw PyException("Geometry3D is not ImplicitSurface or OccupancyGrid type");
+  }
+  return grid;
+}
+
+VolumeGrid Geometry3D::getImplicitSurface()
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(geom->type != AnyGeometry3D::Type::ImplicitSurface) {
+    throw PyException("Geometry is not an ImplicitSurface");
+  }
+  return getVolumeGrid();
+}
+
+VolumeGrid Geometry3D::getOccupancyGrid()
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(geom->type != AnyGeometry3D::Type::OccupancyGrid) {
+    throw PyException("Geometry is not an OccupancyGrid");
+  }
+  return getVolumeGrid();
 }
 
 ConvexHull Geometry3D::getConvexHull()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return ConvexHull();
+  ConvexHull ch;
+  SET_GEOMDATA_TO_REFERENCE(&ch,AnyCollisionGeometry3D,geom);
+  if(!geom) return ch;
   if(geom->type != AnyGeometry3D::Type::ConvexHull) {
     throw PyException("Geometry3D is not ConvexHull type");
   }
   const Geometry::ConvexHull3D& hull = geom->AsConvexHull();
   if(hull.type != Geometry::ConvexHull3D::Polytope) {
-    throw PyException("Can't get ConvexHull object from ConvexHull groups");
+    throw PyException("Can't get ConvexHull object from ConvexHull groups or other exotic types");
   }
-  const auto& pts = hull.AsPolytope();
-  ConvexHull chull;
-  chull.points = pts;
-  return chull;
+  return ch;
 }
 
 Heightmap Geometry3D::getHeightmap()
@@ -942,26 +1191,35 @@ Heightmap Geometry3D::getHeightmap()
   return hm;
 }
 
+#define STANDARD_GEOMETRY3D_SET(arg) \
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr); \
+  Klampt::ManagedGeometry* mgeom = NULL; \
+  if(!isStandalone()) { \
+    Klampt::WorldModel& world = *worlds[this->world]->world; \
+    mgeom = &GetManagedGeometry(world,id); \
+  } \
+  if(geom == NULL) { \
+    if(mgeom) \
+      geom = mgeom->CreateEmpty(); \
+    else \
+      geom = make_shared<AnyCollisionGeometry3D>(); \
+  } \
+  shared_ptr<AnyCollisionGeometry3D>& mptr = GET_GEOMDATA_PTR(&arg,TriangleMesh); \
+  if(geom.get() == mptr.get()) { \
+    /*already set, just make sure to refresh the collision data*/ \
+    geom->ClearCollisionData(); \
+    return; \
+  } \
+  *geom = *mptr; \
+  if(mgeom) { \
+    /*update the display list / cache*/ \
+    mgeom->OnGeometryChange();  \
+    mgeom->RemoveFromCache(); \
+  } \
+
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  Klampt::ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) {
-    Klampt::WorldModel& world = *worlds[this->world]->world;
-    mgeom = &GetManagedGeometry(world,id);
-  }
-  if(geom == NULL) {
-    if(mgeom) 
-      geom = mgeom->CreateEmpty();
-    else
-      geom = make_shared<AnyCollisionGeometry3D>();
-  }
-  GetMesh(mesh,*geom);
-  if(mgeom) {
-    //update the display list / cache
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
+  STANDARD_GEOMETRY3D_SET(mesh);
 }
 
 void Geometry3D::setGroup()
@@ -982,13 +1240,115 @@ void Geometry3D::setGroup()
   geom->ReinitCollisionData();
 }
 
+void Geometry3D::setPointCloud(const PointCloud& pc)
+{
+  STANDARD_GEOMETRY3D_SET(pc);
+}
+
+void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
+{
+  setImplicitSurface(vg);
+}
+
+void Geometry3D::setImplicitSurface(const VolumeGrid& vg)
+{
+  STANDARD_GEOMETRY3D_SET(vg);
+}
+
+void Geometry3D::setOccupancyGrid(const VolumeGrid& vg)
+{
+  setImplicitSurface(vg);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  geom->type = AnyGeometry3D::Type::OccupancyGrid;
+}
+
+void Geometry3D::setConvexHull(const ConvexHull& hull)
+{
+  STANDARD_GEOMETRY3D_SET(hull);
+}
+
+void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & geom2)
+{
+  // make sure both geometry is convexhull
+  shared_ptr<AnyCollisionGeometry3D>& ingeom1 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom1.geomPtr);
+  Assert(ingeom1->type == AnyGeometry3D::Type::ConvexHull);
+  shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
+  Assert(ingeom2->type == AnyGeometry3D::Type::ConvexHull);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  Klampt::ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) {
+    Klampt::WorldModel& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
+  if(geom == NULL) {
+    if(mgeom) {
+      geom = mgeom->CreateEmpty();
+    }
+    else
+      geom = make_shared<AnyCollisionGeometry3D>();
+  }
+  // create collision data from its constructor
+  RigidTransform T1 = ingeom1->GetTransform();
+  RigidTransform T2 = ingeom2->GetTransform();
+  RigidTransform TRel;
+  TRel.mulInverseA(T1,T2);
+  Geometry::ConvexHull3D hull;
+  hull.SetHull(ingeom1->AsConvexHull(), ingeom2->AsConvexHull());
+  *geom = AnyCollisionGeometry3D(hull);
+  geom->InitCollisionData();
+  geom->ConvexHullCollisionData().UpdateHullSecondRelativeTransform(TRel);
+  geom->SetTransform(T1);
+
+  if(mgeom) {
+    //update the display list / cache
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
+  }
+}
+
+void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
+{
+  STANDARD_GEOMETRY3D_SET(prim);
+}
+
+void Geometry3D::setHeightmap(const Heightmap& hm)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
+  Klampt::ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) {
+    Klampt::WorldModel& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
+  if(geom == NULL) {
+    if(mgeom) {
+      geom = mgeom->CreateEmpty();
+    }
+    else
+      geom = make_shared<AnyCollisionGeometry3D>();
+  }
+  Meshing::Heightmap khm;
+  GetHeightmap(hm,khm);
+  RigidTransform T = geom->GetTransform();
+  *geom = khm;
+  geom->ClearCollisionData();
+  geom->SetTransform(T);
+  if(mgeom) {
+    //update the display list / cache
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
+  }
+}
+
 Geometry3D Geometry3D::getElement(int element)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) 
     throw PyException("Geometry is empty");
-  if(element < 0 || element > (int)geom->NumElements()) 
-    throw PyException("Invalid element specified");
+  if(element < 0 || element > (int)geom->NumElements()) {
+    stringstream ss;
+    ss<<"Invalid element specified, "<<element<<" needs to be in the range [0,"<<geom->NumElements()<<")";
+    throw PyException(ss.str());
+  }
   if(geom->type == AnyGeometry3D::Type::Group) {
     vector<AnyCollisionGeometry3D>& data = geom->GroupCollisionData();
     Geometry3D res;
@@ -1047,243 +1407,6 @@ int Geometry3D::numElements()
   return geom->NumElements();
 }
 
-
-PointCloud Geometry3D::getPointCloud()
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  PointCloud pc;
-  if(!geom) return pc;
-  if(geom->type != AnyGeometry3D::Type::PointCloud) {
-    throw PyException("Geometry3D is not PointCloud type");
-  }
-  GetPointCloud(*geom,pc);
-  return pc;
-}
-
-VolumeGrid Geometry3D::getVolumeGrid()
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  VolumeGrid grid;
-  if(!geom) return grid;
-  if(geom->type != AnyGeometry3D::Type::ImplicitSurface && geom->type != AnyGeometry3D::Type::OccupancyGrid) {
-    throw PyException("Geometry3D is not ImplicitSurface or OccupancyGrid type");
-  }
-  GetVolumeGrid(*geom,grid);
-  return grid;
-}
-
-VolumeGrid Geometry3D::getImplicitSurface()
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  if(geom->type != AnyGeometry3D::Type::ImplicitSurface) {
-    throw PyException("Geometry is not an ImplicitSurface");
-  }
-  return getVolumeGrid();
-}
-
-VolumeGrid Geometry3D::getOccupancyGrid()
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  if(geom->type != AnyGeometry3D::Type::OccupancyGrid) {
-    throw PyException("Geometry is not an OccupancyGrid");
-  }
-  return getVolumeGrid();
-}
-
-void Geometry3D::setPointCloud(const PointCloud& pc)
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  Klampt::ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) {
-    Klampt::WorldModel& world = *worlds[this->world]->world;
-    mgeom = &GetManagedGeometry(world,id);
-  }
-  if(geom == NULL) {
-    if(mgeom) {
-      geom = mgeom->CreateEmpty();
-    }
-    else
-      geom = make_shared<AnyCollisionGeometry3D>();
-  }
-  RigidTransform T = geom->GetTransform();
-  GetPointCloud(pc,*geom);
-  geom->SetTransform(T);
-  //this is already called
-  //geom->ClearCollisionData();
-  if(mgeom) {
-    //update the display list / cache
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
-}
-
-void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
-{
-  setImplicitSurface(vg);
-}
-
-void Geometry3D::setImplicitSurface(const VolumeGrid& vg)
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  Klampt::ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) {
-    Klampt::WorldModel& world = *worlds[this->world]->world;
-    mgeom = &GetManagedGeometry(world,id);
-  }
-  if(geom == NULL) {
-    if(mgeom) {
-      geom = mgeom->CreateEmpty();
-    }
-    else
-      geom = make_shared<AnyCollisionGeometry3D>();
-  }
-  RigidTransform T = geom->GetTransform();
-  GetVolumeGrid(vg,*geom);
-  geom->SetTransform(T);
-  //this is already called
-  //geom->ClearCollisionData();
-  if(mgeom) {
-    //update the display list / cache
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
-}
-
-void Geometry3D::setOccupancyGrid(const VolumeGrid& vg)
-{
-  setImplicitSurface(vg);
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  geom->type = AnyGeometry3D::Type::OccupancyGrid;
-}
-
-void Geometry3D::setConvexHull(const ConvexHull& hull)
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  Klampt::ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) {
-    Klampt::WorldModel& world = *worlds[this->world]->world;
-    mgeom = &GetManagedGeometry(world,id);
-  }
-  if(geom == NULL) {
-    if(mgeom) {
-      geom = mgeom->CreateEmpty();
-    }
-    else
-      geom = make_shared<AnyCollisionGeometry3D>();
-  }
-  Geometry::ConvexHull3D chull;  
-  chull.SetPoints(hull.points);
-
-  RigidTransform T = geom->GetTransform();
-  *geom = chull;
-  geom->ClearCollisionData();
-  geom->SetTransform(T);
-
-  if(mgeom) {
-    //update the display list / cache
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
-}
-
-void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & geom2)
-{
-  // make sure both geometry is convexhull
-  shared_ptr<AnyCollisionGeometry3D>& ingeom1 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom1.geomPtr);
-  Assert(ingeom1->type == AnyGeometry3D::Type::ConvexHull);
-  shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
-  Assert(ingeom2->type == AnyGeometry3D::Type::ConvexHull);
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  Klampt::ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) {
-    Klampt::WorldModel& world = *worlds[this->world]->world;
-    mgeom = &GetManagedGeometry(world,id);
-  }
-  if(geom == NULL) {
-    if(mgeom) {
-      geom = mgeom->CreateEmpty();
-    }
-    else
-      geom = make_shared<AnyCollisionGeometry3D>();
-  }
-  // create collision data from its constructor
-  RigidTransform T1 = ingeom1->GetTransform();
-  RigidTransform T2 = ingeom2->GetTransform();
-  RigidTransform TRel;
-  TRel.mulInverseA(T1,T2);
-  Geometry::ConvexHull3D hull;
-  hull.SetHull(ingeom1->AsConvexHull(), ingeom2->AsConvexHull());
-  *geom = AnyCollisionGeometry3D(hull);
-  geom->InitCollisionData();
-  geom->ConvexHullCollisionData().UpdateHullSecondRelativeTransform(TRel);
-  geom->SetTransform(T1);
-
-  if(mgeom) {
-    //update the display list / cache
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
-}
-
-void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
-  Klampt::ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) {
-    Klampt::WorldModel& world = *worlds[this->world]->world;
-    mgeom = &GetManagedGeometry(world,id);
-  }
-  if(geom == NULL) {
-    if(mgeom) {
-      geom = mgeom->CreateEmpty();
-    }
-    else
-      geom = make_shared<AnyCollisionGeometry3D>();
-  }
-  stringstream ss(prim.saveString());
-  Geometry::GeometricPrimitive3D g;
-  ss>>g;
-  if(!ss) {
-    throw PyException("Internal error, can't read geometric primitive?");
-  }
-  RigidTransform T = geom->GetTransform();
-  *geom = g;
-  geom->ClearCollisionData();
-  geom->SetTransform(T);
-  if(mgeom) {
-    //update the display list / cache
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
-}
-
-void Geometry3D::setHeightmap(const Heightmap& hm)
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
-  Klampt::ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) {
-    Klampt::WorldModel& world = *worlds[this->world]->world;
-    mgeom = &GetManagedGeometry(world,id);
-  }
-  if(geom == NULL) {
-    if(mgeom) {
-      geom = mgeom->CreateEmpty();
-    }
-    else
-      geom = make_shared<AnyCollisionGeometry3D>();
-  }
-  Meshing::Heightmap khm;
-  GetHeightmap(hm,khm);
-  RigidTransform T = geom->GetTransform();
-  *geom = khm;
-  geom->ClearCollisionData();
-  geom->SetTransform(T);
-  if(mgeom) {
-    //update the display list / cache
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
-}
 
 
 bool Geometry3D::loadFile(const char* fn)
@@ -1457,9 +1580,10 @@ Geometry3D Geometry3D::convert(const char* destype,double param)
   shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
   resgeom = make_shared<AnyCollisionGeometry3D>();
   if(srctype == destype2 && param > 0)  {
+    printf("Remeshing %s\n",geom->TypeName());
     if(!geom->Remesh(param,*resgeom)) {
       stringstream ss;
-      ss<<"Cannot perform the geometry remeshiing "<<geom->TypeName()<<" at res "<<param;
+      ss<<"Cannot perform the geometry remeshing "<<geom->TypeName()<<" at res "<<param;
       throw PyException(ss.str());
     }
     return res;
@@ -1472,12 +1596,41 @@ Geometry3D Geometry3D::convert(const char* destype,double param)
   return res;
 }
 
+bool Geometry3D::contains_point(const double pt[3])
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return false;
+  return geom->Contains(Vector3(pt));
+}
+
+
 bool Geometry3D::collides(const Geometry3D& other)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
   if(!geom || !geom2) return false;
   return geom->Collides(*geom2);
+}
+
+void Geometry3D::collides_ext(const Geometry3D& other,int maxContacts,std::vector<int>& out,std::vector<int>& out2)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom || !geom2) return;
+  bool res = geom->Collides(*geom2,out,out2,maxContacts);
+  if(res) {
+    if(out.size() != out2.size()) {
+      throw PyException("Internal error: collision detection returned different sizes for indices and elements");
+    }
+    if(out.empty()) {
+      throw PyException("Internal error: collision detection returned empty contact set");
+    }
+  }
+  else {
+    if(!out.empty()) {
+      throw PyException("Internal error: collision detection returned nonempty contact set");
+    }
+  }
 }
 
 bool Geometry3D::withinDistance(const Geometry3D& other,double tol)
@@ -1487,6 +1640,29 @@ bool Geometry3D::withinDistance(const Geometry3D& other,double tol)
   if(!geom || !geom2) return false;
   return geom->WithinDistance(*geom2,tol);
 }
+
+
+void Geometry3D::withinDistance_ext(const Geometry3D& other,double tol,int maxContacts,std::vector<int>& out,std::vector<int>& out2)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom || !geom2) return;
+  bool res = geom->WithinDistance(*geom2,tol,out,out2,maxContacts);
+  if(res) {
+    if(out.size() != out2.size()) {
+      throw PyException("Internal error: within distance returned different sizes for indices and elements");
+    }
+    if(out.empty()) {
+      throw PyException("Internal error: within distance returned empty contact set");
+    }
+  }
+  else {
+    if(!out.empty()) {
+      throw PyException("Internal error: within distance returned nonempty contact set");
+    }
+  }
+}
+
 
 double Geometry3D::distance_simple(const Geometry3D& other,double relErr,double absErr)
 {
@@ -1564,7 +1740,6 @@ DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const Dista
   gsettings.relErr = settings.relErr;
   gsettings.absErr = settings.absErr;
   gsettings.upperBound = settings.upperBound;
-  //std::cout << "call dist\n";
   Geometry::AnyDistanceQueryResult gres = geom->Distance(*geom2,gsettings);
   if(IsInf(gres.d)) {
     throw PyException("Distance queries not implemented yet for those types of geometry, or geometries are content-free?");
@@ -2662,56 +2837,77 @@ void copy(const Matrix& mat,vector<vector<double> >& v)
   }
 }
 
-TriangleMesh::TriangleMesh()
-{}
+
+DEFINE_GEOMDATA_CLASS(TriangleMesh,TriangleMesh)
 
 void TriangleMesh::getVertices(double** np_view2, int* m, int* n)
 {
-  if(vertices.empty()) {
+  GET_GEOMDATA_DATA(this, TriangleMesh, trimesh);
+  Assert(sizeof(Vector3)==3*sizeof(double));
+  if(trimesh.verts.empty()) {
     *np_view2 = 0;
     *m = 0;
     *n = 0;
     return;
   }
-  *np_view2 = &vertices[0];
-  *m = vertices.size()/3;
+  *np_view2 = &trimesh.verts[0].x;
+  *m = (int)trimesh.verts.size();
   *n = 3;
 }
 
 void TriangleMesh::setVertices(double* np_array2, int m, int n)
 {
   if(n != 3) throw PyException("Vertex array must be nx3");
-  vertices.resize(m*n);
-  copy(np_array2,np_array2+m*n,&vertices[0]);
+  GET_GEOMDATA_DATA(this, TriangleMesh, trimesh);
+  trimesh.verts.resize(m);
+  std::copy(np_array2,np_array2+m*n,&trimesh.verts[0].x);
+}
+
+void TriangleMesh::addVertex(double p[3])
+{
+  GET_GEOMDATA_DATA(this, TriangleMesh, trimesh);
+  trimesh.verts.resize(trimesh.verts.size()+1);
+  trimesh.verts.back().set(p);
+}
+
+void TriangleMesh::addTriangleIndices(int t[3])
+{
+  GET_GEOMDATA_DATA(this, TriangleMesh, trimesh);
+  trimesh.tris.resize(trimesh.tris.size()+1);
+  trimesh.tris.back().set(t[0],t[1],t[2]);
 }
 
 void TriangleMesh::getIndices(int** np_view2, int* m, int* n)
 {
-  if(indices.empty()) {
+  GET_GEOMDATA_DATA(this, TriangleMesh, trimesh);
+  Assert(sizeof(IntTriple)==3*sizeof(int));
+  if(trimesh.tris.empty()) {
     *np_view2 = 0;
     *m = 0;
     *n = 0;
     return;
   }
-  *np_view2 = &indices[0];
-  *m = indices.size()/3;
+  *np_view2 = &trimesh.tris[0].a;
+  *m = (int)trimesh.tris.size();
   *n = 3;
 }
 
 void TriangleMesh::setIndices(int* np_array2, int m, int n)
 {
   if(n != 3) throw PyException("Index array must be nx3");
-  indices.resize(m*n);
-  copy(np_array2,np_array2+m*n,&indices[0]);
+  GET_GEOMDATA_DATA(this, TriangleMesh, trimesh);
+  trimesh.tris.resize(m);
+  std::copy(np_array2,np_array2+m*n,&trimesh.tris[0].a);
 }
 
 
 void TriangleMesh::translate(const double t[3])
 {
-  for(size_t i=0;i<vertices.size();i+=3) {
-    vertices[i] += t[0];
-    vertices[i+1] += t[1];
-    vertices[i+2] += t[2];
+  GET_GEOMDATA_DATA(this, TriangleMesh, trimesh);
+  for(size_t i=0;i<trimesh.verts.size();i++) {
+    trimesh.verts[i].x += t[0];
+    trimesh.verts[i].y += t[1];
+    trimesh.verts[i].z += t[2];
   }
 }
 
@@ -2720,75 +2916,82 @@ void TriangleMesh::transform(const double R[9],const double t[3])
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
-  for(size_t i=0;i<vertices.size();i+=3) {
-    Vector3 v(vertices[i],vertices[i+1],vertices[i+2]);
-    v = T*v;
-    v.get(vertices[i],vertices[i+1],vertices[i+2]);
+  GET_GEOMDATA_DATA(this, TriangleMesh, trimesh);
+  for(size_t i=0;i<trimesh.verts.size();i++) {
+    trimesh.verts[i] = T*trimesh.verts[i];
   }
 }
 
-ConvexHull::ConvexHull()
-{}
 
-
-int ConvexHull::numPoints() const
-{
-  return points.size()/3;
-}
+DEFINE_GEOMDATA_CLASS(ConvexHull,ConvexHull)
 
 void ConvexHull::getPoints(double** np_view2, int* m, int* n)
 {
-  if(points.empty()) {
-    *np_view2 = 0;
-    *m = 0;
-    *n = 0;
+  GET_GEOMDATA_DATA(this, ConvexHull, ch);
+  *np_view2 = 0;
+  *m = 0;
+  *n = 0;
+  if(ch.type != Geometry::ConvexHull3D::Polytope) return;
+  vector<Real>& vertcoords = ch.AsPolytope();
+  if(vertcoords.empty()) {
     return;
   }
-  *np_view2 = &points[0];
-  *m = points.size()/3;
+  *np_view2 = &vertcoords[0];
+  *m = vertcoords.size()/3;
   *n = 3;
 }
 
 void ConvexHull::setPoints(double* np_array2, int m, int n)
 {
   if(n != 3) throw PyException("Vertex array must be nx3");
-  points.resize(m*n);
-  copy(np_array2,np_array2+m*n,&points[0]);
+  GET_GEOMDATA_DATA(this, ConvexHull, ch);
+  if(ch.type != Geometry::ConvexHull3D::Polytope) {
+    ch.type = Geometry::ConvexHull3D::Polytope;
+    ch.data = vector<Real>();
+  }
+  vector<Real>& vertcoords = ch.AsPolytope();
+  vertcoords.resize(m*3);
+  std::copy(np_array2,np_array2+m*n,&vertcoords[0]);
 }
 
 
 void ConvexHull::addPoint(const double pt[3])
 {
-  points.push_back(pt[0]);
-  points.push_back(pt[1]);
-  points.push_back(pt[2]);
-}
-
-void ConvexHull::getPoint(int index,double out[3]) const
-{
-  int i=index*3;
-  if(i<0 || i >= (int)points.size())
-    throw PyException("Invalid point index");
-  out[0] = points[i];
-  out[1] = points[i+1];
-  out[2] = points[i+2];
+  GET_GEOMDATA_DATA(this, ConvexHull, ch);
+  if(ch.type != Geometry::ConvexHull3D::Polytope) {
+    ch.type = Geometry::ConvexHull3D::Polytope;
+    ch.data = vector<Real>();
+  }
+  vector<Real>& vertcoords = ch.AsPolytope();
+  vertcoords.push_back(pt[0]);
+  vertcoords.push_back(pt[1]);
+  vertcoords.push_back(pt[2]);
 }
 
 void ConvexHull::translate(const double t[3])
 {
-  for(size_t i=0;i<points.size();i+=3) {
-    points[i] += t[0];
-    points[i+1] += t[1];
-    points[i+2] += t[2];
+  GET_GEOMDATA_DATA(this, ConvexHull, ch);
+  if(ch.type != Geometry::ConvexHull3D::Polytope) {
+    return;
+  }
+  vector<Real>& vertcoords = ch.AsPolytope();
+  for(size_t i=0;i<vertcoords.size();i+=3) {
+    vertcoords[i] += t[0];
+    vertcoords[i+1] += t[1];
+    vertcoords[i+2] += t[2];
   }
 }
 
 void ConvexHull::transform(const double R[9],const double t[3])
 {
+  GET_GEOMDATA_DATA(this, ConvexHull, ch);
+  if(ch.type != Geometry::ConvexHull3D::Polytope) {
+    return;
+  }
+  vector<Real>& vertices = ch.AsPolytope();
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
-  std::vector<double> &vertices = points;
   for(size_t i=0;i<vertices.size();i+=3) {
     Vector3 v(vertices[i],vertices[i+1],vertices[i+2]);
     v = T*v;
@@ -2799,197 +3002,201 @@ void ConvexHull::transform(const double R[9],const double t[3])
   }
 }
 
-PointCloud::PointCloud()
-{}
-int PointCloud::numPoints() const { return vertices.size()/3; }
-int PointCloud::numProperties() const { return propertyNames.size(); }
+DEFINE_GEOMDATA_CLASS(PointCloud,PointCloud)
+
+int PointCloud::numProperties() const
+{
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  return pc.propertyNames.size();
+}
+
 void PointCloud::setPoints(double* parray,int m,int n)
 {
   if(n!=3) throw PyException("Array must be size nx3");
-  int num = m;
-  bool resized = ((int)vertices.size() != num*3);
-  vertices.resize(num*3);
-  copy(parray,parray+num*3,&vertices[0]);
-  if(resized) {
-    properties.resize(num*propertyNames.size());
-    fill(properties.begin(),properties.end(),0.0);
-  }
-  else {
-    properties.resize(num*propertyNames.size(),0.0);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  bool resized = ((int)pc.points.size() != m);
+  pc.points.resize(m);
+  Assert(sizeof(Vector3)==3*sizeof(double));
+  std::copy(parray,parray+m*3,&pc.points[0].x);
+  if(resized && !pc.properties.empty()) {
+    pc.properties.resizePersist(m,pc.propertyNames.size(),0.0);
   }
 }
 void PointCloud::getPoints(double** pview,int* m,int *n)
 {
-  if(vertices.size()==0) {
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  Assert(sizeof(Vector3)==3*sizeof(double));
+  if(pc.points.size()==0) {
     *m=0;
     *n=0;
     *pview=NULL;
     return;
   }
-  *m = vertices.size()/3;
+  *m = (int)pc.points.size();
   *n = 3;
-  *pview = &vertices[0];
+  *pview = &pc.points[0].x;
 }
 
 int PointCloud::addPoint(const double p[3])
 {
-  int ofs = (int)vertices.size();
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  int ofs = (int)pc.points.size();
 
-  vertices.push_back(p[0]);
-  vertices.push_back(p[1]);
-  vertices.push_back(p[2]);
-  properties.resize(properties.size()+propertyNames.size(),0.0);
-  return ofs/3;
+  pc.points.push_back(Vector3(p));
+  if(!pc.properties.empty())
+    pc.properties.resizePersist(pc.properties.m+1,pc.properties.n,0.0);
+  return ofs;
 }
 
 void PointCloud::setPoint(int index,const double p[3])
 {
-  if(index < 0 || index*3 >= (int)vertices.size())
-    throw PyException("Invalid point index");  
-  vertices[index*3] = p[0];
-  vertices[index*3+1] = p[1];
-  vertices[index*3+2] = p[2];
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(index < 0 || index >= (int)pc.points.size())
+    throw PyException("Invalid point index");
+  pc.points[index].set(p);
 }
 
 void PointCloud::getPoint(int index,double out[3]) const
 {
-  if(index < 0 || index*3 >= (int)vertices.size())
-    throw PyException("Invalid point index");  
-  out[0] = vertices[index*3];
-  out[1] = vertices[index*3+1];
-  out[2] = vertices[index*3+2];
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(index < 0 || index >= (int)pc.points.size())
+    throw PyException("Invalid point index");
+  pc.points[index].get(out);
 }
 
-void PointCloud::addProperty(const std::string& pname)
+int PointCloud::addProperty(const std::string& pname)
 {
-  int n = numPoints();
-  vector<double> values(n,0.0);
-  addProperty(pname,&values[0],n);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  vector<double> values(pc.points.size(),0.0);
+  return addProperty(pname,&values[0],values.size());
 }
 
-void PointCloud::addProperty(const std::string& pname,double* values,int numvals)
+int PointCloud::addProperty(const std::string& pname,double* values,int numvals)
 {
-  int n = numPoints();
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  int n = (int)pc.points.size();
   if(numvals != n) {
     stringstream ss;
     ss<<"Invalid size "<<numvals<<" of properties list, must have size #points = "<<n;
     throw PyException(ss.str());
   }
   assert(numvals == n);
-  size_t m=propertyNames.size();
-  assert(properties.size() == n*m);
-  propertyNames.push_back(pname);
-  vector<double> newprops(n*(m+1));
-  for(int i=0;i<n;i++) {
-    assert (i*(m+1) + m < (int)newprops.size()); 
-    if(m > 0) {
-      assert ((i+1)*m < (int)properties.size()); 
-      std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
-    }
-    newprops[i*(m+1) + m] = values[i];
-  }
-  std::swap(newprops,properties);
-  assert(properties.size() == (n*(m+1)));
+  size_t m=pc.propertyNames.size();
+  pc.propertyNames.push_back(pname);
+  pc.properties.resizePersist(pc.properties.m,pc.properties.n+1,0.0);
+  return (int)m;
 }
+
+void PointCloud::setPropertyName(int pindex,const std::string& pname)
+{
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(pindex < 0 || pindex >= (int)pc.propertyNames.size())
+    throw PyException("Invalid property index");
+  pc.propertyNames[pindex] = pname;
+}
+
+std::string PointCloud::getPropertyName(int pindex) const
+{
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(pindex < 0 || pindex >= (int)pc.propertyNames.size())
+    throw PyException("Invalid property index");
+  return pc.propertyNames[pindex];
+}
+
 
 void PointCloud::setProperties(double* np_array2, int m, int n)
 {
-  int npt = numPoints();
-  size_t nprop=propertyNames.size();
-
-  if(m != npt) {
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(m != (int)pc.points.size()) {
     throw PyException("Invalid size of properties array, must have #points rows");
   }
+  size_t nprop=pc.propertyNames.size();
   if((int)nprop != n) {
-    propertyNames.resize(n);
-    properties.resize(m*n);
+    pc.propertyNames.resize(n);
     for(int i=(int)nprop;i<n;i++) {
       stringstream ss;
       ss<<"Property "<<i;
-      propertyNames[i] = ss.str();
+      pc.propertyNames[i] = ss.str();
     }
   }
-  //if(n != nprop) {
-  //  throw PyException("Invalid size of properties array, must have #properties columns");
-  //}
-
-  copy(np_array2,np_array2+m*n,properties.begin());
+  pc.properties.resize(m,n); // in case it was empty
+  Assert(pc.properties.isCompact());
+  std::copy(np_array2,np_array2+m*n,pc.properties.getPointer());
 }
 
 void PointCloud::setPointsAndProperties(double* np_array2, int m,int n)
 {
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
   if(m==0) {
-    vertices.resize(0);
-    properties.resize(0);
-    propertyNames.resize(0);
+    pc.points.resize(0);
+    pc.properties.resize(0,0);
+    pc.propertyNames.resize(0);
     return;
   }
   if(n < 3)
     throw PyException("Invalid size of array, must have >= 3 dimensions");
 
-  size_t nprop=propertyNames.size();
+  size_t nprop=pc.propertyNames.size();
   if((int)nprop != n-3) {
-    propertyNames.resize(n-3);
+    pc.propertyNames.resize(n-3);
     for(int i=(int)nprop;i<n-3;i++) {
       stringstream ss;
       ss<<"Property "<<i;
-      propertyNames[i] = ss.str();
+      pc.propertyNames[i] = ss.str();
     }
   }
-  vertices.resize(m*3);
-  properties.resize(m*(n-3));
-  if(n==3)
-    copy(np_array2,np_array2+m*3,&vertices[0]);
+  pc.points.resize(m);
+  if(n==3) {
+    pc.properties.resize(0,0);
+    std::copy(np_array2,np_array2+m*3,&pc.points[0]);
+  }
   else {
-    int kv=0;
-    int kp=0;
+    pc.properties.resize(m,n-3);
     int k=0;
-    for(int i=0;i<m;i++,k+=n,kv+=3,kp+=(n-3)) {
-      for(int j=0;j<3;j++) vertices[kv+j]=np_array2[k+j];
-      for(int j=0;j<n-3;j++) properties[kp+j]=np_array2[k+3+j];
+    for(int i=0;i<m;i++,k+=n) {
+      pc.points[i].set(&np_array2[k]);
+      pc.properties.copyRow(i,&np_array2[k+3]);
     }
   }
   
 }
  
-void PointCloud::getAllProperties(double** np_view2, int* m, int* n)
+void PointCloud::getProperties(double** np_view2, int* m, int* n)
 {
-  *m = numPoints();
-  *n = (int)propertyNames.size();
-  *np_view2 = (double*)malloc(properties.size()*sizeof(double));
-  copy(properties.begin(),properties.end(),*np_view2);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(pc.properties.empty()) {
+    *np_view2 = 0;
+    *m = 0;
+    *n = 0;
+    return;
+  }
+  Assert(pc.properties.isCompact());
+  *m = pc.properties.m;
+  *n = pc.properties.n;
+  *np_view2 = pc.properties.getPointer();
 }
 
-void PointCloud::setProperties(int pindex,double* vproperties,int numvals)
+int PointCloud::propertyIndex(const std::string& pname) const
 {
-  if(pindex < 0 || pindex >= (int)propertyNames.size())
-    throw PyException("Invalid property index"); 
-  int n = numPoints();
-  if(numvals != n) {
-    throw PyException("Invalid size of properties vector, needs to have size #points"); 
-  }
-  size_t k=pindex;
-  for(int i=0;i<n;i++,k+=propertyNames.size())
-    properties[k] = vproperties[i];
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  for(size_t i=0;i<pc.propertyNames.size();i++)
+    if(pc.propertyNames[i] == pname) return (int)i;
+  return -1;
 }
 
 void PointCloud::setProperty(int index,int pindex,double value)
 {
-  if(index < 0 || index*3 >= (int)vertices.size())
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(index < 0 || index >= (int)pc.points.size())
     throw PyException("Invalid point index");  
-  if(pindex < 0 || pindex >= (int)propertyNames.size())
+  if(pindex < 0 || pindex >= (int)pc.propertyNames.size())
     throw PyException("Invalid property index");  
-  properties[index*propertyNames.size()+pindex] = value;
+  pc.properties(index,pindex) = value;
 }
 
 void PointCloud::setProperty(int index,const std::string& pname,double value)
 {
-  int pindex = -1;
-  for(size_t i=0;i<propertyNames.size();i++)
-    if(propertyNames[i] == pname) {
-      pindex = (int)i;
-      break;
-    }
+  int pindex = propertyIndex(pname);
   if(pindex < 0)
     throw PyException("Invalid property name");  
   setProperty(index,pindex,value);
@@ -2997,211 +3204,138 @@ void PointCloud::setProperty(int index,const std::string& pname,double value)
 
 double PointCloud::getProperty(int index,int pindex) const
 {
-  if(index < 0 || index*3 >= (int)vertices.size())
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(index < 0 || index >= (int)pc.points.size())
     throw PyException("Invalid point index");  
-  if(pindex < 0 || pindex >= (int)propertyNames.size())
+  if(pindex < 0 || pindex >= (int)pc.propertyNames.size())
     throw PyException("Invalid property index");  
-  return properties[index*propertyNames.size()+pindex];
+  return pc.properties(index,pindex);
 }
 
 double PointCloud::getProperty(int index,const std::string& pname) const
 {
-  int pindex = -1;
-  for(size_t i=0;i<propertyNames.size();i++)
-    if(propertyNames[i] == pname) {
-      pindex = (int)i;
-      break;
-    }
+  int pindex = propertyIndex(pname);
   if(pindex < 0)
     throw PyException("Invalid property name");  
   return getProperty(index,pindex);
 }
 
-void PointCloud::getProperties(int pindex,double** out, int* m) const
-{
-  if(pindex < 0 || pindex >= (int)propertyNames.size())
-    throw PyException("Invalid property index");  
-  int n=numPoints();
-  *m = n;
-  *out = (double*)malloc(n*sizeof(double));
-  size_t k=pindex;
-  for(int i=0;i<n;i++,k+=propertyNames.size())
-    (*out)[i] = properties[k];
-}
-
-void PointCloud::getProperties(const std::string& pname,double** out,int* m) const
-{
-  int pindex = -1;
-  for(size_t i=0;i<propertyNames.size();i++)
-    if(propertyNames[i] == pname) {
-      pindex = (int)i;
-      break;
-    }
-  if(pindex < 0)
-    throw PyException("Invalid property name");  
-  return getProperties(pindex,out,m); 
-}
-
 void PointCloud::join(const PointCloud& pc)
 {
-  if(propertyNames != pc.propertyNames) 
+  GET_GEOMDATA_DATA(this, PointCloud, pcthis);
+  GET_GEOMDATA_DATA(&pc, PointCloud, pcpc);
+  if(pcthis.propertyNames != pcpc.propertyNames) 
     throw PyException("PointCloud::join can't join two PCs with dissimilar property names");
-  vertices.insert(vertices.end(),pc.vertices.begin(),pc.vertices.end());
-  properties.insert(properties.end(),pc.properties.begin(),pc.properties.end());
+  pcthis.Concat(pcpc);
 }
 
 void PointCloud::setSetting(const std::string& key,const std::string& value)
 {
-  settings[key] = value;
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  pc.settings[key] = value;
 }
 
 std::string PointCloud::getSetting(const std::string& key) const
 {
-  if(settings.count(key) == 0)
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  if(pc.settings.count(key) == 0)
     throw PyException("PointCloud::getSetting(): key does not exist in settings map");
-  return settings.find(key)->second;
+  return pc.settings.find(key)->second;
 }
 
 void PointCloud::translate(const double t[3])
 {
-  for(size_t i=0;i<vertices.size();i+=3) {
-    vertices[i] += t[0];
-    vertices[i+1] += t[1];
-    vertices[i+2] += t[2];
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  for(size_t i=0;i<pc.points.size();i++) {
+    pc.points[i].x += t[0];
+    pc.points[i].y += t[1];
+    pc.points[i].z += t[2];
   }
 }
 
 void PointCloud::transform(const double R[9],const double t[3])
 {
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
-  for(size_t i=0;i<vertices.size();i+=3) {
-    Vector3 v(vertices[i],vertices[i+1],vertices[i+2]);
-    v = T*v;
-    v.get(vertices[i],vertices[i+1],vertices[i+2]);
-  }
-
-  //transform viewpoint, if available
-  if(settings.count("viewpoint") > 0) {
-    stringstream ss(settings["viewpoint"]);
-    RigidTransform vpOld;
-    QuaternionRotation q;
-    ss>>vpOld.t>>q;
-    q.getMatrix(vpOld.R);
-
-    RigidTransform vpNew = T*vpOld;
-
-    q.setMatrix(vpNew.R);
-    stringstream ss2;
-    ss2 << vpNew.t <<" "<<q;
-    settings["viewpoint"] = ss2.str();
-  }
-
-  //transform normals
-  int nx = -1, ny = -1, nz = -1;
-  for(size_t i=0;i<propertyNames.size();i++)
-    if(propertyNames[i] == "normal_x") {
-      nx = (int)i;
-      break;
-    }
-  if(nx < 0) return;
-  for(size_t i=0;i<propertyNames.size();i++)
-    if(propertyNames[i] == "normal_y") {
-      ny = (int)i;
-      break;
-    }
-  if(ny < 0) return;
-  for(size_t i=0;i<propertyNames.size();i++)
-    if(propertyNames[i] == "normal_z") {
-      nz = (int)i;
-      break;
-    }
-  if(nz < 0) return;
-  for(size_t i=0,base=0;i<vertices.size();i++,base+=propertyNames.size()) {
-    Vector3 n(properties[base+nx],properties[base+ny],properties[base+nz]);
-    n = T.R*n;
-    n.get(properties[base+nx],properties[base+ny],properties[base+nz]);
-  }
+  pc.Transform(T);
 }
 
 void PointCloud::setDepthImage_d(const double intrinsics[4],double* np_depth2,int m,int n,double depth_scale)
 {
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
   double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
   if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  pc.settings.clear();
+  { stringstream ss; ss<<n; pc.settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; pc.settings["height"] = ss.str(); }
+  { pc.settings["viewpoint"] = "0 0 0 1 0 0 0"; }
   double invfx = 1.0/fx;
   double invfy = 1.0/fy;
-  propertyNames.resize(0);
-  properties.resize(0);
+  pc.propertyNames.resize(0);
+  pc.properties.resize(0,0);
 
-  vertices.resize(m*n*3);
+  pc.points.resize(m*n);
   int k=0;
   for(int i=0;i<m;i++) {
     double y=(i-cy)*invfy;
     for(int j=0;j<n;j++,k++) {
       double x=(j-cx)*invfx;
       double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
+      pc.points[k].set(x*z,y*z,z);
     }
   }
 }
 
 void PointCloud::setDepthImage_f(const double intrinsics[4],float* np_depth2,int m,int n,double depth_scale)
 {
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
   double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
   if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  pc.settings.clear();
+  { stringstream ss; ss<<n; pc.settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; pc.settings["height"] = ss.str(); }
+  { pc.settings["viewpoint"] = "0 0 0 1 0 0 0"; }
   double invfx = 1.0/fx;
   double invfy = 1.0/fy;
-  propertyNames.resize(0);
-  properties.resize(0);
+  pc.propertyNames.resize(0);
+  pc.properties.resize(0,0);
 
-  vertices.resize(m*n*3);
+  pc.points.resize(m*n);
   int k=0;
   for(int i=0;i<m;i++) {
     double y=(i-cy)*invfy;
     for(int j=0;j<n;j++,k++) {
       double x=(j-cx)*invfx;
       double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
+      pc.points[k].set(x*z,y*z,z);
     }
   }
 }
 
 void PointCloud::setDepthImage_s(const double intrinsics[4],unsigned short* np_depth2,int m,int n,double depth_scale)
 {
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
   double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
   if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  pc.settings.clear();
+  { stringstream ss; ss<<n; pc.settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; pc.settings["height"] = ss.str(); }
+  { pc.settings["viewpoint"] = "0 0 0 1 0 0 0"; }
   double invfx = 1.0/fx;
   double invfy = 1.0/fy;
-  propertyNames.resize(0);
-  properties.resize(0);
+  pc.propertyNames.resize(0);
+  pc.properties.resize(0,0);
 
-  vertices.resize(m*n*3);
+  pc.points.resize(m*n);
   int k=0;
   for(int i=0;i<m;i++) {
     double y=(i-cy)*invfy;
     for(int j=0;j<n;j++,k++) {
       double x=(j-cx)*invfx;
       double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
+      pc.points[k].set(x*z,y*z,z);
     }
   }
 }
@@ -3209,276 +3343,178 @@ void PointCloud::setDepthImage_s(const double intrinsics[4],unsigned short* np_d
 void PointCloud::setRGBDImages_i_d(const double intrinsics[4],unsigned int* np_array2,int m,int n,double* np_depth2,int m2,int n2,double depth_scale)
 {
   if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
-  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
-  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
-  double invfx = 1.0/fx;
-  double invfy = 1.0/fy;
-  propertyNames.resize(1);
-  propertyNames[0] = "rgb";
-  properties.resize(m*n);
-  for(int i=0;i<m*n;i++)
-    properties[i] = Real(np_array2[i]);  //encode uint as double
-
-  vertices.resize(m*n*3);
-  int k=0;
-  for(int i=0;i<m;i++) {
-    double y=(i-cy)*invfy;
-    for(int j=0;j<n;j++,k++) {
-      double x=(j-cx)*invfx;
-      double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
-    }
+  setDepthImage_d(intrinsics,np_depth2,m,n,depth_scale);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  pc.propertyNames.resize(1);
+  pc.propertyNames[0] = "rgb";
+  pc.properties.resize(m*n,1);
+  for(int i=0;i<m*n;i++) {
+    pc.properties(i,0) = Real(np_array2[i]);  //encode uint as double
   }
 }
 
 void PointCloud::setRGBDImages_i_f(const double intrinsics[4],unsigned int* np_array2,int m,int n,float* np_depth2,int m2,int n2,double depth_scale)
 {
   if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
-  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
-  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
-  double invfx = 1.0/fx;
-  double invfy = 1.0/fy;
-  propertyNames.resize(1);
-  propertyNames[0] = "rgb";
-  properties.resize(m*n);
-  for(int i=0;i<m*n;i++)
-    properties[i] = Real(np_array2[i]);  //encode uint as double
-
-  vertices.resize(m*n*3);
-  int k=0;
-  for(int i=0;i<m;i++) {
-    double y=(i-cy)*invfy;
-    for(int j=0;j<n;j++,k++) {
-      double x=(j-cx)*invfx;
-      double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
-    }
+  setDepthImage_f(intrinsics,np_depth2,m,n,depth_scale);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  pc.propertyNames.resize(1);
+  pc.propertyNames[0] = "rgb";
+  pc.properties.resize(m*n,1);
+  for(int i=0;i<m*n;i++) {
+    pc.properties(i,0) = Real(np_array2[i]);  //encode uint as double
   }
 }
 
 void PointCloud::setRGBDImages_i_s(const double intrinsics[4],unsigned int* np_array2,int m,int n,unsigned short* np_depth2,int m2,int n2,double depth_scale)
 {
   if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
-  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
-  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
-  double invfx = 1.0/fx;
-  double invfy = 1.0/fy;
-  propertyNames.resize(1);
-  propertyNames[0] = "rgb";
-  properties.resize(m*n);
-  for(int i=0;i<m*n;i++)
-    properties[i] = Real(np_array2[i]);  //encode uint as double
-
-  vertices.resize(m*n*3);
-  int k=0;
-  for(int i=0;i<m;i++) {
-    double y=(i-cy)*invfy;
-    for(int j=0;j<n;j++,k++) {
-      double x=(j-cx)*invfx;
-      double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
-    }
+  setDepthImage_s(intrinsics,np_depth2,m,n,depth_scale);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  pc.propertyNames.resize(1);
+  pc.propertyNames[0] = "rgb";
+  pc.properties.resize(m*n,1);
+  for(int i=0;i<m*n;i++) {
+    pc.properties(i,0) = Real(np_array2[i]);  //encode uint as double
   }
 }
 
 void PointCloud::setRGBDImages_b_d(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,double* np_depth2,int m2,int n2,double depth_scale)
 {
-  if(p != 3) throw PyException("Need 3 color channels");
   if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
-  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
-  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
-  double invfx = 1.0/fx;
-  double invfy = 1.0/fy;
-  propertyNames.resize(1);
-  propertyNames[0] = "rgb";
-  properties.resize(m*n);
+  if(p != 3) throw PyException("Need 3 color channels");
+  setDepthImage_d(intrinsics,np_depth2,m,n,depth_scale);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  pc.propertyNames.resize(1);
+  pc.propertyNames[0] = "rgb";
+  pc.properties.resize(m*n,1);
   int j=0;
   for(int i=0;i<m*n;i++,j+=3) {
     unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
-    properties[i] = Real(rgb);  //encode uint as double
-  }
-
-  vertices.resize(m*n*3);
-  int k=0;
-  for(int i=0;i<m;i++) {
-    double y=(i-cy)*invfy;
-    for(int j=0;j<n;j++,k++) {
-      double x=(j-cx)*invfx;
-      double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
-    }
+    pc.properties(i,0) = Real(rgb);  //encode uint as double
   }
 }
 
 void PointCloud::setRGBDImages_b_f(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,float* np_depth2,int m2,int n2,double depth_scale)
 {
-  if(p != 3) throw PyException("Need 3 color channels");
   if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
-  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
-  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
-  double invfx = 1.0/fx;
-  double invfy = 1.0/fy;
-  propertyNames.resize(1);
-  propertyNames[0] = "rgb";
-  properties.resize(m*n);
+  if(p != 3) throw PyException("Need 3 color channels");
+  setDepthImage_f(intrinsics,np_depth2,m,n,depth_scale);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  pc.propertyNames.resize(1);
+  pc.propertyNames[0] = "rgb";
+  pc.properties.resize(m*n,1);
   int j=0;
   for(int i=0;i<m*n;i++,j+=3) {
     unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
-    properties[i] = Real(rgb);  //encode uint as double
-  }
-
-  vertices.resize(m*n*3);
-  int k=0;
-  for(int i=0;i<m;i++) {
-    double y=(i-cy)*invfy;
-    for(int j=0;j<n;j++,k++) {
-      double x=(j-cx)*invfx;
-      double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
-    }
+    pc.properties(i,0) = Real(rgb);  //encode uint as double
   }
 }
 
 void PointCloud::setRGBDImages_b_s(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,unsigned short* np_depth2,int m2,int n2,double depth_scale)
 {
-  if(p != 3) throw PyException("Need 3 color channels");
   if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
-  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
-  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
-  settings.clear();
-  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
-  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
-  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
-  double invfx = 1.0/fx;
-  double invfy = 1.0/fy;
-  propertyNames.resize(1);
-  propertyNames[0] = "rgb";
-  properties.resize(m*n);
+  if(p != 3) throw PyException("Need 3 color channels");
+  setDepthImage_s(intrinsics,np_depth2,m,n,depth_scale);
+  GET_GEOMDATA_DATA(this, PointCloud, pc);
+  pc.propertyNames.resize(1);
+  pc.propertyNames[0] = "rgb";
+  pc.properties.resize(m*n,1);
   int j=0;
   for(int i=0;i<m*n;i++,j+=3) {
     unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
-    properties[i] = Real(rgb);  //encode uint as double
-  }
-
-  vertices.resize(m*n*3);
-  int k=0;
-  for(int i=0;i<m;i++) {
-    double y=(i-cy)*invfy;
-    for(int j=0;j<n;j++,k++) {
-      double x=(j-cx)*invfx;
-      double z=np_depth2[k]*depth_scale;
-      vertices[k*3] = x*z;
-      vertices[k*3+1] = y*z;
-      vertices[k*3+2] = z;
-    }
+    pc.properties(i,0) = Real(rgb);  //encode uint as double
   }
 }
 
 
-VolumeGrid::VolumeGrid()
-{}
+DEFINE_GEOMDATA_CLASS(VolumeGrid,ImplicitSurface)
 
-void VolumeGrid::setBounds(const double bmin[3],const double bmax[3])
+void VolumeGrid::getBmin(double out[3]) const
 {
-  bbox.resize(6);
-  bbox[0] = bmin[0];
-  bbox[1] = bmin[1];
-  bbox[2] = bmin[2];
-  bbox[3] = bmax[0];
-  bbox[4] = bmax[1];
-  bbox[5] = bmax[2];
+    GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+    grid.bb.bmin.get(out);
 }
+
+void VolumeGrid::getBmax(double out[3]) const
+{
+    GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+    grid.bb.bmax.get(out);
+}
+
+void VolumeGrid::setBmin(const double bmin[3])
+{
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  grid.bb.bmin.set(bmin);
+}
+
+void VolumeGrid::setBmax(const double bmax[3])
+{
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  grid.bb.bmax.set(bmax);
+}
+
 
 void VolumeGrid::resize(int sx,int sy,int sz)
 {
   Assert(sx >= 0 && sy >= 0 && sz >= 0);
-  dims.resize(3);
-  dims[0] = sx;
-  dims[1] = sy;
-  dims[2] = sz;
-  values.resize(sx*sy*sz);
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  grid.value.resize(sx,sy,sz);
 }
 
 void VolumeGrid::set(double value)
 {
-  std::fill(values.begin(),values.end(),value);
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  grid.value.set(value);
 }
 
 void VolumeGrid::set(int i,int j,int k,double value)
 {
-  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
-  if(i < 0 || i >= (int)dims[0]) throw PyException("First index out of range");
-  if(j < 0 || j >= (int)dims[1]) throw PyException("Second index out of range");
-  if(k < 0 || k >= (int)dims[2]) throw PyException("Third index out of range");
-  int ind = i*dims[1]*dims[2] + j*dims[2] + k;
-  values[ind] = value;
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  if(i < 0 || i >= grid.value.m) throw PyException("First index out of range");
+  if(j < 0 || j >= grid.value.n) throw PyException("Second index out of range");
+  if(k < 0 || k >= grid.value.p) throw PyException("Third index out of range");
+  grid.value(i,j,k) = value;
 }
 
 double VolumeGrid::get(int i,int j,int k)
 {
-  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
-  if(i < 0 || i >= (int)dims[0]) throw PyException("First index out of range");
-  if(j < 0 || j >= (int)dims[1]) throw PyException("Second index out of range");
-  if(k < 0 || k >= (int)dims[2]) throw PyException("Third index out of range");
-  int ind = i*dims[1]*dims[2] + j*dims[2] + k;
-  return values[ind];
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  if(i < 0 || i >= grid.value.m) throw PyException("First index out of range");
+  if(j < 0 || j >= grid.value.n) throw PyException("Second index out of range");
+  if(k < 0 || k >= grid.value.p) throw PyException("Third index out of range");
+  return grid.value(i,j,k);
 }
 
 void VolumeGrid::shift(double dv)
 {
-  for(vector<double>::iterator i=values.begin();i!=values.end();i++)
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  for(Array3D<Real>::iterator i=grid.value.begin();i!=grid.value.end();++i)
     *i += dv;
 }
 
 void VolumeGrid::scale(double c)
 {
-  for(vector<double>::iterator i=values.begin();i!=values.end();i++)
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  for(Array3D<Real>::iterator i=grid.value.begin();i!=grid.value.end();++i)
     *i *= c;
 }
 
 void VolumeGrid::getValues(double** out, int* m, int* n, int* p)
 {
-  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
-  *m = dims[0];
-  *n = dims[1];
-  *p = dims[2];
-  *out = &values[0];
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  if(grid.value.empty()) throw PyException("VolumeGrid was not initialized yet");
+  *m = grid.value.m;
+  *n = grid.value.n;
+  *p = grid.value.p;
+  *out = grid.value.getData();
 }
 
 void VolumeGrid::setValues(double* in, int m, int n, int p)
 {
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   resize(m,n,p);
-  copy(in,in+m*n*p,&values[0]);
+  std::copy(in,in+m*n*p,grid.value.getData());
 }
 
 
@@ -7489,6 +7525,15 @@ void SimRobotController::getPIDGains(std::vector<double>& kPout,std::vector<doub
 
 /***************************  VISUALIZATION CODE ***************************************/
 
+Viewport::Viewport()
+:perspective(true),x(0),y(0),w(640),h(480),n(0.1),f(1000),fx(640),fy(640),cx(320),cy(240),ori("opencv")
+{
+  xform.resize(16,0.0);
+  xform[0] = 1;
+  xform[5] = 1;
+  xform[10] = 1;
+  xform[15] = 1;
+}
 
 bool Viewport::fromJson(const std::string& str)
 {

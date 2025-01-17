@@ -78,6 +78,8 @@ class SimRobotSensor
   std::vector<std::string> measurementNames();
   ///Returns an array of measurements from the previous simulation (or
   ///kinematicSimulate) timestep
+  ///
+  ///Return type: ndarray
   void getMeasurements(double** np_out,int* m);
   ///Returns all setting names
   ///
@@ -101,12 +103,16 @@ class SimRobotSensor
   ///
   ///If the sensor doesn't have a transform (such as a joint position or
   ///torque sensor) an exception will be raised.
+  ///
+  ///Return type: RigidTransform
   void getTransform(double out[9],double out2[3]);
   ///Returns the world transform of the sensor given the robot's current
   ///configuration. (helper for getSetting)
   ///
   ///If the sensor doesn't have a transform (such as a joint position or
   ///torque sensor) an exception will be raised.
+  ///
+  ///Return type: RigidTransform
   void getTransformWorld(double out[9],double out2[3]);
   ///Sets the local transform of the sensor on the robot's link.
   ///(helper for setSetting)
@@ -403,6 +409,8 @@ class SimBody
   void setTransform(const double R[9],const double t[3]);
   /// Gets the body's transformation at the current
   /// simulation time step (in center-of-mass centered coordinates).
+  ///
+  ///Return type: RigidTransform
   void getTransform(double out[9],double out2[3]);
 
   /// Sets the body's transformation at the current
@@ -410,18 +418,24 @@ class SimBody
   void setObjectTransform(const double R[9],const double t[3]);
   /// Gets the body's transformation at the current
   /// simulation time step (in object-native coordinates).
+  ///
+  ///Return type: RigidTransform
   void getObjectTransform(double out[9],double out2[3]);
 
   /// Sets the angular velocity and translational velocity (of the COM)
   /// at the current simulation time step.
   void setVelocity(const double w[3],const double v[3]);
   /// Returns the angular velocity and translational velocity (of the COM)
+  ///
+  ///Return type: Tuple[Vector3,Vector3]
   void getVelocity(double out[3],double out2[3]);
 
   /// Sets the angular velocity and translational velocity (of the object origin)
   /// at the current simulation time step.
   void setObjectVelocity(const double w[3],const double v[3]);
   /// Returns the angular velocity and translational velocity (of the object origin)
+  ///
+  ///Return type: Tuple[Vector3,Vector3]
   void getObjectVelocity(double out[3],double out2[3]);
 
   /// Sets the collision padding used for contact generation.  At 0 padding
@@ -519,6 +533,7 @@ class Simulator
   ///     A pair of lists of integers, giving the pairs of object ids that
   ///     are overlapping.
   ///
+  ///Return type: Tuple[list,list]
   void checkObjectOverlap(std::vector<int>& out,std::vector<int>& out2);
 
   /// Gets the current simulation state, including controller parameters, etc.
@@ -547,11 +562,17 @@ class Simulator
   void updateWorld();
 
   /// Returns the current actual configuration of the robot from the simulator
+  ///
+  ///Return type: Vector
   void getActualConfig(int robot,std::vector<double>& out);
   /// Returns the current actual velocity of the robot from the simulator
+  ///
+  ///Return type: Vector
   void getActualVelocity(int robot,std::vector<double>& out);
   /// Returns the current actual torques on the robot's drivers
   /// from the simulator
+  ///
+  ///Return type: Vector
   void getActualTorque(int robot,std::vector<double>& out);
 
   /// Call this to enable contact feedback between the two objects
@@ -572,15 +593,23 @@ class Simulator
   /// Returns the nx7 list of contacts (x,n,kFriction) at the last time step.
   /// Normals point into object ``a``.  Each contact point (x,n,kFriction) is 
   /// represented as a 7-element vector
+  ///
+  ///Return type: ndarray
   void getContacts(int aid,int bid,double** np_out2,int* m,int* n);
   /// Returns the list of contact forces on object a at the last time step. Result
   /// is an nx3 array.
+  ///
+  ///Return type: ndarray
   void getContactForces(int aid,int bid,double** np_out2,int* m,int* n);
   /// Returns the contact force on object a at the last time step.  You can set
   /// bid to -1 to get the overall contact force on object a.
+  ///
+  ///Return type: Vector3
   void contactForce(int aid,int bid,double out[3]);
   /// Returns the contact force on object ``a`` (about ``a``'s origin) at the last time step.
   /// You can set ``bid`` to -1 to get the overall contact force on object ``a``.
+  ///
+  ///Return type: Vector3
   void contactTorque(int aid,int bid,double out[3]);
   /// Returns true if the objects had contact over the last simulate() call.  You
   /// can set ``bid`` to -1 to determine if object ``a`` had contact with any other object.
@@ -600,6 +629,8 @@ class Simulator
   bool hadPenetration(int aid,int bid);
   /// Returns the average contact force on object a over the last simulate()
   /// call
+  ///
+  ///Return type: Vector3
   void meanContactForce(int aid,int bid,double out[3]);
 
   /// Returns a controller for the indicated robot, either by index or by RobotModel
@@ -621,7 +652,8 @@ class Simulator
   /// Returns:
   ///
   ///     6 entries of the wrench (fx,fy,fz,mx,my,mz)
-  ///     
+  /// 
+  ///Return type: Vector
   void getJointForces(const RobotModelLink& link,double out[6]);
 
   /// Sets the overall gravity vector

@@ -100,6 +100,7 @@ PyObject* com_equilibrium(double* np_array2,int m,int n,const std::vector<double
  * constraint planes.
  *
  * Args:
+ * 
  *      contacts (list of 7-float lists or tuples): the list of contacts, each
  *          specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
  * 
