@@ -22,6 +22,8 @@ unpack-deps:
 deps: dep-tinyxml dep-glew dep-ode dep-KrisLibrary
 
 dep-KrisLibrary:
+#temporary fix for geometry revision
+	cd KrisLibrary; git checkout geometry_revision; git pull;   
 	cd KrisLibrary; cmake .
 	cd KrisLibrary; make KrisLibrary
 
