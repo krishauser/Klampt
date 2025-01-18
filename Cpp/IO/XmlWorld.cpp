@@ -804,15 +804,20 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
 {
   string filepath = GetFilePath(fn);
   string filename = GetFileName(fn);
-  string relpath = itempath;
+  string relpath ;  //path for saved items relative to fn
   if(itempath.length() == 0) {
     itempath = fn;
     StripExtension(itempath);
     relpath = filename;
     StripExtension(relpath);
-    relpath = relpath + "/";
+    relpath = filepath + relpath + "/";
+  }
+  else {
+    //need to find relpath
+    relpath = GetRelativeFilename(itempath,filepath);
   }
   LOG4CXX_INFO(GET_LOGGER(XmlParser),"World::Save(): Saving world item files to "<<itempath);
+  LOG4CXX_INFO(GET_LOGGER(XmlParser),"   Will save sub-file references under "<<relpath);
   if(!FileUtils::IsDirectory(itempath.c_str())) {
     if(!FileUtils::MakeDirectoryRecursive(itempath.c_str())) {
       LOG4CXX_ERROR(GET_LOGGER(XmlParser),"World::Save(): could not make directory "<<itempath<<" for world items");
@@ -880,7 +885,7 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
         //save the geometry to the item path too
         string geomdir = robotFileNames[i];
         StripExtension(geomdir);
-        if(!FileUtils::IsDirectory(((relpath)+geomdir).c_str()))
+        if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
           if(!FileUtils::MakeDirectory((relpath+geomdir).c_str())) {
             LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<relpath+geomdir);
           }
@@ -896,6 +901,7 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
       //modify geomFile to point to path of geomfile *relative* to where the robot will be saved
       const string& geomfile = world.rigidObjects[i]->geometry.CachedFilename();
       string relfile = GetRelativeFilename(geomfile,itempath);
+      LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving reference to original geometry for rigid object "<<world.rigidObjects[i]->name<<" to "<<relfile);
       world.rigidObjects[i]->geomFile = relfile;
     }
     else {
@@ -917,6 +923,7 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
       //modify geomFile to point to path of geomfile *relative* to where the robot will be saved
       const string& geomfile = world.terrains[i]->geometry.CachedFilename();
       string relfile = GetRelativeFilename(geomfile,itempath);
+      LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving reference to original geometry for terrain "<<world.terrains[i]->name<<" to "<<relfile);
       world.terrains[i]->geomFile = relfile;
     }
     else {
