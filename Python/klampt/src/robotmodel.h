@@ -268,7 +268,7 @@ class RobotModelLink
   ///    ndarray: the 6xn total Jacobian matrix of the
   ///    point given by local coordinates plocal.  
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getJacobian(const double plocal[3],double** np_out2,int* m,int* n);
   ///Computes the position jacobian of a point on this link  w.r.t. the robot's
   ///configuration q.
@@ -281,7 +281,7 @@ class RobotModelLink
   ///    ndarray: the 3xn Jacobian matrix of the
   ///    point given by local coordinates plocal.  
   ///  
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getPositionJacobian(const double plocal[3],double** np_out2,int* m,int* n);
   ///Computes the orientation jacobian of this link  w.r.t. the robot's
   ///configuration q.
@@ -293,7 +293,7 @@ class RobotModelLink
   /// 
   ///    ndarray:: the 3xn orientation Jacobian matrix of the link.  
   ///     
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getOrientationJacobian(double** np_out2,int* m,int* n);
   ///Returns the jacobian of a point on this link  w.r.t. specified entries of 
   ///the robot's configuration q given by `links`.
@@ -306,7 +306,7 @@ class RobotModelLink
   ///    ndarray: the 6xlen(links) Jacobian matrix of the
   ///    point given by local coordinates plocal. 
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getJacobianCols(const double plocal[3],const std::vector<int>& links,double** np_out2,int* m,int* n);
   ///Returns the position jacobian of a point on this link  w.r.t. specified entries of 
   ///the robot's configuration q given by `links`.
@@ -320,7 +320,7 @@ class RobotModelLink
   ///    ndarray: the 3xlen(links) position Jacobian matrix of the
   ///    point given by local coordinates plocal. 
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getPositionJacobianCols(const double plocal[3],const std::vector<int>& links,double** np_out2,int* m,int* n);
   ///Returns the orientation jacobian this link  w.r.t. specified entries of 
   ///the robot's configuration q given by `links`.
@@ -334,7 +334,7 @@ class RobotModelLink
   ///    ndarray: the 3xlen(links) orientation Jacobian matrix of the
   ///    link.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getOrientationJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
 
   ///Computes the acceleration of the link origin given the robot's current
@@ -378,7 +378,7 @@ class RobotModelLink
   ///    ndarray: a 3xnxn array with each of the elements in the first axis
   ///    corresponding respectively, to the (x,y,z) components of the Hessian.
   /// 
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getPositionHessian(const double plocal[3],double** np_out3,int* m,int* n,int* p);
   ///Computes the pseudo-Hessians of each orientation component of the link 
   ///w.r.t the robot's configuration q.  The pseudo-Hessian is the derivative
@@ -390,7 +390,7 @@ class RobotModelLink
   ///    corresponding, respectively, to the (wx,wy,wz) components of the 
   ///    pseudo-Hessian.
   /// 
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getOrientationHessian(double** np_out3,int* m,int* n,int* p);
   ///Draws the link's geometry in its local frame.  If keepAppearance=true, the
   ///current Appearance is honored.  Otherwise, just the geometry is drawn.
@@ -651,7 +651,7 @@ class RobotModel
   ///    ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
   ///    COM velocity at the currene configuration
   /// 
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getComJacobian(double** np_out2,int* m,int* n);
   ///Returns the Jacobian matrix of the current center of mass w.r.t. some
   ///links of the robot
@@ -662,7 +662,7 @@ class RobotModel
   ///    gives the COM velocity at the current configuration, and dqlinks
   ///    is the array of velocities of the links given by `links`
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getComJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
   ///Computes the 3D linear momentum vector
   ///
@@ -676,38 +676,38 @@ class RobotModel
   double getKineticEnergy();
   ///Computes the 3x3 total inertia matrix of the robot
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getTotalInertia(double** np_out2,int* m,int* n);
   ///Computes the nxn mass matrix B(q).
   ///
   ///Takes O(n^2) time
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getMassMatrix(double** np_out2,int* m,int* n);
   ///Computes the inverse of the nxn mass matrix B(q)^-1.
   ///
   ///Takes O(n^2) time, which is much faster than inverting the result of getMassMatrix
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getMassMatrixInv(double** np_out2,int* m,int* n);
   ///Computes the derivative of the nxn mass matrix with respect to q_i.
   ///
   ///Takes O(n^3) time.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getMassMatrixDeriv(int i,double** np_out2,int* m,int* n);
   ///Computes the derivative of the nxn mass matrix with respect to t, given the
   ///robot's current velocity.
   ///
   ///Takes O(n^4) time.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getMassMatrixTimeDeriv(double** np_out2,int* m,int* n);
   ///Computes the Coriolis force matrix C(q,dq) for current config and velocity.
   ///
   ///Takes O(n^2) time.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getCoriolisForceMatrix(double** np_out2,int* m,int* n);
   ///Computes the Coriolis forces C(q,dq)*dq for current config and velocity.
   ///

@@ -409,14 +409,20 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %apply (unsigned short* IN_ARRAY2,int DIM1,int DIM2) {(unsigned short* np_array2, int m, int n)};
 %apply (unsigned int* IN_ARRAY1,int DIM1) {(unsigned int* np_array, int m)};
 %apply (unsigned int* IN_ARRAY2,int DIM1,int DIM2) {(unsigned int* np_array2, int m, int n)};
+%apply (unsigned int** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(unsigned int** np_view2,int* m, int *n)};
+%apply (unsigned int** ARGOUTVIEWM_ARRAY2,int* DIM1,int* DIM2) {(unsigned int** np_out2,int* m, int *n)};
 %apply (int* IN_ARRAY2,int DIM1,int DIM2) {(int* np_array2, int m, int n)};
 %apply (int** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(int** np_view2,int* m, int *n)};
+%apply (int** ARGOUTVIEWM_ARRAY2,int* DIM1,int* DIM2) {(int** np_out2,int* m, int *n)};
 %apply (float* IN_ARRAY1, int DIM1) {(float* np_array,int m)};
 %apply (float* IN_ARRAY2,int DIM1,int DIM2) {(float* np_array2, int m, int n)};
 %apply (float* IN_ARRAY2,int DIM1,int DIM2) {(float* contacts, int m, int n)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* np_array,int m)};
 %apply (double* IN_ARRAY2,int DIM1,int DIM2) {(double* np_array2, int m, int n)};
 %apply (double* IN_ARRAY3,int DIM1,int DIM2, int DIM3) {(double* np_array3, int m, int n, int p)};
+%apply (float** ARGOUTVIEW_ARRAY1,int* DIM1) {(float** np_view,int* m)};
+%apply (float** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(float** np_view2,int* m, int *n)};
+%apply (float** ARGOUTVIEW_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(float** np_view3,int* m, int *n, int* p)};
 %apply (double** ARGOUTVIEW_ARRAY1,int* DIM1) {(double** np_view,int* m)};
 %apply (double** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(double** np_view2,int* m, int *n)};
 %apply (double** ARGOUTVIEW_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(double** np_view3,int* m, int *n, int* p)};
@@ -530,10 +536,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
                 also be packed into uint32 elements.  In this case, the pixel
                 format is 0xaarrggbb or 0xaabbggrr, respectively.
         """
-        import numpy
-        array = numpy.asarray(array)
+        array = np.asarray(array)
         if len(array.shape) == 1:
-            if array.dtype == numpy.uint8:
+            if array.dtype == np.uint8:
                 return self.setTexture1D_b(format,array)
             else:
                 return self.setTexture1D_i(format,array)
@@ -569,10 +574,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
                 format is 0xaarrggbb or 0xaabbggrr, respectively.
         """
         
-        import numpy
-        array = numpy.asarray(array)
+        array = np.asarray(array)
         if len(array.shape) == 2:
-            if array.dtype == numpy.uint8:
+            if array.dtype == np.uint8:
                 return self.setTexture2D_b(format,array)
             else:
                 return self.setTexture2D_i(format,array)
@@ -588,8 +592,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             array (np.ndarray): a 1D or 2D array, of size N or Nx2, where N is
                 the number of vertices in the mesh.
         """
-        import numpy
-        array = numpy.asarray(array)
+        array = np.asarray(array)
         if len(array.shape) == 1:
             return self.setTexcoords1D(array)
         elif len(array.shape) == 2:
@@ -648,7 +651,6 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             depth_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        import numpy as np
         if len(intrinsics) != 4:
             raise ValueError("Invalid value for the intrinsics parameters")
         if depth.dtype == float:
@@ -676,7 +678,6 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             depth_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        import numpy as np
         if len(intrinsics) != 4:
             raise ValueError("Invalid value for the intrinsics parameters")
         if color.shape[0] != depth.shape[0] or color.shape[1] != depth.shape[1]:
@@ -781,10 +782,23 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         from klampt.io import loader
         jsonobj = loader.to_json(self,'Heightmap')
         return (loader.from_json,(jsonobj,'Heightmap'))
-
-    def setHeightImage(self, img, height_scale : float = 1.0):
+        
+    def setHeights(self, arr : 'np.ndarray'):
         """
-        Sets heights from a height image.
+        Sets heights from a numpy array.  Handles conversions to float32. 
+
+        Note that the x,y indexing differs from image orientation.  If you want
+        to set heights from an image with (row,col) ordering, use
+        setHeightImage.
+
+        Args:
+            arr (np.ndarray): the height values, of shape (w,h).
+        """
+        self.setHeights_f(arr.astype(np.float32))
+
+    def setHeightImage(self, img : 'np.ndarray', height_scale : float = 1.0):
+        """
+        Sets heights from a height image.  Handles image orientation.
 
         Args:
             img (np.ndarray): the height values, of shape (h,w).  Should have
@@ -792,38 +806,66 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             height_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        import numpy as np
         if len(img.shape) != 2:
             raise ValueError("Invalid shape for the height image")
-        if img.dtype == float:
-            return self.setHeightImage_d(img,height_scale)
-        elif img.dtype == np.float32:
-            return self.setHeightImage_f(img,height_scale)
-        elif img.dtype == np.uint16:
-            return self.setHeightImage_s(img,height_scale)
-        elif img.dtype == np.uint8:
-            return self.setHeightImage_b(img,height_scale)
-        else:
-            raise ValueError("Invalid dtype for the height image, can use float, np.float32, np.uint16, or np.uint8")
+        img = img.swapaxes(0,1)
+        return self.setHeights(img*height_scale)
 
-    def setColorImage(self, img):
+    def getHeightImage(self) -> 'np.ndarray':
+        """
+        Gets heights as a height image.  Handles image orientation.
+        Result has float32 dtype.
+
+        Returns:
+            np.ndarray: the height values, of shape (h,w).
+        """
+        img = self.getHeights()
+        return img.swapaxes(0,1)
+            
+    def getHeightImage_b(self) -> Tuple['np.ndarray',float]:
+        """
+        Gets heights as a uint8 height image.  Handles image orientation.
+
+        Returns:
+            np.ndarray, float: the height values, of shape (h,w) and dtype
+            uint8, and the height scale.
+
+        """
+        himg = self.getHeightImage()
+        h_max = np.max(himg)
+        return (np.clip((himg/h_max)*255.0,0,255).astype(np.uint8),h_max)
+
+    def getHeightImage_s(self) -> Tuple['np.ndarray',float]:
+        """
+        Gets heights as a uint16 height image.  Handles image orientation.
+
+        Returns:
+            np.ndarray, float: the height values, of shape (h,w) and dtype
+            uint16, and the height scale.
+
+        """
+        himg = self.getHeightImage()
+        h_max = np.max(himg)
+        return (np.clip((himg/h_max)*65535.0,0,65535).astype(np.uint16),h_max)
+
+    def setColorImage(self, img : 'np.ndarray'):
         """
         Sets colors from a color image.
 
         Args:
-            img (np.ndarray): the color values, of shape (h,w) or (h,w,3) or (h,w,4).
-                Should have dtype float, np.float32, np.uint32 (RGBA 32-bit) or np.uint8.
+            img (np.ndarray): the color values, of shape (h,w) or (h,w,3) or
+                (h,w,4). Should have dtype float, np.float32, np.uint32
+                (RGBA 32-bit), or np.uint8.
         """
-        import numpy as np
         if len(img.shape) != 2 and len(img.shape) != 3:
             raise ValueError("Invalid shape for the color image")
         if len(img.shape) == 2:
             if img.dtype == np.uint32:
                 return self.setColorImage_i(img)
             elif img.dtype == np.uint8:
-                return self.setColorImage_b(img)
-            elif img.dtype == float:
-                return self.setColors(img.reshape(img.shape[0],img.shape[1],1))
+                return self.setColorImage_b(img.reshape(img.shape[0],img.shape[1],1))
+            elif img.dtype == float or img.dtype == np.float32:
+                return self.setColorImage_b((img.reshape(img.shape[0],img.shape[1],1)*255.0).astype(np.uint8))
             else:
                 raise ValueError("Invalid dtype for the color image, can use np.uint32, np.uint8, or float")
         else:
@@ -831,10 +873,29 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
                 raise ValueError("Invalid shape for the color image")
             if img.dtype == np.uint8:
                 return self.setColorImage_b(img)
-            elif img.dtype == float:
-                return self.setColors(img)
+            elif img.dtype == float or img.dtype == np.float32:
+                return self.setColorImage_b((img*255.0).astype(np.uint8))
             else:
                 raise ValueError("Invalid dtype for the height image, can use float or np.uint8")
+    
+    def setPropertyImage(self, pindex : int, img : 'np.ndarray'):
+        """
+        Sets property channel pindex to a numpy image.
+
+        Handles image orientation.
+
+        Args:
+            pindex (int): the property index.
+            img (np.ndarray): the property values, of shape (h,w).
+        """
+        if len(img.shape) != 2:
+            raise ValueError("Invalid shape for the property image")
+        img = img.swapaxes(0,1)
+        return self.setProperties(pindex,img)
+
+    heights = property(getHeights, setHeights)
+    colorImage = property(getColorImage, setColorImage)
+    viewport = property(getViewport, setViewport)
 }
 }
 

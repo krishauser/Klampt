@@ -149,7 +149,7 @@ Retrieves per-element color for elements of the given feature type. If per-
 element colors are not enabled, then a 1 x 4 array is returned. Otherwise,
 returns an m x 4 array, where m is the number of featuress of that type.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Appearance::setTintColor "
@@ -240,7 +240,7 @@ Retrieves a 1D texture format, returning '' if the texture is not set.
 Retrieves a view into the 1D texture data. If the texture is not set, throws an
 exception.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Appearance::setTexture2D_b "
@@ -280,7 +280,7 @@ Retrieves a 2D texture format, returning '' if the texture is not set.
 Retrieves a view into the 2D texture data. If the texture is not set, throws an
 exception.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Appearance::setTexcoords1D "
@@ -295,7 +295,7 @@ You may also set uvs to be empty, which turns off texture mapping altogether.
 Gets per-vertex texture coordinates for a 1D texture. If no 1D texture is set,
 throws an exception.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Appearance::setTexcoords2D "
@@ -311,7 +311,7 @@ You may also set uvs to be empty, which turns off texture mapping altogether.
 Gets per-vertex texture coordinates for a 2D texture. If no 2D texture is set,
 throws an exception.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Appearance::setTexgen "
@@ -326,7 +326,7 @@ coordinates rather than object coordinates.
 Retrieves the texture generation. The array will be size m x 4, with m in the
 range 0,...,4. The texture generation is performed in  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Appearance::isTexgenWorld "
@@ -510,7 +510,7 @@ Returns:
 
     ndarray: an nx3 Numpy array. Setting elements of this array will
     change the points.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") ConvexHull::setPoints "
@@ -1645,36 +1645,46 @@ Attributes:
 
     viewport (Viewport): contains the size (w,h), projection (perspective)
          intrinsics (fx,fy,cx,cy), and pose (pose) of the heightmap
-         reference coordinate system.
-    heights (SWIG vector of floats): contains a 2D array of
-         ``dims[0]*dims[1]`` values from the upper left to the bottom
-         right (image scan-line convention)
+         reference coordinate system.  Note that to change the viewport, you
+         will need to use `vp = hm.viewport; vp.w = ...; hm.viewport = vp`.
 
-         The vertex index (i,j) indicates (x index, y index) and is flattened to
-         ``i*dims[1] + j``.
+    heights (np.ndarray): contains a 2D array of (w,h) values.
 
-         The array index k is associated to vertex index (x index,y index)
-         ``(k/dims[1], k % dims[0])``
-
-     colors (SWIG vector of floats): contains a 2D array of colors in
-         grayscale (w*h), RGB (3*w*h), or RGBA (4*w*h) form.  The layout
-         is row major in the space (row,col,channel), i.e., the index of
-         (i,j,channel) is ``i*h*C + j*C + channel`` where C is 1, 3, or 4.
-
-     properties (SWIG vector of floats): contains a 3D array of properties
-         (w*h*p) where p is the number of properties.  p matches the length
-        of propertyNames.  Layout is row-major with (property, row, col), i.e.,
-p order,
-        w order, then h order.  Property p at index (i,j) is flattened to
-       ``p*w*h + i*h + j``.
-
-     propertyNames (SWIG vector of strings): A list of the p property names.
+    colorImage (np.ndarray): contains a 3D image array of colors in
+         grayscale (h,w), RGB (h,w,3), or RGBA (h,w,4) format.
   
 
 C++ includes: geometry.h
 ";
 
 %feature("docstring") Heightmap::Heightmap "
+";
+
+%feature("docstring") Heightmap::Heightmap "
+";
+
+%feature("docstring") Heightmap::~Heightmap "
+";
+
+%feature("docstring") Heightmap::copy "
+
+Creates a standalone object that is a copy of this.  
+";
+
+%feature("docstring") Heightmap::set "
+
+Copies the data of the argument into this.  
+";
+
+%feature("docstring") Heightmap::set "
+
+Sets all elements to a uniform value (e.g., 0)  
+";
+
+%feature("docstring") Heightmap::set "
+
+Sets the height of a vertex (note, indices are x and y units, which is reversed
+from image convention)  
 ";
 
 %feature("docstring") Heightmap::resize "
@@ -1700,15 +1710,24 @@ Sets an perspective projection (depth map) with the given intrinsics fx, fy, cx,
 cy. If cx or cy are negative, then cx = (w-1)/2, cy = (h-1)/2.  
 ";
 
-%feature("docstring") Heightmap::set "
+%feature("docstring") Heightmap::isPerspective "
 
-Sets all elements to a uniform value (e.g., 0)  
+Returns true if the heightmaps is in perspective (depth map) mode.  
 ";
 
-%feature("docstring") Heightmap::set "
+%feature("docstring") Heightmap::isOrthographic "
 
-Sets the height of a vertex (note, indices are x and y units, which is reversed
-from image convention)  
+Returns true if the heightmaps is in orthographic (elevation map) mode.  
+";
+
+%feature("docstring") Heightmap::getViewport "
+
+Retrieves the viewport.  
+";
+
+%feature("docstring") Heightmap::setViewport "
+
+Sets the viewport.  
 ";
 
 %feature("docstring") Heightmap::get "
@@ -1729,34 +1748,20 @@ Scales the height uniformly.
 
 %feature("docstring") Heightmap::getHeights "
 
-Returns a 2D Numpy array view of the values. Result has shape w x h.  
+Returns a 2D Numpy array view of the values. Result has shape w x h and has
+float32 dtype.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
-%feature("docstring") Heightmap::setHeights "
+%feature("docstring") Heightmap::setHeights_f "
 
-Sets the values to 2D numpy array of shape w x h.  
+Sets the values to a 2D numpy array of shape w x h.  
 ";
 
-%feature("docstring") Heightmap::setHeightImage_d "
+%feature("docstring") Heightmap::hasColors "
 
-Sets values to an image with size (h, w) with rows ordered top to bottom.  
-";
-
-%feature("docstring") Heightmap::setHeightImage_f "
-
-Sets values to an image with size (h, w) with rows ordered top to bottom.  
-";
-
-%feature("docstring") Heightmap::setHeightImage_s "
-
-Sets values to an image with size (h, w) with rows ordered top to bottom.  
-";
-
-%feature("docstring") Heightmap::setHeightImage_b "
-
-Sets values to an image with size (h, w) with rows ordered top to bottom.  
+Returns true if colors are present.  
 ";
 
 %feature("docstring") Heightmap::clearColors "
@@ -1777,31 +1782,36 @@ Sets a uniform color. Call this first if you want to start setting colors.
 
 %feature("docstring") Heightmap::setColor "
 
-Gets the grayscale color of a cell.  
+Gets the grayscale color of a vertex (note, indices are x and y units, which is
+reversed from image convention)  
 ";
 
 %feature("docstring") Heightmap::setColor "
 
-Gets the RGBA color of a cell.  
+Gets the RGBA color of a vertex (note, indices are x and y units, which is
+reversed from image convention)  
 ";
 
 %feature("docstring") Heightmap::getColor "
 
-Gets the RGBA color of a cell.  
+Gets the RGBA color of a vertex (note, indices are x and y units, which is
+reversed from image convention)  
 
 Return type: Tuple[float,float,float,float]  
 ";
 
-%feature("docstring") Heightmap::getColors "
+%feature("docstring") Heightmap::getColorImage "
 
-Returns a 3D Numpy array view of the colors (w x h x 1, 3, or 4)  
+Returns a 3D Numpy array view of the color image (h x w x (1, 3, or 4)), with
+rows ordered top to bottom.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
-%feature("docstring") Heightmap::setColors "
+%feature("docstring") Heightmap::setColorImage_b "
 
-Sets the values to a 3D numpy array (w x h x 1, 3, or 4)  
+Sets the values to a 3D numpy array (h x w x 1, 3, or (1, 3, or 4)), with rows
+ordered top to bottom.  
 ";
 
 %feature("docstring") Heightmap::setColorImage_i "
@@ -1809,16 +1819,24 @@ Sets the values to a 3D numpy array (w x h x 1, 3, or 4)
 Sets colors to a 32-bit RGBA image (size h x w) with rows ordered top to bottom.  
 ";
 
-%feature("docstring") Heightmap::setColorImage_b3 "
+%feature("docstring") Heightmap::getColorImage_i "
 
-Sets colors to a 24-bit RGB image (size h x w x 3) with rows ordered top to
-bottom.  
+Retrieves a 32-bit RGBA image of the heightmap's colors (h x w)  
+
+Return type: np.ndarray  
 ";
 
-%feature("docstring") Heightmap::setColorImage_b "
+%feature("docstring") Heightmap::getColorImage_d "
 
-Sets colors to an 8-bit grayscale image (size h x w) with rows ordered top to
-bottom.  
+Retrieves a floating point RGB, RGBA, or L image (h x w x (1, 3, or 4)) with
+rows ordered from top to bottom.  
+
+Return type: np.ndarray  
+";
+
+%feature("docstring") Heightmap::numProperties "
+
+Returns the number of properties.  
 ";
 
 %feature("docstring") Heightmap::addProperty "
@@ -1831,16 +1849,21 @@ Adds a new property and sets it to 0.
 Adds a new property and sets it to an array of size (w x h)  
 ";
 
+%feature("docstring") Heightmap::propertyIndex "
+
+Retrieves the index associated with a property name.  
+";
+
 %feature("docstring") Heightmap::setProperty "
 
-Sets an individual pixel's property vector.  
+Retrieves a property index Sets an individual pixel's property vector.  
 ";
 
 %feature("docstring") Heightmap::getProperty "
 
 Retrieves an individual pixel's property vector.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Heightmap::setProperties "
@@ -1852,12 +1875,7 @@ Sets a property to an array of size (w x h)
 
 Retrieves a view of the property of size (w x h)  
 
-Return type: ndarray  
-";
-
-%feature("docstring") Heightmap::setPropertyImage "
-
-Sets a property to an image of size (h x w) with rows ordered top to bottom.  
+Return type: np.ndarray  
 ";
 
 // File: classIKObjective.xml
@@ -2217,7 +2235,7 @@ Return type: Vector
 Computes the matrix describing the instantaneous derivative of the objective
 with respect to the active Dofs.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") IKSolver::getSecondaryResidual "
@@ -2566,7 +2584,7 @@ Returns:
 
     ndarray: an nx3 Numpy array. Setting elements of this array will
     change the points.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") PointCloud::setPoints "
@@ -2619,7 +2637,7 @@ Returns:
 
     ndarray: an nxk Numpy array. Setting elements of this array will
     change the vertices.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") PointCloud::addProperty "
@@ -3180,7 +3198,7 @@ Returns:
 
     ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
     COM velocity at the currene configuration
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModel::getComJacobianCols "
@@ -3193,7 +3211,7 @@ Returns:
     ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
     gives the COM velocity at the current configuration, and dqlinks
     is the array of velocities of the links given by `links`
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModel::getLinearMomentum "
@@ -3219,7 +3237,7 @@ Computes the kinetic energy at the current config / velocity.
 
 Computes the 3x3 total inertia matrix of the robot.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModel::getMassMatrix "
@@ -3228,7 +3246,7 @@ Computes the nxn mass matrix B(q).
 
 Takes O(n^2) time  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModel::getMassMatrixInv "
@@ -3238,7 +3256,7 @@ Computes the inverse of the nxn mass matrix B(q)^-1.
 Takes O(n^2) time, which is much faster than inverting the result of
 getMassMatrix  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModel::getMassMatrixDeriv "
@@ -3247,7 +3265,7 @@ Computes the derivative of the nxn mass matrix with respect to q_i.
 
 Takes O(n^3) time.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModel::getMassMatrixTimeDeriv "
@@ -3257,7 +3275,7 @@ robot's current velocity.
 
 Takes O(n^4) time.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModel::getCoriolisForceMatrix "
@@ -3266,7 +3284,7 @@ Computes the Coriolis force matrix C(q,dq) for current config and velocity.
 
 Takes O(n^2) time.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModel::getCoriolisForces "
@@ -3848,7 +3866,7 @@ Returns:
 
     ndarray: the 6xn total Jacobian matrix of the
     point given by local coordinates plocal.  
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getPositionJacobian "
@@ -3863,7 +3881,7 @@ Returns:
 
     ndarray: the 3xn Jacobian matrix of the
     point given by local coordinates plocal.  
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getOrientationJacobian "
@@ -3877,7 +3895,7 @@ np.dot(J,dq), where dq is the robot's joint velocities.
 Returns:  
 
     ndarray:: the 3xn orientation Jacobian matrix of the link.  
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getJacobianCols "
@@ -3892,7 +3910,7 @@ Returns:
 
     ndarray: the 6xlen(links) Jacobian matrix of the
     point given by local coordinates plocal.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getPositionJacobianCols "
@@ -3908,7 +3926,7 @@ Returns:
 
     ndarray: the 3xlen(links) position Jacobian matrix of the
     point given by local coordinates plocal.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getOrientationJacobianCols "
@@ -3924,7 +3942,7 @@ Returns:
 
     ndarray: the 3xlen(links) orientation Jacobian matrix of the
     link.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getAcceleration "
@@ -3975,7 +3993,7 @@ Returns:
 
     ndarray: a 3xnxn array with each of the elements in the first axis
     corresponding respectively, to the (x,y,z) components of the Hessian.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModelLink::getOrientationHessian "
@@ -3989,7 +4007,7 @@ Returns:
     ndarray: a 3xnxn array with each of the elements in the first axis
     corresponding, respectively, to the (wx,wy,wz) components of the
     pseudo-Hessian.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") RobotModelLink::drawLocalGL "
@@ -4632,7 +4650,7 @@ Returns a list of names for the measurements (one per measurement).
 Returns an array of measurements from the previous simulation (or
 kinematicSimulate) timestep.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") SimRobotSensor::settings "
@@ -4875,7 +4893,7 @@ Returns the nx7 list of contacts (x,n,kFriction) at the last time step. Normals
 point into object `a`. Each contact point (x,n,kFriction) is represented as a
 7-element vector.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Simulator::getContactForces "
@@ -4883,7 +4901,7 @@ Return type: ndarray
 Returns the list of contact forces on object a at the last time step. Result is
 an nx3 array.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") Simulator::contactForce "
@@ -5194,7 +5212,7 @@ Returns:
 
     ndarray: an nx3 Numpy array. Setting elements of this array will
     change the vertices.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") TriangleMesh::setVertices "
@@ -5215,7 +5233,7 @@ Returns:
 
     ndarray: an mx3 Numpy array of int32 type. Setting elements of this
     array will change the triangle indices.
- Return type: ndarray  
+ Return type: np.ndarray  
 ";
 
 %feature("docstring") TriangleMesh::setIndices "
@@ -5236,6 +5254,95 @@ Translates all the vertices by v=v+t.
 %feature("docstring") TriangleMesh::transform "
 
 Transforms all the vertices by the rigid transform v=R*v+t.  
+";
+
+// File: classViewport.xml
+
+
+%feature("docstring") Viewport "
+
+A class that represents an idealized pinhole camera.  
+
+Duplicates the functioning of KrisLibrary/Camera/Viewport.  
+
+C++ includes: viewport.h
+";
+
+%feature("docstring") Viewport::Viewport "
+";
+
+%feature("docstring") Viewport::fromJson "
+";
+
+%feature("docstring") Viewport::toJson "
+";
+
+%feature("docstring") Viewport::fromText "
+";
+
+%feature("docstring") Viewport::toText "
+";
+
+%feature("docstring") Viewport::resize "
+
+Resizes the viewport, keeping the same field of view and relative position of
+the focal point.  
+";
+
+%feature("docstring") Viewport::setFOV "
+
+Sets the horizontal and optionally the vertical FOV. If yfov < 0, square pixels
+will be assumed.  
+";
+
+%feature("docstring") Viewport::getFOV "
+
+Returns the horizontal FOV.  
+";
+
+%feature("docstring") Viewport::getVFOV "
+
+Returns the vertical FOV.  
+";
+
+%feature("docstring") Viewport::setPose "
+
+Sets the pose of the camera.  
+";
+
+%feature("docstring") Viewport::getPose "
+
+Gets the pose of the camera.  
+
+Return type: RigidTransform  
+";
+
+%feature("docstring") Viewport::viewRectangle "
+
+Gets the viewing rectangle (xmin,ymin,xmax,ymax) at a given depth.  
+
+Return type: Tuple[float,float,float,float]  
+";
+
+%feature("docstring") Viewport::project "
+
+Projects into image coordinates.  
+
+Return type: Vector3  
+";
+
+%feature("docstring") Viewport::clickSource "
+
+Provides the source of a ray for an image coordinate (x,y)  
+
+Return type: Vector3  
+";
+
+%feature("docstring") Viewport::clickDirection "
+
+Provides the direction of a ray for an image coordinate (x,y)  
+
+Return type: Vector  
 ";
 
 // File: classVolumeGrid.xml
@@ -5334,7 +5441,7 @@ Scales the value uniformly.
 
 Returns a 3D Numpy array view of the values.  
 
-Return type: ndarray  
+Return type: np.ndarray  
 ";
 
 %feature("docstring") VolumeGrid::setValues "
@@ -6293,6 +6400,8 @@ Args:
     None is returned if no solution exists.
   
 ";
+
+// File: viewport_8h.xml
 
 // File: widget_8h.xml
 

@@ -206,7 +206,7 @@ class IKSolver
   /// Computes the matrix describing the instantaneous derivative of the objective
   /// with respect to the active Dofs
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getJacobian(double** np_out2,int* m,int* n);
   /// Returns the vector describing the error of the secondary objective at the current configuration
   ///

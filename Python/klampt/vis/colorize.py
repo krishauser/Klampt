@@ -166,7 +166,7 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
         if isinstance(geometrydata,PointCloud):
             N = len(geometrydata.points)
         elif isinstance(geometrydata,Heightmap):
-            N = geometrydata.viewport.w*geometrydata.viewport.h
+            N = geometrydata.heights.shape[0]*geometrydata.heights.shape[1]
         else:
             N = len(geometrydata.vertices)
     elif feature == 'faces':
@@ -179,7 +179,7 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
         if feature == None:
             if isinstance(geometrydata,Heightmap):
                 feature = 'vertices'
-                N = geometrydata.viewport.w*geometrydata.viewport.h
+                N = geometrydata.heights.shape[0]*geometrydata.heights.shape[1]
             elif not isinstance(colormap,str) or colormap != 'random' or isinstance(geometrydata,PointCloud):
                 feature = 'vertices'
                 N = len(geometrydata.vertices)
@@ -211,11 +211,10 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
                     found = True
                     value = geometrydata.getHeights().flatten()
                 else:
-                    for i in range(len(geometrydata.propertyNames)):
-                        if value == geometrydata.propertyNames[i]:
-                            found = True
-                            value = geometrydata.getProperties(i).flatten()
-                            break
+                    i = geometry.propertyIndex(value)
+                    if i >= 0:
+                        found = True
+                        value = geometrydata.getProperties(i).flatten()
             if found:
                 assert value is not None
                 assert len(value) == N,"Feature is "+feature+" with length "+str(N)+" but extracted values of size "+str(len(value))
@@ -231,7 +230,7 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
                 N = len(geometrydata.points)
             elif isinstance(geometrydata,Heightmap):
                 feature = 'height'
-                N = geometrydata.viewport.w*geometrydata.viewport.h
+                N = geometrydata.heights.shape[0]*geometrydata.heights.shape[1]
             else:
                 assert isinstance(geometrydata,TriangleMesh)
                 if len(value) == len(geometrydata.indices):
@@ -405,8 +404,8 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
             #write it back to the geometry
             geometry.setPointCloud(appearance)
     elif isinstance(appearance,Heightmap):
-        colors = colors.reshape((appearance.viewport.w,appearance.viewport.h,colors.shape[1]))
-        appearance.setColors(colors)
+        colors = colors.reshape((appearance.heights.shape[0],appearance.heights.shape[1],colors.shape[1]))
+        appearance.setColorImage(colors.swapaxes(0,1))
         if isinstance(geometry,Geometry3D):
             #write it back to the geometry
             geometry.setHeightmap(appearance)

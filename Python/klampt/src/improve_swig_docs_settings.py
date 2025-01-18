@@ -31,6 +31,7 @@ basic_types = {'int','float','str','bytes','bool'}
 #location to inject typing string
 typing_inject_location = 'import __builtin__'
 typing_header = """
+import numpy as np
 from typing import Sequence,List,Tuple,Iterator
 from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
 """
@@ -101,15 +102,15 @@ to_python_type_hints = {
     "std::map< std::string,std::string >::key_type" : 'str',
     "std::map< std::string,std::string >::mapped_type" : 'str',
     "std::vector< std::string,std::allocator< std::string > >" : "Sequence[str]",
-    'unsigned char *':'"ndarray"',
-    'unsigned short *':'"ndarray"',
-    'unsigned int *':'"ndarray"',
+    'unsigned char *':'"np.ndarray"',
+    'unsigned short *':'"np.ndarray"',
+    'unsigned int *':'"np.ndarray"',
     'int *' : 'IntArray',
     'float *' : 'Vector',
     'double *' : 'Vector',
-    'double * np_array' : '"ndarray"',    
-    'double * np_array2' : '"ndarray"',
-    'double * np_array3' : '"ndarray"',        
+    'double * np_array' : '"np.ndarray"',    
+    'double * np_array2' : '"np.ndarray"',
+    'double * np_array3' : '"np.ndarray"',        
     'intArray' : 'IntArray',
     'intVector' : 'IntArray',
     'floatArray' : 'Vector',

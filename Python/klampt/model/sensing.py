@@ -733,7 +733,6 @@ def camera_to_intrinsics(camera : SimRobotSensor, format='opencv', fn=None):
                 json.dump(jsonobj,f)
         return jsonobj
     elif format == 'numpy':
-        import numpy as np
         res = np.zeros((3,3))
         res[0,0] = fx
         res[1,1] = fy
@@ -747,7 +746,6 @@ def camera_to_intrinsics(camera : SimRobotSensor, format='opencv', fn=None):
         from ..io import ros
         return ros.to_CameraInfo(camera)
     elif format == 'opencv':
-        import numpy as np
         res = np.zeros((3,3))
         dist = np.zeros(5)
         res[0,0] = fx
@@ -816,7 +814,6 @@ def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
             if format == 'opencv':
                 raise NotImplementedError("TODO: read from OpenCV calibrations")
             elif format == 'numpy':
-                import numpy as np
                 return intrinsics_to_camera(np.load(data),camera,format)
             elif format == 'json':
                 import json

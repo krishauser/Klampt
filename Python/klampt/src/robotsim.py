@@ -916,7 +916,7 @@ class TriangleMesh(object):
 
             ndarray: an nx3 Numpy array. Setting elements of this array will
             change the vertices.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.TriangleMesh_getVertices(self)
@@ -952,7 +952,7 @@ class TriangleMesh(object):
 
             ndarray: an mx3 Numpy array of int32 type. Setting elements of this
             array will change the triangle indices.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.TriangleMesh_getIndices(self)
@@ -1081,7 +1081,7 @@ class ConvexHull(object):
 
             ndarray: an nx3 Numpy array. Setting elements of this array will
             change the points.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.ConvexHull_getPoints(self)
@@ -1243,7 +1243,7 @@ class PointCloud(object):
 
             ndarray: an nx3 Numpy array. Setting elements of this array will
             change the points.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.PointCloud_getPoints(self)
@@ -1336,7 +1336,7 @@ class PointCloud(object):
 
             ndarray: an nxk Numpy array. Setting elements of this array will
             change the vertices.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.PointCloud_getProperties(self)
@@ -1589,7 +1589,6 @@ class PointCloud(object):
             depth_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        import numpy as np
         if len(intrinsics) != 4:
             raise ValueError("Invalid value for the intrinsics parameters")
         if depth.dtype == float:
@@ -1617,7 +1616,6 @@ class PointCloud(object):
             depth_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        import numpy as np
         if len(intrinsics) != 4:
             raise ValueError("Invalid value for the intrinsics parameters")
         if color.shape[0] != depth.shape[0] or color.shape[1] != depth.shape[1]:
@@ -1961,7 +1959,7 @@ class VolumeGrid(object):
 
         Returns a 3D Numpy array view of the values.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.VolumeGrid_getValues(self)
@@ -2044,30 +2042,13 @@ class Heightmap(object):
 
         viewport (Viewport): contains the size (w,h), projection (perspective)
              intrinsics (fx,fy,cx,cy), and pose (pose) of the heightmap
-             reference coordinate system.
-        heights (SWIG vector of floats): contains a 2D array of
-             ``dims[0]*dims[1]`` values from the upper left to the bottom
-             right (image scan-line convention)
+             reference coordinate system.  Note that to change the viewport, you
+             will need to use `vp = hm.viewport; vp.w = ...; hm.viewport = vp`.
 
-             The vertex index (i,j) indicates (x index, y index) and is flattened to
-             ``i*dims[1] + j``.
+        heights (np.ndarray): contains a 2D array of (w,h) values.
 
-             The array index k is associated to vertex index (x index,y index)
-             ``(k/dims[1], k % dims[0])``
-
-         colors (SWIG vector of floats): contains a 2D array of colors in
-             grayscale (w*h), RGB (3*w*h), or RGBA (4*w*h) form.  The layout
-             is row major in the space (row,col,channel), i.e., the index of
-             (i,j,channel) is ``i*h*C + j*C + channel`` where C is 1, 3, or 4.
-
-         properties (SWIG vector of floats): contains a 3D array of properties
-             (w*h*p) where p is the number of properties.  p matches the length
-            of propertyNames.  Layout is row-major with (property, row, col), i.e.,
-    p order,
-            w order, then h order.  Property p at index (i,j) is flattened to
-           ``p*w*h + i*h + j``.
-
-         propertyNames (SWIG vector of strings): A list of the p property names.
+        colorImage (np.ndarray): contains a 3D image array of colors in
+             grayscale (h,w), RGB (h,w,3), or RGBA (h,w,4) format.
 
 
     C++ includes: geometry.h
@@ -2076,14 +2057,26 @@ class Heightmap(object):
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
+    __swig_destroy__ = _robotsim.delete_Heightmap
 
-    def __init__(self):
+    def __init__(self, *args):
         r"""
         __init__(Heightmap self) -> Heightmap
+        __init__(Heightmap self, Heightmap rhs) -> Heightmap
 
 
         """
-        _robotsim.Heightmap_swiginit(self, _robotsim.new_Heightmap())
+        _robotsim.Heightmap_swiginit(self, _robotsim.new_Heightmap(*args))
+
+    def copy(self) -> "Heightmap":
+        r"""
+        copy(Heightmap self) -> Heightmap
+
+
+        Creates a standalone object that is a copy of this.  
+
+        """
+        return _robotsim.Heightmap_copy(self)
 
     def resize(self, w: "int", h: "int") -> "void":
         r"""
@@ -2128,8 +2121,49 @@ class Heightmap(object):
         """
         return _robotsim.Heightmap_setIntrinsics(self, fx, fy, cx, cy)
 
+    def isPerspective(self) -> "bool":
+        r"""
+        isPerspective(Heightmap self) -> bool
+
+
+        Returns true if the heightmaps is in perspective (depth map) mode.  
+
+        """
+        return _robotsim.Heightmap_isPerspective(self)
+
+    def isOrthographic(self) -> "bool":
+        r"""
+        isOrthographic(Heightmap self) -> bool
+
+
+        Returns true if the heightmaps is in orthographic (elevation map) mode.  
+
+        """
+        return _robotsim.Heightmap_isOrthographic(self)
+
+    def getViewport(self) -> "Viewport":
+        r"""
+        getViewport(Heightmap self) -> Viewport
+
+
+        Retrieves the viewport.  
+
+        """
+        return _robotsim.Heightmap_getViewport(self)
+
+    def setViewport(self, viewport: "Viewport") -> "void":
+        r"""
+        setViewport(Heightmap self, Viewport viewport)
+
+
+        Sets the viewport.  
+
+        """
+        return _robotsim.Heightmap_setViewport(self, viewport)
+
     def set(self, *args) -> "void":
         r"""
+        set(Heightmap self, Heightmap arg2)
         set(Heightmap self, double value)
         set(Heightmap self, int i, int j, double value)
 
@@ -2176,62 +2210,33 @@ class Heightmap(object):
         getHeights(Heightmap self)
 
 
-        Returns a 2D Numpy array view of the values. Result has shape w x h.  
+        Returns a 2D Numpy array view of the values. Result has shape w x h and has
+        float32 dtype.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Heightmap_getHeights(self)
 
-    def setHeights(self, np_array2: "double *") -> "void":
+    def setHeights_f(self, np_array2: "float *") -> "void":
         r"""
-        setHeights(Heightmap self, double * np_array2)
+        setHeights_f(Heightmap self, float * np_array2)
 
 
-        Sets the values to 2D numpy array of shape w x h.  
+        Sets the values to a 2D numpy array of shape w x h.  
 
         """
-        return _robotsim.Heightmap_setHeights(self, np_array2)
+        return _robotsim.Heightmap_setHeights_f(self, np_array2)
 
-    def setHeightImage_d(self, np_array2: "double *", height_scale: "double"=1) -> "void":
+    def hasColors(self) -> "bool":
         r"""
-        setHeightImage_d(Heightmap self, double * np_array2, double height_scale=1)
+        hasColors(Heightmap self) -> bool
 
 
-        Sets values to an image with size (h, w) with rows ordered top to bottom.  
+        Returns true if colors are present.  
 
         """
-        return _robotsim.Heightmap_setHeightImage_d(self, np_array2, height_scale)
-
-    def setHeightImage_f(self, np_array2: "float *", height_scale: "double"=1) -> "void":
-        r"""
-        setHeightImage_f(Heightmap self, float * np_array2, double height_scale=1)
-
-
-        Sets values to an image with size (h, w) with rows ordered top to bottom.  
-
-        """
-        return _robotsim.Heightmap_setHeightImage_f(self, np_array2, height_scale)
-
-    def setHeightImage_s(self, np_array2: "unsigned short *", height_scale: "double"=1) -> "void":
-        r"""
-        setHeightImage_s(Heightmap self, unsigned short * np_array2, double height_scale=1)
-
-
-        Sets values to an image with size (h, w) with rows ordered top to bottom.  
-
-        """
-        return _robotsim.Heightmap_setHeightImage_s(self, np_array2, height_scale)
-
-    def setHeightImage_b(self, np_array2: "unsigned char *", height_scale: "double"=1) -> "void":
-        r"""
-        setHeightImage_b(Heightmap self, unsigned char * np_array2, double height_scale=1)
-
-
-        Sets values to an image with size (h, w) with rows ordered top to bottom.  
-
-        """
-        return _robotsim.Heightmap_setHeightImage_b(self, np_array2, height_scale)
+        return _robotsim.Heightmap_hasColors(self)
 
     def clearColors(self) -> "void":
         r"""
@@ -2251,7 +2256,8 @@ class Heightmap(object):
         setColor(Heightmap self, int i, int j, double const [4] rgba)
 
 
-        Gets the RGBA color of a cell.  
+        Gets the RGBA color of a vertex (note, indices are x and y units, which is
+        reversed from image convention)  
 
         """
         return _robotsim.Heightmap_setColor(self, *args)
@@ -2261,34 +2267,37 @@ class Heightmap(object):
         getColor(Heightmap self, int i, int j)
 
 
-        Gets the RGBA color of a cell.  
+        Gets the RGBA color of a vertex (note, indices are x and y units, which is
+        reversed from image convention)  
 
         Return type: Tuple[float,float,float,float]  
 
         """
         return _robotsim.Heightmap_getColor(self, i, j)
 
-    def getColors(self) -> "void":
+    def getColorImage(self) -> "void":
         r"""
-        getColors(Heightmap self)
+        getColorImage(Heightmap self)
 
 
-        Returns a 3D Numpy array view of the colors (w x h x 1, 3, or 4)  
+        Returns a 3D Numpy array view of the color image (h x w x (1, 3, or 4)), with
+        rows ordered top to bottom.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
-        return _robotsim.Heightmap_getColors(self)
+        return _robotsim.Heightmap_getColorImage(self)
 
-    def setColors(self, np_array3: "double *") -> "void":
+    def setColorImage_b(self, np_array3: "unsigned char *") -> "void":
         r"""
-        setColors(Heightmap self, double * np_array3)
+        setColorImage_b(Heightmap self, unsigned char * np_array3)
 
 
-        Sets the values to a 3D numpy array (w x h x 1, 3, or 4)  
+        Sets the values to a 3D numpy array (h x w x 1, 3, or (1, 3, or 4)), with rows
+        ordered top to bottom.  
 
         """
-        return _robotsim.Heightmap_setColors(self, np_array3)
+        return _robotsim.Heightmap_setColorImage_b(self, np_array3)
 
     def setColorImage_i(self, np_array2: "unsigned int *") -> "void":
         r"""
@@ -2300,32 +2309,45 @@ class Heightmap(object):
         """
         return _robotsim.Heightmap_setColorImage_i(self, np_array2)
 
-    def setColorImage_b3(self, np_array3: "unsigned char *") -> "void":
+    def getColorImage_i(self) -> "void":
         r"""
-        setColorImage_b3(Heightmap self, unsigned char * np_array3)
+        getColorImage_i(Heightmap self)
 
 
-        Sets colors to a 24-bit RGB image (size h x w x 3) with rows ordered top to
-        bottom.  
+        Retrieves a 32-bit RGBA image of the heightmap's colors (h x w)  
+
+        Return type: np.ndarray  
 
         """
-        return _robotsim.Heightmap_setColorImage_b3(self, np_array3)
+        return _robotsim.Heightmap_getColorImage_i(self)
 
-    def setColorImage_b(self, np_array2: "unsigned char *") -> "void":
+    def getColorImage_d(self) -> "void":
         r"""
-        setColorImage_b(Heightmap self, unsigned char * np_array2)
+        getColorImage_d(Heightmap self)
 
 
-        Sets colors to an 8-bit grayscale image (size h x w) with rows ordered top to
-        bottom.  
+        Retrieves a floating point RGB, RGBA, or L image (h x w x (1, 3, or 4)) with
+        rows ordered from top to bottom.  
+
+        Return type: np.ndarray  
 
         """
-        return _robotsim.Heightmap_setColorImage_b(self, np_array2)
+        return _robotsim.Heightmap_getColorImage_d(self)
 
-    def addProperty(self, *args) -> "void":
+    def numProperties(self) -> "int":
         r"""
-        addProperty(Heightmap self, std::string const & pname)
-        addProperty(Heightmap self, std::string const & pname, double * np_array2)
+        numProperties(Heightmap self) -> int
+
+
+        Returns the number of properties.  
+
+        """
+        return _robotsim.Heightmap_numProperties(self)
+
+    def addProperty(self, *args) -> "int":
+        r"""
+        addProperty(Heightmap self, std::string const & pname) -> int
+        addProperty(Heightmap self, std::string const & pname, double * np_array2) -> int
 
 
         Adds a new property and sets it to an array of size (w x h)  
@@ -2333,12 +2355,22 @@ class Heightmap(object):
         """
         return _robotsim.Heightmap_addProperty(self, *args)
 
+    def propertyIndex(self, pname: "std::string const &") -> "int":
+        r"""
+        propertyIndex(Heightmap self, std::string const & pname) -> int
+
+
+        Retrieves the index associated with a property name.  
+
+        """
+        return _robotsim.Heightmap_propertyIndex(self, pname)
+
     def setProperty(self, i: "int", j: "int", np_array: "double *") -> "void":
         r"""
         setProperty(Heightmap self, int i, int j, double * np_array)
 
 
-        Sets an individual pixel's property vector.  
+        Retrieves a property index Sets an individual pixel's property vector.  
 
         """
         return _robotsim.Heightmap_setProperty(self, i, j, np_array)
@@ -2350,7 +2382,7 @@ class Heightmap(object):
 
         Retrieves an individual pixel's property vector.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Heightmap_getProperty(self, i, j)
@@ -2372,34 +2404,34 @@ class Heightmap(object):
 
         Retrieves a view of the property of size (w x h)  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Heightmap_getProperties(self, pindex)
-
-    def setPropertyImage(self, pindex: "int", np_array2: "double *") -> "void":
-        r"""
-        setPropertyImage(Heightmap self, int pindex, double * np_array2)
-
-
-        Sets a property to an image of size (h x w) with rows ordered top to bottom.  
-
-        """
-        return _robotsim.Heightmap_setPropertyImage(self, pindex, np_array2)
-    viewport = property(_robotsim.Heightmap_viewport_get, _robotsim.Heightmap_viewport_set, doc=r"""viewport : Viewport""")
-    heights = property(_robotsim.Heightmap_heights_get, _robotsim.Heightmap_heights_set, doc=r"""heights : std::vector<(double,std::allocator<(double)>)>""")
-    colors = property(_robotsim.Heightmap_colors_get, _robotsim.Heightmap_colors_set, doc=r"""colors : std::vector<(double,std::allocator<(double)>)>""")
-    propertyNames = property(_robotsim.Heightmap_propertyNames_get, _robotsim.Heightmap_propertyNames_set, doc=r"""propertyNames : std::vector<(std::string,std::allocator<(std::string)>)>""")
-    properties = property(_robotsim.Heightmap_properties_get, _robotsim.Heightmap_properties_set, doc=r"""properties : std::vector<(double,std::allocator<(double)>)>""")
+    dataPtr = property(_robotsim.Heightmap_dataPtr_get, _robotsim.Heightmap_dataPtr_set, doc=r"""dataPtr : p.void""")
+    isStandalone = property(_robotsim.Heightmap_isStandalone_get, _robotsim.Heightmap_isStandalone_set, doc=r"""isStandalone : bool""")
 
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'Heightmap')
         return (loader.from_json,(jsonobj,'Heightmap'))
 
-    def setHeightImage(self, img, height_scale : float = 1.0):
+    def setHeights(self, arr : 'np.ndarray'):
         """
-        Sets heights from a height image.
+        Sets heights from a numpy array.  Handles conversions to float32. 
+
+        Note that the x,y indexing differs from image orientation.  If you want
+        to set heights from an image with (row,col) ordering, use
+        setHeightImage.
+
+        Args:
+            arr (np.ndarray): the height values, of shape (w,h).
+        """
+        self.setHeights_f(arr.astype(np.float32))
+
+    def setHeightImage(self, img : 'np.ndarray', height_scale : float = 1.0):
+        """
+        Sets heights from a height image.  Handles image orientation.
 
         Args:
             img (np.ndarray): the height values, of shape (h,w).  Should have
@@ -2407,38 +2439,66 @@ class Heightmap(object):
             height_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        import numpy as np
         if len(img.shape) != 2:
             raise ValueError("Invalid shape for the height image")
-        if img.dtype == float:
-            return self.setHeightImage_d(img,height_scale)
-        elif img.dtype == np.float32:
-            return self.setHeightImage_f(img,height_scale)
-        elif img.dtype == np.uint16:
-            return self.setHeightImage_s(img,height_scale)
-        elif img.dtype == np.uint8:
-            return self.setHeightImage_b(img,height_scale)
-        else:
-            raise ValueError("Invalid dtype for the height image, can use float, np.float32, np.uint16, or np.uint8")
+        img = img.swapaxes(0,1)
+        return self.setHeights(img*height_scale)
 
-    def setColorImage(self, img):
+    def getHeightImage(self) -> 'np.ndarray':
+        """
+        Gets heights as a height image.  Handles image orientation.
+        Result has float32 dtype.
+
+        Returns:
+            np.ndarray: the height values, of shape (h,w).
+        """
+        img = self.getHeights()
+        return img.swapaxes(0,1)
+
+    def getHeightImage_b(self) -> Tuple['np.ndarray',float]:
+        """
+        Gets heights as a uint8 height image.  Handles image orientation.
+
+        Returns:
+            np.ndarray, float: the height values, of shape (h,w) and dtype
+            uint8, and the height scale.
+
+        """
+        himg = self.getHeightImage()
+        h_max = np.max(himg)
+        return (np.clip((himg/h_max)*255.0,0,255).astype(np.uint8),h_max)
+
+    def getHeightImage_s(self) -> Tuple['np.ndarray',float]:
+        """
+        Gets heights as a uint16 height image.  Handles image orientation.
+
+        Returns:
+            np.ndarray, float: the height values, of shape (h,w) and dtype
+            uint16, and the height scale.
+
+        """
+        himg = self.getHeightImage()
+        h_max = np.max(himg)
+        return (np.clip((himg/h_max)*65535.0,0,65535).astype(np.uint16),h_max)
+
+    def setColorImage(self, img : 'np.ndarray'):
         """
         Sets colors from a color image.
 
         Args:
-            img (np.ndarray): the color values, of shape (h,w) or (h,w,3) or (h,w,4).
-                Should have dtype float, np.float32, np.uint32 (RGBA 32-bit) or np.uint8.
+            img (np.ndarray): the color values, of shape (h,w) or (h,w,3) or
+                (h,w,4). Should have dtype float, np.float32, np.uint32
+                (RGBA 32-bit), or np.uint8.
         """
-        import numpy as np
         if len(img.shape) != 2 and len(img.shape) != 3:
             raise ValueError("Invalid shape for the color image")
         if len(img.shape) == 2:
             if img.dtype == np.uint32:
                 return self.setColorImage_i(img)
             elif img.dtype == np.uint8:
-                return self.setColorImage_b(img)
-            elif img.dtype == float:
-                return self.setColors(img.reshape(img.shape[0],img.shape[1],1))
+                return self.setColorImage_b(img.reshape(img.shape[0],img.shape[1],1))
+            elif img.dtype == float or img.dtype == np.float32:
+                return self.setColorImage_b((img.reshape(img.shape[0],img.shape[1],1)*255.0).astype(np.uint8))
             else:
                 raise ValueError("Invalid dtype for the color image, can use np.uint32, np.uint8, or float")
         else:
@@ -2446,12 +2506,30 @@ class Heightmap(object):
                 raise ValueError("Invalid shape for the color image")
             if img.dtype == np.uint8:
                 return self.setColorImage_b(img)
-            elif img.dtype == float:
-                return self.setColors(img)
+            elif img.dtype == float or img.dtype == np.float32:
+                return self.setColorImage_b((img*255.0).astype(np.uint8))
             else:
                 raise ValueError("Invalid dtype for the height image, can use float or np.uint8")
 
-    __swig_destroy__ = _robotsim.delete_Heightmap
+    def setPropertyImage(self, pindex : int, img : 'np.ndarray'):
+        """
+        Sets property channel pindex to a numpy image.
+
+        Handles image orientation.
+
+        Args:
+            pindex (int): the property index.
+            img (np.ndarray): the property values, of shape (h,w).
+        """
+        if len(img.shape) != 2:
+            raise ValueError("Invalid shape for the property image")
+        img = img.swapaxes(0,1)
+        return self.setProperties(pindex,img)
+
+    heights = property(getHeights, setHeights)
+    colorImage = property(getColorImage, setColorImage)
+    viewport = property(getViewport, setViewport)
+
 
 # Register Heightmap in _robotsim:
 _robotsim.Heightmap_swigregister(Heightmap)
@@ -3718,7 +3796,7 @@ class Appearance(object):
         element colors are not enabled, then a 1 x 4 array is returned. Otherwise,
         returns an m x 4 array, where m is the number of featuress of that type.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Appearance_getColors(self, feature)
@@ -3869,7 +3947,7 @@ class Appearance(object):
         Retrieves a view into the 1D texture data. If the texture is not set, throws an
         exception.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Appearance_getTexture1D_channels(self)
@@ -3934,7 +4012,7 @@ class Appearance(object):
         Retrieves a view into the 2D texture data. If the texture is not set, throws an
         exception.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Appearance_getTexture2D_channels(self)
@@ -3959,7 +4037,7 @@ class Appearance(object):
         Gets per-vertex texture coordinates for a 1D texture. If no 1D texture is set,
         throws an exception.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Appearance_getTexcoords1D(self)
@@ -3985,7 +4063,7 @@ class Appearance(object):
         Gets per-vertex texture coordinates for a 2D texture. If no 2D texture is set,
         throws an exception.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Appearance_getTexcoords2D(self)
@@ -4010,7 +4088,7 @@ class Appearance(object):
         Retrieves the texture generation. The array will be size m x 4, with m in the
         range 0,...,4. The texture generation is performed in  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Appearance_getTexgenMatrix(self)
@@ -4125,10 +4203,9 @@ class Appearance(object):
                 also be packed into uint32 elements.  In this case, the pixel
                 format is 0xaarrggbb or 0xaabbggrr, respectively.
         """
-        import numpy
-        array = numpy.asarray(array)
+        array = np.asarray(array)
         if len(array.shape) == 1:
-            if array.dtype == numpy.uint8:
+            if array.dtype == np.uint8:
                 return self.setTexture1D_b(format,array)
             else:
                 return self.setTexture1D_i(format,array)
@@ -4164,10 +4241,9 @@ class Appearance(object):
                 format is 0xaarrggbb or 0xaabbggrr, respectively.
         """
 
-        import numpy
-        array = numpy.asarray(array)
+        array = np.asarray(array)
         if len(array.shape) == 2:
-            if array.dtype == numpy.uint8:
+            if array.dtype == np.uint8:
                 return self.setTexture2D_b(format,array)
             else:
                 return self.setTexture2D_i(format,array)
@@ -4183,8 +4259,7 @@ class Appearance(object):
             array (np.ndarray): a 1D or 2D array, of size N or Nx2, where N is
                 the number of vertices in the mesh.
         """
-        import numpy
-        array = numpy.asarray(array)
+        array = np.asarray(array)
         if len(array.shape) == 1:
             return self.setTexcoords1D(array)
         elif len(array.shape) == 2:
@@ -4717,69 +4792,170 @@ class SpherePoser(Widget):
 _robotsim.SpherePoser_swigregister(SpherePoser)
 
 class Viewport(object):
-    r"""Proxy of C++ Viewport class."""
+    r"""
+
+
+    A class that represents an idealized pinhole camera.  
+
+    Duplicates the functioning of KrisLibrary/Camera/Viewport.  
+
+    C++ includes: viewport.h
+
+    """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
     def __init__(self):
-        r"""__init__(Viewport self) -> Viewport"""
+        r"""
+        __init__(Viewport self) -> Viewport
+
+
+        """
         _robotsim.Viewport_swiginit(self, _robotsim.new_Viewport())
 
     def fromJson(self, str: "std::string const &") -> "bool":
-        r"""fromJson(Viewport self, std::string const & str) -> bool"""
+        r"""
+        fromJson(Viewport self, std::string const & str) -> bool
+
+
+        """
         return _robotsim.Viewport_fromJson(self, str)
 
     def toJson(self) -> "std::string":
-        r"""toJson(Viewport self) -> std::string"""
+        r"""
+        toJson(Viewport self) -> std::string
+
+
+        """
         return _robotsim.Viewport_toJson(self)
 
     def fromText(self, str: "std::string const &") -> "bool":
-        r"""fromText(Viewport self, std::string const & str) -> bool"""
+        r"""
+        fromText(Viewport self, std::string const & str) -> bool
+
+
+        """
         return _robotsim.Viewport_fromText(self, str)
 
     def toText(self) -> "std::string":
-        r"""toText(Viewport self) -> std::string"""
+        r"""
+        toText(Viewport self) -> std::string
+
+
+        """
         return _robotsim.Viewport_toText(self)
 
     def resize(self, w: "int", h: "int") -> "void":
-        r"""resize(Viewport self, int w, int h)"""
+        r"""
+        resize(Viewport self, int w, int h)
+
+
+        Resizes the viewport, keeping the same field of view and relative position of
+        the focal point.  
+
+        """
         return _robotsim.Viewport_resize(self, w, h)
 
     def setFOV(self, xfov: "double", yfov: "double"=-1) -> "void":
-        r"""setFOV(Viewport self, double xfov, double yfov=-1)"""
+        r"""
+        setFOV(Viewport self, double xfov, double yfov=-1)
+
+
+        Sets the horizontal and optionally the vertical FOV. If yfov < 0, square pixels
+        will be assumed.  
+
+        """
         return _robotsim.Viewport_setFOV(self, xfov, yfov)
 
     def getFOV(self) -> "double":
-        r"""getFOV(Viewport self) -> double"""
+        r"""
+        getFOV(Viewport self) -> double
+
+
+        Returns the horizontal FOV.  
+
+        """
         return _robotsim.Viewport_getFOV(self)
 
     def getVFOV(self) -> "double":
-        r"""getVFOV(Viewport self) -> double"""
+        r"""
+        getVFOV(Viewport self) -> double
+
+
+        Returns the vertical FOV.  
+
+        """
         return _robotsim.Viewport_getVFOV(self)
 
     def setPose(self, R: "double const [9]", t: "double const [3]") -> "void":
-        r"""setPose(Viewport self, double const [9] R, double const [3] t)"""
+        r"""
+        setPose(Viewport self, double const [9] R, double const [3] t)
+
+
+        Sets the pose of the camera.  
+
+        """
         return _robotsim.Viewport_setPose(self, R, t)
 
     def getPose(self) -> "void":
-        r"""getPose(Viewport self)"""
+        r"""
+        getPose(Viewport self)
+
+
+        Gets the pose of the camera.  
+
+        Return type: RigidTransform  
+
+        """
         return _robotsim.Viewport_getPose(self)
 
     def viewRectangle(self, depth: "double") -> "void":
-        r"""viewRectangle(Viewport self, double depth)"""
+        r"""
+        viewRectangle(Viewport self, double depth)
+
+
+        Gets the viewing rectangle (xmin,ymin,xmax,ymax) at a given depth.  
+
+        Return type: Tuple[float,float,float,float]  
+
+        """
         return _robotsim.Viewport_viewRectangle(self, depth)
 
     def project(self, pt: "double const [3]") -> "void":
-        r"""project(Viewport self, double const [3] pt)"""
+        r"""
+        project(Viewport self, double const [3] pt)
+
+
+        Projects into image coordinates.  
+
+        Return type: Vector3  
+
+        """
         return _robotsim.Viewport_project(self, pt)
 
     def clickSource(self, x: "double", y: "double") -> "void":
-        r"""clickSource(Viewport self, double x, double y)"""
+        r"""
+        clickSource(Viewport self, double x, double y)
+
+
+        Provides the source of a ray for an image coordinate (x,y)  
+
+        Return type: Vector3  
+
+        """
         return _robotsim.Viewport_clickSource(self, x, y)
 
     def clickDirection(self, x: "double", y: "double") -> "void":
-        r"""clickDirection(Viewport self, double x, double y)"""
+        r"""
+        clickDirection(Viewport self, double x, double y)
+
+
+        Provides the direction of a ray for an image coordinate (x,y)  
+
+        Return type: Vector  
+
+        """
         return _robotsim.Viewport_clickDirection(self, x, y)
     perspective = property(_robotsim.Viewport_perspective_get, _robotsim.Viewport_perspective_set, doc=r"""perspective : bool""")
     x = property(_robotsim.Viewport_x_get, _robotsim.Viewport_x_set, doc=r"""x : int""")
@@ -5386,7 +5562,7 @@ class RobotModelLink(object):
 
             ndarray: the 6xn total Jacobian matrix of the
             point given by local coordinates plocal.  
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModelLink_getJacobian(self, plocal)
@@ -5406,7 +5582,7 @@ class RobotModelLink(object):
 
             ndarray: the 3xn Jacobian matrix of the
             point given by local coordinates plocal.  
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModelLink_getPositionJacobian(self, plocal)
@@ -5425,7 +5601,7 @@ class RobotModelLink(object):
         Returns:  
 
             ndarray:: the 3xn orientation Jacobian matrix of the link.  
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModelLink_getOrientationJacobian(self)
@@ -5445,7 +5621,7 @@ class RobotModelLink(object):
 
             ndarray: the 6xlen(links) Jacobian matrix of the
             point given by local coordinates plocal.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModelLink_getJacobianCols(self, plocal, links)
@@ -5466,7 +5642,7 @@ class RobotModelLink(object):
 
             ndarray: the 3xlen(links) position Jacobian matrix of the
             point given by local coordinates plocal.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModelLink_getPositionJacobianCols(self, plocal, links)
@@ -5487,7 +5663,7 @@ class RobotModelLink(object):
 
             ndarray: the 3xlen(links) orientation Jacobian matrix of the
             link.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModelLink_getOrientationJacobianCols(self, links)
@@ -5558,7 +5734,7 @@ class RobotModelLink(object):
 
             ndarray: a 3xnxn array with each of the elements in the first axis
             corresponding respectively, to the (x,y,z) components of the Hessian.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModelLink_getPositionHessian(self, plocal)
@@ -5577,7 +5753,7 @@ class RobotModelLink(object):
             ndarray: a 3xnxn array with each of the elements in the first axis
             corresponding, respectively, to the (wx,wy,wz) components of the
             pseudo-Hessian.
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModelLink_getOrientationHessian(self)
@@ -6226,7 +6402,7 @@ class RobotModel(object):
 
             ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
             COM velocity at the currene configuration
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModel_getComJacobian(self)
@@ -6244,7 +6420,7 @@ class RobotModel(object):
             ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
             gives the COM velocity at the current configuration, and dqlinks
             is the array of velocities of the links given by `links`
-         Return type: ndarray  
+         Return type: np.ndarray  
 
         """
         return _robotsim.RobotModel_getComJacobianCols(self, links)
@@ -6290,7 +6466,7 @@ class RobotModel(object):
 
         Computes the 3x3 total inertia matrix of the robot.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.RobotModel_getTotalInertia(self)
@@ -6304,7 +6480,7 @@ class RobotModel(object):
 
         Takes O(n^2) time  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.RobotModel_getMassMatrix(self)
@@ -6319,7 +6495,7 @@ class RobotModel(object):
         Takes O(n^2) time, which is much faster than inverting the result of
         getMassMatrix  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.RobotModel_getMassMatrixInv(self)
@@ -6333,7 +6509,7 @@ class RobotModel(object):
 
         Takes O(n^3) time.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.RobotModel_getMassMatrixDeriv(self, i)
@@ -6348,7 +6524,7 @@ class RobotModel(object):
 
         Takes O(n^4) time.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.RobotModel_getMassMatrixTimeDeriv(self)
@@ -6362,7 +6538,7 @@ class RobotModel(object):
 
         Takes O(n^2) time.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.RobotModel_getCoriolisForceMatrix(self)
@@ -8055,7 +8231,7 @@ class IKSolver(object):
         Computes the matrix describing the instantaneous derivative of the objective
         with respect to the active Dofs.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.IKSolver_getJacobian(self)
@@ -8464,7 +8640,7 @@ class SimRobotSensor(object):
         Returns an array of measurements from the previous simulation (or
         kinematicSimulate) timestep.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.SimRobotSensor_getMeasurements(self)
@@ -9734,7 +9910,7 @@ class Simulator(object):
         point into object `a`. Each contact point (x,n,kFriction) is represented as a
         7-element vector.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Simulator_getContacts(self, aid, bid)
@@ -9747,7 +9923,7 @@ class Simulator(object):
         Returns the list of contact forces on object a at the last time step. Result is
         an nx3 array.  
 
-        Return type: ndarray  
+        Return type: np.ndarray  
 
         """
         return _robotsim.Simulator_getContactForces(self, aid, bid)

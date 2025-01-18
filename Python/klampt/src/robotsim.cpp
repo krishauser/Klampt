@@ -562,6 +562,7 @@ void GetVolumeGrid(const VolumeGrid& grid,AnyCollisionGeometry3D& geom)
 }
 */
 
+/*
 void GetHeightmap(const Meshing::Heightmap& khm,Heightmap& hm)
 {
   hm.viewport = SetCameraViewport(khm.viewport);
@@ -594,7 +595,6 @@ void GetHeightmap(const Meshing::Heightmap& khm,Heightmap& hm)
     }
   }
 }
-
 
 void GetHeightmap(const Heightmap& hm, Meshing::Heightmap& khm)
 {
@@ -645,6 +645,7 @@ void GetHeightmap(const Heightmap& hm, Meshing::Heightmap& khm)
   }
 }
 
+*/
 
 //returns a shared_ptr<InternalType>&
 #define GET_GEOMDATA_PTR(ptr,InternalType) (*reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>((ptr)->dataPtr))
@@ -716,7 +717,7 @@ void GetHeightmap(const Heightmap& hm, Meshing::Heightmap& khm)
   } \
   void Class::operator = (const Class& rhs) { \
     shared_ptr<AnyCollisionGeometry3D>& data = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(dataPtr); \
-    const shared_ptr<AnyCollisionGeometry3D>& gdata = *reinterpret_cast<const shared_ptr<AnyCollisionGeometry3D>*>(rhs.dataPtr); \ 
+    const shared_ptr<AnyCollisionGeometry3D>& gdata = *reinterpret_cast<const shared_ptr<AnyCollisionGeometry3D>*>(rhs.dataPtr); \
     data = gdata; \
   } \
   void Class::set(const Class& g) \
@@ -1186,13 +1187,12 @@ ConvexHull Geometry3D::getConvexHull()
 Heightmap Geometry3D::getHeightmap()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return Heightmap();
+  Heightmap hm;
+  SET_GEOMDATA_TO_REFERENCE(&hm,AnyCollisionGeometry3D,geom);
+  if(!geom) return hm;
   if(geom->type != AnyGeometry3D::Type::Heightmap) {
     throw PyException("Geometry3D is not Heightmap type");
   }
-  const Meshing::Heightmap& khm = geom->AsHeightmap();
-  Heightmap hm;
-  GetHeightmap(khm,hm);
   return hm;
 }
 
@@ -1318,30 +1318,7 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 
 void Geometry3D::setHeightmap(const Heightmap& hm)
 {
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
-  Klampt::ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) {
-    Klampt::WorldModel& world = *worlds[this->world]->world;
-    mgeom = &GetManagedGeometry(world,id);
-  }
-  if(geom == NULL) {
-    if(mgeom) {
-      geom = mgeom->CreateEmpty();
-    }
-    else
-      geom = make_shared<AnyCollisionGeometry3D>();
-  }
-  Meshing::Heightmap khm;
-  GetHeightmap(hm,khm);
-  RigidTransform T = geom->GetTransform();
-  *geom = khm;
-  geom->ClearCollisionData();
-  geom->SetTransform(T);
-  if(mgeom) {
-    //update the display list / cache
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
+  STANDARD_GEOMETRY3D_SET(hm);
 }
 
 Geometry3D Geometry3D::getElement(int element)
@@ -3525,423 +3502,319 @@ void VolumeGrid::setValues(double* in, int m, int n, int p)
 
 
 
-
-Heightmap::Heightmap()
-{ 
-  viewport.perspective = false;
-  Matrix3 I; I.setIdentity();
-  viewport.setPose(&I(0,0),Vector3(0.0));
-  viewport.x = 0;
-  viewport.y = 0;
-  viewport.w = 0;
-  viewport.h = 0;
-  viewport.fx = -1;
-  viewport.fy = -1;
-  viewport.cx = -1;
-  viewport.cy = -1;
-}
+DEFINE_GEOMDATA_CLASS(Heightmap,Heightmap)
 
 void Heightmap::setSize(double width, double height)
 {
-  if(viewport.w == 0 || viewport.h == 0)
-    throw PyException("Heightmap dimensions not set, call resize() first");
-  viewport.perspective = false;
-  viewport.cx = (viewport.w)*0.5;
-  viewport.cy = (viewport.h)*0.5;
-  viewport.w -= 1;
-  viewport.h -= 1;
-  viewport.setFOV(width,height);
-  viewport.w += 1;
-  viewport.h += 1;
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.SetSize(width,height);
 }
 
 void Heightmap::setFOV(double fovx,double fovy)
 {
-  if(viewport.w == 0 || viewport.h == 0)
-    throw PyException("Heightmap dimensions not set, call resize() first");
-  viewport.perspective = true;
-  viewport.w -= 1;
-  viewport.h -= 1;
-  viewport.setFOV(fovx,fovy);
-  viewport.w += 1;
-  viewport.h += 1;
-  viewport.cx = (viewport.w)*0.5;
-  viewport.cy = (viewport.h)*0.5;
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.SetFOV(fovx,fovy);
 }
 
 void Heightmap::setIntrinsics(double fx,double fy,double cx,double cy)
 {
-  if(viewport.w == 0 || viewport.h == 0)
-    throw PyException("Heightmap dimensions not set, call resize() first");
-  viewport.perspective = true;
-  if(cx < 0) cx = (viewport.w-1)*0.5;
-  if(cy < 0) cy = (viewport.h-1)*0.5;
-  viewport.fx = fx;
-  viewport.fy = fy;
-  viewport.cx = cx;
-  viewport.cy = cy;
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.viewport.fx = fx;
+  hm.viewport.fy = fy;
+  hm.viewport.cx = cx;
+  hm.viewport.cy = cy;
+}
+
+bool Heightmap::isPerspective() const
+{
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  return hm.viewport.perspective;
+}
+
+void Heightmap::setViewport(const Viewport& vp)
+{
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.viewport = GetCameraViewport(vp);
+}
+
+Viewport Heightmap::getViewport() const
+{
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  return SetCameraViewport(hm.viewport);
 }
 
 void Heightmap::resize(int w,int h)
 {
   if(w <= 1 || h <= 1) throw PyException("Invalid dimensions, must be > 1");
-  if(viewport.w != 0) {
-    float xratio = float(w)/viewport.w;
-    viewport.fx *= xratio;
-    viewport.cx *= xratio;
-  }
-  if(viewport.h != 0) {
-    float yratio = float(h)/viewport.h;
-    viewport.fy *= yratio;
-    viewport.cy *= yratio;
-  }
-  viewport.w = w;
-  viewport.h = h;
-  
-  heights.resize(w*h);
-  if((int)colors.size() != w*h)
-    colors.resize(0);
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.Resize(w,h);
 }
 
 void Heightmap::set(double value)
 {
-  std::fill(heights.begin(),heights.end(),value);
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.heights.set(value);
 }
 
 void Heightmap::set(int i,int j,double value)
 {
-  if(i < 0 || i >= viewport.w) throw PyException("First index out of range");
-  if(j < 0 || j >= viewport.h) throw PyException("Second index out of range");
-  heights[i*viewport.h+j] = value;
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(i < 0 || i >= hm.heights.m) throw PyException("First index out of range");
+  if(j < 0 || j >= hm.heights.n) throw PyException("Second index out of range");
+  hm.heights(i,j) = value;
 }
 
 double Heightmap::get(int i,int j)
 {
-  if(i < 0 || i >= viewport.w) throw PyException("First index out of range");
-  if(j < 0 || j >= viewport.h) throw PyException("Second index out of range");
-  return heights[i*viewport.h+j];
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(i < 0 || i >= hm.heights.m) throw PyException("First index out of range");
+  if(j < 0 || j >= hm.heights.n) throw PyException("Second index out of range");
+  return hm.heights(i,j);
 }
 
 void Heightmap::shift(double dh)
 {
-  for(vector<double>::iterator i=heights.begin();i!=heights.end();i++)
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  for(auto i=hm.heights.begin();i!=hm.heights.end();++i) {
     *i += dh;
+  }
 }
 
 void Heightmap::scale(double c)
 {
-  for(vector<double>::iterator i=heights.begin();i!=heights.end();i++)
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  for(auto i=hm.heights.begin();i!=hm.heights.end();++i) {
     *i *= c;
+  }
 }
 
-void Heightmap::getHeights(double** np_view2, int* m, int* n)
+void Heightmap::getHeights(float** np_view2, int* m, int* n)
 {
-  *m = viewport.w;
-  *n = viewport.h;
-  *np_view2 = &heights[0];
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(hm.heights.empty()) {
+    *np_view2 = NULL;
+    *m = 0;
+    *n = 0;
+    return;
+  }
+  *m = hm.heights.m;
+  *n = hm.heights.n;
+  *np_view2 = hm.heights.getData();
 }
 
-void Heightmap::setHeights(double* np_array2, int m, int n)
+void Heightmap::setHeights_f(float* np_array2, int m, int n)
 {
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
   resize(m,n);
-  copy(np_array2,np_array2+m*n,&heights[0]);
+  std::copy(np_array2,np_array2+m*n,hm.heights.getData());
 }
 
-void Heightmap::setHeightImage_d(double* np_array2,int m2,int n2,double height_scale)
+bool Heightmap::hasColors() const 
 {
-  resize(n2,m2);
-  int k;
-  for(int i=0;i<m2;i++) //row, from top to bottom
-    for(int j=0;j<n2;j++,k++) //column
-      heights[j*m2+(m2-i-1)] = np_array2[i*n2+j]*height_scale;
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  return hm.HasColors();
 }
-
-void Heightmap::setHeightImage_f(float* np_array2,int m2,int n2,double height_scale)
-{
-  resize(n2,m2);
-  int k;
-  for(int i=0;i<m2;i++) //row, from top to bottom
-    for(int j=0;j<n2;j++,k++) //column
-      heights[j*m2+(m2-i-1)] = np_array2[i*n2+j]*height_scale;
-}
-
-void Heightmap::setHeightImage_s(unsigned short* np_array2,int m2,int n2,double height_scale)
-{
-  resize(n2,m2);
-  int k;
-  for(int i=0;i<m2;i++) //row, from top to bottom
-    for(int j=0;j<n2;j++,k++) //column
-      heights[j*m2+(m2-i-1)] = np_array2[i*n2+j]*height_scale;
-}
-
-void Heightmap::setHeightImage_b(unsigned char* np_array2,int m2,int n2,double height_scale)
-{
-  resize(n2,m2);
-  int k;
-  for(int i=0;i<m2;i++) //row, from top to bottom
-    for(int j=0;j<n2;j++,k++) //column
-      heights[j*m2+(m2-i-1)] = np_array2[i*n2+j]*height_scale;
-}
-
-// void Heightmap::getHeightImage_d(double** np_view2,int* m2,int* n2);
-// void Heightmap::getHeightImage_f(float** np_view2,int* m2,int* n2);
-// void Heightmap::getHeightImage_s(unsigned short** np_view2,int* m2,int* n2);
-// void Heightmap::getHeightImage_b(unsigned char** np_view2,int* m2,int* n2);
 
 void Heightmap::clearColors()
 {
-  colors.resize(0);
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.colors.clear();
 }
 
 void Heightmap::setColor(double intensity)
 {
-  if(colors.empty()) colors.resize(viewport.w*viewport.h);
-  if((int)colors.size() != viewport.w*viewport.h)
-    throw PyException("Color array is not grayscale?");
-  fill(colors.begin(),colors.end(),intensity);
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.AddColors(Vector3(intensity));
 }
   
 void Heightmap::setColor(const double rgba[4])
 {
-  if(colors.empty()) colors.resize(viewport.w*viewport.h*4);
-  if((int)colors.size() != viewport.w*viewport.h*4 && (int)colors.size() != viewport.w*viewport.h*3)
-    throw PyException("Color array is not RGBA?");
-  size_t nchannels = colors.size()/(viewport.w*viewport.h);
-  for(int i=0;i<viewport.w*viewport.h;i++) {
-    if(nchannels==3) {
-      colors[i*3] = rgba[0];
-      colors[i*3+1] = rgba[1];
-      colors[i*3+2] = rgba[2];
-    }
-    else {
-      colors[i*4] = rgba[0];
-      colors[i*4+1] = rgba[1];
-      colors[i*4+2] = rgba[2];
-      colors[i*4+3] = rgba[3];
-    }
-  }
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  //TODO: consider alpha
+  hm.AddColors(Vector3(rgba));
 }
 
 void Heightmap::setColor(int i,int j,double intensity)
 {
-  if(i < 0 || i >= viewport.w) throw PyException("First index out of range");
-  if(j < 0 || j >= viewport.h) throw PyException("Second index out of range");
-  if(colors.empty()) colors.resize(viewport.w*viewport.h,1.0);
-  if((int)colors.size() != viewport.w*viewport.h)
-    throw PyException("Color array is not Grayscale?");
-  int ind = i*viewport.h+j;
-  colors[ind] = intensity;
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(i < 0 || i >= hm.heights.m) throw PyException("First index out of range");
+  if(j < 0 || j >= hm.heights.n) throw PyException("Second index out of range");
+  if(!hm.HasColors()) hm.AddColors(Vector3(1,1,1));
+  hm.SetVertexColor(i,j,Vector3(intensity));
 }
 
 void Heightmap::setColor(int i,int j,const double rgba[4])
 {
-  if(i < 0 || i >= viewport.w) throw PyException("First index out of range");
-  if(j < 0 || j >= viewport.h) throw PyException("Second index out of range");
-  if(colors.empty()) colors.resize(viewport.w*viewport.h*4,1.0);
-  if((int)colors.size() != viewport.w*viewport.h*4 && (int)colors.size() != viewport.w*viewport.h*3)
-    throw PyException("Color array is not RGBA?");
-  int ind = i*viewport.h+j;
-  size_t nchannels = colors.size()/(viewport.w*viewport.h);
-  if(nchannels == 3) {
-    colors[ind*3] = rgba[0];
-    colors[ind*3+1] = rgba[1];
-    colors[ind*3+2] = rgba[2];
-  }
-  else {
-    colors[ind*4] = rgba[0];
-    colors[ind*4+1] = rgba[1];
-    colors[ind*4+2] = rgba[2];
-    colors[ind*4+3] = rgba[3];
-  }
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(i < 0 || i >= hm.heights.m) throw PyException("First index out of range");
+  if(j < 0 || j >= hm.heights.n) throw PyException("Second index out of range");
+  if(!hm.HasColors()) hm.AddColors(Vector3(1,1,1));
+  hm.SetVertexColor(i,j,Vector4(rgba));
 }
 
 void Heightmap::getColor(int i,int j,double out[4])
 {
-  if(i < 0 || i >= viewport.w) throw PyException("First index out of range");
-  if(j < 0 || j >= viewport.h) throw PyException("Second index out of range");
-  if(colors.empty()) throw PyException("Color array is not initialized");
-  int ind = i*viewport.h+j;
-  if((int)colors.size() == viewport.w*viewport.h*4) {
-    out[0] = colors[ind*4];
-    out[1] = colors[ind*4+1];
-    out[2] = colors[ind*4+2];
-    out[3] = colors[ind*4+3];
-  }
-  else if((int)colors.size() == viewport.w*viewport.h*3) {
-    out[0] = colors[ind*3];
-    out[1] = colors[ind*3+1];
-    out[2] = colors[ind*3+2];
-    out[3] = 1.0;
-  }
-  else if((int)colors.size() == viewport.w*viewport.h) {
-    out[0] = colors[ind];
-    out[1] = colors[ind];
-    out[2] = colors[ind];
-    out[3] = 1.0;
-  }
-  else
-    throw PyException("Color array is not grayscale or RGBA?");
-
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(i < 0 || i >= hm.heights.m) throw PyException("First index out of range");
+  if(j < 0 || j >= hm.heights.n) throw PyException("Second index out of range");
+  if(!hm.HasColors()) throw PyException("Color array is not initialized");
+  Vector3 col = hm.GetVertexColor(i,j);
+  col.get(out);
+  out[3] = 1.0;
 }
 
-void Heightmap::getColors(double** np_view3, int* m, int* n, int* p)
+void Heightmap::getColorImage(unsigned char** np_view3, int* m, int* n, int* p)
 {
-  if(colors.empty()) throw PyException("Color array is not initialized");
-  *m = viewport.w;
-  *n = viewport.h;
-  *p = (int)colors.size()/(viewport.w*viewport.h);
-  *np_view3 = &colors[0];
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(!hm.HasColors()) throw PyException("Color array is not initialized");  
+  if(hm.colors.format != Image::R8G8B8 && hm.colors.format != Image::R8G8B8A8 && hm.colors.format != Image::A8) throw PyException("Can only return RGB uint8 arrays");
+  *m = hm.colors.h;
+  *n = hm.colors.w;
+  *p = hm.colors.pixelChannels();
+  *np_view3 = hm.colors.data;
+}
+void Heightmap::getColorImage_i(unsigned int** np_out2, int* m, int* n)
+{
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(!hm.HasColors()) throw PyException("Color array is not initialized");  
+  if(hm.colors.format != Image::R8G8B8 && hm.colors.format != Image::R8G8B8A8 && hm.colors.format != Image::A8) throw PyException("Can only return RGB uint8 arrays");
+  *m = hm.colors.h;
+  *n = hm.colors.w;
+  *np_out2 = (unsigned int*)malloc(hm.colors.w*hm.colors.h*sizeof(unsigned int));
+  float color[4];
+  for(int row=0;row<hm.colors.h;row++) {
+    for(int col=0;col<hm.colors.w;col++) {
+      int i = row*hm.colors.w+col;
+      hm.colors.getNormalizedColor(col,row,color);
+      (*np_out2)[i] = ((unsigned int)(color[0]*255) << 16) | ((unsigned int)(color[1]*255) << 8) | ((unsigned int)(color[2]*255));
+    }
+  }
 }
 
-void Heightmap::setColors(double* np_array3, int m, int n, int p)
+void Heightmap::getColorImage_d(double** np_out3, int* m, int* n, int* p)
 {
-  if(m != viewport.w || n != viewport.h) throw PyException("Color image size does not match heightmap size");
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(!hm.HasColors()) throw PyException("Color array is not initialized");  
+  if(hm.colors.format != Image::R8G8B8 && hm.colors.format != Image::R8G8B8A8 && hm.colors.format != Image::A8) throw PyException("Can only return RGB uint8 arrays");
+  *m = hm.colors.h;
+  *n = hm.colors.w;
+  *p = hm.colors.pixelChannels();
+  *np_out3 = (double*)malloc(hm.colors.w*hm.colors.h*hm.colors.pixelChannels()*sizeof(double));
+  int k = hm.colors.w*hm.colors.h*hm.colors.pixelChannels();
+  double scale = 1.0/255.0;
+  for(int i=0;i<k;i++)
+    (*np_out3)[i] = hm.colors.data[i]*scale;
+}
+
+void Heightmap::setColorImage_b(unsigned char* np_array3, int m, int n, int p)
+{
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(m != hm.heights.n || n != hm.heights.m) throw PyException("Color image size does not match heightmap size");
   if(p != 1 && p != 3 && p != 4) throw PyException("Color image must have 1, 3, or 4 channels");
-  if(colors.empty())
-    colors.resize(m*n*p);
-  copy(np_array3,np_array3+m*n*p,&colors[0]);
+  hm.colors.clear();
+  Image::PixelFormat fmt;
+  if(p == 1) fmt = Image::A8;
+  else if(p == 3) fmt = Image::R8G8B8;
+  else fmt = Image::R8G8B8A8;
+  hm.colors.initialize(n,m,fmt);
+  std::copy(np_array3,np_array3+m*n*p,hm.colors.data);
 }
 
 void Heightmap::setColorImage_i(unsigned int* np_array2, int m, int n)
 {
-  if(viewport.w != n || viewport.h != m) throw PyException("Color image size does not match heightmap size");
-  colors.resize(m*n*4);
-  double scale = 1.0/255.0;
-  int k=0;
-  for(int i=0;i<m;i++) {  // rows, top to bottom
-    for(int j=0;j<n;j++,k++) {  // columns
-      int ind = ((m-1-i)*n+j)*4;
-      colors[ind] = ((np_array2[k] >> 24) & 0xff)*scale;
-      colors[ind+1] = ((np_array2[k] >> 16) & 0xff)*scale;
-      colors[ind+2] = ((np_array2[k] >> 8) & 0xff)*scale;
-      colors[ind+3] = (np_array2[k] & 0xff)*scale;
-    }
-  }
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(m != hm.heights.n || n != hm.heights.m) throw PyException("Color image size does not match heightmap size");
+  hm.colors.initialize(n,m,Image::R8G8B8A8);
+  std::copy((unsigned char*)np_array2,(unsigned char*)(np_array2 + m*n),hm.colors.data);
 }
 
-void Heightmap::setColorImage_b3(unsigned char* np_array3, int m, int n, int p)
+int Heightmap::numProperties() const
 {
-  if(viewport.w != n || viewport.h != m) throw PyException("Color image size does not match heightmap size");
-  if(p != 3) throw PyException("Color image needs 3 RGB channels");
-  colors.resize(m*n*3);
-  double scale = 1.0/255.0;
-  int k=0;
-  for(int i=0;i<m;i++) {  // rows, top to bottom
-    for(int j=0;j<n;j++,k+=3) {  // columns
-      int ind = ((m-1-i)*n+j)*3;
-      colors[ind] = np_array3[k] *scale;
-      colors[ind+1] = np_array3[k+1] *scale;
-      colors[ind+2] = np_array3[k+2] *scale;
-    }
-  }
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  return (int)hm.propertyNames.size();
 }
 
-void Heightmap::setColorImage_b(unsigned char* np_array2, int m, int n)
+int Heightmap::propertyIndex(const std::string& pname) const
 {
-  if(viewport.w != n || viewport.h != m) throw PyException("Color image size does not match heightmap size");
-  colors.resize(m*n);
-  double scale = 1.0/255.0;
-  int k=0;
-  for(int i=0;i<m;i++) {  // rows, top to bottom
-    for(int j=0;j<n;j++,k++) {  // columns
-      int ind = ((m-1-i)*n+j);
-      colors[ind] = np_array2[k] *scale;
-    }
-  }
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  for(size_t i=0;i<hm.propertyNames.size();i++)
+    if(hm.propertyNames[i] == pname) return (int)i;
+  return -1;
 }
-// void Heightmap::getColorImage_i(unsigned int** np_view2, int* m, int* n);
-// void Heightmap::getColorImage_b(unsigned int** np_view2, int* m, int* n);
 
-void Heightmap::addProperty(const std::string& pname)
+int Heightmap::addProperty(const std::string& pname)
 {
-  for(size_t i=0;i<propertyNames.size();i++)
-    if(propertyNames[i] == pname) {
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  int k = (int)hm.propertyNames.size();
+  for(size_t i=0;i<hm.propertyNames.size();i++)
+    if(hm.propertyNames[i] == pname) {
       stringstream ss;
       ss<<"Property "<<pname<<" already exists";
       throw PyException(ss.str());
     }
-  propertyNames.push_back(pname);
-  properties.resize(propertyNames.size()*viewport.w*viewport.h,0.0);
+  hm.AddProperty(pname);
+  return k;
 }
 
-void Heightmap::addProperty(const std::string& pname,double* np_array2,int m,int n)
+int Heightmap::addProperty(const std::string& pname,double* np_array2,int m,int n)
 {
-  int pindex = (int)properties.size();
-  addProperty(pname);
+  int pindex = addProperty(pname);
   setProperties(pindex,np_array2,m,n);
+  return pindex;
 }
 
 void Heightmap::setProperty(int i,int j,double* np_array,int m)
 {
-  if(m != (int)propertyNames.size()) {
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(m != (int)hm.propertyNames.size()) {
     stringstream ss;
-    ss<<"Property size "<<m<<" does not match number of properties "<<propertyNames.size();
+    ss<<"Property size "<<m<<" does not match number of properties "<<hm.propertyNames.size();
     throw PyException(ss.str());
   }
-  if(i < 0 || i >= viewport.w) throw PyException("First index out of range");
-  if(j < 0 || j >= viewport.h) throw PyException("Second index out of range");
-  int ind = i+j*viewport.w;
+  if(i < 0 || i >= hm.heights.m) throw PyException("First index out of range");
+  if(j < 0 || j >= hm.heights.n) throw PyException("Second index out of range");
   for(int k=0;k<m;k++)
-    properties[k*viewport.w*viewport.h+ind] = np_array[k];
+    hm.properties[k](i,j) = np_array[k];
 }
 
 void Heightmap::getProperty(int i,int j,double** np_out,int* m)
 {
-  if(i < 0 || i >= viewport.w) throw PyException("First index out of range");
-  if(j < 0 || j >= viewport.h) throw PyException("Second index out of range");
-  *np_out = (double*)malloc(propertyNames.size()*sizeof(double));
-  *m = propertyNames.size();
-  *np_out = &properties[0] + i+j*viewport.w;
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(i < 0 || i >= hm.heights.m) throw PyException("First index out of range");
+  if(j < 0 || j >= hm.heights.n) throw PyException("Second index out of range");
+  *np_out = (double*)malloc(hm.propertyNames.size()*sizeof(double));
+  *m = hm.propertyNames.size();
+  for(int k=0;k<*m;k++)
+    (*np_out)[k] = hm.properties[k](i,j);
 }
 
 void Heightmap::setProperties(int pindex,double* np_array2,int m,int n)
 {
-  if(pindex < 0 || pindex >= (int)propertyNames.size()) {
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(pindex < 0 || pindex >= (int)hm.propertyNames.size()) {
     stringstream ss;
     ss<<"Property index "<<pindex<<" out of range";
     throw PyException(ss.str());
   }
-  if(m != viewport.w || n != viewport.h) {
+  if(m != hm.heights.m || n != hm.heights.n) {
     stringstream ss;
-    ss<<"Property size "<<m<<" x "<<n<<" does not match heightmap size "<<viewport.w<<" x "<<viewport.h;
+    ss<<"Property size "<<m<<" x "<<n<<" does not match heightmap size "<<hm.heights.m<<" x "<<hm.heights.n;
     throw PyException(ss.str());
   }
-  copy(np_array2,np_array2+m*n,&properties[pindex*m*n]);
+  std::copy(np_array2,np_array2+m*n,hm.properties[pindex].getData());
 }
 
-void Heightmap::getProperties(int pindex,double** np_view2,int* m,int* n)
+void Heightmap::getProperties(int pindex,float** np_view2,int* m,int* n)
 {
-  if(pindex < 0 || pindex >= (int)propertyNames.size()) {
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  if(pindex < 0 || pindex >= (int)hm.propertyNames.size()) {
     stringstream ss;
     ss<<"Property index "<<pindex<<" out of range";
     throw PyException(ss.str());
   }
-  *m = viewport.w;
-  *n = viewport.h;
-  *np_view2 = &properties[pindex*viewport.w*viewport.h];
-}
-
-void Heightmap::setPropertyImage(int pindex,double* np_array2,int m,int n)
-{
-  if(pindex < 0 || pindex >= (int)propertyNames.size()) {
-    stringstream ss;
-    ss<<"Property index "<<pindex<<" out of range";
-    throw PyException(ss.str());
-  }
-  if(m != viewport.h || n != viewport.w) {
-    stringstream ss;
-    ss<<"Property image size "<<n<<" x "<<m<<" does not match heightmap size "<<viewport.w<<" x "<<viewport.h;
-    throw PyException(ss.str());
-  }
-
-  int start_index = pindex*viewport.w*viewport.h;
-  int k=0;
-  for(int i=0;i<m;i++) {  // rows, top to bottom
-    for(int j=0;j<n;j++,k++) {  // columns
-      int ind = ((m-1-i)*n+j);
-      properties[start_index + ind] = np_array2[k];
-    }
-  }
+  *m = hm.heights.m;
+  *n = hm.heights.n;
+  *np_view2 = hm.properties[pindex].getData();
 }
 
 
@@ -7612,7 +7485,7 @@ void Viewport::resize(int _w, int _h)
   w = _w;
   h = _h;
   fx *= xratio;
-  fy *= yratio;
+  fy *= xratio; //keep pixel aspect ratio the same
   cx *= xratio;
   cy *= yratio;
 }

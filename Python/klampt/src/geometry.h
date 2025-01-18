@@ -46,7 +46,7 @@ struct TriangleMesh
   ///    ndarray: an nx3 Numpy array. Setting elements of this array will
   ///    change the vertices.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getVertices(double** np_view2, int* m, int* n);
   ///Sets all vertices to the given nx3 Numpy array
   void setVertices(double* np_array2, int m, int n);
@@ -59,7 +59,7 @@ struct TriangleMesh
   ///    ndarray: an mx3 Numpy array of int32 type. Setting elements of this 
   ///    array will change the triangle indices.
   /// 
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getIndices(int** np_view2, int* m, int* n);
   ///Sets all indices to the given mx3 Numpy array
   void setIndices(int* np_array2, int m, int n);
@@ -102,7 +102,7 @@ struct ConvexHull
   ///    ndarray: an nx3 Numpy array. Setting elements of this array will
   ///    change the points.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getPoints(double** np_view2, int* m, int* n);
   ///Sets all points to the given nx3 Numpy array
   void setPoints(double* np_array2, int m, int n);
@@ -188,7 +188,7 @@ struct PointCloud
   ///    ndarray: an nx3 Numpy array. Setting elements of this array will
   ///    change the points.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getPoints(double** np_view2, int* m, int* n);
   ///Sets all the points to the given nx3 Numpy array
   void setPoints(double* np_array2, int m, int n);
@@ -218,7 +218,7 @@ struct PointCloud
   ///    ndarray: an nxk Numpy array. Setting elements of this array will
   ///    change the vertices.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getProperties(double** np_view2, int* m, int* n);
   ///Adds a new property.  All values for this property are set to 0.
   int addProperty(const std::string& pname);
@@ -270,13 +270,6 @@ struct PointCloud
 
   void* dataPtr;
   bool isStandalone;
-
-/*
-  std::vector<double> vertices;
-  std::vector<std::string> propertyNames;
-  std::vector<double> properties;
-  std::map<std::string,std::string> settings;
-*/
 };
 
 /** @brief A geometric primitive.  So far only points, spheres, segments,
@@ -374,18 +367,13 @@ public:
   void scale(double cv);
   ///Returns a 3D Numpy array view of the values
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getValues(double** np_view3, int* m, int* n, int* p);
   ///Sets the values to a 3D numpy array
   void setValues(double* np_array3, int m, int n, int p);
 
   void* dataPtr;
   bool isStandalone;
-  /*
-  std::vector<double> bbox; 
-  std::vector<int> dims;
-  std::vector<double> values; 
-  */
 };
 
 /** @brief A height (elevation) map or a depth map.
@@ -410,34 +398,28 @@ public:
  *
  *     viewport (Viewport): contains the size (w,h), projection (perspective)
  *          intrinsics (fx,fy,cx,cy), and pose (pose) of the heightmap
- *          reference coordinate system.
- *     heights (SWIG vector of floats): contains a 2D array of
- *          ``dims[0]*dims[1]`` values from the upper left to the bottom
- *          right (image scan-line convention)
+ *          reference coordinate system.  Note that to change the viewport, you
+ *          will need to use `vp = hm.viewport; vp.w = ...; hm.viewport = vp`.
  * 
- *          The vertex index (i,j) indicates (x index, y index) and is flattened to
- *          ``i*dims[1] + j``.
- *
- *          The array index k is associated to vertex index (x index,y index)
- *          ``(k/dims[1], k % dims[0])``
+ *     heights (np.ndarray): contains a 2D array of (w,h) values.
  * 
- *      colors (SWIG vector of floats): contains a 2D array of colors in
- *          grayscale (w*h), RGB (3*w*h), or RGBA (4*w*h) form.  The layout
- *          is row major in the space (row,col,channel), i.e., the index of
- *          (i,j,channel) is ``i*h*C + j*C + channel`` where C is 1, 3, or 4.
+ *     colorImage (np.ndarray): contains a 3D image array of colors in
+ *          grayscale (h,w), RGB (h,w,3), or RGBA (h,w,4) format.
  * 
- *      properties (SWIG vector of floats): contains a 3D array of properties
- *          (w*h*p) where p is the number of properties.  p matches the length
- *         of propertyNames.  Layout is row-major with (property, row, col), i.e., p order,
- *         w order, then h order.  Property p at index (i,j) is flattened to 
- *        ``p*w*h + i*h + j``.
- * 
- *      propertyNames (SWIG vector of strings): A list of the p property names.
  */
 class Heightmap
 {
 public:
   Heightmap();
+  ~Heightmap();
+  Heightmap(const Heightmap& rhs);
+  ///Creates a standalone object that is a copy of this 
+  Heightmap copy() const;
+  ///Used internally 
+  void operator = (const Heightmap& rhs);
+  ///Copies the data of the argument into this.
+  void set(const Heightmap&);
+
   /// Resizes the height map 
   void resize(int w,int h);
   ///Sets an orthographic projection (elevation map) with the given width and height
@@ -449,6 +431,14 @@ public:
   /// Sets an perspective projection (depth map) with the given intrinsics fx, fy, cx, cy.
   /// If cx or cy are negative, then cx = (w-1)/2, cy = (h-1)/2.
   void setIntrinsics(double fx,double fy,double cx=-1,double cy=-1);
+  /// Returns true if the heightmaps is in perspective (depth map) mode 
+  bool isPerspective() const;
+  /// Returns true if the heightmaps is in orthographic (elevation map) mode
+  bool isOrthographic() const { return !isPerspective(); }
+  /// Retrieves the viewport 
+  Viewport getViewport() const;
+  /// Sets the viewport
+  void setViewport(const Viewport& viewport);
   ///Sets all elements to a uniform value (e.g., 0)
   void set(double value);
   ///Sets the height of a vertex (note, indices are x and y units, which is reversed from image convention)
@@ -459,94 +449,69 @@ public:
   void shift(double dh);
   /// Scales the height uniformly 
   void scale(double c);
-  ///Returns a 2D Numpy array view of the values.  Result has shape w x h
+  ///Returns a 2D Numpy array view of the values.  Result has shape w x h and 
+  ///has float32 dtype.
   ///
-  ///Return type: ndarray
-  void getHeights(double** np_view2, int* m, int* n);
-  ///Sets the values to 2D numpy array of shape w x h
-  void setHeights(double* np_array2, int m, int n);
-  ///Sets values to an image with size (h, w) with rows ordered top to bottom
-  void setHeightImage_d(double* np_array2,int m,int n,double height_scale=1);
-  ///Sets values to an image with size (h, w) with rows ordered top to bottom
-  void setHeightImage_f(float* np_array2,int m,int n,double height_scale=1);
-  ///Sets values to an image with size (h, w) with rows ordered top to bottom
-  void setHeightImage_s(unsigned short* np_array2,int m,int n,double height_scale=1);
-  ///Sets values to an image with size (h, w) with rows ordered top to bottom
-  void setHeightImage_b(unsigned char* np_array2,int m,int n,double height_scale=1);
-  // ///Gets values as an image with size (h x w) with rows ordered top to bottom.  No scaling performed.
-  // void getHeightImage_d(double** np_out2,int* m,int* n);
-  // ///Sets values to an image with size (h x w) with rows ordered top to bottom.  No scaling performed.
-  // void getHeightImage_f(float** np_out2,int* m,int* n);
-  // ///Sets values to an image with size (h x w) with rows ordered top to bottom.  Values are scaled to [0,2^16)
-  // void getHeightImage_s(unsigned short** np_out2,int* m,int* n);
-  // ///Sets values to an image with size (h x w) with rows ordered top to bottom.  Values are scaled to [0,2^8)
-  // void getHeightImage_b(unsigned char** np_out2,int* m,int* n);
+  ///Return type: np.ndarray
+  void getHeights(float** np_view2, int* m, int* n);
+  ///Sets the values to a 2D numpy array of shape w x h
+  void setHeights_f(float* np_array2, int m, int n);
+  ///Returns true if colors are present
+  bool hasColors() const;
   ///Erases all colors
   void clearColors();
   ///Sets a uniform grayscale color.  Call this first if you want to start setting colors.
   void setColor(double intensity);
   ///Sets a uniform color.  Call this first if you want to start setting colors.
   void setColor(const double rgba[4]);
-  ///Gets the grayscale color of a cell
+  ///Gets the grayscale color of a vertex (note, indices are x and y units, which is reversed from image convention)
   void setColor(int i,int j,double intensity);
-  ///Gets the RGBA color of a cell
+  ///Gets the RGBA color of a vertex (note, indices are x and y units, which is reversed from image convention)
   void setColor(int i,int j,const double rgba[4]);
-  ///Gets the RGBA color of a cell
+  ///Gets the RGBA color of a vertex (note, indices are x and y units, which is reversed from image convention)
   ///
   ///Return type: Tuple[float,float,float,float]
   void getColor(int i,int j,double out[4]);
-  ///Returns a 3D Numpy array view of the colors (w x h x 1, 3, or 4)
+  ///Returns a 3D Numpy array view of the color image (h x w x (1, 3, or 4)), with rows ordered top to bottom
   ///
-  ///Return type: ndarray
-  void getColors(double** np_view3, int* m, int* n, int* p);
-  ///Sets the values to a 3D numpy array (w x h x 1, 3, or 4)
-  void setColors(double* np_array3, int m, int n, int p);
+  ///Return type: np.ndarray
+  void getColorImage(unsigned char** np_view3, int* m, int* n, int* p);
+  ///Sets the values to a 3D numpy array (h x w x 1, 3, or (1, 3, or 4)), with rows ordered top to bottom
+  void setColorImage_b(unsigned char* np_array3, int m, int n, int p);
   /// Sets colors to a 32-bit RGBA image (size h x w) with rows ordered top to bottom
   void setColorImage_i(unsigned int* np_array2, int m, int n);
-  /// Sets colors to a 24-bit RGB image (size h x w x 3) with rows ordered top to bottom
-  void setColorImage_b3(unsigned char* np_array3, int m, int n, int p);
-  /// Sets colors to an 8-bit grayscale image (size h x w) with rows ordered top to bottom
-  void setColorImage_b(unsigned char* np_array2, int m, int n);
-  // /// Retrieves a 32-bit RGBA image of the heightmap's colors (h x w)
-  // ///
-  // ///Return type: ndarray
-  // void getColorImage_i(unsigned int** np_out2, int* m, int* n);
-  // /// Retrieves a 24-bit RGB image of the heightmap's colors
-  // ///
-  // ///Return type: ndarray
-  // void getColorImage_b(unsigned char** np_out2, int* m, int* n, int* p);
-  // /// Retrieves an 8-bit grayscale image of the heightmap's colors (h x w) (only if colors are indeed grayscale)
-  // ///
-  // ///Return type: ndarray
-  // void getColorImage_gray_b(unsigned char** np_out2, int* m, int* n);
+  /// Retrieves a 32-bit RGBA image of the heightmap's colors (h x w)
+  ///
+  /// Return type: np.ndarray
+  void getColorImage_i(unsigned int** np_out2, int* m, int* n);
+  /// Retrieves a floating point RGB, RGBA, or L image (h x w x (1, 3, or 4)) with rows ordered from top to bottom. 
+  ///
+  /// Return type: np.ndarray
+  void getColorImage_d(double** np_out3, int* m, int* n, int* p);
+  /// Returns the number of properties 
+  int numProperties() const;
   /// Adds a new property and sets it to 0
-  void addProperty(const std::string& pname);
+  int addProperty(const std::string& pname);
   /// Adds a new property and sets it to an array of size (w x h)
-  void addProperty(const std::string& pname,double* np_array2,int m,int n);
+  int addProperty(const std::string& pname,double* np_array2,int m,int n);
+  /// Retrieves the index associated with a property name 
+  int propertyIndex(const std::string& pname) const;
+  /// Retrieves a property index
   /// Sets an individual pixel's property vector 
   void setProperty(int i,int j,double* np_array,int m);
   /// Retrieves an individual pixel's property vector 
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getProperty(int i,int j,double** np_out,int* m);
   /// Sets a property to an array of size (w x h)
   void setProperties(int pindex,double* np_array2,int m,int n);
   /// Retrieves a view of the property of size (w x h)
   ///
-  ///Return type: ndarray
-  void getProperties(int pindex,double** np_out2,int* m,int* n);
-  /// Sets a property to an image of size (h x w) with rows ordered top to bottom
-  void setPropertyImage(int pindex,double* np_array2,int m,int n);
-  /// Retrieves a property as an image of size (h x w) with rows ordered top to bottom
-  ///
-  ///Return type: ndarray
-  //void getPropertyImage(int pindex,double** np_out2,int* m,int* n);
+  ///Return type: np.ndarray
+  void getProperties(int pindex,float** np_out2,int* m,int* n);
 
-  Viewport viewport;
-  std::vector<double> heights; 
-  std::vector<double> colors;
-  std::vector<std::string> propertyNames;
-  std::vector<double> properties;
+  void* dataPtr;
+  bool isStandalone;
 };
 
 /** @brief Configures the _ext distance queries of

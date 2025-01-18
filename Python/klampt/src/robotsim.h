@@ -79,7 +79,7 @@ class SimRobotSensor
   ///Returns an array of measurements from the previous simulation (or
   ///kinematicSimulate) timestep
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getMeasurements(double** np_out,int* m);
   ///Returns all setting names
   ///
@@ -594,12 +594,12 @@ class Simulator
   /// Normals point into object ``a``.  Each contact point (x,n,kFriction) is 
   /// represented as a 7-element vector
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getContacts(int aid,int bid,double** np_out2,int* m,int* n);
   /// Returns the list of contact forces on object a at the last time step. Result
   /// is an nx3 array.
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getContactForces(int aid,int bid,double** np_out2,int* m,int* n);
   /// Returns the contact force on object a at the last time step.  You can set
   /// bid to -1 to get the overall contact force on object a.

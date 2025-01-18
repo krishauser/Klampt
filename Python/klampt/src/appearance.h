@@ -92,7 +92,7 @@ class Appearance
   /// Otherwise, returns an m x 4 array, where m is the number of featuress of
   /// that type. 
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getColors(int feature,float** np_out2, int* m, int* n);
   ///Sets a temporary tint color that modulates the appearance of the object.
   ///This works with both flat colors and per-vertex / per-face colors.
@@ -144,7 +144,7 @@ class Appearance
   /// Retrieves a view into the 1D texture data. If the texture is not set,
   /// throws an exception. 
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getTexture1D_channels(unsigned char** np_view2,int* m,int* n);
   ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D_b` for 
   ///valid format strings.
@@ -169,7 +169,7 @@ class Appearance
   /// Retrieves a view into the 2D texture data. If the texture is not set,
   /// throws an exception. 
   ///
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getTexture2D_channels(unsigned char** np_view3,int* m,int* n,int* p);
   ///Sets per-vertex texture coordinates for a 1D texture.
   ///
@@ -178,7 +178,7 @@ class Appearance
   /// Gets per-vertex texture coordinates for a 1D texture.  If no 1D texture
   /// is set, throws an exception.
   /// 
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getTexcoords1D(double** np_out,int* m);
   ///Sets per-vertex texture coordinates for a 2D texture.  uvs is an array of
   ///shape (nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]]. 
@@ -188,7 +188,7 @@ class Appearance
   /// Gets per-vertex texture coordinates for a 2D texture.  If no 2D texture
   /// is set, throws an exception.
   /// 
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getTexcoords2D(double** np_out2,int* m,int* n);
   ///Sets the texture generation.  The array must be size m x 4, with m in the 
   ///range 0,...,4.  If worldcoordinates=true, the texture generation is 
@@ -197,7 +197,7 @@ class Appearance
   /// Retrieves the texture generation.  The array will be size m x 4, with m
   /// in the range 0,...,4.  The texture generation is performed in  
   /// 
-  ///Return type: ndarray
+  ///Return type: np.ndarray
   void getTexgenMatrix(double** np_out2,int* m,int* n);
   /// Returns whether texture generation is performed in world coordinates 
   bool isTexgenWorld();
