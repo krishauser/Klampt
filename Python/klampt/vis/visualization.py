@@ -2538,7 +2538,7 @@ def _default_attributes(item,type=None):
         pass
     elif isinstance(item,IKObjective):
         return _default_IKObjective_attributes
-    elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Geometry3D)):
+    elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,ConvexHull,Heightmap,Geometry3D)):
         return _default_Geometry_attributes
     else:
         if type is not None:
@@ -3191,7 +3191,7 @@ class VisAppearance:
                         pass
                     if name is not None:
                         self.drawText(name,wp)
-        elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Geometry3D)):
+        elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Heightmap,ConvexHull,Geometry3D)):
             #this can be tricky if the mesh or point cloud has colors
             if 'appearance' in self.attributes:
                 self.appearance = self.attributes['appearance']
@@ -3224,6 +3224,10 @@ class VisAppearance:
                 lighting = False
                 geometry = self.geometry
             elif isinstance(self.item,TriangleMesh):
+                if not hasattr(self,'geometry'):
+                    self.geometry = Geometry3D(self.item)
+                geometry = self.geometry
+            elif isinstance(self.item,Heightmap):
                 if not hasattr(self,'geometry'):
                     self.geometry = Geometry3D(self.item)
                 geometry = self.geometry

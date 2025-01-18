@@ -731,11 +731,25 @@ def load(type,fn):
 
     if type in loaders:
         return loaders[type](fn)
-    elif type in readers or type == 'json':
+    elif type in readers:
         text = None
         with open(fn,'r') as f:
             text = ''.join(f.readlines())
         return read(type,text)
+    elif type == 'json':
+        import json
+        with open(fn,'r') as f:
+            jsonobj = json.load(f)
+        if 'type' in jsonobj and jsonobj['type'] == 'Heightmap':
+            #use Geometry3D loader
+            g = Geometry3D()
+            if not g.loadFile(fn):
+                raise IOError("Error reading Heightmap from "+fn)
+            h = Heightmap()
+            h.set(g.getHeightmap())
+            return h
+        else:
+            return from_json(jsonobj)
     else:
         raise ValueError("Loading of type "+type+" is not supported")
 

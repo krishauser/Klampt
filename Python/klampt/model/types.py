@@ -6,20 +6,20 @@ from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
-from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,ConvexHull,VolumeGrid
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,ConvexHull,Heightmap,VolumeGrid
 import warnings
 
 _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
                 'IntArray','StringArray',
                 'Configs','Trajectory','LinearPath','MultiPath','SE3Trajectory','SO3Trajectory',
                 'IKGoal','ContactPoint','Hold',
-                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D',
+                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Heightmap','Geometry3D',
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
 
 _vectorLikeTypes = set(['Vector2','Vector3','Matrix3','Point','Rotation','Vector','Config'])
 _arrayLikeTypes = set(['Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config','IntArray','StringArray','Configs'])
 _pathLikeTypes = set(['Configs','Trajectory','LinearPath','MultiPath','SE3Trajectory','SO3Trajectory'])
-_geometryTypes = set(['TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D'])
+_geometryTypes = set(['TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Heightmap','Geometry3D'])
 
 def known_types():
     """Returns a set of all known Klampt types"""
@@ -54,6 +54,8 @@ def object_to_types(object,world=None):
         return 'VolumeGrid'
     elif isinstance(object,ConvexHull):
         return 'ConvexHull'
+    elif isinstance(object,Heightmap):
+        return 'Heightmap'
     elif isinstance(object,Geometry3D):
         return ['Geometry3D',object.type()]
     elif isinstance(object,WorldModel):
@@ -218,6 +220,8 @@ def make(type,object=None):
         return VolumeGrid()
     elif type == 'ConvexHull':
         return ConvexHull()
+    elif type == 'Heightmap':
+        return Heightmap()
     elif type == 'IntArray':
         return [0]
     elif type == 'StringArray':
@@ -294,6 +298,11 @@ def info(object,world=None) -> dict:
             res["maximum value"] = max(object.values)
         res["lower bound"] = object.bmin
         res["upper bound"] = object.bmax
+    elif otype == "Heightmap":
+        res["dims"] = [object.heights.shape[0],object.heights.shape[1]]
+        if len(object.heights) > 0:
+            res["minimum value"] = object.heights.min()
+            res["maximum value"] = object.heights.min()
     elif otype == "Geometry3D":
         res["geometry type"] = object.type()
         res["#elements"] = object.numElements()
