@@ -503,6 +503,7 @@ class RobotModelDriver
  *     do some stuff that may touch the robot's configuration...
  *     robot.setConfig(q)
  *
+ * 
  * The model maintains configuration/velocity/acceleration/torque limits.
  * However, these are not enforced by the model, so you can happily set
  * configurations outside the limits. Valid commands must rather be enforced 
@@ -727,6 +728,7 @@ class RobotModel
   ///    "Forces" is somewhat of a misnomer; the result is a vector of joint
   ///    torques.
   ///
+  ///
   ///Returns:
   /// 
   ///    list of floats: the n-element generalized gravity vector at the
@@ -743,10 +745,12 @@ class RobotModel
   ///
   ///    `B(q) \ddot{q} + C(q,\dot{q}) = \tau`
   ///
+  ///
   ///.. note::
   ///
   ///    Does not include gravity term G(q).  getGravityForces(g) will 
   ///    need to be added to the result.
+  ///
   ///
   ///Returns:
   ///
@@ -765,10 +769,12 @@ class RobotModel
   ///
   ///    `B(q) \ddot{q} + C(q,\dot{q}) = \tau`
   ///
+  ///
   ///.. note::
   ///
   ///    Does not include gravity term G(q).  getGravityForces(g) will 
   ///    need to be subtracted from the argument t.
+  ///
   ///
   ///Returns:
   /// 
@@ -802,6 +808,7 @@ class RobotModel
   ///.. note::
   ///
   ///    Python random module seeding does not affect the result.
+  ///
   ///
   void randomizeConfig(double unboundedScale=1.0);
 
@@ -1014,6 +1021,7 @@ class RigidObjectModel
   ///
   ///    The world ID is not the same as the rigid object index.
   ///
+  ///
   int getID() const;
   const char* getName() const;
   void setName(const char* name);
@@ -1028,6 +1036,7 @@ class RigidObjectModel
   ///    To change the mass properties, you should call ``m=object.getMass()``,
   ///    change the desired properties in m, and then ``object.setMass(m)``
   ///
+  ///
   Mass getMass();
   void setMass(const Mass& mass);
   ///Returns a copy of the ContactParameters of this rigid object.
@@ -1037,6 +1046,7 @@ class RigidObjectModel
   ///    To change the contact parameters, you should call
   ///    ``p=object.getContactParameters()``, change the desired properties in
   ///    p, and then call ``object.setContactParameters(p)``
+  ///
   ///
   ContactParameters getContactParameters();
   void setContactParameters(const ContactParameters& params);
@@ -1089,6 +1099,7 @@ class TerrainModel
   ///Returns the ID of the terrain in its world
   ///
   ///.. note::
+  ///
   ///    The world ID is not the same as the terrain index.
   ///
   int getID() const;

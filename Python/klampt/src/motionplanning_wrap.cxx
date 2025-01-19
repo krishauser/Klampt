@@ -14617,7 +14617,8 @@ static PyMethodDef SwigMethods[] = {
 		"set_random_seed(int seed)\n"
 		"\n"
 		"\n"
-		"Sets the random seed used by the motion planner.  \n"
+		"Sets the random seed used by the RobotModel.randomizeConfig() method and\n"
+		"sampling-based motion planners.  \n"
 		"\n"
 		""},
 	 { "set_plan_json_string", _wrap_set_plan_json_string, METH_O, "\n"

@@ -3162,7 +3162,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.PointCloud` or :obj:`ImplicitSurface` or :class:`~klampt.GeometricPrimitive` or :obj:`Heightmap` or :obj:`OccupancyGrid`, optional): 
+            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.ConvexHull` or :obj:`Heightmap` or :class:`~klampt.Geometry3D` or :obj:`ImplicitSurface` or :class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :obj:`OccupancyGrid`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -6573,8 +6573,9 @@ class RobotModel(object):
         .. note::  
 
             "Forces" is somewhat of a misnomer; the result is a vector of joint
-            torques.
-         Returns:  
+            torques.  
+
+        Returns:  
 
             list of floats: the n-element generalized gravity vector at the
             robot's current configuration.
@@ -6593,12 +6594,14 @@ class RobotModel(object):
 
         .. math::  
 
-            `B(q) \ddot{q} + C(q,\dot{q}) = \tau`
-         .. note::  
+            `B(q) \ddot{q} + C(q,\dot{q}) = \tau`  
+
+        .. note::  
 
             Does not include gravity term G(q).  getGravityForces(g) will
-            need to be added to the result.
-         Returns:  
+            need to be added to the result.  
+
+        Returns:  
 
             list of floats: the n-element torque vector that would produce
             the joint accelerations ddq in the absence of external forces.
@@ -6617,12 +6620,14 @@ class RobotModel(object):
 
         .. math::  
 
-            `B(q) \ddot{q} + C(q,\dot{q}) = \tau`
-         .. note::  
+            `B(q) \ddot{q} + C(q,\dot{q}) = \tau`  
+
+        .. note::  
 
             Does not include gravity term G(q).  getGravityForces(g) will
-            need to be subtracted from the argument t.
-         Returns:  
+            need to be subtracted from the argument t.  
+
+        Returns:  
 
             list of floats: the n-element joint acceleration vector that would
             result from joint torques t in the absence of external forces.
@@ -7464,7 +7469,9 @@ class TerrainModel(object):
         Returns the ID of the terrain in its world.  
 
 
-        .. note:: The world ID is not the same as the terrain index.  
+        .. note::  
+
+            The world ID is not the same as the terrain index.
         """
         return _robotsim.TerrainModel_getID(self)
 
@@ -7870,7 +7877,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -10015,7 +10022,7 @@ class Simulator(object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             SimRobotController:
@@ -10157,7 +10164,8 @@ _robotsim.Simulator_swigregister(Simulator)
 
 def set_random_seed(seed: int) -> None:
     r"""
-    Sets the random seed used by the motion planner.  
+    Sets the random seed used by the RobotModel.randomizeConfig() method and
+    sampling-based motion planners.  
 
     Args:
         seed (int)

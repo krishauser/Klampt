@@ -3528,8 +3528,9 @@ vector g (usually (0,0,-9.8)).
 .. note::  
 
     \"Forces\" is somewhat of a misnomer; the result is a vector of joint
-    torques.
- Returns:  
+    torques.  
+
+Returns:  
 
     list of floats: the n-element generalized gravity vector at the
     robot's current configuration.
@@ -3545,12 +3546,14 @@ Specifically, solves for :math:`\\tau` in the (partial) dynamics equation:
 
 .. math::  
 
-    `B(q) \\ddot{q} + C(q,\\dot{q}) = \\tau`
- .. note::  
+    `B(q) \\ddot{q} + C(q,\\dot{q}) = \\tau`  
+
+.. note::  
 
     Does not include gravity term G(q).  getGravityForces(g) will
-    need to be added to the result.
- Returns:  
+    need to be added to the result.  
+
+Returns:  
 
     list of floats: the n-element torque vector that would produce
     the joint accelerations ddq in the absence of external forces.
@@ -3566,12 +3569,14 @@ Specifically, solves for :math:`\\ddot{q}` in the (partial) dynamics equation:
 
 .. math::  
 
-    `B(q) \\ddot{q} + C(q,\\dot{q}) = \\tau`
- .. note::  
+    `B(q) \\ddot{q} + C(q,\\dot{q}) = \\tau`  
+
+.. note::  
 
     Does not include gravity term G(q).  getGravityForces(g) will
-    need to be subtracted from the argument t.
- Returns:  
+    need to be subtracted from the argument t.  
+
+Returns:  
 
     list of floats: the n-element joint acceleration vector that would
     result from joint torques t in the absence of external forces.
@@ -5321,7 +5326,10 @@ saved to that file.
 
 Returns the ID of the terrain in its world.  
 
-.. note:: The world ID is not the same as the terrain index.  
+.. note::  
+
+    The world ID is not the same as the terrain index.
+  
 ";
 
 %feature("docstring") TerrainModel::getName "
@@ -5935,7 +5943,8 @@ ray-casting routines are called.
 
 %feature("docstring") set_random_seed "
 
-Sets the random seed used by the motion planner.  
+Sets the random seed used by the RobotModel.randomizeConfig() method and
+sampling-based motion planners.  
 ";
 
 %feature("docstring") set_plan_json_string "

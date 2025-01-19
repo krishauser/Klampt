@@ -8,7 +8,8 @@
 struct _object;
 typedef _object PyObject;
 
-/// Sets the random seed used by the motion planner
+/// Sets the random seed used by the RobotModel.randomizeConfig() 
+/// method and sampling-based motion planners 
 void set_random_seed(int seed);
 
 /// Loads planner values from a JSON string
