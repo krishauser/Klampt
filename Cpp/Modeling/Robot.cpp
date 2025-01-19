@@ -9,8 +9,6 @@
 #include <KrisLibrary/math3d/misc.h>
 #include <KrisLibrary/math3d/basis.h>
 #include <KrisLibrary/meshing/IO.h>
-#include <KrisLibrary/meshing/VolumeGrid.h>
-#include <KrisLibrary/meshing/PointCloud.h>
 #include <KrisLibrary/geometry/Conversions.h>
 #include <KrisLibrary/utils/ioutils.h>
 #include <KrisLibrary/utils/fileutils.h>
