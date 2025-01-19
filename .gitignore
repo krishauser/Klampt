@@ -71,6 +71,7 @@ CTest*
 cmake*.cmake
 Makefile
 _CPack*
+CMakeDoxy*
 
 # Log files
 *.log
