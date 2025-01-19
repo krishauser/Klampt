@@ -1633,18 +1633,24 @@ class PointCloud(object):
         jsonobj = loader.to_json(self,'PointCloud')
         return (loader.from_json,(jsonobj,'PointCloud'))
 
-    def setDepthImage(self,intrinsics:Tuple[float,float,float,float], depth : np.ndarray, depth_scale:float=1.0):
+    def setDepthImage(self,intrinsics:Union[Sequence[float],Dict[str,float]], depth : np.ndarray, depth_scale:float=1.0):
         """
         Sets a structured point cloud from a depth image.
 
         Args:
-            intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
+            intrinsics (list or dict): intrinsics parameters [fx,fy,cx,cy] or a
+                dictionary containing keys 'fx', 'fy', 'cx', 'cy'.
             depth (np.ndarray): the depth values, of shape (h,w).  Should have
                 dtype float, np.float32, or np.uint16 for best performance.
             depth_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        if len(intrinsics) != 4:
+        if isinstance(intrinsics,dict):
+            try:
+                intrinsics = intrinsics['fx'],intrinsics['fy'],intrinsics['cx'],intrinsics['cy']
+            except Exception:
+                raise ValueError("Invalid value for the intrinsics parameters")
+        elif len(intrinsics) != 4:
             raise ValueError("Invalid value for the intrinsics parameters")
         if depth.dtype == float:
             return self.setDepthImage_d(intrinsics,depth,depth_scale)
@@ -1655,12 +1661,13 @@ class PointCloud(object):
         else:
             return self.setDepthImage_d(intrinsics,depth,depth_scale)
 
-    def setRGBDImages(self,intrinsics:Tuple[float,float,float,float], color : np.ndarray, depth : np.ndarray, depth_scale:float=1.0):
+    def setRGBDImages(self,intrinsics:Union[Sequence[float],Dict[str,float]], color : np.ndarray, depth : np.ndarray, depth_scale:float=1.0):
         """
         Sets a structured point cloud from a color,depth image pair.
 
         Args:
-            intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
+            intrinsics (list or dict): intrinsics parameters [fx,fy,cx,cy] or a
+                dictionary containing keys 'fx', 'fy', 'cx', 'cy'.
             color (np.ndarray): the color values, of shape (h,w) or (h,w,3).
                 In first case, must have dtype np.uint32 with r,g,b values
                 packed in 0xrrggbb order.  In second case, if dtype is
@@ -1671,7 +1678,12 @@ class PointCloud(object):
             depth_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        if len(intrinsics) != 4:
+        if isinstance(intrinsics,dict):
+            try:
+                intrinsics = intrinsics['fx'],intrinsics['fy'],intrinsics['cx'],intrinsics['cy']
+            except Exception:
+                raise ValueError("Invalid value for the intrinsics parameters")
+        elif len(intrinsics) != 4:
             raise ValueError("Invalid value for the intrinsics parameters")
         if color.shape[0] != depth.shape[0] or color.shape[1] != depth.shape[1]:
             raise ValueError("Color and depth images need to have matching dimensions")
@@ -1936,22 +1948,22 @@ class GeometricPrimitive(object):
 # Register GeometricPrimitive in _robotsim:
 _robotsim.GeometricPrimitive_swigregister(GeometricPrimitive)
 
-class VolumeGrid(object):
+class ImplicitSurface(object):
     r"""
 
 
-    An axis-aligned volumetric grid, typically a signed distance transform with > 0
-    indicating outside and < 0 indicating inside. Can also store an occupancy grid
-    with 1 indicating inside and 0 indicating outside.  
+    An axis-aligned volumetric grid representing a signed distance transform with >
+    0 indicating outside and < 0 indicating inside.  
 
-    In general, values are associated with cells rather than vertices. So, cell
-    (i,j,k) is associated with a single value, and has size (w,d,h) =
+    In general, values are associated with cells rather than vertices.  
+
+    Cell (i,j,k) contains a value, and has size (w,d,h) =
     ((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1],
     (bmax[2]-bmin[2])/dims[2]). It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1))
     x [h*k,h*(k+1)).  
 
-    For SDFs and TSDFs which assume values at vertices, the values are specified at
-    the **centers** of cells. I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).  
+    The field should be assumed sampled at the **centers** of cells, i.e., at
+    (w*(i+1/2),d*(j+1/2),h*(k+1/2)).  
 
     Attributes:  
 
@@ -1962,6 +1974,11 @@ class VolumeGrid(object):
         values (numpy array): contains a 3D array of
              ``dims[0] x dims[1] x dims[2]`` values.
 
+        truncationDistance (float): inf for SDFs, and the truncation distance
+             for TSDFs. Cells whose values are >= d are considered "sufficiently
+             far" and distance / tolerance queries outside of this range are
+             usually not meaningful.
+
 
     C++ includes: geometry.h
 
@@ -1969,114 +1986,114 @@ class VolumeGrid(object):
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
-    __swig_destroy__ = _robotsim.delete_VolumeGrid
+    __swig_destroy__ = _robotsim.delete_ImplicitSurface
 
     def __init__(self, *args):
         r"""
-        __init__(VolumeGrid self) -> VolumeGrid
-        __init__(VolumeGrid self, VolumeGrid rhs) -> VolumeGrid
+        __init__(ImplicitSurface self) -> ImplicitSurface
+        __init__(ImplicitSurface self, ImplicitSurface rhs) -> ImplicitSurface
 
 
         """
-        _robotsim.VolumeGrid_swiginit(self, _robotsim.new_VolumeGrid(*args))
+        _robotsim.ImplicitSurface_swiginit(self, _robotsim.new_ImplicitSurface(*args))
 
-    def copy(self) -> "VolumeGrid":
+    def copy(self) -> "ImplicitSurface":
         r"""
-        copy(VolumeGrid self) -> VolumeGrid
+        copy(ImplicitSurface self) -> ImplicitSurface
 
 
         Creates a standalone object that is a copy of this.  
 
         """
-        return _robotsim.VolumeGrid_copy(self)
+        return _robotsim.ImplicitSurface_copy(self)
 
     def getBmin(self) -> "void":
         r"""
-        getBmin(VolumeGrid self)
+        getBmin(ImplicitSurface self)
 
 
         """
-        return _robotsim.VolumeGrid_getBmin(self)
+        return _robotsim.ImplicitSurface_getBmin(self)
 
     def setBmin(self, bmin: "double const [3]") -> "void":
         r"""
-        setBmin(VolumeGrid self, double const [3] bmin)
+        setBmin(ImplicitSurface self, double const [3] bmin)
 
 
         """
-        return _robotsim.VolumeGrid_setBmin(self, bmin)
+        return _robotsim.ImplicitSurface_setBmin(self, bmin)
 
     def getBmax(self) -> "void":
         r"""
-        getBmax(VolumeGrid self)
+        getBmax(ImplicitSurface self)
 
 
         """
-        return _robotsim.VolumeGrid_getBmax(self)
+        return _robotsim.ImplicitSurface_getBmax(self)
 
     def setBmax(self, bmax: "double const [3]") -> "void":
         r"""
-        setBmax(VolumeGrid self, double const [3] bmax)
+        setBmax(ImplicitSurface self, double const [3] bmax)
 
 
         """
-        return _robotsim.VolumeGrid_setBmax(self, bmax)
+        return _robotsim.ImplicitSurface_setBmax(self, bmax)
 
     def resize(self, sx: "int", sy: "int", sz: "int") -> "void":
         r"""
-        resize(VolumeGrid self, int sx, int sy, int sz)
+        resize(ImplicitSurface self, int sx, int sy, int sz)
 
 
         Resizes the x, y, and z dimensions of the grid.  
 
         """
-        return _robotsim.VolumeGrid_resize(self, sx, sy, sz)
+        return _robotsim.ImplicitSurface_resize(self, sx, sy, sz)
 
     def set(self, *args) -> "void":
         r"""
-        set(VolumeGrid self, VolumeGrid arg2)
-        set(VolumeGrid self, double value)
-        set(VolumeGrid self, int i, int j, int k, double value)
+        set(ImplicitSurface self, ImplicitSurface arg2)
+        set(ImplicitSurface self, double value)
+        set(ImplicitSurface self, int i, int j, int k, double value)
 
 
         Sets a specific element of a cell.  
 
         """
-        return _robotsim.VolumeGrid_set(self, *args)
+        return _robotsim.ImplicitSurface_set(self, *args)
 
     def get(self, i: "int", j: "int", k: "int") -> "double":
         r"""
-        get(VolumeGrid self, int i, int j, int k) -> double
+        get(ImplicitSurface self, int i, int j, int k) -> double
 
 
         Gets a specific element of a cell.  
 
         """
-        return _robotsim.VolumeGrid_get(self, i, j, k)
+        return _robotsim.ImplicitSurface_get(self, i, j, k)
 
     def shift(self, dv: "double") -> "void":
         r"""
-        shift(VolumeGrid self, double dv)
+        shift(ImplicitSurface self, double dv)
 
 
         Shifts the value uniformly.  
 
         """
-        return _robotsim.VolumeGrid_shift(self, dv)
+        return _robotsim.ImplicitSurface_shift(self, dv)
 
     def scale(self, cv: "double") -> "void":
         r"""
-        scale(VolumeGrid self, double cv)
+        scale(ImplicitSurface self, double cv)
 
 
         Scales the value uniformly.  
 
         """
-        return _robotsim.VolumeGrid_scale(self, cv)
+        return _robotsim.ImplicitSurface_scale(self, cv)
 
     def getValues(self) -> "void":
         r"""
-        getValues(VolumeGrid self)
+        getValues(ImplicitSurface self)
 
 
         Returns a 3D Numpy array view of the values.  
@@ -2084,19 +2101,39 @@ class VolumeGrid(object):
         Return type: np.ndarray  
 
         """
-        return _robotsim.VolumeGrid_getValues(self)
+        return _robotsim.ImplicitSurface_getValues(self)
 
     def setValues(self, np_array3: "double *") -> "void":
         r"""
-        setValues(VolumeGrid self, double * np_array3)
+        setValues(ImplicitSurface self, double * np_array3)
 
 
         Sets the values to a 3D numpy array.  
 
         """
-        return _robotsim.VolumeGrid_setValues(self, np_array3)
-    dataPtr = property(_robotsim.VolumeGrid_dataPtr_get, _robotsim.VolumeGrid_dataPtr_set, doc=r"""dataPtr : p.void""")
-    isStandalone = property(_robotsim.VolumeGrid_isStandalone_get, _robotsim.VolumeGrid_isStandalone_set, doc=r"""isStandalone : bool""")
+        return _robotsim.ImplicitSurface_setValues(self, np_array3)
+
+    def setTruncationDistance(self, d: "double") -> "void":
+        r"""
+        setTruncationDistance(ImplicitSurface self, double d)
+
+
+        Sets the truncation distance for TSDFs.  
+
+        """
+        return _robotsim.ImplicitSurface_setTruncationDistance(self, d)
+
+    def getTruncationDistance(self) -> "double":
+        r"""
+        getTruncationDistance(ImplicitSurface self) -> double
+
+
+        Retrieves the truncation distance for TSDFs.  
+
+        """
+        return _robotsim.ImplicitSurface_getTruncationDistance(self)
+    dataPtr = property(_robotsim.ImplicitSurface_dataPtr_get, _robotsim.ImplicitSurface_dataPtr_set, doc=r"""dataPtr : p.void""")
+    isStandalone = property(_robotsim.ImplicitSurface_isStandalone_get, _robotsim.ImplicitSurface_isStandalone_set, doc=r"""isStandalone : bool""")
 
     bmin = property(getBmin, setBmin)
     """The lower bound of the domain."""
@@ -2111,7 +2148,7 @@ class VolumeGrid(object):
         Provided for backwards compatibility
         """
         import warnings
-        warnings.warn("VolumeGrid. setBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        warnings.warn("ImplicitSurface.setBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
         self.bmin = bounds[0:3]
         self.bmax = bounds[3:6]
 
@@ -2122,7 +2159,7 @@ class VolumeGrid(object):
         Provided for backwards compatibility
         """
         import warnings
-        warnings.warn("VolumeGrid. getBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        warnings.warn("ImplicitSurface. getBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
         return list(self.bmin) + list(self.bmax)
 
     bounds = property(getBounds, setBounds)
@@ -2133,13 +2170,237 @@ class VolumeGrid(object):
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.to_json(self,'VolumeGrid')
-        return (loader.from_json,(jsonobj,'VolumeGrid'))
+        jsonobj = loader.to_json(self,'ImplicitSurface')
+        return (loader.from_json,(jsonobj,'ImplicitSurface'))
 
 
+# Register ImplicitSurface in _robotsim:
+_robotsim.ImplicitSurface_swigregister(ImplicitSurface)
 
-# Register VolumeGrid in _robotsim:
-_robotsim.VolumeGrid_swigregister(VolumeGrid)
+class OccupancyGrid(object):
+    r"""
+
+
+    An occupancy grid with 1 indicating inside and 0 indicating outside. Can also be
+    a fuzzy (probabilistic / density) grid.  
+
+    In general, values are associated with cells rather than vertices.  
+
+    Cell (i,j,k) contains an occupancy / density value, and has size (w,d,h) =
+    ((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1],
+    (bmax[2]-bmin[2])/dims[2]). It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1))
+    x [h*k,h*(k+1)).  
+
+    Attributes:  
+
+        bmin (array of 3 doubles): contains the minimum bounds.
+
+        bmax (array of 3 doubles): contains the maximum bounds.
+
+        values (numpy array): contains a 3D array of
+             ``dims[0] x dims[1] x dims[2]`` values.
+
+        occupancyThreshold (float): set to 0.5 by default. Collision
+            detection treats all cells whose values are greater than this
+            value as occupied.
+
+
+    C++ includes: geometry.h
+
+    """
+
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+    __swig_destroy__ = _robotsim.delete_OccupancyGrid
+
+    def __init__(self, *args):
+        r"""
+        __init__(OccupancyGrid self) -> OccupancyGrid
+        __init__(OccupancyGrid self, OccupancyGrid rhs) -> OccupancyGrid
+
+
+        """
+        _robotsim.OccupancyGrid_swiginit(self, _robotsim.new_OccupancyGrid(*args))
+
+    def copy(self) -> "OccupancyGrid":
+        r"""
+        copy(OccupancyGrid self) -> OccupancyGrid
+
+
+        Creates a standalone object that is a copy of this.  
+
+        """
+        return _robotsim.OccupancyGrid_copy(self)
+
+    def getBmin(self) -> "void":
+        r"""
+        getBmin(OccupancyGrid self)
+
+
+        """
+        return _robotsim.OccupancyGrid_getBmin(self)
+
+    def setBmin(self, bmin: "double const [3]") -> "void":
+        r"""
+        setBmin(OccupancyGrid self, double const [3] bmin)
+
+
+        """
+        return _robotsim.OccupancyGrid_setBmin(self, bmin)
+
+    def getBmax(self) -> "void":
+        r"""
+        getBmax(OccupancyGrid self)
+
+
+        """
+        return _robotsim.OccupancyGrid_getBmax(self)
+
+    def setBmax(self, bmax: "double const [3]") -> "void":
+        r"""
+        setBmax(OccupancyGrid self, double const [3] bmax)
+
+
+        """
+        return _robotsim.OccupancyGrid_setBmax(self, bmax)
+
+    def resize(self, sx: "int", sy: "int", sz: "int") -> "void":
+        r"""
+        resize(OccupancyGrid self, int sx, int sy, int sz)
+
+
+        Resizes the x, y, and z dimensions of the grid.  
+
+        """
+        return _robotsim.OccupancyGrid_resize(self, sx, sy, sz)
+
+    def set(self, *args) -> "void":
+        r"""
+        set(OccupancyGrid self, OccupancyGrid arg2)
+        set(OccupancyGrid self, double value)
+        set(OccupancyGrid self, int i, int j, int k, double value)
+
+
+        Sets a specific element of a cell.  
+
+        """
+        return _robotsim.OccupancyGrid_set(self, *args)
+
+    def get(self, i: "int", j: "int", k: "int") -> "double":
+        r"""
+        get(OccupancyGrid self, int i, int j, int k) -> double
+
+
+        Gets a specific element of a cell.  
+
+        """
+        return _robotsim.OccupancyGrid_get(self, i, j, k)
+
+    def shift(self, dv: "double") -> "void":
+        r"""
+        shift(OccupancyGrid self, double dv)
+
+
+        Shifts the value uniformly.  
+
+        """
+        return _robotsim.OccupancyGrid_shift(self, dv)
+
+    def scale(self, cv: "double") -> "void":
+        r"""
+        scale(OccupancyGrid self, double cv)
+
+
+        Scales the value uniformly.  
+
+        """
+        return _robotsim.OccupancyGrid_scale(self, cv)
+
+    def getValues(self) -> "void":
+        r"""
+        getValues(OccupancyGrid self)
+
+
+        Returns a 3D Numpy array view of the values.  
+
+        Return type: np.ndarray  
+
+        """
+        return _robotsim.OccupancyGrid_getValues(self)
+
+    def setValues(self, np_array3: "double *") -> "void":
+        r"""
+        setValues(OccupancyGrid self, double * np_array3)
+
+
+        Sets the values to a 3D numpy array.  
+
+        """
+        return _robotsim.OccupancyGrid_setValues(self, np_array3)
+
+    def setOccupancyThreshold(self, threshold: "double") -> "void":
+        r"""
+        setOccupancyThreshold(OccupancyGrid self, double threshold)
+
+
+        Sets the threshold for collision detection.  
+
+        """
+        return _robotsim.OccupancyGrid_setOccupancyThreshold(self, threshold)
+
+    def getOccupancyThreshold(self) -> "double":
+        r"""
+        getOccupancyThreshold(OccupancyGrid self) -> double
+
+
+        Gets the threshold for collision detection.  
+
+        """
+        return _robotsim.OccupancyGrid_getOccupancyThreshold(self)
+    dataPtr = property(_robotsim.OccupancyGrid_dataPtr_get, _robotsim.OccupancyGrid_dataPtr_set, doc=r"""dataPtr : p.void""")
+    isStandalone = property(_robotsim.OccupancyGrid_isStandalone_get, _robotsim.OccupancyGrid_isStandalone_set, doc=r"""isStandalone : bool""")
+
+    bmin = property(getBmin, setBmin)
+    """The lower bound of the domain."""
+
+    bmax = property(getBmax, setBmax)
+    """The upper bound of the domain."""
+
+    def setBounds(self, bounds):
+        """
+        @deprecated
+
+        Provided for backwards compatibility
+        """
+        import warnings
+        warnings.warn("OccupancyGrid.setBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        self.bmin = bounds[0:3]
+        self.bmax = bounds[3:6]
+
+    def getBounds(self):
+        """
+        @deprecated
+
+        Provided for backwards compatibility
+        """
+        import warnings
+        warnings.warn("OccupancyGrid. getBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        return list(self.bmin) + list(self.bmax)
+
+    bounds = property(getBounds, setBounds)
+    """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
+
+    values = property(getValues, setValues)
+    """The 3D array of values in the grid (numpy.ndarray)"""
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.to_json(self,'OccupancyGrid')
+        return (loader.from_json,(jsonobj,'OccupancyGrid'))
+
+
+# Register OccupancyGrid in _robotsim:
+_robotsim.OccupancyGrid_swigregister(OccupancyGrid)
 
 class Heightmap(object):
     r"""
@@ -2152,8 +2413,8 @@ class Heightmap(object):
     (`viewport.perspective=true`), the values are the depths of each grid point (not
     distance) from the origin in the +z direction.  
 
-    Note that unlike VolumeGrid types, each grid entry is defined at a vertex, not a
-    cell. In elevation map form, the (i,j) cell is associated with the vertex
+    Note that unlike volume grid types, each grid entry is defined at a vertex, not
+    a cell. In elevation map form, the (i,j) cell is associated with the vertex
     ((i-cx)/fx,(n-1-j-cy)/fy,heights[i,j]) where n is `heights.shape[1]`. Note that
     the y-axis is flipped in the heightmap compared to the viewport such that the
     image is given in standard top-down convention.  
@@ -2815,13 +3076,13 @@ class Geometry3D(object):
     *   convex hulls (:class:`ConvexHull`)  
     *   triangle meshes (:class:`TriangleMesh`)  
     *   point clouds (:class:`PointCloud`)  
-    *   implicit surfaces (name "ImplicitSurface", data :class:`VolumeGrid`)  
-    *   occupancy grids (name "OccupancyGrid", data :class:`VolumeGrid`)  
+    *   implicit surfaces (:class:`ImplicitSurface`)  
+    *   occupancy grids (:class:`OccupancyGrid`)  
     *   heightmaps (:class:`Heightmap`)  
     *   groups ("Group" type)  
 
     For now we also support the "VolumeGrid" identifier which is treated as an
-    alias for "ImplicitSurface"  
+    alias for "ImplicitSurface". This will be deprecated in a future version  
 
     This class acts as a uniform container of all of these types.  
 
@@ -2910,7 +3171,8 @@ class Geometry3D(object):
         __init__(Geometry3D self, ConvexHull arg2) -> Geometry3D
         __init__(Geometry3D self, TriangleMesh arg2) -> Geometry3D
         __init__(Geometry3D self, PointCloud arg2) -> Geometry3D
-        __init__(Geometry3D self, VolumeGrid arg2) -> Geometry3D
+        __init__(Geometry3D self, ImplicitSurface arg2) -> Geometry3D
+        __init__(Geometry3D self, OccupancyGrid arg2) -> Geometry3D
         __init__(Geometry3D self, Heightmap arg2) -> Geometry3D
 
 
@@ -3019,33 +3281,22 @@ class Geometry3D(object):
         """
         return _robotsim.Geometry3D_getConvexHull(self)
 
-    def getVolumeGrid(self) -> "VolumeGrid":
+    def getImplicitSurface(self) -> "ImplicitSurface":
         r"""
-        getVolumeGrid(Geometry3D self) -> VolumeGrid
+        getImplicitSurface(Geometry3D self) -> ImplicitSurface
 
 
-        Returns a VolumeGrid if this geometry is of type ImplicitSurface or
-        OccupancyGrid.  
-
-        """
-        return _robotsim.Geometry3D_getVolumeGrid(self)
-
-    def getImplicitSurface(self) -> "VolumeGrid":
-        r"""
-        getImplicitSurface(Geometry3D self) -> VolumeGrid
-
-
-        Returns the VolumeGrid if this geometry is of type ImplicitSurface.  
+        Returns the ImplicitSurface if this geometry is of type ImplicitSurface.  
 
         """
         return _robotsim.Geometry3D_getImplicitSurface(self)
 
-    def getOccupancyGrid(self) -> "VolumeGrid":
+    def getOccupancyGrid(self) -> "OccupancyGrid":
         r"""
-        getOccupancyGrid(Geometry3D self) -> VolumeGrid
+        getOccupancyGrid(Geometry3D self) -> OccupancyGrid
 
 
-        Returns the VolumeGrid if this geometry is of type OccupancyGrid.  
+        Returns the OccupancyGrid if this geometry is of type OccupancyGrid.  
 
         """
         return _robotsim.Geometry3D_getOccupancyGrid(self)
@@ -3112,35 +3363,25 @@ class Geometry3D(object):
         """
         return _robotsim.Geometry3D_setConvexHullGroup(self, g1, g2)
 
-    def setVolumeGrid(self, arg2: "VolumeGrid") -> "void":
+    def setImplicitSurface(self, grid: "ImplicitSurface") -> "void":
         r"""
-        setVolumeGrid(Geometry3D self, VolumeGrid arg2)
-
-
-        Sets this Geometry3D to an ImplicitSurface. Will be deprecated soon.  
-
-        """
-        return _robotsim.Geometry3D_setVolumeGrid(self, arg2)
-
-    def setImplicitSurface(self, vg: "VolumeGrid") -> "void":
-        r"""
-        setImplicitSurface(Geometry3D self, VolumeGrid vg)
+        setImplicitSurface(Geometry3D self, ImplicitSurface grid)
 
 
         Sets this Geometry3D to an ImplicitSurface.  
 
         """
-        return _robotsim.Geometry3D_setImplicitSurface(self, vg)
+        return _robotsim.Geometry3D_setImplicitSurface(self, grid)
 
-    def setOccupancyGrid(self, vg: "VolumeGrid") -> "void":
+    def setOccupancyGrid(self, grid: "OccupancyGrid") -> "void":
         r"""
-        setOccupancyGrid(Geometry3D self, VolumeGrid vg)
+        setOccupancyGrid(Geometry3D self, OccupancyGrid grid)
 
 
         Sets this Geometry3D to an OccupancyGrid.  
 
         """
-        return _robotsim.Geometry3D_setOccupancyGrid(self, vg)
+        return _robotsim.Geometry3D_setOccupancyGrid(self, grid)
 
     def setHeightmap(self, hm: "Heightmap") -> "void":
         r"""
@@ -3352,19 +3593,31 @@ class Geometry3D(object):
         *   TriangleMesh -> PointCloud. param is the desired dispersion of the points,
             by default set to the average triangle diameter. At least all of the mesh's
             vertices will be returned.  
-        *   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
-            good results only if the mesh is watertight. param is the grid resolution,
-            by default set to the average triangle diameter.  
+        *   TriangleMesh -> ImplicitSurface. Converted using the fast marching method
+            with good results only if the mesh is watertight. param is the grid
+            resolution, by default set to the average triangle diameter.  
+        *   TriangleMesh -> OccupancyGrid. Converted using rasterization. param is the
+            grid resolution, by default set to the average triangle diameter.  
         *   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
             Otherwise, uses convex decomposition with the HACD library.  
+        *   TriangleMesh -> Heightmap. Converted using rasterization. param is the grid
+            resolution, by default set to max mesh dimension / 256.  
         *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
             param is the threshold for splitting triangles by depth discontinuity. param
             is by default infinity.  
+        *   PointCloud -> OccupancyGrid. param is the grid resolution, by default some
+            reasonable number.  
         *   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  
+        *   PointCloud -> Heightmap. param is the grid resolution, by default set to max
+            point cloud dimension / 256.  
         *   GeometricPrimitive -> anything. param determines the desired resolution.  
-        *   VolumeGrid -> TriangleMesh. param determines the level set for the marching
-            cubes algorithm.  
-        *   VolumeGrid -> PointCloud. param determines the level set.  
+        *   ImplicitSurface -> TriangleMesh. param determines the level set for the
+            marching cubes algorithm.  
+        *   ImplicitSurface -> PointCloud. param determines the level set.  
+        *   ImplicitSurface -> Heightmap.  
+        *   OccupancyGrid -> TriangleMesh. Creates a mesh around each block.  
+        *   OccupancyGrid -> PointCloud. Outputs a point for each block.  
+        *   OccupancyGrid -> Heightmap.  
         *   ConvexHull -> TriangleMesh.  
         *   ConvexHull -> PointCloud. param is the desired dispersion of the points.
             Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
@@ -3395,10 +3648,8 @@ class Geometry3D(object):
 
         Unsupported types:  
 
-        *   VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]  
-        *   VolumeGrid - TriangleMesh  
-        *   VolumeGrid - VolumeGrid  
-        *   ConvexHull - anything else besides ConvexHull  
+        *   ImplicitSurface - GeometricPrimitive [aabb, box, triangle, polygon]  
+        *   ImplicitSurface - ConvexHull  
 
         """
         return _robotsim.Geometry3D_collides(self, other)
@@ -3475,9 +3726,9 @@ class Geometry3D(object):
         geometry types return signed distances:  
 
         *   GeometricPrimitive  
-        *   PointCloud (approximate, if the cloud is a set of balls with the radius
-            property)  
-        *   VolumeGrid  
+        *   PointCloud  
+        *   ImplictSurface  
+        *   Heightmap (approximate, only accurate in the viewing direction)  
         *   ConvexHull  
 
         For other types, a signed distance will be returned if the geometry has a
@@ -3514,23 +3765,26 @@ class Geometry3D(object):
         touching. Only the following combinations of geometry types return signed
         distances:  
 
-        *   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
+        *   GeometricPrimitive-GeometricPrimitive (missing some for boxes, segments, and
+            tris)  
         *   GeometricPrimitive-TriangleMesh (surface only)  
         *   GeometricPrimitive-PointCloud  
-        *   GeometricPrimitive-VolumeGrid  
+        *   GeometricPrimitive-ImplicitSurface  
         *   TriangleMesh (surface only)-GeometricPrimitive  
-        *   PointCloud-VolumeGrid  
-        *   ConvexHull - ConvexHull  
+        *   PointCloud-ImplicitSurface  
+        *   PointCloud-ConvexHull  
+        *   ConvexHull-ConvexHull  
+        *   ConvexHull-GeometricPrimitive  
 
         If penetration is supported, a negative distance is returned and cp1,cp2 are the
         deepest penetrating points.  
 
         Unsupported types:  
 
-        *   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
         *   PointCloud-PointCloud  
-        *   VolumeGrid-TriangleMesh  
-        *   VolumeGrid-VolumeGrid  
+        *   ImplicitSurface-TriangleMesh  
+        *   ImplicitSurface-ImplicitSurface  
+        *   OccupancyGrid - anything  
         *   ConvexHull - anything else besides ConvexHull  
 
         See the comments of the distance_point function  
@@ -3557,14 +3811,8 @@ class Geometry3D(object):
 
         Performs a ray cast.  
 
-        Supported types:  
-
-        *   GeometricPrimitive  
-        *   TriangleMesh  
-        *   PointCloud (need a positive collision margin, or points need to have a
-            'radius' property assigned)  
-        *   VolumeGrid  
-        *   Group (groups of the aforementioned types)  
+        All types supported, but PointCloud needs a positive collision margin, or points
+        need to have a 'radius' property assigned)  
 
         Returns:  
 
@@ -3583,16 +3831,9 @@ class Geometry3D(object):
 
         A more sophisticated ray cast.  
 
-        Supported types:  
+        All types supported, but PointCloud needs a positive collision  
 
-        *   GeometricPrimitive  
-        *   TriangleMesh  
-        *   PointCloud (need a positive collision margin, or points need to have a
-            'radius' property assigned)  
-        *   VolumeGrid  
-        *   Group (groups of the aforementioned types)  
-
-        Returns:  
+        margin, or points need to have a 'radius' property assigned) Returns:  
 
             (hit_element,pt) where hit_element is >= 0 if ray starting at
             s and pointing in direction d hits the geometry (given in world
@@ -3617,20 +3858,13 @@ class Geometry3D(object):
         of points within distance self.collisionMargin + other.collisionMargin +
         padding1 + padding2.  
 
+        Relatively few geometry types are supported.  
+
         For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,
         PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
         and normals.  
 
         If maxContacts != 0 a clustering postprocessing step is performed.  
-
-        Unsupported types:  
-
-        *   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
-        *   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,
-            the results are potentially inaccurate for non-convex VolumeGrids.  
-        *   VolumeGrid-TriangleMesh  
-        *   VolumeGrid-VolumeGrid  
-        *   ConvexHull - anything  
 
         """
         return _robotsim.Geometry3D_contacts(self, other, padding1, padding2, maxContacts)
@@ -3645,6 +3879,10 @@ class Geometry3D(object):
         Supported types:  
 
         *   ConvexHull  
+        *   GeometricPrimitive  
+        *   PointCloud  
+        *   TriangleMesh  
+        *   OccupancyGrid  
 
         Return type: Vector3  
 
@@ -3700,9 +3938,9 @@ class Geometry3D(object):
         """
         return _robotsim.Geometry3D_roi(self, query, bmin, bmax)
 
-    def merge(self, other: "Geometry3D", threshold: "double"=0) -> "void":
+    def merge(self, other: "Geometry3D") -> "void":
         r"""
-        merge(Geometry3D self, Geometry3D other, double threshold=0)
+        merge(Geometry3D self, Geometry3D other)
 
 
         Merges another geometry into this geometry. The result is stored inplace and the
@@ -3713,11 +3951,8 @@ class Geometry3D(object):
         ImplicitSurface, OccupancyGrid, and Heightmap merges preserve the domain of the
         current grid. They can also be merged with many other geometries.  
 
-        In the ImplicitSurface case, a truncation value can be set via `threshold`. This
-        performs a TSDF-style merge  
-
         """
-        return _robotsim.Geometry3D_merge(self, other, threshold)
+        return _robotsim.Geometry3D_merge(self, other)
     world = property(_robotsim.Geometry3D_world_get, _robotsim.Geometry3D_world_set, doc=r"""world : int""")
     id = property(_robotsim.Geometry3D_id_get, _robotsim.Geometry3D_id_set, doc=r"""id : int""")
     geomPtr = property(_robotsim.Geometry3D_geomPtr_get, _robotsim.Geometry3D_geomPtr_set, doc=r"""geomPtr : p.void""")
@@ -10921,8 +11156,6 @@ def equilibrium_torques(*args) -> "PyObject *":
     return _robotsim.equilibrium_torques(*args)
 
 import warnings
-
-SimRobotSensor = SensorModel
 
 def _deprecated_func(oldName,newName):
     import sys

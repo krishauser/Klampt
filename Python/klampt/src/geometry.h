@@ -313,18 +313,17 @@ struct GeometricPrimitive
   bool isStandalone;
 };
 
-/** @brief An axis-aligned volumetric grid, typically a signed distance
+/** @brief An axis-aligned volumetric grid representing a signed distance
  * transform with > 0 indicating outside and < 0 indicating inside. 
- * Can also store an occupancy grid with 1 indicating inside and 0
- * indicating outside.
  * 
- * In general, values are associated with cells rather than vertices. So,
- * cell (i,j,k) is associated with a single value, and has size
+ * In general, values are associated with cells rather than vertices.
+ * 
+ * Cell (i,j,k) contains a value, and has size
  * (w,d,h) = ((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1], (bmax[2]-bmin[2])/dims[2]).
  * It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1)) x [h*k,h*(k+1)).
  * 
- * For SDFs and TSDFs which assume values at vertices, the values are specified
- * at the **centers** of cells.  I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).
+ * The field should be assumed sampled at the **centers** of cells, i.e.,
+ * at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).
  *
  * Attributes:
  *
@@ -335,19 +334,24 @@ struct GeometricPrimitive
  *     values (numpy array): contains a 3D array of
  *          ``dims[0] x dims[1] x dims[2]`` values. 
  * 
+ *     truncationDistance (float): inf for SDFs, and the truncation distance
+ *          for TSDFs. Cells whose values are >= d are considered "sufficiently
+ *          far" and distance / tolerance queries outside of this range are
+ *          usually not meaningful.
+ * 
  */
-class VolumeGrid
+class ImplicitSurface
 {
 public:
-  VolumeGrid();
-  ~VolumeGrid();
-  VolumeGrid(const VolumeGrid& rhs);
+  ImplicitSurface();
+  ~ImplicitSurface();
+  ImplicitSurface(const ImplicitSurface& rhs);
   ///Creates a standalone object that is a copy of this
-  VolumeGrid copy() const;
+  ImplicitSurface copy() const;
   ///Used internally 
-  void operator = (const VolumeGrid& rhs);
+  void operator = (const ImplicitSurface& rhs);
   ///Copies the data of the argument into this.
-  void set(const VolumeGrid&);
+  void set(const ImplicitSurface&);
 
   void getBmin(double out[3]) const;
   void setBmin(const double bmin[3]);
@@ -371,6 +375,78 @@ public:
   void getValues(double** np_view3, int* m, int* n, int* p);
   ///Sets the values to a 3D numpy array
   void setValues(double* np_array3, int m, int n, int p);
+  ///Sets the truncation distance for TSDFs. 
+  void setTruncationDistance(double d);
+  ///Retrieves the truncation distance for TSDFs. 
+  double getTruncationDistance() const;
+
+  void* dataPtr;
+  bool isStandalone;
+};
+
+/** @brief An occupancy grid with 1 indicating inside and 0
+ * indicating outside.  Can also be a fuzzy (probabilistic / density)
+ * grid.
+ *  
+ * In general, values are associated with cells rather than vertices.
+ * 
+ * Cell (i,j,k) contains an occupancy / density value, and has size
+ * (w,d,h) = ((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1], (bmax[2]-bmin[2])/dims[2]).
+ * It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1)) x [h*k,h*(k+1)).
+ *
+ * Attributes:
+ *
+ *     bmin (array of 3 doubles): contains the minimum bounds.
+ * 
+ *     bmax (array of 3 doubles): contains the maximum bounds.
+ * 
+ *     values (numpy array): contains a 3D array of
+ *          ``dims[0] x dims[1] x dims[2]`` values. 
+ * 
+ *     occupancyThreshold (float): set to 0.5 by default. Collision
+ *         detection treats all cells whose values are greater than this
+ *         value as occupied.
+ * 
+ */
+class OccupancyGrid
+{
+public:
+  OccupancyGrid();
+  ~OccupancyGrid();
+  OccupancyGrid(const OccupancyGrid& rhs);
+  ///Creates a standalone object that is a copy of this
+  OccupancyGrid copy() const;
+  ///Used internally 
+  void operator = (const OccupancyGrid& rhs);
+  ///Copies the data of the argument into this.
+  void set(const OccupancyGrid&);
+
+  void getBmin(double out[3]) const;
+  void setBmin(const double bmin[3]);
+  void getBmax(double out[3]) const;
+  void setBmax(const double bmax[3]);
+  /// Resizes the x, y, and z dimensions of the grid 
+  void resize(int sx,int sy,int sz);
+  ///Sets all elements to a uniform value (e.g., 0)
+  void set(double value);
+  ///Sets a specific element of a cell
+  void set(int i,int j,int k,double value);
+  ///Gets a specific element of a cell
+  double get(int i,int j,int k);
+  ///Shifts the value uniformly 
+  void shift(double dv);
+  ///Scales the value uniformly 
+  void scale(double cv);
+  ///Returns a 3D Numpy array view of the values
+  ///
+  ///Return type: np.ndarray
+  void getValues(double** np_view3, int* m, int* n, int* p);
+  ///Sets the values to a 3D numpy array
+  void setValues(double* np_array3, int m, int n, int p);
+  /// Sets the threshold for collision detection
+  void setOccupancyThreshold(double threshold);
+  /// Gets the threshold for collision detection
+  double getOccupancyThreshold() const;
 
   void* dataPtr;
   bool isStandalone;
@@ -383,7 +459,7 @@ public:
  * (`viewport.perspective=true`), the values are the depths of each
  * grid point (not distance) from the origin in the +z direction.
  * 
- * Note that unlike VolumeGrid types, each grid entry is defined at a
+ * Note that unlike volume grid types, each grid entry is defined at a
  * vertex, not a cell.  In elevation map form, the (i,j) cell is associated
  * with the vertex ((i-cx)/fx,(n-1-j-cy)/fy,heights[i,j]) where n is
  * `heights.shape[1]`.  Note that the y-axis is flipped in the heightmap
@@ -614,13 +690,14 @@ public:
  * - convex hulls (:class:`ConvexHull`)
  * - triangle meshes (:class:`TriangleMesh`)
  * - point clouds (:class:`PointCloud`)
- * - implicit surfaces (name "ImplicitSurface", data :class:`VolumeGrid`)
- * - occupancy grids (name "OccupancyGrid", data :class:`VolumeGrid`)
+ * - implicit surfaces (:class:`ImplicitSurface`)
+ * - occupancy grids (:class:`OccupancyGrid`)
  * - heightmaps (:class:`Heightmap`)
  * - groups ("Group" type)
  * 
  * For now we also support the "VolumeGrid" identifier which is treated
- * as an alias for "ImplicitSurface"
+ * as an alias for "ImplicitSurface".  This will be deprecated in a
+ * future version
  * 
  * This class acts as a uniform container of all of these types.
  *
@@ -709,7 +786,8 @@ class Geometry3D
   Geometry3D(const ConvexHull&);
   Geometry3D(const TriangleMesh&);
   Geometry3D(const PointCloud&);
-  Geometry3D(const VolumeGrid&);
+  Geometry3D(const ImplicitSurface&);
+  Geometry3D(const OccupancyGrid&);
   Geometry3D(const Heightmap&);
   ~Geometry3D();
   const Geometry3D& operator = (const Geometry3D& rhs);
@@ -734,12 +812,10 @@ class Geometry3D
   GeometricPrimitive getGeometricPrimitive();
   ///Returns a ConvexHull if this geometry is of type ConvexHull
   ConvexHull getConvexHull();
-  ///Returns a VolumeGrid if this geometry is of type ImplicitSurface or OccupancyGrid
-  VolumeGrid getVolumeGrid();
-  ///Returns the VolumeGrid if this geometry is of type ImplicitSurface
-  VolumeGrid getImplicitSurface();
-  ///Returns the VolumeGrid if this geometry is of type OccupancyGrid
-  VolumeGrid getOccupancyGrid();
+  ///Returns the ImplicitSurface if this geometry is of type ImplicitSurface
+  ImplicitSurface getImplicitSurface();
+  ///Returns the OccupancyGrid if this geometry is of type OccupancyGrid
+  OccupancyGrid getOccupancyGrid();
   ///Returns the Heightmap if this geometry is of type Heightmap
   Heightmap getHeightmap();
   
@@ -755,12 +831,10 @@ class Geometry3D
   ///transform of these two objects is frozen in place; i.e., setting the current
   ///transform of g2 doesn't do anything to this object.
   void setConvexHullGroup(const Geometry3D& g1, const Geometry3D & g2);
-  ///Sets this Geometry3D to an ImplicitSurface.  Will be deprecated soon.
-  void setVolumeGrid(const VolumeGrid&);
   ///Sets this Geometry3D to an ImplicitSurface.
-  void setImplicitSurface(const VolumeGrid& vg);
+  void setImplicitSurface(const ImplicitSurface& grid);
   ///Sets this Geometry3D to an OccupancyGrid.
-  void setOccupancyGrid(const VolumeGrid& vg);
+  void setOccupancyGrid(const OccupancyGrid& grid);
   ///Sets this Geometry3D to a Heightmap.
   void setHeightmap(const Heightmap& hm);
   ///Sets this Geometry3D to a group geometry.  To add sub-geometries, 
@@ -835,21 +909,34 @@ class Geometry3D
    *   - TriangleMesh -> PointCloud.  param is the desired dispersion of
    *        the points, by default set to the average triangle diameter. 
    *        At least all of the mesh's vertices will be returned.
-   *   - TriangleMesh -> VolumeGrid.  Converted using the fast marching
+   *   - TriangleMesh -> ImplicitSurface.  Converted using the fast marching
    *        method with good results only if the mesh is watertight.
+   *        param is the grid resolution, by default set to the average
+   *        triangle diameter.
+   *   - TriangleMesh -> OccupancyGrid.  Converted using rasterization.
    *        param is the grid resolution, by default set to the average
    *        triangle diameter.
    *   - TriangleMesh -> ConvexHull.  If param==0, just calculates a convex
    *        hull. Otherwise, uses convex decomposition with the HACD library.
+   *   - TriangleMesh -> Heightmap.  Converted using rasterization.  param
+   *        is the grid resolution, by default set to max mesh dimension / 256.
    *   - PointCloud -> TriangleMesh. Available if the point cloud is
    *        structured. param is the threshold for splitting triangles
    *        by depth discontinuity. param is by default infinity.
+   *   - PointCloud -> OccupancyGrid.  param is the grid resolution, by default
+   *        some reasonable number.
    *   - PointCloud -> ConvexHull.  Converted using SOLID / Qhull.
+   *   - PointCloud -> Heightmap.  param is the grid resolution, by default
+   *        set to max point cloud dimension / 256.
    *   - GeometricPrimitive -> anything.  param determines the desired
    *        resolution.
-   *   - VolumeGrid -> TriangleMesh.  param determines the level set for
+   *   - ImplicitSurface -> TriangleMesh.  param determines the level set for
    *         the marching cubes algorithm.
-   *   - VolumeGrid -> PointCloud.  param determines the level set.
+   *   - ImplicitSurface -> PointCloud.  param determines the level set.
+   *   - ImplicitSurface -> Heightmap.
+   *   - OccupancyGrid -> TriangleMesh.  Creates a mesh around each block.
+   *   - OccupancyGrid -> PointCloud.  Outputs a point for each block.
+   *   - OccupancyGrid -> Heightmap.
    *   - ConvexHull -> TriangleMesh. 
    *   - ConvexHull -> PointCloud.  param is the desired dispersion of the
    *         points.  Equivalent to ConvexHull -> TriangleMesh -> PointCloud
@@ -867,10 +954,8 @@ class Geometry3D
    *
    * Unsupported types:
    *
-   * - VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]
-   * - VolumeGrid - TriangleMesh
-   * - VolumeGrid - VolumeGrid
-   * - ConvexHull - anything else besides ConvexHull
+   * - ImplicitSurface - GeometricPrimitive [aabb, box, triangle, polygon]
+   * - ImplicitSurface - ConvexHull
    */
   bool collides(const Geometry3D& other);
   /// @brief Same as collide, but will also return the elements of each
@@ -909,9 +994,9 @@ class Geometry3D
   ///The following geometry types return signed distances:
   ///
   ///- GeometricPrimitive
-  ///- PointCloud (approximate, if the cloud is a set of balls with the radius
-  ///  property)
-  ///- VolumeGrid
+  ///- PointCloud
+  ///- ImplictSurface
+  ///- Heightmap (approximate, only accurate in the viewing direction)
   ///- ConvexHull
   ///
   ///For other types, a signed distance will be returned if the geometry has
@@ -933,23 +1018,25 @@ class Geometry3D
   ///are touching.  Only the following combinations of geometry types return
   ///signed distances:
   ///
-  ///- GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)
+  ///- GeometricPrimitive-GeometricPrimitive (missing some for boxes, segments, and tris)
   ///- GeometricPrimitive-TriangleMesh (surface only)
   ///- GeometricPrimitive-PointCloud
-  ///- GeometricPrimitive-VolumeGrid
+  ///- GeometricPrimitive-ImplicitSurface
   ///- TriangleMesh (surface only)-GeometricPrimitive
-  ///- PointCloud-VolumeGrid
-  ///- ConvexHull - ConvexHull
+  ///- PointCloud-ImplicitSurface
+  ///- PointCloud-ConvexHull
+  ///- ConvexHull-ConvexHull
+  ///- ConvexHull-GeometricPrimitive
   ///
   ///If penetration is supported, a negative distance is returned and cp1,cp2
   ///are the deepest penetrating points.
   ///
   ///Unsupported types:
   ///
-  ///- GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb
   ///- PointCloud-PointCloud
-  ///- VolumeGrid-TriangleMesh
-  ///- VolumeGrid-VolumeGrid
+  ///- ImplicitSurface-TriangleMesh
+  ///- ImplicitSurface-ImplicitSurface
+  ///- OccupancyGrid - anything
   ///- ConvexHull - anything else besides ConvexHull
   ///
   ///See the comments of the distance_point function
@@ -961,14 +1048,8 @@ class Geometry3D
   DistanceQueryResult distance_ext(const Geometry3D& other,const DistanceQuerySettings& settings);
   ///Performs a ray cast.
   ///
-  ///Supported types:
-  ///
-  ///- GeometricPrimitive
-  ///- TriangleMesh
-  ///- PointCloud (need a positive collision margin, or points need to have a
-  ///  'radius' property assigned)
-  ///- VolumeGrid
-  ///- Group (groups of the aforementioned types)
+  ///All types supported, but PointCloud needs a positive collision
+  ///margin, or points need to have a 'radius' property assigned)
   ///
   ///Returns:
   ///
@@ -980,15 +1061,10 @@ class Geometry3D
   bool rayCast(const double s[3],const double d[3],double out[3]);
   ///A more sophisticated ray cast. 
   ///
-  ///Supported types:
   ///
-  ///- GeometricPrimitive
-  ///- TriangleMesh
-  ///- PointCloud (need a positive collision margin, or points need to have a
-  ///  'radius' property assigned)
-  ///- VolumeGrid
-  ///- Group (groups of the aforementioned types)
+  ///All types supported, but PointCloud needs a positive collision
   ///
+  ///margin, or points need to have a 'radius' property assigned)
   ///Returns:
   ///
   ///    (hit_element,pt) where hit_element is >= 0 if ray starting at 
@@ -1008,20 +1084,13 @@ class Geometry3D
   ///is defined as all pairs of points within distance
   ///self.collisionMargin + other.collisionMargin + padding1 + padding2.
   ///
+  ///Relatively few geometry types are supported.
+  ///
   ///For some geometry types (TriangleMesh-TriangleMesh,
   ///TriangleMesh-PointCloud, PointCloud-PointCloud) padding must be positive
   ///to get meaningful contact poitns and normals.
   ///
   ///If maxContacts != 0  a clustering postprocessing step is performed.
-  ///
-  ///Unsupported types:
-  ///
-  ///- GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb
-  ///- VolumeGrid-GeometricPrimitive any subtypes except point and sphere.
-  ///  also, the results are potentially inaccurate for non-convex VolumeGrids.
-  ///- VolumeGrid-TriangleMesh
-  ///- VolumeGrid-VolumeGrid
-  ///- ConvexHull - anything
   ///
   ContactQueryResult contacts(const Geometry3D& other,double padding1,double padding2,int maxContacts=0);
   ///Calculates the furthest point on this geometry in the direction dir.
@@ -1029,6 +1098,10 @@ class Geometry3D
   ///Supported types:
   ///
   ///- ConvexHull
+  ///- GeometricPrimitive
+  ///- PointCloud
+  ///- TriangleMesh
+  ///- OccupancyGrid
   ///
   ///Return type: Vector3
   void support(const double dir[3], double out[3]);
@@ -1071,10 +1144,7 @@ class Geometry3D
   ///
   ///ImplicitSurface, OccupancyGrid, and Heightmap merges preserve the domain of the
   ///current grid.  They can also be merged with many other geometries.
-  ///
-  ///In the ImplicitSurface case, a truncation value can be set via `threshold`.  This
-  ///performs a TSDF-style merge
-  void merge(const Geometry3D& other,double threshold=0);
+  void merge(const Geometry3D& other);
 
   int world;
   int id;

@@ -253,8 +253,7 @@ something in the world changes, you must manually make a call to
     locking / unlocking, which is to prevent thread clashes amongst changes to 
     the underlying object data.
 
-This mode does NOT support plugins, dialogs, or custom draw functions.  Also,
-certain types of geometries like VolumeGrids are not supported.
+This mode does NOT support plugins, dialogs, or custom draw functions.
 
 Animations are supported, but you will manually have to advance the animations 
 and call ``vis.update()`` or ``vis.scene().update()`` for each frame.  

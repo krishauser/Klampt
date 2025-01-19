@@ -1055,7 +1055,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 }
 
-%extend VolumeGrid { 
+%extend ImplicitSurface { 
 %pythoncode {
     bmin = property(getBmin, setBmin)
     """The lower bound of the domain."""
@@ -1070,7 +1070,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         Provided for backwards compatibility
         """
         import warnings
-        warnings.warn("VolumeGrid. setBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        warnings.warn("ImplicitSurface.setBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
         self.bmin = bounds[0:3]
         self.bmax = bounds[3:6]
     
@@ -1081,7 +1081,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         Provided for backwards compatibility
         """
         import warnings
-        warnings.warn("VolumeGrid. getBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        warnings.warn("ImplicitSurface. getBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
         return list(self.bmin) + list(self.bmax)
     
     bounds = property(getBounds, setBounds)
@@ -1092,9 +1092,50 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.to_json(self,'VolumeGrid')
-        return (loader.from_json,(jsonobj,'VolumeGrid'))
+        jsonobj = loader.to_json(self,'ImplicitSurface')
+        return (loader.from_json,(jsonobj,'ImplicitSurface'))
+}
+}
 
+%extend OccupancyGrid { 
+%pythoncode {
+    bmin = property(getBmin, setBmin)
+    """The lower bound of the domain."""
+
+    bmax = property(getBmax, setBmax)
+    """The upper bound of the domain."""
+
+    def setBounds(self, bounds):
+        """
+        @deprecated
+        
+        Provided for backwards compatibility
+        """
+        import warnings
+        warnings.warn("OccupancyGrid.setBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        self.bmin = bounds[0:3]
+        self.bmax = bounds[3:6]
+    
+    def getBounds(self):
+        """
+        @deprecated
+        
+        Provided for backwards compatibility
+        """
+        import warnings
+        warnings.warn("OccupancyGrid. getBounds will be deprecated in favor of bmin, bmax attributes in a future version of Klampt",DeprecationWarning)
+        return list(self.bmin) + list(self.bmax)
+    
+    bounds = property(getBounds, setBounds)
+    """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
+
+    values = property(getValues, setValues)
+    """The 3D array of values in the grid (numpy.ndarray)"""
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.to_json(self,'OccupancyGrid')
+        return (loader.from_json,(jsonobj,'OccupancyGrid'))
 }
 }
 
@@ -1276,8 +1317,6 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 //PEP8 deprecations
 %pythoncode {
     import warnings
-
-    SimRobotSensor = SensorModel
 
     def _deprecated_func(oldName,newName):
         import sys

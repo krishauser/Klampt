@@ -8,18 +8,16 @@ It can be installed using pip as follows::
 """
 
 import open3d
-from klampt import PointCloud,TriangleMesh,VolumeGrid,Geometry3D
+from klampt import PointCloud,TriangleMesh,ImplicitSurface,OccupancyGrid,Geometry3D
 
 def to_open3d(obj):
     """Converts Klamp't geometry to an open3d geometry.
 
     Geometry3D objects are converted applying the current transform.
 
-    If the VolumeGrid is considered to be an occupancy grid (all values
-    between 0 and 1), then it is converted to a VoxelGrid containing a
-    voxel for any positive items.  If it is considered to be a SDF,
-    then it contains a voxel of any non-positive items.  There may be
-    issues converting from VolumeGrids whose cells are non-cubic.
+    OccupancyGrids are is converted to a VoxelGrid containing a
+    voxel for any positive items.  ImplicitSurfaces are first converted
+    to OccupancyGrid type first. 
     """
     if isinstance(obj,PointCloud):
         pc = open3d.geometry.PointCloud()
@@ -35,7 +33,7 @@ def to_open3d(obj):
         m.vertices = open3d.utility.Vector3dVector(obj.vertices)
         m.triangles = open3d.utility.Vector3iVector(obj.indices)
         return m
-    elif isinstance(obj,VolumeGrid):
+    elif isinstance(obj,OccupancyGrid):
         import numpy as np
 
         origin = obj.bmin
@@ -45,14 +43,29 @@ def to_open3d(obj):
         cz = (obj.bmax[2]-obj.bmin[2])/dims[2]
         voxel_size = pow(cx*cy*cz,1.0/3.0)
         
-        values = obj.values
-        vrange = np.min(values),np.min(values)
-        if vrange[0] < 0 or vrange[1] > 1:
-            #treat as SDF
-            indices = np.nonzero(values <= 0)
-        else:
-            #treat as occupancy grid
-            indices = np.nonzero(values > 0.5)
+        indices = np.nonzero(obj.values > obj.occupancyThreshold)
+
+        pc = open3d.geometry.PointCloud()
+        for i in indices[0]:
+            cell = np.array([i//(dims[2]*dims[1]), (i//dims[2]) % dims[1], i%dims[2]])
+            pt = (cell + 0.5)*voxel_size + origin
+            pc.points.append(pt)
+        vg = open3d.geometry.VoxelGrid()
+        vg.create_from_point_cloud(pc,voxel_size)
+        return vg
+        #deprecated in open3d 0.8.0
+        #return open3d.geometry.create_surface_voxel_grid_from_point_cloud(pc,voxel_size)
+    elif isinstance(obj,ImplicitSurface):
+        import numpy as np
+
+        origin = obj.bmin
+        dims = obj.values.shape
+        cx = (obj.bmax[0]-obj.bmin[0])/dims[0]
+        cy = (obj.bmax[1]-obj.bmin[1])/dims[1]
+        cz = (obj.bmax[2]-obj.bmin[2])/dims[2]
+        voxel_size = pow(cx*cy*cz,1.0/3.0)
+        
+        indices = np.nonzero(obj.values <= 0)
 
         pc = open3d.geometry.PointCloud()
         for i in indices[0]:
@@ -95,8 +108,10 @@ def from_open3d(obj):
         m.indices = np.asarray(obj.triangles)
         return m
     elif isinstance(obj,open3d.geometry.VoxelGrid):
-        grid = VolumeGrid()
         import numpy as np
+        grid = OccupancyGrid()
+        grid.bmin = obj.get_min_bound()
+        grid.bmax = obj.get_max_bound()
         if hasattr(obj, 'voxels'):
             # open3d <= 0.9.0
             occupied = np.array(obj.voxels,dtype=np.int32)
@@ -109,13 +124,10 @@ def from_open3d(obj):
         imax = np.max(occupied,axis=0)
         assert imin.shape == (3,)
         assert imax.shape == (3,)
-        #TODO: fix this up
-        import warnings
-        warnings.warn("from_open3d: VoxelGrid conversion may not be correct")
-        bmin = obj.origin + (imin-1)*obj.voxel_size
-        bmax = obj.origin + (imax+2)*obj.voxel_size
-        grid.bmin = bmin
-        grid.bmax = bmax
-        grid.values = occupied.astype(float)
+        assert imin[0] >= 0 and imin[1] >= 0 and imin[2] >= 0
+        print("SIZE",imin,imax)
+        mask = np.zeros((imax[0]+1,imax[1]+1,imax[2]+1),dtype=float)
+        mask[occupied[:,0],occupied[:,1],occupied[:,2]] = 1.0
+        grid.values = mask
         return grid
     raise TypeError("Invalid type")

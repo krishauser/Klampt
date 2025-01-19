@@ -1,5 +1,5 @@
 from ..visualization import _WindowManager,VisualizationScene,VisPlot,objectToVisType,_globalLock
-from ...robotsim import WorldModel,RobotModel,RigidObjectModel,Geometry3D,GeometricPrimitive,PointCloud,TriangleMesh,VolumeGrid,ConvexHull
+from ...robotsim import WorldModel,RobotModel,RigidObjectModel,Geometry3D,GeometricPrimitive,PointCloud,TriangleMesh,ImplicitSurface,OccupancyGrid,ConvexHull
 from ...model.trajectory import Trajectory,RobotTrajectory
 from ...control.utils import TimedLooper
 from ...io.rerun_convert import *
@@ -19,7 +19,7 @@ def log_rr(name : str, item, attributes : dict, world : WorldModel):
         log_rr_rigid_object(item,name,attributes.get('hide_label',False),attributes.get('color',None))
     elif isinstance(item,Geometry3D):
         log_rr_geometry(item,name,appearance=attributes.get('appearance',None),hide_label=attributes.get('hide_label',False),color=attributes.get('color',None))
-    elif isinstance(item,(GeometricPrimitive,PointCloud,TriangleMesh,VolumeGrid,ConvexHull)):
+    elif isinstance(item,(GeometricPrimitive,PointCloud,TriangleMesh,ImplicitSurface,OccupancyGrid,ConvexHull)):
         geom = Geometry3D(item)
         log_rr_geometry(geom,name,appearance=attributes.get('appearance',None),hide_label=attributes.get('hide_label',False),color=attributes.get('color',None))
     elif isinstance(item,Trajectory):

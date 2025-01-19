@@ -988,13 +988,13 @@ There are eight currently supported types of geometry:
 *   convex hulls (:class:`ConvexHull`)  
 *   triangle meshes (:class:`TriangleMesh`)  
 *   point clouds (:class:`PointCloud`)  
-*   implicit surfaces (name \"ImplicitSurface\", data :class:`VolumeGrid`)  
-*   occupancy grids (name \"OccupancyGrid\", data :class:`VolumeGrid`)  
+*   implicit surfaces (:class:`ImplicitSurface`)  
+*   occupancy grids (:class:`OccupancyGrid`)  
 *   heightmaps (:class:`Heightmap`)  
 *   groups (\"Group\" type)  
 
 For now we also support the \"VolumeGrid\" identifier which is treated as an
-alias for \"ImplicitSurface\"  
+alias for \"ImplicitSurface\". This will be deprecated in a future version  
 
 This class acts as a uniform container of all of these types.  
 
@@ -1095,6 +1095,9 @@ C++ includes: geometry.h
 %feature("docstring") Geometry3D::Geometry3D "
 ";
 
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
 %feature("docstring") Geometry3D::~Geometry3D "
 ";
 
@@ -1149,20 +1152,14 @@ Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive.
 Returns a ConvexHull if this geometry is of type ConvexHull.  
 ";
 
-%feature("docstring") Geometry3D::getVolumeGrid "
-
-Returns a VolumeGrid if this geometry is of type ImplicitSurface or
-OccupancyGrid.  
-";
-
 %feature("docstring") Geometry3D::getImplicitSurface "
 
-Returns the VolumeGrid if this geometry is of type ImplicitSurface.  
+Returns the ImplicitSurface if this geometry is of type ImplicitSurface.  
 ";
 
 %feature("docstring") Geometry3D::getOccupancyGrid "
 
-Returns the VolumeGrid if this geometry is of type OccupancyGrid.  
+Returns the OccupancyGrid if this geometry is of type OccupancyGrid.  
 ";
 
 %feature("docstring") Geometry3D::getHeightmap "
@@ -1195,11 +1192,6 @@ Sets this Geometry3D to a ConvexHull.
 Sets this Geometry3D to be a convex hull of two geometries. Note: the relative
 transform of these two objects is frozen in place; i.e., setting the current
 transform of g2 doesn't do anything to this object.  
-";
-
-%feature("docstring") Geometry3D::setVolumeGrid "
-
-Sets this Geometry3D to an ImplicitSurface. Will be deprecated soon.  
 ";
 
 %feature("docstring") Geometry3D::setImplicitSurface "
@@ -1339,19 +1331,31 @@ Available conversions are:
 *   TriangleMesh -> PointCloud. param is the desired dispersion of the points,
     by default set to the average triangle diameter. At least all of the mesh's
     vertices will be returned.  
-*   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
-    good results only if the mesh is watertight. param is the grid resolution,
-    by default set to the average triangle diameter.  
+*   TriangleMesh -> ImplicitSurface. Converted using the fast marching method
+    with good results only if the mesh is watertight. param is the grid
+    resolution, by default set to the average triangle diameter.  
+*   TriangleMesh -> OccupancyGrid. Converted using rasterization. param is the
+    grid resolution, by default set to the average triangle diameter.  
 *   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
     Otherwise, uses convex decomposition with the HACD library.  
+*   TriangleMesh -> Heightmap. Converted using rasterization. param is the grid
+    resolution, by default set to max mesh dimension / 256.  
 *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
     param is the threshold for splitting triangles by depth discontinuity. param
     is by default infinity.  
+*   PointCloud -> OccupancyGrid. param is the grid resolution, by default some
+    reasonable number.  
 *   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  
+*   PointCloud -> Heightmap. param is the grid resolution, by default set to max
+    point cloud dimension / 256.  
 *   GeometricPrimitive -> anything. param determines the desired resolution.  
-*   VolumeGrid -> TriangleMesh. param determines the level set for the marching
-    cubes algorithm.  
-*   VolumeGrid -> PointCloud. param determines the level set.  
+*   ImplicitSurface -> TriangleMesh. param determines the level set for the
+    marching cubes algorithm.  
+*   ImplicitSurface -> PointCloud. param determines the level set.  
+*   ImplicitSurface -> Heightmap.  
+*   OccupancyGrid -> TriangleMesh. Creates a mesh around each block.  
+*   OccupancyGrid -> PointCloud. Outputs a point for each block.  
+*   OccupancyGrid -> Heightmap.  
 *   ConvexHull -> TriangleMesh.  
 *   ConvexHull -> PointCloud. param is the desired dispersion of the points.
     Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
@@ -1372,10 +1376,8 @@ Returns true if this geometry collides with the other.
 
 Unsupported types:  
 
-*   VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]  
-*   VolumeGrid - TriangleMesh  
-*   VolumeGrid - VolumeGrid  
-*   ConvexHull - anything else besides ConvexHull  
+*   ImplicitSurface - GeometricPrimitive [aabb, box, triangle, polygon]  
+*   ImplicitSurface - ConvexHull  
 ";
 
 %feature("docstring") Geometry3D::collides_ext "
@@ -1427,9 +1429,9 @@ returns the negative penetration depth if pt is within this. The following
 geometry types return signed distances:  
 
 *   GeometricPrimitive  
-*   PointCloud (approximate, if the cloud is a set of balls with the radius
-    property)  
-*   VolumeGrid  
+*   PointCloud  
+*   ImplictSurface  
+*   Heightmap (approximate, only accurate in the viewing direction)  
 *   ConvexHull  
 
 For other types, a signed distance will be returned if the geometry has a
@@ -1456,23 +1458,26 @@ The signed distance returns the negative penetration depth if the objects are
 touching. Only the following combinations of geometry types return signed
 distances:  
 
-*   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
+*   GeometricPrimitive-GeometricPrimitive (missing some for boxes, segments, and
+    tris)  
 *   GeometricPrimitive-TriangleMesh (surface only)  
 *   GeometricPrimitive-PointCloud  
-*   GeometricPrimitive-VolumeGrid  
+*   GeometricPrimitive-ImplicitSurface  
 *   TriangleMesh (surface only)-GeometricPrimitive  
-*   PointCloud-VolumeGrid  
-*   ConvexHull - ConvexHull  
+*   PointCloud-ImplicitSurface  
+*   PointCloud-ConvexHull  
+*   ConvexHull-ConvexHull  
+*   ConvexHull-GeometricPrimitive  
 
 If penetration is supported, a negative distance is returned and cp1,cp2 are the
 deepest penetrating points.  
 
 Unsupported types:  
 
-*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
 *   PointCloud-PointCloud  
-*   VolumeGrid-TriangleMesh  
-*   VolumeGrid-VolumeGrid  
+*   ImplicitSurface-TriangleMesh  
+*   ImplicitSurface-ImplicitSurface  
+*   OccupancyGrid - anything  
 *   ConvexHull - anything else besides ConvexHull  
 
 See the comments of the distance_point function  
@@ -1489,14 +1494,8 @@ break if the closest points are at least upperBound distance from one another.
 
 Performs a ray cast.  
 
-Supported types:  
-
-*   GeometricPrimitive  
-*   TriangleMesh  
-*   PointCloud (need a positive collision margin, or points need to have a
-    'radius' property assigned)  
-*   VolumeGrid  
-*   Group (groups of the aforementioned types)  
+All types supported, but PointCloud needs a positive collision margin, or points
+need to have a 'radius' property assigned)  
 
 Returns:  
 
@@ -1510,16 +1509,9 @@ Returns:
 
 A more sophisticated ray cast.  
 
-Supported types:  
+All types supported, but PointCloud needs a positive collision  
 
-*   GeometricPrimitive  
-*   TriangleMesh  
-*   PointCloud (need a positive collision margin, or points need to have a
-    'radius' property assigned)  
-*   VolumeGrid  
-*   Group (groups of the aforementioned types)  
-
-Returns:  
+margin, or points need to have a 'radius' property assigned) Returns:  
 
     (hit_element,pt) where hit_element is >= 0 if ray starting at
     s and pointing in direction d hits the geometry (given in world
@@ -1539,20 +1531,13 @@ representation of the region of surface overlap, which is defined as all pairs
 of points within distance self.collisionMargin + other.collisionMargin +
 padding1 + padding2.  
 
+Relatively few geometry types are supported.  
+
 For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,
 PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
 and normals.  
 
 If maxContacts != 0 a clustering postprocessing step is performed.  
-
-Unsupported types:  
-
-*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
-*   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,
-    the results are potentially inaccurate for non-convex VolumeGrids.  
-*   VolumeGrid-TriangleMesh  
-*   VolumeGrid-VolumeGrid  
-*   ConvexHull - anything  
 ";
 
 %feature("docstring") Geometry3D::support "
@@ -1562,6 +1547,10 @@ Calculates the furthest point on this geometry in the direction dir.
 Supported types:  
 
 *   ConvexHull  
+*   GeometricPrimitive  
+*   PointCloud  
+*   TriangleMesh  
+*   OccupancyGrid  
 
 Return type: Vector3  
 ";
@@ -1614,9 +1603,6 @@ OccupancyGrids, and Heightmaps.
 
 ImplicitSurface, OccupancyGrid, and Heightmap merges preserve the domain of the
 current grid. They can also be merged with many other geometries.  
-
-In the ImplicitSurface case, a truncation value can be set via `threshold`. This
-performs a TSDF-style merge  
 ";
 
 // File: classHeightmap.xml
@@ -1631,8 +1617,8 @@ z-height of the terrain at each grid point. In depth-map form
 (`viewport.perspective=true`), the values are the depths of each grid point (not
 distance) from the origin in the +z direction.  
 
-Note that unlike VolumeGrid types, each grid entry is defined at a vertex, not a
-cell. In elevation map form, the (i,j) cell is associated with the vertex
+Note that unlike volume grid types, each grid entry is defined at a vertex, not
+a cell. In elevation map form, the (i,j) cell is associated with the vertex
 ((i-cx)/fx,(n-1-j-cy)/fy,heights[i,j]) where n is `heights.shape[1]`. Note that
 the y-axis is flipped in the heightmap compared to the viewport such that the
 image is given in standard top-down convention.  
@@ -2314,6 +2300,125 @@ Samples an initial random configuration. More initial configurations can be
 sampled in case the prior configs lead to local minima.  
 ";
 
+// File: classImplicitSurface.xml
+
+
+%feature("docstring") ImplicitSurface "
+
+An axis-aligned volumetric grid representing a signed distance transform with >
+0 indicating outside and < 0 indicating inside.  
+
+In general, values are associated with cells rather than vertices.  
+
+Cell (i,j,k) contains a value, and has size (w,d,h) =
+((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1],
+(bmax[2]-bmin[2])/dims[2]). It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1))
+x [h*k,h*(k+1)).  
+
+The field should be assumed sampled at the **centers** of cells, i.e., at
+(w*(i+1/2),d*(j+1/2),h*(k+1/2)).  
+
+Attributes:  
+
+    bmin (array of 3 doubles): contains the minimum bounds.
+
+    bmax (array of 3 doubles): contains the maximum bounds.
+
+    values (numpy array): contains a 3D array of
+         ``dims[0] x dims[1] x dims[2]`` values.
+
+    truncationDistance (float): inf for SDFs, and the truncation distance
+         for TSDFs. Cells whose values are >= d are considered \"sufficiently
+         far\" and distance / tolerance queries outside of this range are
+         usually not meaningful.
+  
+
+C++ includes: geometry.h
+";
+
+%feature("docstring") ImplicitSurface::ImplicitSurface "
+";
+
+%feature("docstring") ImplicitSurface::ImplicitSurface "
+";
+
+%feature("docstring") ImplicitSurface::~ImplicitSurface "
+";
+
+%feature("docstring") ImplicitSurface::copy "
+
+Creates a standalone object that is a copy of this.  
+";
+
+%feature("docstring") ImplicitSurface::set "
+
+Copies the data of the argument into this.  
+";
+
+%feature("docstring") ImplicitSurface::set "
+
+Sets all elements to a uniform value (e.g., 0)  
+";
+
+%feature("docstring") ImplicitSurface::set "
+
+Sets a specific element of a cell.  
+";
+
+%feature("docstring") ImplicitSurface::getBmin "
+";
+
+%feature("docstring") ImplicitSurface::setBmin "
+";
+
+%feature("docstring") ImplicitSurface::getBmax "
+";
+
+%feature("docstring") ImplicitSurface::setBmax "
+";
+
+%feature("docstring") ImplicitSurface::resize "
+
+Resizes the x, y, and z dimensions of the grid.  
+";
+
+%feature("docstring") ImplicitSurface::get "
+
+Gets a specific element of a cell.  
+";
+
+%feature("docstring") ImplicitSurface::shift "
+
+Shifts the value uniformly.  
+";
+
+%feature("docstring") ImplicitSurface::scale "
+
+Scales the value uniformly.  
+";
+
+%feature("docstring") ImplicitSurface::getValues "
+
+Returns a 3D Numpy array view of the values.  
+
+Return type: np.ndarray  
+";
+
+%feature("docstring") ImplicitSurface::setValues "
+
+Sets the values to a 3D numpy array.  
+";
+
+%feature("docstring") ImplicitSurface::setTruncationDistance "
+
+Sets the truncation distance for TSDFs.  
+";
+
+%feature("docstring") ImplicitSurface::getTruncationDistance "
+
+Retrieves the truncation distance for TSDFs.  
+";
+
 // File: classMass.xml
 
 
@@ -2396,6 +2501,121 @@ is concentrated at the surface rather than the interior.
 ";
 
 %feature("docstring") ObjectPoser::get "
+";
+
+// File: classOccupancyGrid.xml
+
+
+%feature("docstring") OccupancyGrid "
+
+An occupancy grid with 1 indicating inside and 0 indicating outside. Can also be
+a fuzzy (probabilistic / density) grid.  
+
+In general, values are associated with cells rather than vertices.  
+
+Cell (i,j,k) contains an occupancy / density value, and has size (w,d,h) =
+((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1],
+(bmax[2]-bmin[2])/dims[2]). It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1))
+x [h*k,h*(k+1)).  
+
+Attributes:  
+
+    bmin (array of 3 doubles): contains the minimum bounds.
+
+    bmax (array of 3 doubles): contains the maximum bounds.
+
+    values (numpy array): contains a 3D array of
+         ``dims[0] x dims[1] x dims[2]`` values.
+
+    occupancyThreshold (float): set to 0.5 by default. Collision
+        detection treats all cells whose values are greater than this
+        value as occupied.
+  
+
+C++ includes: geometry.h
+";
+
+%feature("docstring") OccupancyGrid::OccupancyGrid "
+";
+
+%feature("docstring") OccupancyGrid::OccupancyGrid "
+";
+
+%feature("docstring") OccupancyGrid::~OccupancyGrid "
+";
+
+%feature("docstring") OccupancyGrid::copy "
+
+Creates a standalone object that is a copy of this.  
+";
+
+%feature("docstring") OccupancyGrid::set "
+
+Copies the data of the argument into this.  
+";
+
+%feature("docstring") OccupancyGrid::set "
+
+Sets all elements to a uniform value (e.g., 0)  
+";
+
+%feature("docstring") OccupancyGrid::set "
+
+Sets a specific element of a cell.  
+";
+
+%feature("docstring") OccupancyGrid::getBmin "
+";
+
+%feature("docstring") OccupancyGrid::setBmin "
+";
+
+%feature("docstring") OccupancyGrid::getBmax "
+";
+
+%feature("docstring") OccupancyGrid::setBmax "
+";
+
+%feature("docstring") OccupancyGrid::resize "
+
+Resizes the x, y, and z dimensions of the grid.  
+";
+
+%feature("docstring") OccupancyGrid::get "
+
+Gets a specific element of a cell.  
+";
+
+%feature("docstring") OccupancyGrid::shift "
+
+Shifts the value uniformly.  
+";
+
+%feature("docstring") OccupancyGrid::scale "
+
+Scales the value uniformly.  
+";
+
+%feature("docstring") OccupancyGrid::getValues "
+
+Returns a 3D Numpy array view of the values.  
+
+Return type: np.ndarray  
+";
+
+%feature("docstring") OccupancyGrid::setValues "
+
+Sets the values to a 3D numpy array.  
+";
+
+%feature("docstring") OccupancyGrid::setOccupancyThreshold "
+
+Sets the threshold for collision detection.  
+";
+
+%feature("docstring") OccupancyGrid::getOccupancyThreshold "
+
+Gets the threshold for collision detection.  
 ";
 
 // File: classPlannerInterface.xml
@@ -5346,110 +5566,6 @@ Return type: Vector3
 Provides the direction of a ray for an image coordinate (x,y)  
 
 Return type: Vector  
-";
-
-// File: classVolumeGrid.xml
-
-
-%feature("docstring") VolumeGrid "
-
-An axis-aligned volumetric grid, typically a signed distance transform with > 0
-indicating outside and < 0 indicating inside. Can also store an occupancy grid
-with 1 indicating inside and 0 indicating outside.  
-
-In general, values are associated with cells rather than vertices. So, cell
-(i,j,k) is associated with a single value, and has size (w,d,h) =
-((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1],
-(bmax[2]-bmin[2])/dims[2]). It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1))
-x [h*k,h*(k+1)).  
-
-For SDFs and TSDFs which assume values at vertices, the values are specified at
-the **centers** of cells. I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).  
-
-Attributes:  
-
-    bmin (array of 3 doubles): contains the minimum bounds.
-
-    bmax (array of 3 doubles): contains the maximum bounds.
-
-    values (numpy array): contains a 3D array of
-         ``dims[0] x dims[1] x dims[2]`` values.
-  
-
-C++ includes: geometry.h
-";
-
-%feature("docstring") VolumeGrid::VolumeGrid "
-";
-
-%feature("docstring") VolumeGrid::VolumeGrid "
-";
-
-%feature("docstring") VolumeGrid::~VolumeGrid "
-";
-
-%feature("docstring") VolumeGrid::copy "
-
-Creates a standalone object that is a copy of this.  
-";
-
-%feature("docstring") VolumeGrid::set "
-
-Copies the data of the argument into this.  
-";
-
-%feature("docstring") VolumeGrid::set "
-
-Sets all elements to a uniform value (e.g., 0)  
-";
-
-%feature("docstring") VolumeGrid::set "
-
-Sets a specific element of a cell.  
-";
-
-%feature("docstring") VolumeGrid::getBmin "
-";
-
-%feature("docstring") VolumeGrid::setBmin "
-";
-
-%feature("docstring") VolumeGrid::getBmax "
-";
-
-%feature("docstring") VolumeGrid::setBmax "
-";
-
-%feature("docstring") VolumeGrid::resize "
-
-Resizes the x, y, and z dimensions of the grid.  
-";
-
-%feature("docstring") VolumeGrid::get "
-
-Gets a specific element of a cell.  
-";
-
-%feature("docstring") VolumeGrid::shift "
-
-Shifts the value uniformly.  
-";
-
-%feature("docstring") VolumeGrid::scale "
-
-Scales the value uniformly.  
-";
-
-%feature("docstring") VolumeGrid::getValues "
-
-Returns a 3D Numpy array view of the values.  
-
-Return type: np.ndarray  
-";
-
-%feature("docstring") VolumeGrid::setValues "
-
-Sets the values to a 3D numpy array.  
 ";
 
 // File: classWidget.xml

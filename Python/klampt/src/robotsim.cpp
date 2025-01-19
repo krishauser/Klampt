@@ -25,7 +25,6 @@
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
 #include <KrisLibrary/meshing/PointCloud.h>
-#include <KrisLibrary/meshing/VolumeGrid.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/Widget.h>
@@ -991,11 +990,18 @@ Geometry3D::Geometry3D(const PointCloud& rhs)
   setPointCloud(rhs);
 }
 
-Geometry3D::Geometry3D(const VolumeGrid& rhs)
+Geometry3D::Geometry3D(const ImplicitSurface& rhs)
 :world(-1),id(-1),geomPtr(NULL)
 {
   geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
-  setVolumeGrid(rhs);
+  setImplicitSurface(rhs);
+}
+
+Geometry3D::Geometry3D(const OccupancyGrid& rhs)
+:world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
+  setOccupancyGrid(rhs);
 }
 
 Geometry3D::Geometry3D(const Heightmap& rhs)
@@ -1138,34 +1144,28 @@ PointCloud Geometry3D::getPointCloud()
   return pc;
 }
 
-VolumeGrid Geometry3D::getVolumeGrid()
+ImplicitSurface Geometry3D::getImplicitSurface()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  VolumeGrid grid;
+  ImplicitSurface grid;
   SET_GEOMDATA_TO_REFERENCE(&grid,ImplicitSurface,geom);
   if(!geom) return grid;
-  if(geom->type != AnyGeometry3D::Type::ImplicitSurface && geom->type != AnyGeometry3D::Type::OccupancyGrid) {
-    throw PyException("Geometry3D is not ImplicitSurface or OccupancyGrid type");
+  if(geom->type != AnyGeometry3D::Type::ImplicitSurface) {
+    throw PyException("Geometry3D is not ImplicitSurface type");
   }
   return grid;
 }
 
-VolumeGrid Geometry3D::getImplicitSurface()
+OccupancyGrid Geometry3D::getOccupancyGrid()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  if(geom->type != AnyGeometry3D::Type::ImplicitSurface) {
-    throw PyException("Geometry is not an ImplicitSurface");
-  }
-  return getVolumeGrid();
-}
-
-VolumeGrid Geometry3D::getOccupancyGrid()
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  OccupancyGrid grid;
+  SET_GEOMDATA_TO_REFERENCE(&grid,OccupancyGrid,geom);
+  if(!geom) return grid;
   if(geom->type != AnyGeometry3D::Type::OccupancyGrid) {
-    throw PyException("Geometry is not an OccupancyGrid");
+    throw PyException("Geometry3D is not OccupancyGrid type");
   }
-  return getVolumeGrid();
+  return grid;
 }
 
 ConvexHull Geometry3D::getConvexHull()
@@ -1250,21 +1250,15 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
   STANDARD_GEOMETRY3D_SET(pc);
 }
 
-void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
-{
-  setImplicitSurface(vg);
-}
-
-void Geometry3D::setImplicitSurface(const VolumeGrid& vg)
+void Geometry3D::setImplicitSurface(const ImplicitSurface& vg)
 {
   STANDARD_GEOMETRY3D_SET(vg);
 }
 
-void Geometry3D::setOccupancyGrid(const VolumeGrid& vg)
+void Geometry3D::setOccupancyGrid(const OccupancyGrid& vg)
 {
-  setImplicitSurface(vg);
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  geom->type = AnyGeometry3D::Type::OccupancyGrid;
+  STANDARD_GEOMETRY3D_SET(vg);
+
 }
 
 void Geometry3D::setConvexHull(const ConvexHull& hull)
@@ -1876,18 +1870,12 @@ Geometry3D Geometry3D::roi(const char* query,const double bmin[3],const double b
   return res;
 }
 
-void Geometry3D::merge(const Geometry3D& other,double threshold)
+void Geometry3D::merge(const Geometry3D& other)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
   if(!geom) throw PyException("Geometry3D.contacts: Geometry is empty");
   if(!geom2) throw PyException("Geometry3D.contacts: Other geometry is empty");
-  if(geom->type == AnyGeometry3D::Type::ImplicitSurface) {
-    if(threshold>0) {
-      shared_ptr<Geometry::Geometry3DImplicitSurface> vol = static_pointer_cast<Geometry::Geometry3DImplicitSurface>(geom->data);
-      vol->truncationDistance = threshold;
-    }
-  }
   bool res = geom->Merge(*geom2);
   if(!res) {
     stringstream ss;
@@ -3049,8 +3037,10 @@ void PointCloud::getPoint(int index,double out[3]) const
 int PointCloud::addProperty(const std::string& pname)
 {
   GET_GEOMDATA_DATA(this, PointCloud, pc);
-  vector<double> values(pc.points.size(),0.0);
-  return addProperty(pname,&values[0],values.size());
+  size_t m=pc.propertyNames.size();
+  pc.propertyNames.push_back(pname);
+  pc.properties.resizePersist(pc.points.size(),pc.properties.n+1,0.0);
+  return (int)m;
 }
 
 int PointCloud::addProperty(const std::string& pname,double* values,int numvals)
@@ -3062,11 +3052,9 @@ int PointCloud::addProperty(const std::string& pname,double* values,int numvals)
     ss<<"Invalid size "<<numvals<<" of properties list, must have size #points = "<<n;
     throw PyException(ss.str());
   }
-  assert(numvals == n);
-  size_t m=pc.propertyNames.size();
-  pc.propertyNames.push_back(pname);
-  pc.properties.resizePersist(pc.points.size(),pc.properties.n+1,0.0);
-  return (int)m;
+  int res = addProperty(pname);
+  pc.properties.copyCol(res,values);
+  return res;
 }
 
 void PointCloud::setPropertyName(int pindex,const std::string& pname)
@@ -3410,47 +3398,47 @@ void PointCloud::setRGBDImages_b_s(const double intrinsics[4],unsigned char* np_
 }
 
 
-DEFINE_GEOMDATA_CLASS(VolumeGrid,ImplicitSurface)
+DEFINE_GEOMDATA_CLASS(ImplicitSurface,ImplicitSurface)
 
-void VolumeGrid::getBmin(double out[3]) const
+void ImplicitSurface::getBmin(double out[3]) const
 {
     GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
     grid.bb.bmin.get(out);
 }
 
-void VolumeGrid::getBmax(double out[3]) const
+void ImplicitSurface::getBmax(double out[3]) const
 {
     GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
     grid.bb.bmax.get(out);
 }
 
-void VolumeGrid::setBmin(const double bmin[3])
+void ImplicitSurface::setBmin(const double bmin[3])
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   grid.bb.bmin.set(bmin);
 }
 
-void VolumeGrid::setBmax(const double bmax[3])
+void ImplicitSurface::setBmax(const double bmax[3])
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   grid.bb.bmax.set(bmax);
 }
 
 
-void VolumeGrid::resize(int sx,int sy,int sz)
+void ImplicitSurface::resize(int sx,int sy,int sz)
 {
   Assert(sx >= 0 && sy >= 0 && sz >= 0);
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   grid.value.resize(sx,sy,sz);
 }
 
-void VolumeGrid::set(double value)
+void ImplicitSurface::set(double value)
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   grid.value.set(value);
 }
 
-void VolumeGrid::set(int i,int j,int k,double value)
+void ImplicitSurface::set(int i,int j,int k,double value)
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   if(i < 0 || i >= grid.value.m) throw PyException("First index out of range");
@@ -3459,7 +3447,7 @@ void VolumeGrid::set(int i,int j,int k,double value)
   grid.value(i,j,k) = value;
 }
 
-double VolumeGrid::get(int i,int j,int k)
+double ImplicitSurface::get(int i,int j,int k)
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   if(i < 0 || i >= grid.value.m) throw PyException("First index out of range");
@@ -3468,39 +3456,149 @@ double VolumeGrid::get(int i,int j,int k)
   return grid.value(i,j,k);
 }
 
-void VolumeGrid::shift(double dv)
+void ImplicitSurface::shift(double dv)
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   for(Array3D<Real>::iterator i=grid.value.begin();i!=grid.value.end();++i)
     *i += dv;
 }
 
-void VolumeGrid::scale(double c)
+void ImplicitSurface::scale(double c)
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   for(Array3D<Real>::iterator i=grid.value.begin();i!=grid.value.end();++i)
     *i *= c;
 }
 
-void VolumeGrid::getValues(double** out, int* m, int* n, int* p)
+void ImplicitSurface::getValues(double** out, int* m, int* n, int* p)
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
-  if(grid.value.empty()) throw PyException("VolumeGrid was not initialized yet");
+  if(grid.value.empty()) throw PyException("ImplicitSurface was not initialized yet");
   *m = grid.value.m;
   *n = grid.value.n;
   *p = grid.value.p;
   *out = grid.value.getData();
 }
 
-void VolumeGrid::setValues(double* in, int m, int n, int p)
+void ImplicitSurface::setValues(double* in, int m, int n, int p)
 {
   GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
   resize(m,n,p);
   std::copy(in,in+m*n*p,grid.value.getData());
 }
 
+void ImplicitSurface::setTruncationDistance(double threshold)
+{
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  static_pointer_cast<Geometry::Geometry3DImplicitSurface>(gptrgrid->data)->truncationDistance = threshold;
+}
+
+double ImplicitSurface::getTruncationDistance() const
+{
+  GET_GEOMDATA_DATA(this, ImplicitSurface, grid);
+  return static_pointer_cast<Geometry::Geometry3DImplicitSurface>(gptrgrid->data)->truncationDistance;
+}
+
+DEFINE_GEOMDATA_CLASS(OccupancyGrid,OccupancyGrid)
+
+void OccupancyGrid::getBmin(double out[3]) const
+{
+    GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+    grid.bb.bmin.get(out);
+}
+
+void OccupancyGrid::getBmax(double out[3]) const
+{
+    GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+    grid.bb.bmax.get(out);
+}
+
+void OccupancyGrid::setBmin(const double bmin[3])
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  grid.bb.bmin.set(bmin);
+}
+
+void OccupancyGrid::setBmax(const double bmax[3])
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  grid.bb.bmax.set(bmax);
+}
 
 
+void OccupancyGrid::resize(int sx,int sy,int sz)
+{
+  Assert(sx >= 0 && sy >= 0 && sz >= 0);
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  grid.value.resize(sx,sy,sz);
+}
+
+void OccupancyGrid::set(double value)
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  grid.value.set(value);
+}
+
+void OccupancyGrid::set(int i,int j,int k,double value)
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  if(i < 0 || i >= grid.value.m) throw PyException("First index out of range");
+  if(j < 0 || j >= grid.value.n) throw PyException("Second index out of range");
+  if(k < 0 || k >= grid.value.p) throw PyException("Third index out of range");
+  grid.value(i,j,k) = value;
+}
+
+double OccupancyGrid::get(int i,int j,int k)
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  if(i < 0 || i >= grid.value.m) throw PyException("First index out of range");
+  if(j < 0 || j >= grid.value.n) throw PyException("Second index out of range");
+  if(k < 0 || k >= grid.value.p) throw PyException("Third index out of range");
+  return grid.value(i,j,k);
+}
+
+void OccupancyGrid::shift(double dv)
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  for(Array3D<Real>::iterator i=grid.value.begin();i!=grid.value.end();++i)
+    *i += dv;
+}
+
+void OccupancyGrid::scale(double c)
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  for(Array3D<Real>::iterator i=grid.value.begin();i!=grid.value.end();++i)
+    *i *= c;
+}
+
+void OccupancyGrid::getValues(double** out, int* m, int* n, int* p)
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  if(grid.value.empty()) throw PyException("OccupancyGrid was not initialized yet");
+  *m = grid.value.m;
+  *n = grid.value.n;
+  *p = grid.value.p;
+  *out = grid.value.getData();
+}
+
+void OccupancyGrid::setValues(double* in, int m, int n, int p)
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  resize(m,n,p);
+  std::copy(in,in+m*n*p,grid.value.getData());
+}
+
+void OccupancyGrid::setOccupancyThreshold(double threshold)
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  static_pointer_cast<Geometry::Geometry3DOccupancyGrid>(gptrgrid->data)->occupancyThreshold = threshold;
+}
+
+double OccupancyGrid::getOccupancyThreshold() const
+{
+  GET_GEOMDATA_DATA(this, OccupancyGrid, grid);
+  return static_pointer_cast<Geometry::Geometry3DOccupancyGrid>(gptrgrid->data)->occupancyThreshold;
+}
 
 DEFINE_GEOMDATA_CLASS(Heightmap,Heightmap)
 

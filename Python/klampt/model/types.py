@@ -6,20 +6,20 @@ from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
-from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,ConvexHull,Heightmap,VolumeGrid
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,ConvexHull,Heightmap,ImplicitSurface,OccupancyGrid
 import warnings
 
 _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
                 'IntArray','StringArray',
                 'Configs','Trajectory','LinearPath','MultiPath','SE3Trajectory','SO3Trajectory',
                 'IKGoal','ContactPoint','Hold',
-                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Heightmap','Geometry3D',
+                'TriangleMesh','PointCloud','ImplicitSurface','OccupancyGrid','GeometricPrimitive','ConvexHull','Heightmap','Geometry3D',
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
 
 _vectorLikeTypes = set(['Vector2','Vector3','Matrix3','Point','Rotation','Vector','Config'])
 _arrayLikeTypes = set(['Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config','IntArray','StringArray','Configs'])
 _pathLikeTypes = set(['Configs','Trajectory','LinearPath','MultiPath','SE3Trajectory','SO3Trajectory'])
-_geometryTypes = set(['TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Heightmap','Geometry3D'])
+_geometryTypes = set(['TriangleMesh','PointCloud','ImplicitSurface','OccupancyGrid','GeometricPrimitive','ConvexHull','Heightmap','Geometry3D'])
 
 def known_types():
     """Returns a set of all known Klampt types"""
@@ -50,8 +50,10 @@ def object_to_types(object,world=None):
         return 'TriangleMesh'
     elif isinstance(object,PointCloud):
         return 'PointCloud'
-    elif isinstance(object,VolumeGrid):
-        return 'VolumeGrid'
+    elif isinstance(object,ImplicitSurface):
+        return 'ImplicitSurface'
+    elif isinstance(object,OccupancyGrid):
+        return 'OccupancyGrid'
     elif isinstance(object,ConvexHull):
         return 'ConvexHull'
     elif isinstance(object,Heightmap):
@@ -216,8 +218,10 @@ def make(type,object=None):
         p = GeometricPrimitive()
         p.setPoint((0,0,0))
         return p
-    elif type == 'VolumeGrid':
-        return VolumeGrid()
+    elif type in ['VolumeGrid','ImplicitSurface']:
+        return ImplicitSurface()
+    elif type == 'OccupancyGrid':
+        return OccupancyGrid()
     elif type == 'ConvexHull':
         return ConvexHull()
     elif type == 'Heightmap':

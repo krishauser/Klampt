@@ -789,7 +789,7 @@ def to_json(obj,type='auto'):
                         raise TypeError("Could not parse object "+str(obj))
         elif isinstance(obj,(bool,int,float,str)):
             type = 'Value'
-        elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath','GeometricPrimitive','TriangleMesh','ConvexHull','PointCloud','VolumeGrid','Geometry3D']:
+        elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath','GeometricPrimitive','TriangleMesh','ConvexHull','PointCloud','ImplicitSurface','OccupancyGrid','Geometry3D']:
             type = obj.__class__.__name__
         elif isinstance(obj,Trajectory):   #some subclasses of Trajectory may be used here too
             type = obj.__class__.__name__
@@ -849,7 +849,7 @@ def to_json(obj,type='auto'):
             res['properties'] = obj.properties.tolist()
         #TODO: settings
         return res
-    elif type == 'VolumeGrid':
+    elif type in ['ImplicitSurface','OccupancyGrid']:
         res = {'type':type}
         res['bmin'] = [v for v in obj.bmin]
         res['bmax'] = [v for v in obj.bmax]
@@ -869,8 +869,10 @@ def to_json(obj,type='auto'):
             data = to_json(obj.getPointCloud(),gtype)
         elif gtype == 'ConvexHull':
             data = to_json(obj.getConvexHull(),gtype)
-        elif gtype == 'VolumeGrid':
-            data = to_json(obj.getVolumeGrid(),gtype)
+        elif gtype in ['VolumeGrid','ImplicitSurface']:
+            data = to_json(obj.getImplicitSurface(),gtype)
+        elif gtype == 'OccupancyGrid':
+            data = to_json(obj.getOccupancyGrid(),gtype)
         elif gtype == 'Group':
             data = [to_json(obj.getElement(i)) for i in range(obj.numElements())]
         return {'type':type,'datatype':gtype,'data':data}
@@ -1002,15 +1004,24 @@ def from_json(jsonobj,type='auto'):
                 pc.properties = props
         #TODO: settings
         return pc
-    elif type == 'VolumeGrid':
+    elif type in ['VolumeGrid','ImplicitSurface']:
         import numpy as np
-        vg = VolumeGrid()
+        vg = ImplicitSurface()
         vg.bmin = jsonobj['bmin']
         vg.bmax = jsonobj['bmax']
         dims = jsonobj['dims']
         values = np.array(jsonobj['values']).reshape(dims)
         vg.values = values
         return vg
+    elif type == 'OccupancyGrid':
+        import numpy as np
+        og = OccupancyGrid()
+        og.bmin = jsonobj['bmin']
+        og.bmax = jsonobj['bmax']
+        dims = jsonobj['dims']
+        values = np.array(jsonobj['values']).reshape(dims)
+        og.values = values
+        return og
     elif type == 'ConvexHull':
         import numpy as np
         ch = ConvexHull()

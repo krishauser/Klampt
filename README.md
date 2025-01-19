@@ -99,7 +99,7 @@ Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the 
 -   None
 
 **0.10.0** (1/20/2024)
--   New geometry types `OccupancyGrid` and `Heightmap`.  `OccupancyGrid` uses the same `VolumeGrid` data structure as `ImplicitSurface`.  `Heightmap` can represent orthographic heightmaps (e.g., elevation maps) as well as depth maps coming from RGB-D cameras. Many more [proximity queries](blob/master/Cpp/docs/Manual-Geometry.md) are implemented / accelerated.
+-   New geometry types `OccupancyGrid` and `Heightmap`.  The `VolumeGrid` data structure is deprecated but aliases to `ImplicitSurface`.  `Heightmap` can represent orthographic heightmaps (e.g., elevation maps) as well as depth maps coming from RGB-D cameras. Many more [proximity queries](blob/master/Cpp/docs/Manual-Geometry.md) are implemented / accelerated.
 -   Viewport data structure now accepts non-square pixels and non-centered focal points, making it compatible with calibrated camera intrinsics.  API breaking change; to resize viewports and keep the FOV and relative center, use `Viewport.resize(w,h)`.
 -   C++ API: Breaking changes to KrisLibrary Geometry API, now reflected in KrisLibrary `0.2` and later.  Older builds of Klampt will need to pull KrisLibrary branch `0.1`. 
 -   C++ API: Renamed `Merge` to `Union` for all geometries. Added `Merge` function that merges a single geometry into the current geometry's representation.
@@ -116,10 +116,7 @@ Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the 
 
 Known issues:
 -   Multiple PyQt editors cause a stall
--   Camera simulation isn't working (RGB shows up as black, depth is OK)
--   Open3D volume to VolumeGrid not working
 -   TSDFs aren't drawn correctly
--   
 
 **0.9.2** (8/13/2024)
 -   Python API: pip packages now built with Numpy 2+.

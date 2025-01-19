@@ -2708,81 +2708,82 @@ SWIGINTERN PyObject *SWIG_PyStaticMethod_New(PyObject *SWIGUNUSEDPARM(self), PyO
 #define SWIGTYPE_p_IKGoal swig_types[13]
 #define SWIGTYPE_p_IKObjective swig_types[14]
 #define SWIGTYPE_p_IKSolver swig_types[15]
-#define SWIGTYPE_p_Klampt__ODEGeometry swig_types[16]
-#define SWIGTYPE_p_Klampt__RigidObjectModel swig_types[17]
-#define SWIGTYPE_p_Klampt__RobotModel swig_types[18]
-#define SWIGTYPE_p_Klampt__SensorBase swig_types[19]
-#define SWIGTYPE_p_Klampt__SimRobotController swig_types[20]
-#define SWIGTYPE_p_Klampt__Simulator swig_types[21]
-#define SWIGTYPE_p_Klampt__TerrainModel swig_types[22]
-#define SWIGTYPE_p_Mass swig_types[23]
-#define SWIGTYPE_p_ObjectPoser swig_types[24]
-#define SWIGTYPE_p_PointCloud swig_types[25]
-#define SWIGTYPE_p_PointPoser swig_types[26]
-#define SWIGTYPE_p_RigidObjectModel swig_types[27]
-#define SWIGTYPE_p_RobotModel swig_types[28]
-#define SWIGTYPE_p_RobotModelDriver swig_types[29]
-#define SWIGTYPE_p_RobotModelLink swig_types[30]
-#define SWIGTYPE_p_RobotPoser swig_types[31]
-#define SWIGTYPE_p_SensorModel swig_types[32]
-#define SWIGTYPE_p_SimBody swig_types[33]
-#define SWIGTYPE_p_SimJoint swig_types[34]
-#define SWIGTYPE_p_SimRobotController swig_types[35]
-#define SWIGTYPE_p_Simulator swig_types[36]
-#define SWIGTYPE_p_SpherePoser swig_types[37]
-#define SWIGTYPE_p_TerrainModel swig_types[38]
-#define SWIGTYPE_p_TransformPoser swig_types[39]
-#define SWIGTYPE_p_TriangleMesh swig_types[40]
-#define SWIGTYPE_p_Viewport swig_types[41]
-#define SWIGTYPE_p_VolumeGrid swig_types[42]
-#define SWIGTYPE_p_Widget swig_types[43]
-#define SWIGTYPE_p_WidgetSet swig_types[44]
-#define SWIGTYPE_p_WorldModel swig_types[45]
-#define SWIGTYPE_p__object swig_types[46]
-#define SWIGTYPE_p_allocator_type swig_types[47]
-#define SWIGTYPE_p_char swig_types[48]
-#define SWIGTYPE_p_difference_type swig_types[49]
-#define SWIGTYPE_p_double swig_types[50]
-#define SWIGTYPE_p_doubleArray swig_types[51]
-#define SWIGTYPE_p_dxBody swig_types[52]
-#define SWIGTYPE_p_dxJoint swig_types[53]
-#define SWIGTYPE_p_float swig_types[54]
-#define SWIGTYPE_p_floatArray swig_types[55]
-#define SWIGTYPE_p_int swig_types[56]
-#define SWIGTYPE_p_intArray swig_types[57]
-#define SWIGTYPE_p_key_type swig_types[58]
-#define SWIGTYPE_p_mapped_type swig_types[59]
-#define SWIGTYPE_p_p__object swig_types[60]
-#define SWIGTYPE_p_p_double swig_types[61]
-#define SWIGTYPE_p_p_doubleArray swig_types[62]
-#define SWIGTYPE_p_p_float swig_types[63]
-#define SWIGTYPE_p_p_floatArray swig_types[64]
-#define SWIGTYPE_p_p_int swig_types[65]
-#define SWIGTYPE_p_p_intArray swig_types[66]
-#define SWIGTYPE_p_p_unsigned_char swig_types[67]
-#define SWIGTYPE_p_p_unsigned_int swig_types[68]
-#define SWIGTYPE_p_size_type swig_types[69]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[70]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[71]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[72]
-#define SWIGTYPE_p_std__allocatorT_std__pairT_std__string_const_std__string_t_t swig_types[73]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[74]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[75]
-#define SWIGTYPE_p_std__invalid_argument swig_types[76]
-#define SWIGTYPE_p_std__lessT_std__string_t swig_types[77]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[78]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[79]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[80]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[81]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[82]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[83]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[84]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[85]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[86]
-#define SWIGTYPE_p_value_type swig_types[87]
-#define SWIGTYPE_p_void swig_types[88]
-static swig_type_info *swig_types[90];
-static swig_module_info swig_module = {swig_types, 89, 0, 0, 0, 0};
+#define SWIGTYPE_p_ImplicitSurface swig_types[16]
+#define SWIGTYPE_p_Klampt__ODEGeometry swig_types[17]
+#define SWIGTYPE_p_Klampt__RigidObjectModel swig_types[18]
+#define SWIGTYPE_p_Klampt__RobotModel swig_types[19]
+#define SWIGTYPE_p_Klampt__SensorBase swig_types[20]
+#define SWIGTYPE_p_Klampt__SimRobotController swig_types[21]
+#define SWIGTYPE_p_Klampt__Simulator swig_types[22]
+#define SWIGTYPE_p_Klampt__TerrainModel swig_types[23]
+#define SWIGTYPE_p_Mass swig_types[24]
+#define SWIGTYPE_p_ObjectPoser swig_types[25]
+#define SWIGTYPE_p_OccupancyGrid swig_types[26]
+#define SWIGTYPE_p_PointCloud swig_types[27]
+#define SWIGTYPE_p_PointPoser swig_types[28]
+#define SWIGTYPE_p_RigidObjectModel swig_types[29]
+#define SWIGTYPE_p_RobotModel swig_types[30]
+#define SWIGTYPE_p_RobotModelDriver swig_types[31]
+#define SWIGTYPE_p_RobotModelLink swig_types[32]
+#define SWIGTYPE_p_RobotPoser swig_types[33]
+#define SWIGTYPE_p_SensorModel swig_types[34]
+#define SWIGTYPE_p_SimBody swig_types[35]
+#define SWIGTYPE_p_SimJoint swig_types[36]
+#define SWIGTYPE_p_SimRobotController swig_types[37]
+#define SWIGTYPE_p_Simulator swig_types[38]
+#define SWIGTYPE_p_SpherePoser swig_types[39]
+#define SWIGTYPE_p_TerrainModel swig_types[40]
+#define SWIGTYPE_p_TransformPoser swig_types[41]
+#define SWIGTYPE_p_TriangleMesh swig_types[42]
+#define SWIGTYPE_p_Viewport swig_types[43]
+#define SWIGTYPE_p_Widget swig_types[44]
+#define SWIGTYPE_p_WidgetSet swig_types[45]
+#define SWIGTYPE_p_WorldModel swig_types[46]
+#define SWIGTYPE_p__object swig_types[47]
+#define SWIGTYPE_p_allocator_type swig_types[48]
+#define SWIGTYPE_p_char swig_types[49]
+#define SWIGTYPE_p_difference_type swig_types[50]
+#define SWIGTYPE_p_double swig_types[51]
+#define SWIGTYPE_p_doubleArray swig_types[52]
+#define SWIGTYPE_p_dxBody swig_types[53]
+#define SWIGTYPE_p_dxJoint swig_types[54]
+#define SWIGTYPE_p_float swig_types[55]
+#define SWIGTYPE_p_floatArray swig_types[56]
+#define SWIGTYPE_p_int swig_types[57]
+#define SWIGTYPE_p_intArray swig_types[58]
+#define SWIGTYPE_p_key_type swig_types[59]
+#define SWIGTYPE_p_mapped_type swig_types[60]
+#define SWIGTYPE_p_p__object swig_types[61]
+#define SWIGTYPE_p_p_double swig_types[62]
+#define SWIGTYPE_p_p_doubleArray swig_types[63]
+#define SWIGTYPE_p_p_float swig_types[64]
+#define SWIGTYPE_p_p_floatArray swig_types[65]
+#define SWIGTYPE_p_p_int swig_types[66]
+#define SWIGTYPE_p_p_intArray swig_types[67]
+#define SWIGTYPE_p_p_unsigned_char swig_types[68]
+#define SWIGTYPE_p_p_unsigned_int swig_types[69]
+#define SWIGTYPE_p_size_type swig_types[70]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[71]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[72]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[73]
+#define SWIGTYPE_p_std__allocatorT_std__pairT_std__string_const_std__string_t_t swig_types[74]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[75]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[76]
+#define SWIGTYPE_p_std__invalid_argument swig_types[77]
+#define SWIGTYPE_p_std__lessT_std__string_t swig_types[78]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[79]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[80]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[81]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[82]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[83]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[84]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[85]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[86]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[87]
+#define SWIGTYPE_p_value_type swig_types[88]
+#define SWIGTYPE_p_void swig_types[89]
+static swig_type_info *swig_types[91];
+static swig_module_info swig_module = {swig_types, 90, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -23299,14 +23300,14 @@ SWIGINTERN PyObject *GeometricPrimitive_swiginit(PyObject *SWIGUNUSEDPARM(self),
   return SWIG_Python_InitShadowInstance(args);
 }
 
-SWIGINTERN PyObject *_wrap_new_VolumeGrid__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **SWIGUNUSEDPARM(swig_obj)) {
+SWIGINTERN PyObject *_wrap_new_ImplicitSurface__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **SWIGUNUSEDPARM(swig_obj)) {
   PyObject *resultobj = 0;
-  VolumeGrid *result = 0 ;
+  ImplicitSurface *result = 0 ;
   
   if ((nobjs < 0) || (nobjs > 0)) SWIG_fail;
   {
     try {
-      result = (VolumeGrid *)new VolumeGrid();
+      result = (ImplicitSurface *)new ImplicitSurface();
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -23317,27 +23318,27 @@ SWIGINTERN PyObject *_wrap_new_VolumeGrid__SWIG_0(PyObject *SWIGUNUSEDPARM(self)
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ImplicitSurface, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_delete_VolumeGrid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_delete_ImplicitSurface(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, SWIG_POINTER_DISOWN |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_VolumeGrid" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_ImplicitSurface" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     try {
       delete arg1;
@@ -23358,25 +23359,25 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_VolumeGrid__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_new_ImplicitSurface__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = 0 ;
+  ImplicitSurface *arg1 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  VolumeGrid *result = 0 ;
+  ImplicitSurface *result = 0 ;
   
   if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_VolumeGrid,  0  | 0);
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_ImplicitSurface,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_VolumeGrid" "', argument " "1"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_ImplicitSurface" "', argument " "1"" of type '" "ImplicitSurface const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_VolumeGrid" "', argument " "1"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_ImplicitSurface" "', argument " "1"" of type '" "ImplicitSurface const &""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     try {
-      result = (VolumeGrid *)new VolumeGrid((VolumeGrid const &)*arg1);
+      result = (ImplicitSurface *)new ImplicitSurface((ImplicitSurface const &)*arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -23387,60 +23388,60 @@ SWIGINTERN PyObject *_wrap_new_VolumeGrid__SWIG_1(PyObject *SWIGUNUSEDPARM(self)
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_NEW |  0 );
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ImplicitSurface, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_new_VolumeGrid(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_ImplicitSurface(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "new_VolumeGrid", 0, 1, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "new_ImplicitSurface", 0, 1, argv))) SWIG_fail;
   --argc;
   if (argc == 0) {
-    return _wrap_new_VolumeGrid__SWIG_0(self, argc, argv);
+    return _wrap_new_ImplicitSurface__SWIG_0(self, argc, argv);
   }
   if (argc == 1) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_VolumeGrid, SWIG_POINTER_NO_NULL | 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_ImplicitSurface, SWIG_POINTER_NO_NULL | 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      return _wrap_new_VolumeGrid__SWIG_1(self, argc, argv);
+      return _wrap_new_ImplicitSurface__SWIG_1(self, argc, argv);
     }
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_VolumeGrid'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_ImplicitSurface'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    VolumeGrid::VolumeGrid()\n"
-    "    VolumeGrid::VolumeGrid(VolumeGrid const &)\n");
+    "    ImplicitSurface::ImplicitSurface()\n"
+    "    ImplicitSurface::ImplicitSurface(ImplicitSurface const &)\n");
   return 0;
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  VolumeGrid result;
+  ImplicitSurface result;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_copy" "', argument " "1"" of type '" "VolumeGrid const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_copy" "', argument " "1"" of type '" "ImplicitSurface const *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     try {
-      result = ((VolumeGrid const *)arg1)->copy();
+      result = ((ImplicitSurface const *)arg1)->copy();
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -23451,39 +23452,39 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_copy(PyObject *SWIGUNUSEDPARM(self), PyObj
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj((new VolumeGrid(static_cast< const VolumeGrid& >(result))), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj((new ImplicitSurface(static_cast< const ImplicitSurface& >(result))), SWIGTYPE_p_ImplicitSurface, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_set__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_set__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
-  VolumeGrid *arg2 = 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
+  ImplicitSurface *arg2 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
   
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_set" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_set" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_VolumeGrid,  0  | 0);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_ImplicitSurface,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "VolumeGrid_set" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ImplicitSurface_set" "', argument " "2"" of type '" "ImplicitSurface const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "VolumeGrid_set" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ImplicitSurface_set" "', argument " "2"" of type '" "ImplicitSurface const &""'"); 
   }
-  arg2 = reinterpret_cast< VolumeGrid * >(argp2);
+  arg2 = reinterpret_cast< ImplicitSurface * >(argp2);
   {
     try {
-      (arg1)->set((VolumeGrid const &)*arg2);
+      (arg1)->set((ImplicitSurface const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -23501,9 +23502,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_getBmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_getBmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double *arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -23515,14 +23516,14 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_getBmin(PyObject *SWIGUNUSEDPARM(self), Py
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_getBmin" "', argument " "1"" of type '" "VolumeGrid const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_getBmin" "', argument " "1"" of type '" "ImplicitSurface const *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     try {
-      ((VolumeGrid const *)arg1)->getBmin(arg2);
+      ((ImplicitSurface const *)arg1)->getBmin(arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -23559,21 +23560,21 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_setBmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_setBmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double *arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
   PyObject *swig_obj[2] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_setBmin", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_setBmin", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_setBmin" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_setBmin" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     if (!convert_darray(swig_obj[1],temp2,3)) {
       return NULL;
@@ -23600,9 +23601,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_getBmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_getBmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double *arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -23614,14 +23615,14 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_getBmax(PyObject *SWIGUNUSEDPARM(self), Py
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_getBmax" "', argument " "1"" of type '" "VolumeGrid const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_getBmax" "', argument " "1"" of type '" "ImplicitSurface const *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     try {
-      ((VolumeGrid const *)arg1)->getBmax(arg2);
+      ((ImplicitSurface const *)arg1)->getBmax(arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -23658,21 +23659,21 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_setBmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_setBmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double *arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
   PyObject *swig_obj[2] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_setBmax", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_setBmax", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_setBmax" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_setBmax" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     if (!convert_darray(swig_obj[1],temp2,3)) {
       return NULL;
@@ -23699,9 +23700,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_resize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_resize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   int arg2 ;
   int arg3 ;
   int arg4 ;
@@ -23715,25 +23716,25 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_resize(PyObject *SWIGUNUSEDPARM(self), PyO
   int ecode4 = 0 ;
   PyObject *swig_obj[4] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_resize", 4, 4, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_resize", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_resize" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_resize" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VolumeGrid_resize" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ImplicitSurface_resize" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "VolumeGrid_resize" "', argument " "3"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ImplicitSurface_resize" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
   ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "VolumeGrid_resize" "', argument " "4"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "ImplicitSurface_resize" "', argument " "4"" of type '" "int""'");
   } 
   arg4 = static_cast< int >(val4);
   {
@@ -23756,9 +23757,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_set__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_set__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -23766,14 +23767,14 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_set__SWIG_1(PyObject *SWIGUNUSEDPARM(self)
   int ecode2 = 0 ;
   
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_set" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_set" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VolumeGrid_set" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ImplicitSurface_set" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -23796,9 +23797,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_set__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_set__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   int arg2 ;
   int arg3 ;
   int arg4 ;
@@ -23815,29 +23816,29 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_set__SWIG_2(PyObject *SWIGUNUSEDPARM(self)
   int ecode5 = 0 ;
   
   if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_set" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_set" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VolumeGrid_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ImplicitSurface_set" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "VolumeGrid_set" "', argument " "3"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ImplicitSurface_set" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
   ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "VolumeGrid_set" "', argument " "4"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "ImplicitSurface_set" "', argument " "4"" of type '" "int""'");
   } 
   arg4 = static_cast< int >(val4);
   ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
   if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "VolumeGrid_set" "', argument " "5"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "ImplicitSurface_set" "', argument " "5"" of type '" "double""'");
   } 
   arg5 = static_cast< double >(val5);
   {
@@ -23860,31 +23861,31 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_set(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_set(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[6] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "VolumeGrid_set", 0, 5, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "ImplicitSurface_set", 0, 5, argv))) SWIG_fail;
   --argc;
   if (argc == 2) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_VolumeGrid, 0);
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_ImplicitSurface, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_VolumeGrid, SWIG_POINTER_NO_NULL | 0);
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_ImplicitSurface, SWIG_POINTER_NO_NULL | 0);
       _v = SWIG_CheckState(res);
       if (_v) {
-        return _wrap_VolumeGrid_set__SWIG_0(self, argc, argv);
+        return _wrap_ImplicitSurface_set__SWIG_0(self, argc, argv);
       }
     }
   }
   if (argc == 2) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_VolumeGrid, 0);
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_ImplicitSurface, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -23892,14 +23893,14 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_set(PyObject *self, PyObject *args) {
         _v = SWIG_CheckState(res);
       }
       if (_v) {
-        return _wrap_VolumeGrid_set__SWIG_1(self, argc, argv);
+        return _wrap_ImplicitSurface_set__SWIG_1(self, argc, argv);
       }
     }
   }
   if (argc == 5) {
     int _v;
     void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_VolumeGrid, 0);
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_ImplicitSurface, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       {
@@ -23922,7 +23923,7 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_set(PyObject *self, PyObject *args) {
               _v = SWIG_CheckState(res);
             }
             if (_v) {
-              return _wrap_VolumeGrid_set__SWIG_2(self, argc, argv);
+              return _wrap_ImplicitSurface_set__SWIG_2(self, argc, argv);
             }
           }
         }
@@ -23931,18 +23932,18 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_set(PyObject *self, PyObject *args) {
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'VolumeGrid_set'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'ImplicitSurface_set'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    VolumeGrid::set(VolumeGrid const &)\n"
-    "    VolumeGrid::set(double)\n"
-    "    VolumeGrid::set(int,int,int,double)\n");
+    "    ImplicitSurface::set(ImplicitSurface const &)\n"
+    "    ImplicitSurface::set(double)\n"
+    "    ImplicitSurface::set(int,int,int,double)\n");
   return 0;
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   int arg2 ;
   int arg3 ;
   int arg4 ;
@@ -23957,25 +23958,25 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_get(PyObject *SWIGUNUSEDPARM(self), PyObje
   PyObject *swig_obj[4] ;
   double result;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_get", 4, 4, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_get", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_get" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_get" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VolumeGrid_get" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ImplicitSurface_get" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "VolumeGrid_get" "', argument " "3"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "ImplicitSurface_get" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
   ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "VolumeGrid_get" "', argument " "4"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "ImplicitSurface_get" "', argument " "4"" of type '" "int""'");
   } 
   arg4 = static_cast< int >(val4);
   {
@@ -23998,9 +23999,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_shift(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_shift(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -24008,15 +24009,15 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_shift(PyObject *SWIGUNUSEDPARM(self), PyOb
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_shift", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_shift", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_shift" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_shift" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VolumeGrid_shift" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ImplicitSurface_shift" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -24039,9 +24040,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_scale(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_scale(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -24049,15 +24050,15 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_scale(PyObject *SWIGUNUSEDPARM(self), PyOb
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_scale", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_scale", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_scale" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_scale" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VolumeGrid_scale" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ImplicitSurface_scale" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
@@ -24080,9 +24081,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_getValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_getValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double **arg2 = (double **) 0 ;
   int *arg3 = (int *) 0 ;
   int *arg4 = (int *) 0 ;
@@ -24103,11 +24104,11 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_getValues(PyObject *SWIGUNUSEDPARM(self), 
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_getValues" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_getValues" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     try {
       (arg1)->getValues(arg2,arg3,arg4,arg5);
@@ -24138,9 +24139,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_setValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_setValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   double *arg2 = (double *) 0 ;
   int arg3 ;
   int arg4 ;
@@ -24151,12 +24152,12 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_setValues(PyObject *SWIGUNUSEDPARM(self), 
   int is_new_object2 = 0 ;
   PyObject *swig_obj[2] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_setValues", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_setValues", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_setValues" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_setValues" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     npy_intp size[3] = {
       -1, -1, -1 
@@ -24202,24 +24203,100 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_dataPtr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_setTruncationDistance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_setTruncationDistance", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_setTruncationDistance" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
+  }
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ImplicitSurface_setTruncationDistance" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setTruncationDistance(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ImplicitSurface_getTruncationDistance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_getTruncationDistance" "', argument " "1"" of type '" "ImplicitSurface const *""'"); 
+  }
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
+  {
+    try {
+      result = (double)((ImplicitSurface const *)arg1)->getTruncationDistance();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ImplicitSurface_dataPtr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   void *arg2 = (void *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 ;
   PyObject *swig_obj[2] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_dataPtr_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_dataPtr_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_dataPtr_set" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_dataPtr_set" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, SWIG_POINTER_DISOWN);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "VolumeGrid_dataPtr_set" "', argument " "2"" of type '" "void *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ImplicitSurface_dataPtr_set" "', argument " "2"" of type '" "void *""'"); 
   }
   if (arg1) (arg1)->dataPtr = arg2;
   resultobj = SWIG_Py_Void();
@@ -24229,9 +24306,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_dataPtr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_dataPtr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
@@ -24239,11 +24316,11 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_dataPtr_get(PyObject *SWIGUNUSEDPARM(self)
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_dataPtr_get" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_dataPtr_get" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   result = (void *) ((arg1)->dataPtr);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
   return resultobj;
@@ -24252,9 +24329,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_isStandalone_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_isStandalone_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   bool arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -24262,15 +24339,15 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_isStandalone_set(PyObject *SWIGUNUSEDPARM(
   int ecode2 = 0 ;
   PyObject *swig_obj[2] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_isStandalone_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_Python_UnpackTuple(args, "ImplicitSurface_isStandalone_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_isStandalone_set" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_isStandalone_set" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "VolumeGrid_isStandalone_set" "', argument " "2"" of type '" "bool""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "ImplicitSurface_isStandalone_set" "', argument " "2"" of type '" "bool""'");
   } 
   arg2 = static_cast< bool >(val2);
   if (arg1) (arg1)->isStandalone = arg2;
@@ -24281,9 +24358,9 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_VolumeGrid_isStandalone_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ImplicitSurface_isStandalone_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  ImplicitSurface *arg1 = (ImplicitSurface *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
@@ -24291,11 +24368,11 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_isStandalone_get(PyObject *SWIGUNUSEDPARM(
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ImplicitSurface, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_isStandalone_get" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ImplicitSurface_isStandalone_get" "', argument " "1"" of type '" "ImplicitSurface *""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   result = (bool) ((arg1)->isStandalone);
   resultobj = SWIG_From_bool(static_cast< bool >(result));
   return resultobj;
@@ -24304,14 +24381,1106 @@ fail:
 }
 
 
-SWIGINTERN PyObject *VolumeGrid_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *ImplicitSurface_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *obj;
   if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_VolumeGrid, SWIG_NewClientData(obj));
+  SWIG_TypeNewClientData(SWIGTYPE_p_ImplicitSurface, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *VolumeGrid_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *ImplicitSurface_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_new_OccupancyGrid__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **SWIGUNUSEDPARM(swig_obj)) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *result = 0 ;
+  
+  if ((nobjs < 0) || (nobjs > 0)) SWIG_fail;
+  {
+    try {
+      result = (OccupancyGrid *)new OccupancyGrid();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_OccupancyGrid, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_OccupancyGrid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_OccupancyGrid" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_OccupancyGrid__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  OccupancyGrid *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_OccupancyGrid,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_OccupancyGrid" "', argument " "1"" of type '" "OccupancyGrid const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_OccupancyGrid" "', argument " "1"" of type '" "OccupancyGrid const &""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    try {
+      result = (OccupancyGrid *)new OccupancyGrid((OccupancyGrid const &)*arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_OccupancyGrid, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_OccupancyGrid(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[2] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "new_OccupancyGrid", 0, 1, argv))) SWIG_fail;
+  --argc;
+  if (argc == 0) {
+    return _wrap_new_OccupancyGrid__SWIG_0(self, argc, argv);
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_OccupancyGrid, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_OccupancyGrid__SWIG_1(self, argc, argv);
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_OccupancyGrid'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    OccupancyGrid::OccupancyGrid()\n"
+    "    OccupancyGrid::OccupancyGrid(OccupancyGrid const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  OccupancyGrid result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_copy" "', argument " "1"" of type '" "OccupancyGrid const *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    try {
+      result = ((OccupancyGrid const *)arg1)->copy();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new OccupancyGrid(static_cast< const OccupancyGrid& >(result))), SWIGTYPE_p_OccupancyGrid, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_set__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  OccupancyGrid *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_set" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_OccupancyGrid,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "OccupancyGrid_set" "', argument " "2"" of type '" "OccupancyGrid const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "OccupancyGrid_set" "', argument " "2"" of type '" "OccupancyGrid const &""'"); 
+  }
+  arg2 = reinterpret_cast< OccupancyGrid * >(argp2);
+  {
+    try {
+      (arg1)->set((OccupancyGrid const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_getBmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_getBmin" "', argument " "1"" of type '" "OccupancyGrid const *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    try {
+      ((OccupancyGrid const *)arg1)->getBmin(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_setBmin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_setBmin", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_setBmin" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->setBmin((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_getBmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_getBmax" "', argument " "1"" of type '" "OccupancyGrid const *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    try {
+      ((OccupancyGrid const *)arg1)->getBmax(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_setBmax(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_setBmax", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_setBmax" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->setBmax((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_resize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_resize", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_resize" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "OccupancyGrid_resize" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "OccupancyGrid_resize" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "OccupancyGrid_resize" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
+  {
+    try {
+      (arg1)->resize(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_set__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_set" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "OccupancyGrid_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->set(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_set__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  double arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  
+  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_set" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "OccupancyGrid_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "OccupancyGrid_set" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "OccupancyGrid_set" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
+  ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "OccupancyGrid_set" "', argument " "5"" of type '" "double""'");
+  } 
+  arg5 = static_cast< double >(val5);
+  {
+    try {
+      (arg1)->set(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_set(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[6] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "OccupancyGrid_set", 0, 5, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_OccupancyGrid, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_OccupancyGrid, SWIG_POINTER_NO_NULL | 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_OccupancyGrid_set__SWIG_0(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_OccupancyGrid, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_OccupancyGrid_set__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_OccupancyGrid, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_double(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              return _wrap_OccupancyGrid_set__SWIG_2(self, argc, argv);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'OccupancyGrid_set'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    OccupancyGrid::set(OccupancyGrid const &)\n"
+    "    OccupancyGrid::set(double)\n"
+    "    OccupancyGrid::set(int,int,int,double)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  double result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_get", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_get" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "OccupancyGrid_get" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "OccupancyGrid_get" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "OccupancyGrid_get" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
+  {
+    try {
+      result = (double)(arg1)->get(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_shift(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_shift", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_shift" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "OccupancyGrid_shift" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->shift(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_scale(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_scale", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_scale" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "OccupancyGrid_scale" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->scale(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_getValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  int dim3_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+    arg5 = &dim3_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_getValues" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    try {
+      (arg1)->getValues(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[3] = {
+      *arg3, *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(3, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_setValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_setValues", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_setValues" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 3) ||
+      !require_size(array2, size, 3)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+    arg5 = (int) array_size(array2,2);
+  }
+  {
+    try {
+      (arg1)->setValues(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_setOccupancyThreshold(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_setOccupancyThreshold", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_setOccupancyThreshold" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "OccupancyGrid_setOccupancyThreshold" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setOccupancyThreshold(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_getOccupancyThreshold(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  double result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_getOccupancyThreshold" "', argument " "1"" of type '" "OccupancyGrid const *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    try {
+      result = (double)((OccupancyGrid const *)arg1)->getOccupancyThreshold();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_dataPtr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  void *arg2 = (void *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_dataPtr_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_dataPtr_set" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, SWIG_POINTER_DISOWN);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "OccupancyGrid_dataPtr_set" "', argument " "2"" of type '" "void *""'"); 
+  }
+  if (arg1) (arg1)->dataPtr = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_dataPtr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  void *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_dataPtr_get" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  result = (void *) ((arg1)->dataPtr);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_isStandalone_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "OccupancyGrid_isStandalone_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_isStandalone_set" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "OccupancyGrid_isStandalone_set" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  if (arg1) (arg1)->isStandalone = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_OccupancyGrid_isStandalone_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = (OccupancyGrid *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  bool result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_OccupancyGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "OccupancyGrid_isStandalone_get" "', argument " "1"" of type '" "OccupancyGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  result = (bool) ((arg1)->isStandalone);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *OccupancyGrid_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_OccupancyGrid, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *OccupancyGrid_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   return SWIG_Python_InitShadowInstance(args);
 }
 
@@ -28384,23 +29553,23 @@ fail:
 
 SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_6(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  VolumeGrid *arg1 = 0 ;
+  ImplicitSurface *arg1 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   Geometry3D *result = 0 ;
   
   if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_VolumeGrid,  0  | 0);
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_ImplicitSurface,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Geometry3D" "', argument " "1"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Geometry3D" "', argument " "1"" of type '" "ImplicitSurface const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Geometry3D" "', argument " "1"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Geometry3D" "', argument " "1"" of type '" "ImplicitSurface const &""'"); 
   }
-  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  arg1 = reinterpret_cast< ImplicitSurface * >(argp1);
   {
     try {
-      result = (Geometry3D *)new Geometry3D((VolumeGrid const &)*arg1);
+      result = (Geometry3D *)new Geometry3D((ImplicitSurface const &)*arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -28419,6 +29588,42 @@ fail:
 
 
 SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_7(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  OccupancyGrid *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  Geometry3D *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_OccupancyGrid,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Geometry3D" "', argument " "1"" of type '" "OccupancyGrid const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Geometry3D" "', argument " "1"" of type '" "OccupancyGrid const &""'"); 
+  }
+  arg1 = reinterpret_cast< OccupancyGrid * >(argp1);
+  {
+    try {
+      result = (Geometry3D *)new Geometry3D((OccupancyGrid const &)*arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Geometry3D, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_8(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Heightmap *arg1 = 0 ;
   void *argp1 = 0 ;
@@ -28507,7 +29712,7 @@ SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *self, PyObject *args) {
   }
   if (argc == 1) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_VolumeGrid, SWIG_POINTER_NO_NULL | 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_ImplicitSurface, SWIG_POINTER_NO_NULL | 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       return _wrap_new_Geometry3D__SWIG_6(self, argc, argv);
@@ -28515,10 +29720,18 @@ SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *self, PyObject *args) {
   }
   if (argc == 1) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Heightmap, SWIG_POINTER_NO_NULL | 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_OccupancyGrid, SWIG_POINTER_NO_NULL | 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       return _wrap_new_Geometry3D__SWIG_7(self, argc, argv);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_Heightmap, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Geometry3D__SWIG_8(self, argc, argv);
     }
   }
   
@@ -28531,7 +29744,8 @@ fail:
     "    Geometry3D::Geometry3D(ConvexHull const &)\n"
     "    Geometry3D::Geometry3D(TriangleMesh const &)\n"
     "    Geometry3D::Geometry3D(PointCloud const &)\n"
-    "    Geometry3D::Geometry3D(VolumeGrid const &)\n"
+    "    Geometry3D::Geometry3D(ImplicitSurface const &)\n"
+    "    Geometry3D::Geometry3D(OccupancyGrid const &)\n"
     "    Geometry3D::Geometry3D(Heightmap const &)\n");
   return 0;
 }
@@ -28929,48 +30143,13 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_getVolumeGrid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  VolumeGrid result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getVolumeGrid" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  {
-    try {
-      result = (arg1)->getVolumeGrid();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new VolumeGrid(static_cast< const VolumeGrid& >(result))), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_Geometry3D_getImplicitSurface(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  VolumeGrid result;
+  ImplicitSurface result;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -28992,7 +30171,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_getImplicitSurface(PyObject *SWIGUNUSEDPAR
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj((new VolumeGrid(static_cast< const VolumeGrid& >(result))), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj((new ImplicitSurface(static_cast< const ImplicitSurface& >(result))), SWIGTYPE_p_ImplicitSurface, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -29005,7 +30184,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_getOccupancyGrid(PyObject *SWIGUNUSEDPARM(
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  VolumeGrid result;
+  OccupancyGrid result;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -29027,7 +30206,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_getOccupancyGrid(PyObject *SWIGUNUSEDPARM(
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj((new VolumeGrid(static_cast< const VolumeGrid& >(result))), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj((new OccupancyGrid(static_cast< const OccupancyGrid& >(result))), SWIGTYPE_p_OccupancyGrid, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -29300,54 +30479,10 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_setVolumeGrid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  VolumeGrid *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_setVolumeGrid", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setVolumeGrid" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_VolumeGrid,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setVolumeGrid" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setVolumeGrid" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
-  }
-  arg2 = reinterpret_cast< VolumeGrid * >(argp2);
-  {
-    try {
-      (arg1)->setVolumeGrid((VolumeGrid const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_Geometry3D_setImplicitSurface(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
-  VolumeGrid *arg2 = 0 ;
+  ImplicitSurface *arg2 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -29360,17 +30495,17 @@ SWIGINTERN PyObject *_wrap_Geometry3D_setImplicitSurface(PyObject *SWIGUNUSEDPAR
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setImplicitSurface" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_VolumeGrid,  0  | 0);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_ImplicitSurface,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setImplicitSurface" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setImplicitSurface" "', argument " "2"" of type '" "ImplicitSurface const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setImplicitSurface" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setImplicitSurface" "', argument " "2"" of type '" "ImplicitSurface const &""'"); 
   }
-  arg2 = reinterpret_cast< VolumeGrid * >(argp2);
+  arg2 = reinterpret_cast< ImplicitSurface * >(argp2);
   {
     try {
-      (arg1)->setImplicitSurface((VolumeGrid const &)*arg2);
+      (arg1)->setImplicitSurface((ImplicitSurface const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -29391,7 +30526,7 @@ fail:
 SWIGINTERN PyObject *_wrap_Geometry3D_setOccupancyGrid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
-  VolumeGrid *arg2 = 0 ;
+  OccupancyGrid *arg2 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -29404,17 +30539,17 @@ SWIGINTERN PyObject *_wrap_Geometry3D_setOccupancyGrid(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setOccupancyGrid" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_VolumeGrid,  0  | 0);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_OccupancyGrid,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setOccupancyGrid" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setOccupancyGrid" "', argument " "2"" of type '" "OccupancyGrid const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setOccupancyGrid" "', argument " "2"" of type '" "VolumeGrid const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setOccupancyGrid" "', argument " "2"" of type '" "OccupancyGrid const &""'"); 
   }
-  arg2 = reinterpret_cast< VolumeGrid * >(argp2);
+  arg2 = reinterpret_cast< OccupancyGrid * >(argp2);
   {
     try {
-      (arg1)->setOccupancyGrid((VolumeGrid const &)*arg2);
+      (arg1)->setOccupancyGrid((OccupancyGrid const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -31843,58 +32978,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_merge__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  Geometry3D *arg2 = 0 ;
-  double arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
-  
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_merge" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_merge" "', argument " "2"" of type '" "Geometry3D const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_merge" "', argument " "2"" of type '" "Geometry3D const &""'"); 
-  }
-  arg2 = reinterpret_cast< Geometry3D * >(argp2);
-  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_merge" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = static_cast< double >(val3);
-  {
-    try {
-      (arg1)->merge((Geometry3D const &)*arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Geometry3D_merge__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_Geometry3D_merge(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   Geometry3D *arg2 = 0 ;
@@ -31902,8 +32986,9 @@ SWIGINTERN PyObject *_wrap_Geometry3D_merge__SWIG_1(PyObject *SWIGUNUSEDPARM(sel
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
+  PyObject *swig_obj[2] ;
   
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_merge", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_merge" "', argument " "1"" of type '" "Geometry3D *""'"); 
@@ -31934,56 +33019,6 @@ SWIGINTERN PyObject *_wrap_Geometry3D_merge__SWIG_1(PyObject *SWIGUNUSEDPARM(sel
   return resultobj;
 fail:
   return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Geometry3D_merge(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[4] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "Geometry3D_merge", 0, 3, argv))) SWIG_fail;
-  --argc;
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, SWIG_POINTER_NO_NULL | 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_Geometry3D_merge__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, SWIG_POINTER_NO_NULL | 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        {
-          int res = SWIG_AsVal_double(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          return _wrap_Geometry3D_merge__SWIG_0(self, argc, argv);
-        }
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Geometry3D_merge'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    Geometry3D::merge(Geometry3D const &,double)\n"
-    "    Geometry3D::merge(Geometry3D const &)\n");
-  return 0;
 }
 
 
@@ -71343,83 +72378,83 @@ static PyMethodDef SwigMethods[] = {
 	 { "GeometricPrimitive_isStandalone_get", _wrap_GeometricPrimitive_isStandalone_get, METH_O, "GeometricPrimitive_isStandalone_get(GeometricPrimitive self) -> bool"},
 	 { "GeometricPrimitive_swigregister", GeometricPrimitive_swigregister, METH_O, NULL},
 	 { "GeometricPrimitive_swiginit", GeometricPrimitive_swiginit, METH_VARARGS, NULL},
-	 { "delete_VolumeGrid", _wrap_delete_VolumeGrid, METH_O, "\n"
-		"delete_VolumeGrid(VolumeGrid self)\n"
+	 { "delete_ImplicitSurface", _wrap_delete_ImplicitSurface, METH_O, "\n"
+		"delete_ImplicitSurface(ImplicitSurface self)\n"
 		"\n"
 		"\n"
 		""},
-	 { "new_VolumeGrid", _wrap_new_VolumeGrid, METH_VARARGS, "\n"
-		"VolumeGrid()\n"
-		"new_VolumeGrid(VolumeGrid rhs) -> VolumeGrid\n"
+	 { "new_ImplicitSurface", _wrap_new_ImplicitSurface, METH_VARARGS, "\n"
+		"ImplicitSurface()\n"
+		"new_ImplicitSurface(ImplicitSurface rhs) -> ImplicitSurface\n"
 		"\n"
 		"\n"
 		""},
-	 { "VolumeGrid_copy", _wrap_VolumeGrid_copy, METH_O, "\n"
-		"VolumeGrid_copy(VolumeGrid self) -> VolumeGrid\n"
+	 { "ImplicitSurface_copy", _wrap_ImplicitSurface_copy, METH_O, "\n"
+		"ImplicitSurface_copy(ImplicitSurface self) -> ImplicitSurface\n"
 		"\n"
 		"\n"
 		"Creates a standalone object that is a copy of this.  \n"
 		"\n"
 		""},
-	 { "VolumeGrid_getBmin", _wrap_VolumeGrid_getBmin, METH_O, "\n"
-		"VolumeGrid_getBmin(VolumeGrid self)\n"
+	 { "ImplicitSurface_getBmin", _wrap_ImplicitSurface_getBmin, METH_O, "\n"
+		"ImplicitSurface_getBmin(ImplicitSurface self)\n"
 		"\n"
 		"\n"
 		""},
-	 { "VolumeGrid_setBmin", _wrap_VolumeGrid_setBmin, METH_VARARGS, "\n"
-		"VolumeGrid_setBmin(VolumeGrid self, double const [3] bmin)\n"
+	 { "ImplicitSurface_setBmin", _wrap_ImplicitSurface_setBmin, METH_VARARGS, "\n"
+		"ImplicitSurface_setBmin(ImplicitSurface self, double const [3] bmin)\n"
 		"\n"
 		"\n"
 		""},
-	 { "VolumeGrid_getBmax", _wrap_VolumeGrid_getBmax, METH_O, "\n"
-		"VolumeGrid_getBmax(VolumeGrid self)\n"
+	 { "ImplicitSurface_getBmax", _wrap_ImplicitSurface_getBmax, METH_O, "\n"
+		"ImplicitSurface_getBmax(ImplicitSurface self)\n"
 		"\n"
 		"\n"
 		""},
-	 { "VolumeGrid_setBmax", _wrap_VolumeGrid_setBmax, METH_VARARGS, "\n"
-		"VolumeGrid_setBmax(VolumeGrid self, double const [3] bmax)\n"
+	 { "ImplicitSurface_setBmax", _wrap_ImplicitSurface_setBmax, METH_VARARGS, "\n"
+		"ImplicitSurface_setBmax(ImplicitSurface self, double const [3] bmax)\n"
 		"\n"
 		"\n"
 		""},
-	 { "VolumeGrid_resize", _wrap_VolumeGrid_resize, METH_VARARGS, "\n"
-		"VolumeGrid_resize(VolumeGrid self, int sx, int sy, int sz)\n"
+	 { "ImplicitSurface_resize", _wrap_ImplicitSurface_resize, METH_VARARGS, "\n"
+		"ImplicitSurface_resize(ImplicitSurface self, int sx, int sy, int sz)\n"
 		"\n"
 		"\n"
 		"Resizes the x, y, and z dimensions of the grid.  \n"
 		"\n"
 		""},
-	 { "VolumeGrid_set", _wrap_VolumeGrid_set, METH_VARARGS, "\n"
-		"VolumeGrid_set(VolumeGrid self, VolumeGrid arg2)\n"
-		"VolumeGrid_set(VolumeGrid self, double value)\n"
-		"VolumeGrid_set(VolumeGrid self, int i, int j, int k, double value)\n"
+	 { "ImplicitSurface_set", _wrap_ImplicitSurface_set, METH_VARARGS, "\n"
+		"ImplicitSurface_set(ImplicitSurface self, ImplicitSurface arg2)\n"
+		"ImplicitSurface_set(ImplicitSurface self, double value)\n"
+		"ImplicitSurface_set(ImplicitSurface self, int i, int j, int k, double value)\n"
 		"\n"
 		"\n"
 		"Sets a specific element of a cell.  \n"
 		"\n"
 		""},
-	 { "VolumeGrid_get", _wrap_VolumeGrid_get, METH_VARARGS, "\n"
-		"VolumeGrid_get(VolumeGrid self, int i, int j, int k) -> double\n"
+	 { "ImplicitSurface_get", _wrap_ImplicitSurface_get, METH_VARARGS, "\n"
+		"ImplicitSurface_get(ImplicitSurface self, int i, int j, int k) -> double\n"
 		"\n"
 		"\n"
 		"Gets a specific element of a cell.  \n"
 		"\n"
 		""},
-	 { "VolumeGrid_shift", _wrap_VolumeGrid_shift, METH_VARARGS, "\n"
-		"VolumeGrid_shift(VolumeGrid self, double dv)\n"
+	 { "ImplicitSurface_shift", _wrap_ImplicitSurface_shift, METH_VARARGS, "\n"
+		"ImplicitSurface_shift(ImplicitSurface self, double dv)\n"
 		"\n"
 		"\n"
 		"Shifts the value uniformly.  \n"
 		"\n"
 		""},
-	 { "VolumeGrid_scale", _wrap_VolumeGrid_scale, METH_VARARGS, "\n"
-		"VolumeGrid_scale(VolumeGrid self, double cv)\n"
+	 { "ImplicitSurface_scale", _wrap_ImplicitSurface_scale, METH_VARARGS, "\n"
+		"ImplicitSurface_scale(ImplicitSurface self, double cv)\n"
 		"\n"
 		"\n"
 		"Scales the value uniformly.  \n"
 		"\n"
 		""},
-	 { "VolumeGrid_getValues", _wrap_VolumeGrid_getValues, METH_O, "\n"
-		"VolumeGrid_getValues(VolumeGrid self)\n"
+	 { "ImplicitSurface_getValues", _wrap_ImplicitSurface_getValues, METH_O, "\n"
+		"ImplicitSurface_getValues(ImplicitSurface self)\n"
 		"\n"
 		"\n"
 		"Returns a 3D Numpy array view of the values.  \n"
@@ -71427,19 +72462,144 @@ static PyMethodDef SwigMethods[] = {
 		"Return type: np.ndarray  \n"
 		"\n"
 		""},
-	 { "VolumeGrid_setValues", _wrap_VolumeGrid_setValues, METH_VARARGS, "\n"
-		"VolumeGrid_setValues(VolumeGrid self, double * np_array3)\n"
+	 { "ImplicitSurface_setValues", _wrap_ImplicitSurface_setValues, METH_VARARGS, "\n"
+		"ImplicitSurface_setValues(ImplicitSurface self, double * np_array3)\n"
 		"\n"
 		"\n"
 		"Sets the values to a 3D numpy array.  \n"
 		"\n"
 		""},
-	 { "VolumeGrid_dataPtr_set", _wrap_VolumeGrid_dataPtr_set, METH_VARARGS, "VolumeGrid_dataPtr_set(VolumeGrid self, void * dataPtr)"},
-	 { "VolumeGrid_dataPtr_get", _wrap_VolumeGrid_dataPtr_get, METH_O, "VolumeGrid_dataPtr_get(VolumeGrid self) -> void *"},
-	 { "VolumeGrid_isStandalone_set", _wrap_VolumeGrid_isStandalone_set, METH_VARARGS, "VolumeGrid_isStandalone_set(VolumeGrid self, bool isStandalone)"},
-	 { "VolumeGrid_isStandalone_get", _wrap_VolumeGrid_isStandalone_get, METH_O, "VolumeGrid_isStandalone_get(VolumeGrid self) -> bool"},
-	 { "VolumeGrid_swigregister", VolumeGrid_swigregister, METH_O, NULL},
-	 { "VolumeGrid_swiginit", VolumeGrid_swiginit, METH_VARARGS, NULL},
+	 { "ImplicitSurface_setTruncationDistance", _wrap_ImplicitSurface_setTruncationDistance, METH_VARARGS, "\n"
+		"ImplicitSurface_setTruncationDistance(ImplicitSurface self, double d)\n"
+		"\n"
+		"\n"
+		"Sets the truncation distance for TSDFs.  \n"
+		"\n"
+		""},
+	 { "ImplicitSurface_getTruncationDistance", _wrap_ImplicitSurface_getTruncationDistance, METH_O, "\n"
+		"ImplicitSurface_getTruncationDistance(ImplicitSurface self) -> double\n"
+		"\n"
+		"\n"
+		"Retrieves the truncation distance for TSDFs.  \n"
+		"\n"
+		""},
+	 { "ImplicitSurface_dataPtr_set", _wrap_ImplicitSurface_dataPtr_set, METH_VARARGS, "ImplicitSurface_dataPtr_set(ImplicitSurface self, void * dataPtr)"},
+	 { "ImplicitSurface_dataPtr_get", _wrap_ImplicitSurface_dataPtr_get, METH_O, "ImplicitSurface_dataPtr_get(ImplicitSurface self) -> void *"},
+	 { "ImplicitSurface_isStandalone_set", _wrap_ImplicitSurface_isStandalone_set, METH_VARARGS, "ImplicitSurface_isStandalone_set(ImplicitSurface self, bool isStandalone)"},
+	 { "ImplicitSurface_isStandalone_get", _wrap_ImplicitSurface_isStandalone_get, METH_O, "ImplicitSurface_isStandalone_get(ImplicitSurface self) -> bool"},
+	 { "ImplicitSurface_swigregister", ImplicitSurface_swigregister, METH_O, NULL},
+	 { "ImplicitSurface_swiginit", ImplicitSurface_swiginit, METH_VARARGS, NULL},
+	 { "delete_OccupancyGrid", _wrap_delete_OccupancyGrid, METH_O, "\n"
+		"delete_OccupancyGrid(OccupancyGrid self)\n"
+		"\n"
+		"\n"
+		""},
+	 { "new_OccupancyGrid", _wrap_new_OccupancyGrid, METH_VARARGS, "\n"
+		"OccupancyGrid()\n"
+		"new_OccupancyGrid(OccupancyGrid rhs) -> OccupancyGrid\n"
+		"\n"
+		"\n"
+		""},
+	 { "OccupancyGrid_copy", _wrap_OccupancyGrid_copy, METH_O, "\n"
+		"OccupancyGrid_copy(OccupancyGrid self) -> OccupancyGrid\n"
+		"\n"
+		"\n"
+		"Creates a standalone object that is a copy of this.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_getBmin", _wrap_OccupancyGrid_getBmin, METH_O, "\n"
+		"OccupancyGrid_getBmin(OccupancyGrid self)\n"
+		"\n"
+		"\n"
+		""},
+	 { "OccupancyGrid_setBmin", _wrap_OccupancyGrid_setBmin, METH_VARARGS, "\n"
+		"OccupancyGrid_setBmin(OccupancyGrid self, double const [3] bmin)\n"
+		"\n"
+		"\n"
+		""},
+	 { "OccupancyGrid_getBmax", _wrap_OccupancyGrid_getBmax, METH_O, "\n"
+		"OccupancyGrid_getBmax(OccupancyGrid self)\n"
+		"\n"
+		"\n"
+		""},
+	 { "OccupancyGrid_setBmax", _wrap_OccupancyGrid_setBmax, METH_VARARGS, "\n"
+		"OccupancyGrid_setBmax(OccupancyGrid self, double const [3] bmax)\n"
+		"\n"
+		"\n"
+		""},
+	 { "OccupancyGrid_resize", _wrap_OccupancyGrid_resize, METH_VARARGS, "\n"
+		"OccupancyGrid_resize(OccupancyGrid self, int sx, int sy, int sz)\n"
+		"\n"
+		"\n"
+		"Resizes the x, y, and z dimensions of the grid.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_set", _wrap_OccupancyGrid_set, METH_VARARGS, "\n"
+		"OccupancyGrid_set(OccupancyGrid self, OccupancyGrid arg2)\n"
+		"OccupancyGrid_set(OccupancyGrid self, double value)\n"
+		"OccupancyGrid_set(OccupancyGrid self, int i, int j, int k, double value)\n"
+		"\n"
+		"\n"
+		"Sets a specific element of a cell.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_get", _wrap_OccupancyGrid_get, METH_VARARGS, "\n"
+		"OccupancyGrid_get(OccupancyGrid self, int i, int j, int k) -> double\n"
+		"\n"
+		"\n"
+		"Gets a specific element of a cell.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_shift", _wrap_OccupancyGrid_shift, METH_VARARGS, "\n"
+		"OccupancyGrid_shift(OccupancyGrid self, double dv)\n"
+		"\n"
+		"\n"
+		"Shifts the value uniformly.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_scale", _wrap_OccupancyGrid_scale, METH_VARARGS, "\n"
+		"OccupancyGrid_scale(OccupancyGrid self, double cv)\n"
+		"\n"
+		"\n"
+		"Scales the value uniformly.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_getValues", _wrap_OccupancyGrid_getValues, METH_O, "\n"
+		"OccupancyGrid_getValues(OccupancyGrid self)\n"
+		"\n"
+		"\n"
+		"Returns a 3D Numpy array view of the values.  \n"
+		"\n"
+		"Return type: np.ndarray  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_setValues", _wrap_OccupancyGrid_setValues, METH_VARARGS, "\n"
+		"OccupancyGrid_setValues(OccupancyGrid self, double * np_array3)\n"
+		"\n"
+		"\n"
+		"Sets the values to a 3D numpy array.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_setOccupancyThreshold", _wrap_OccupancyGrid_setOccupancyThreshold, METH_VARARGS, "\n"
+		"OccupancyGrid_setOccupancyThreshold(OccupancyGrid self, double threshold)\n"
+		"\n"
+		"\n"
+		"Sets the threshold for collision detection.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_getOccupancyThreshold", _wrap_OccupancyGrid_getOccupancyThreshold, METH_O, "\n"
+		"OccupancyGrid_getOccupancyThreshold(OccupancyGrid self) -> double\n"
+		"\n"
+		"\n"
+		"Gets the threshold for collision detection.  \n"
+		"\n"
+		""},
+	 { "OccupancyGrid_dataPtr_set", _wrap_OccupancyGrid_dataPtr_set, METH_VARARGS, "OccupancyGrid_dataPtr_set(OccupancyGrid self, void * dataPtr)"},
+	 { "OccupancyGrid_dataPtr_get", _wrap_OccupancyGrid_dataPtr_get, METH_O, "OccupancyGrid_dataPtr_get(OccupancyGrid self) -> void *"},
+	 { "OccupancyGrid_isStandalone_set", _wrap_OccupancyGrid_isStandalone_set, METH_VARARGS, "OccupancyGrid_isStandalone_set(OccupancyGrid self, bool isStandalone)"},
+	 { "OccupancyGrid_isStandalone_get", _wrap_OccupancyGrid_isStandalone_get, METH_O, "OccupancyGrid_isStandalone_get(OccupancyGrid self) -> bool"},
+	 { "OccupancyGrid_swigregister", OccupancyGrid_swigregister, METH_O, NULL},
+	 { "OccupancyGrid_swiginit", OccupancyGrid_swiginit, METH_VARARGS, NULL},
 	 { "delete_Heightmap", _wrap_delete_Heightmap, METH_O, "\n"
 		"delete_Heightmap(Heightmap self)\n"
 		"\n"
@@ -71772,7 +72932,8 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D(ConvexHull arg1)\n"
 		"Geometry3D(TriangleMesh arg1)\n"
 		"Geometry3D(PointCloud arg1)\n"
-		"Geometry3D(VolumeGrid arg1)\n"
+		"Geometry3D(ImplicitSurface arg1)\n"
+		"Geometry3D(OccupancyGrid arg1)\n"
 		"new_Geometry3D(Heightmap arg1) -> Geometry3D\n"
 		"\n"
 		"\n"
@@ -71853,26 +73014,18 @@ static PyMethodDef SwigMethods[] = {
 		"Returns a ConvexHull if this geometry is of type ConvexHull.  \n"
 		"\n"
 		""},
-	 { "Geometry3D_getVolumeGrid", _wrap_Geometry3D_getVolumeGrid, METH_O, "\n"
-		"Geometry3D_getVolumeGrid(Geometry3D self) -> VolumeGrid\n"
-		"\n"
-		"\n"
-		"Returns a VolumeGrid if this geometry is of type ImplicitSurface or\n"
-		"OccupancyGrid.  \n"
-		"\n"
-		""},
 	 { "Geometry3D_getImplicitSurface", _wrap_Geometry3D_getImplicitSurface, METH_O, "\n"
-		"Geometry3D_getImplicitSurface(Geometry3D self) -> VolumeGrid\n"
+		"Geometry3D_getImplicitSurface(Geometry3D self) -> ImplicitSurface\n"
 		"\n"
 		"\n"
-		"Returns the VolumeGrid if this geometry is of type ImplicitSurface.  \n"
+		"Returns the ImplicitSurface if this geometry is of type ImplicitSurface.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_getOccupancyGrid", _wrap_Geometry3D_getOccupancyGrid, METH_O, "\n"
-		"Geometry3D_getOccupancyGrid(Geometry3D self) -> VolumeGrid\n"
+		"Geometry3D_getOccupancyGrid(Geometry3D self) -> OccupancyGrid\n"
 		"\n"
 		"\n"
-		"Returns the VolumeGrid if this geometry is of type OccupancyGrid.  \n"
+		"Returns the OccupancyGrid if this geometry is of type OccupancyGrid.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_getHeightmap", _wrap_Geometry3D_getHeightmap, METH_O, "\n"
@@ -71919,22 +73072,15 @@ static PyMethodDef SwigMethods[] = {
 		"transform of g2 doesn't do anything to this object.  \n"
 		"\n"
 		""},
-	 { "Geometry3D_setVolumeGrid", _wrap_Geometry3D_setVolumeGrid, METH_VARARGS, "\n"
-		"Geometry3D_setVolumeGrid(Geometry3D self, VolumeGrid arg2)\n"
-		"\n"
-		"\n"
-		"Sets this Geometry3D to an ImplicitSurface. Will be deprecated soon.  \n"
-		"\n"
-		""},
 	 { "Geometry3D_setImplicitSurface", _wrap_Geometry3D_setImplicitSurface, METH_VARARGS, "\n"
-		"Geometry3D_setImplicitSurface(Geometry3D self, VolumeGrid vg)\n"
+		"Geometry3D_setImplicitSurface(Geometry3D self, ImplicitSurface grid)\n"
 		"\n"
 		"\n"
 		"Sets this Geometry3D to an ImplicitSurface.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_setOccupancyGrid", _wrap_Geometry3D_setOccupancyGrid, METH_VARARGS, "\n"
-		"Geometry3D_setOccupancyGrid(Geometry3D self, VolumeGrid vg)\n"
+		"Geometry3D_setOccupancyGrid(Geometry3D self, OccupancyGrid grid)\n"
 		"\n"
 		"\n"
 		"Sets this Geometry3D to an OccupancyGrid.  \n"
@@ -72098,19 +73244,31 @@ static PyMethodDef SwigMethods[] = {
 		"*   TriangleMesh -> PointCloud. param is the desired dispersion of the points,\n"
 		"    by default set to the average triangle diameter. At least all of the mesh's\n"
 		"    vertices will be returned.  \n"
-		"*   TriangleMesh -> VolumeGrid. Converted using the fast marching method with\n"
-		"    good results only if the mesh is watertight. param is the grid resolution,\n"
-		"    by default set to the average triangle diameter.  \n"
+		"*   TriangleMesh -> ImplicitSurface. Converted using the fast marching method\n"
+		"    with good results only if the mesh is watertight. param is the grid\n"
+		"    resolution, by default set to the average triangle diameter.  \n"
+		"*   TriangleMesh -> OccupancyGrid. Converted using rasterization. param is the\n"
+		"    grid resolution, by default set to the average triangle diameter.  \n"
 		"*   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.\n"
 		"    Otherwise, uses convex decomposition with the HACD library.  \n"
+		"*   TriangleMesh -> Heightmap. Converted using rasterization. param is the grid\n"
+		"    resolution, by default set to max mesh dimension / 256.  \n"
 		"*   PointCloud -> TriangleMesh. Available if the point cloud is structured.\n"
 		"    param is the threshold for splitting triangles by depth discontinuity. param\n"
 		"    is by default infinity.  \n"
+		"*   PointCloud -> OccupancyGrid. param is the grid resolution, by default some\n"
+		"    reasonable number.  \n"
 		"*   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  \n"
+		"*   PointCloud -> Heightmap. param is the grid resolution, by default set to max\n"
+		"    point cloud dimension / 256.  \n"
 		"*   GeometricPrimitive -> anything. param determines the desired resolution.  \n"
-		"*   VolumeGrid -> TriangleMesh. param determines the level set for the marching\n"
-		"    cubes algorithm.  \n"
-		"*   VolumeGrid -> PointCloud. param determines the level set.  \n"
+		"*   ImplicitSurface -> TriangleMesh. param determines the level set for the\n"
+		"    marching cubes algorithm.  \n"
+		"*   ImplicitSurface -> PointCloud. param determines the level set.  \n"
+		"*   ImplicitSurface -> Heightmap.  \n"
+		"*   OccupancyGrid -> TriangleMesh. Creates a mesh around each block.  \n"
+		"*   OccupancyGrid -> PointCloud. Outputs a point for each block.  \n"
+		"*   OccupancyGrid -> Heightmap.  \n"
 		"*   ConvexHull -> TriangleMesh.  \n"
 		"*   ConvexHull -> PointCloud. param is the desired dispersion of the points.\n"
 		"    Equivalent to ConvexHull -> TriangleMesh -> PointCloud  \n"
@@ -72135,10 +73293,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Unsupported types:  \n"
 		"\n"
-		"*   VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]  \n"
-		"*   VolumeGrid - TriangleMesh  \n"
-		"*   VolumeGrid - VolumeGrid  \n"
-		"*   ConvexHull - anything else besides ConvexHull  \n"
+		"*   ImplicitSurface - GeometricPrimitive [aabb, box, triangle, polygon]  \n"
+		"*   ImplicitSurface - ConvexHull  \n"
 		"\n"
 		""},
 	 { "Geometry3D_collides_ext", _wrap_Geometry3D_collides_ext, METH_VARARGS, "\n"
@@ -72200,9 +73356,9 @@ static PyMethodDef SwigMethods[] = {
 		"geometry types return signed distances:  \n"
 		"\n"
 		"*   GeometricPrimitive  \n"
-		"*   PointCloud (approximate, if the cloud is a set of balls with the radius\n"
-		"    property)  \n"
-		"*   VolumeGrid  \n"
+		"*   PointCloud  \n"
+		"*   ImplictSurface  \n"
+		"*   Heightmap (approximate, only accurate in the viewing direction)  \n"
 		"*   ConvexHull  \n"
 		"\n"
 		"For other types, a signed distance will be returned if the geometry has a\n"
@@ -72233,23 +73389,26 @@ static PyMethodDef SwigMethods[] = {
 		"touching. Only the following combinations of geometry types return signed\n"
 		"distances:  \n"
 		"\n"
-		"*   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  \n"
+		"*   GeometricPrimitive-GeometricPrimitive (missing some for boxes, segments, and\n"
+		"    tris)  \n"
 		"*   GeometricPrimitive-TriangleMesh (surface only)  \n"
 		"*   GeometricPrimitive-PointCloud  \n"
-		"*   GeometricPrimitive-VolumeGrid  \n"
+		"*   GeometricPrimitive-ImplicitSurface  \n"
 		"*   TriangleMesh (surface only)-GeometricPrimitive  \n"
-		"*   PointCloud-VolumeGrid  \n"
-		"*   ConvexHull - ConvexHull  \n"
+		"*   PointCloud-ImplicitSurface  \n"
+		"*   PointCloud-ConvexHull  \n"
+		"*   ConvexHull-ConvexHull  \n"
+		"*   ConvexHull-GeometricPrimitive  \n"
 		"\n"
 		"If penetration is supported, a negative distance is returned and cp1,cp2 are the\n"
 		"deepest penetrating points.  \n"
 		"\n"
 		"Unsupported types:  \n"
 		"\n"
-		"*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  \n"
 		"*   PointCloud-PointCloud  \n"
-		"*   VolumeGrid-TriangleMesh  \n"
-		"*   VolumeGrid-VolumeGrid  \n"
+		"*   ImplicitSurface-TriangleMesh  \n"
+		"*   ImplicitSurface-ImplicitSurface  \n"
+		"*   OccupancyGrid - anything  \n"
 		"*   ConvexHull - anything else besides ConvexHull  \n"
 		"\n"
 		"See the comments of the distance_point function  \n"
@@ -72270,14 +73429,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Performs a ray cast.  \n"
 		"\n"
-		"Supported types:  \n"
-		"\n"
-		"*   GeometricPrimitive  \n"
-		"*   TriangleMesh  \n"
-		"*   PointCloud (need a positive collision margin, or points need to have a\n"
-		"    'radius' property assigned)  \n"
-		"*   VolumeGrid  \n"
-		"*   Group (groups of the aforementioned types)  \n"
+		"All types supported, but PointCloud needs a positive collision margin, or points\n"
+		"need to have a 'radius' property assigned)  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
@@ -72293,16 +73446,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"A more sophisticated ray cast.  \n"
 		"\n"
-		"Supported types:  \n"
+		"All types supported, but PointCloud needs a positive collision  \n"
 		"\n"
-		"*   GeometricPrimitive  \n"
-		"*   TriangleMesh  \n"
-		"*   PointCloud (need a positive collision margin, or points need to have a\n"
-		"    'radius' property assigned)  \n"
-		"*   VolumeGrid  \n"
-		"*   Group (groups of the aforementioned types)  \n"
-		"\n"
-		"Returns:  \n"
+		"margin, or points need to have a 'radius' property assigned) Returns:  \n"
 		"\n"
 		"    (hit_element,pt) where hit_element is >= 0 if ray starting at\n"
 		"    s and pointing in direction d hits the geometry (given in world\n"
@@ -72324,20 +73470,13 @@ static PyMethodDef SwigMethods[] = {
 		"of points within distance self.collisionMargin + other.collisionMargin +\n"
 		"padding1 + padding2.  \n"
 		"\n"
+		"Relatively few geometry types are supported.  \n"
+		"\n"
 		"For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,\n"
 		"PointCloud-PointCloud) padding must be positive to get meaningful contact poitns\n"
 		"and normals.  \n"
 		"\n"
 		"If maxContacts != 0 a clustering postprocessing step is performed.  \n"
-		"\n"
-		"Unsupported types:  \n"
-		"\n"
-		"*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  \n"
-		"*   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,\n"
-		"    the results are potentially inaccurate for non-convex VolumeGrids.  \n"
-		"*   VolumeGrid-TriangleMesh  \n"
-		"*   VolumeGrid-VolumeGrid  \n"
-		"*   ConvexHull - anything  \n"
 		"\n"
 		""},
 	 { "Geometry3D_support", _wrap_Geometry3D_support, METH_VARARGS, "\n"
@@ -72349,6 +73488,10 @@ static PyMethodDef SwigMethods[] = {
 		"Supported types:  \n"
 		"\n"
 		"*   ConvexHull  \n"
+		"*   GeometricPrimitive  \n"
+		"*   PointCloud  \n"
+		"*   TriangleMesh  \n"
+		"*   OccupancyGrid  \n"
 		"\n"
 		"Return type: Vector3  \n"
 		"\n"
@@ -72397,7 +73540,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "Geometry3D_merge", _wrap_Geometry3D_merge, METH_VARARGS, "\n"
-		"Geometry3D_merge(Geometry3D self, Geometry3D other, double threshold=0)\n"
+		"Geometry3D_merge(Geometry3D self, Geometry3D other)\n"
 		"\n"
 		"\n"
 		"Merges another geometry into this geometry. The result is stored inplace and the\n"
@@ -72407,9 +73550,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"ImplicitSurface, OccupancyGrid, and Heightmap merges preserve the domain of the\n"
 		"current grid. They can also be merged with many other geometries.  \n"
-		"\n"
-		"In the ImplicitSurface case, a truncation value can be set via `threshold`. This\n"
-		"performs a TSDF-style merge  \n"
 		"\n"
 		""},
 	 { "Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, "Geometry3D_world_set(Geometry3D self, int world)"},
@@ -77295,6 +78435,7 @@ static swig_type_info _swigt__p_Heightmap = {"_p_Heightmap", "Heightmap *", 0, 0
 static swig_type_info _swigt__p_IKGoal = {"_p_IKGoal", "IKGoal *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKObjective = {"_p_IKObjective", "IKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKSolver = {"_p_IKSolver", "IKSolver *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ImplicitSurface = {"_p_ImplicitSurface", "ImplicitSurface *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Klampt__ODEGeometry = {"_p_Klampt__ODEGeometry", "Klampt::ODEGeometry *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Klampt__RigidObjectModel = {"_p_Klampt__RigidObjectModel", "Klampt::RigidObjectModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Klampt__RobotModel = {"_p_Klampt__RobotModel", "Klampt::RobotModel *", 0, 0, (void*)0, 0};
@@ -77304,6 +78445,7 @@ static swig_type_info _swigt__p_Klampt__Simulator = {"_p_Klampt__Simulator", "Kl
 static swig_type_info _swigt__p_Klampt__TerrainModel = {"_p_Klampt__TerrainModel", "Klampt::TerrainModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Mass = {"_p_Mass", "Mass *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ObjectPoser = {"_p_ObjectPoser", "ObjectPoser *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_OccupancyGrid = {"_p_OccupancyGrid", "OccupancyGrid *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_PointCloud = {"_p_PointCloud", "PointCloud *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_PointPoser = {"_p_PointPoser", "PointPoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RigidObjectModel = {"_p_RigidObjectModel", "RigidObjectModel *", 0, 0, (void*)0, 0};
@@ -77321,7 +78463,6 @@ static swig_type_info _swigt__p_TerrainModel = {"_p_TerrainModel", "TerrainModel
 static swig_type_info _swigt__p_TransformPoser = {"_p_TransformPoser", "TransformPoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TriangleMesh = {"_p_TriangleMesh", "TriangleMesh *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Viewport = {"_p_Viewport", "Viewport *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_VolumeGrid = {"_p_VolumeGrid", "VolumeGrid *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Widget = {"_p_Widget", "Widget *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_WidgetSet = {"_p_WidgetSet", "WidgetSet *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_WorldModel = {"_p_WorldModel", "WorldModel *", 0, 0, (void*)0, 0};
@@ -77386,6 +78527,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_IKGoal,
   &_swigt__p_IKObjective,
   &_swigt__p_IKSolver,
+  &_swigt__p_ImplicitSurface,
   &_swigt__p_Klampt__ODEGeometry,
   &_swigt__p_Klampt__RigidObjectModel,
   &_swigt__p_Klampt__RobotModel,
@@ -77395,6 +78537,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Klampt__TerrainModel,
   &_swigt__p_Mass,
   &_swigt__p_ObjectPoser,
+  &_swigt__p_OccupancyGrid,
   &_swigt__p_PointCloud,
   &_swigt__p_PointPoser,
   &_swigt__p_RigidObjectModel,
@@ -77412,7 +78555,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_TransformPoser,
   &_swigt__p_TriangleMesh,
   &_swigt__p_Viewport,
-  &_swigt__p_VolumeGrid,
   &_swigt__p_Widget,
   &_swigt__p_WidgetSet,
   &_swigt__p_WorldModel,
@@ -77477,6 +78619,7 @@ static swig_cast_info _swigc__p_Heightmap[] = {  {&_swigt__p_Heightmap, 0, 0, 0}
 static swig_cast_info _swigc__p_IKGoal[] = {  {&_swigt__p_IKGoal, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKObjective[] = {  {&_swigt__p_IKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKSolver[] = {  {&_swigt__p_IKSolver, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ImplicitSurface[] = {  {&_swigt__p_ImplicitSurface, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Klampt__ODEGeometry[] = {  {&_swigt__p_Klampt__ODEGeometry, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Klampt__RigidObjectModel[] = {  {&_swigt__p_Klampt__RigidObjectModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Klampt__RobotModel[] = {  {&_swigt__p_Klampt__RobotModel, 0, 0, 0},{0, 0, 0, 0}};
@@ -77486,6 +78629,7 @@ static swig_cast_info _swigc__p_Klampt__Simulator[] = {  {&_swigt__p_Klampt__Sim
 static swig_cast_info _swigc__p_Klampt__TerrainModel[] = {  {&_swigt__p_Klampt__TerrainModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Mass[] = {  {&_swigt__p_Mass, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ObjectPoser[] = {  {&_swigt__p_ObjectPoser, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_OccupancyGrid[] = {  {&_swigt__p_OccupancyGrid, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_PointCloud[] = {  {&_swigt__p_PointCloud, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_PointPoser[] = {  {&_swigt__p_PointPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RigidObjectModel[] = {  {&_swigt__p_RigidObjectModel, 0, 0, 0},{0, 0, 0, 0}};
@@ -77503,7 +78647,6 @@ static swig_cast_info _swigc__p_TerrainModel[] = {  {&_swigt__p_TerrainModel, 0,
 static swig_cast_info _swigc__p_TransformPoser[] = {  {&_swigt__p_TransformPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TriangleMesh[] = {  {&_swigt__p_TriangleMesh, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Viewport[] = {  {&_swigt__p_Viewport, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_VolumeGrid[] = {  {&_swigt__p_VolumeGrid, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Widget[] = {  {&_swigt__p_AABBPoser, _p_AABBPoserTo_p_Widget, 0, 0},  {&_swigt__p_SpherePoser, _p_SpherePoserTo_p_Widget, 0, 0},  {&_swigt__p_ObjectPoser, _p_ObjectPoserTo_p_Widget, 0, 0},  {&_swigt__p_RobotPoser, _p_RobotPoserTo_p_Widget, 0, 0},  {&_swigt__p_PointPoser, _p_PointPoserTo_p_Widget, 0, 0},  {&_swigt__p_TransformPoser, _p_TransformPoserTo_p_Widget, 0, 0},  {&_swigt__p_BoxPoser, _p_BoxPoserTo_p_Widget, 0, 0},  {&_swigt__p_WidgetSet, _p_WidgetSetTo_p_Widget, 0, 0},  {&_swigt__p_Widget, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WidgetSet[] = {  {&_swigt__p_WidgetSet, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WorldModel[] = {  {&_swigt__p_WorldModel, 0, 0, 0},{0, 0, 0, 0}};
@@ -77568,6 +78711,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_IKGoal,
   _swigc__p_IKObjective,
   _swigc__p_IKSolver,
+  _swigc__p_ImplicitSurface,
   _swigc__p_Klampt__ODEGeometry,
   _swigc__p_Klampt__RigidObjectModel,
   _swigc__p_Klampt__RobotModel,
@@ -77577,6 +78721,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Klampt__TerrainModel,
   _swigc__p_Mass,
   _swigc__p_ObjectPoser,
+  _swigc__p_OccupancyGrid,
   _swigc__p_PointCloud,
   _swigc__p_PointPoser,
   _swigc__p_RigidObjectModel,
@@ -77594,7 +78739,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_TransformPoser,
   _swigc__p_TriangleMesh,
   _swigc__p_Viewport,
-  _swigc__p_VolumeGrid,
   _swigc__p_Widget,
   _swigc__p_WidgetSet,
   _swigc__p_WorldModel,
