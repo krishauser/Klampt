@@ -320,7 +320,7 @@ void CameraSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
   if(link >= 0) Tlink = robot.links[link].T_World;
   else Tlink.setIdentity();
 
-  if(useGLFramebuffers) {
+  if(useGLFramebuffers && renderer.width == 0) {
     if(!renderer.Setup(xres,yres,true,false)) {
       LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: Couldn't initialize GLEW, falling back to slow mode");
       const GLubyte* glVersion = glGetString(GL_VERSION);
