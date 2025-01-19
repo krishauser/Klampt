@@ -275,8 +275,7 @@ class KlamptWidget(widgets.DOMWidget):
             return [name]
         elif type == 'PointCloud':
             pc = item
-            from klampt.model import geometry
-            colors = geometry.point_cloud_colors(pc,'rgb')
+            colors = pc.getColors('rgb')
             data = ([v for v in pc.vertices],colors)
             self._extras[name] = ('Points',data)
             msg = {'type':'add_points','name':name,'verts':data[0],'size':kwargs.get('size',0.01)}

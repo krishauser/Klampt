@@ -846,6 +846,10 @@ class stringMap(object):
 # Register stringMap in _robotsim:
 _robotsim.stringMap_swigregister(stringMap)
 
+
+import numpy as np
+import types
+
 class TriangleMesh(object):
     r"""
 
@@ -1006,10 +1010,59 @@ class TriangleMesh(object):
     """The triangles of the mesh, given as indices into the vertices array."""
 
     def triangle(self, i) -> Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
-        """Returns the i'th triangle of the mesh as a tuple of 3 3-tuples."""
+        """
+        Returns the i'th triangle of the mesh as a tuple of 3 3-tuples.
+        """
         a,b,c = self.indices[i]
         v = self.vertices
         return (v[a],v[b],v[c])
+
+    def triangleNoormals(self) -> np.ndarray:
+        """
+        Computes outward triangle normals.
+
+        Returns:
+            An N x 3 matrix of triangle normals with N the number of triangles.
+        """
+        verts=self.vertices
+        tris=self.indices
+        dba = verts[tris[:,1]]-verts[tris[:,0]]
+        dca = verts[tris[:,2]]-verts[tris[:,0]]
+        n = np.cross(dba,dca)
+        norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
+        n = np.divide(n,norms,where=norms!=0)
+        return n
+
+    def vertexNormals(self, area_weighted=True) -> np.ndarray:
+        """
+        Computes outward vertex normals.
+
+        Args:
+            area_weighted (bool): whether to compute area-weighted average or
+                simple average.
+
+        Returns:
+            An N x 3 matrix of vertex normals with N the number of vertices.
+        """
+        verts=self.vertices
+        tris=self.indices
+        dba = verts[tris[:,1]]-verts[tris[:,0]]
+        dca = verts[tris[:,2]]-verts[tris[:,0]]
+        n = np.cross(dba,dca)
+        normals = [np.zeros(3) for i in range(len(verts))]
+        if area_weighted:
+            for i,t in enumerate(tris):
+                for j in range(3):
+                    normals[t[j]] += n[i]
+        else:
+            norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
+            n = np.divide(n,norms,where=norms!=0)
+            for i,t in enumerate(tris):
+                for j in range(3):
+                    normals[t[j]] += n[i]
+        normals = np.array(normals)
+        norms = np.linalg.norm(normals,axis=1)[:, np.newaxis]
+        return np.divide(normals,norms,where=norms!=0)
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1570,7 +1623,9 @@ class PointCloud(object):
     """The properties of the point cloud."""
 
     def getPropertyNames(self) -> List[str]:
-        """Returns the names of the properties."""
+        """
+        Returns the names of the properties.
+        """
         return [self.getPropertyName(i) for i in range(self.numProperties())]
 
     def __reduce__(self):
@@ -1578,7 +1633,7 @@ class PointCloud(object):
         jsonobj = loader.to_json(self,'PointCloud')
         return (loader.from_json,(jsonobj,'PointCloud'))
 
-    def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
+    def setDepthImage(self,intrinsics:Tuple[float,float,float,float], depth : np.ndarray, depth_scale:float=1.0):
         """
         Sets a structured point cloud from a depth image.
 
@@ -1600,7 +1655,7 @@ class PointCloud(object):
         else:
             return self.setDepthImage_d(intrinsics,depth,depth_scale)
 
-    def setRGBDImages(self,intrinsics,color,depth,depth_scale=1.0):
+    def setRGBDImages(self,intrinsics:Tuple[float,float,float,float], color : np.ndarray, depth : np.ndarray, depth_scale:float=1.0):
         """
         Sets a structured point cloud from a color,depth image pair.
 
@@ -1642,6 +1697,73 @@ class PointCloud(object):
                 return self.setRGBDImages_i_s(intrinsics,color,depth,depth_scale)
             else:
                 return self.setRGBDImages_i_d(intrinsics,color,depth,depth_scale)
+
+    def getColors(self, format='rgb') -> np.ndarray:
+        """
+        Returns the colors of the point cloud in the given format.  If the
+        point cloud has no colors, this returns None.  If the point cloud has no
+        colors but has opacity, this returns white colors.
+
+        Args:
+            format: describes the output color format, either:
+
+                - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
+                bits used),
+                - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
+                bits used),
+                - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
+                - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
+                - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
+                - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
+                - ('r','g','b'): triple with each channel in range [0,1]
+                - ('r','g','b','a'): tuple with each channel in range [0,1]
+                - 'channels': returns a list of channels, in the form (r,g,b) or 
+                (r,g,b,a), where each value in the channel has range [0,1].
+                - 'opacity': returns opacity only, in the range [0,1].
+
+        Returns:
+            A an array of len(pc.points) colors corresponding to 
+            the points in the point cloud.  If format='channels', the return
+            value is a tuple (r,g,b) or (r,g,b,a).
+        """
+        from klampt.model.geometry import point_cloud_colors
+        return point_cloud_colors(self,format)
+
+    def setColors(self, colors : Union[list,np.ndarray], color_format='rgb',pc_property='auto'):
+        """
+        Sets the colors of the point cloud.
+
+        Args:
+            colors (list or numpy.ndarray): the array of colors, and each color 
+                can be either ints, tuples, or channels, depending on color_format.
+            color_format: describes the format of each element of ``colors``, and
+                can be:
+
+                - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
+                bits used),
+                - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
+                bits used),
+                - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
+                - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
+                - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
+                - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
+                - ('r','g','b'): triple with each channel in range [0,1]. Also use
+                this if colors is an n x 3 numpy array.
+                - ('r','g','b','a'): tuple with each channel in range [0,1]. Also 
+                use this if colors is an n x 4 numpy array.
+                - 'channels': ``colors`` is a list of 3 or 4 channels, in the form
+                (r,g,b) or (r,g,b,a), where each element in a channel has range
+                [0,1].
+                - 'opacity': opacity only, in the range [0,1].
+
+            pc_property (str): describes to which property the colors should be
+                set.  'auto' determines chooses the property from the point cloud
+                if it's already colored, or color_format if not.  'channels' sets
+                the 'r', 'g', 'b', and optionally 'a' properties.
+
+        """
+        from klampt.model.geometry import point_cloud_set_colors
+        return point_cloud_set_colors(self,colors,color_format,pc_property)
 
 
 
@@ -1983,7 +2105,8 @@ class VolumeGrid(object):
     """The upper bound of the domain."""
 
     def setBounds(self, bounds):
-        """@deprecated
+        """
+        @deprecated
 
         Provided for backwards compatibility
         """
@@ -1993,7 +2116,8 @@ class VolumeGrid(object):
         self.bmax = bounds[3:6]
 
     def getBounds(self):
-        """@deprecated
+        """
+        @deprecated
 
         Provided for backwards compatibility
         """
@@ -4179,7 +4303,8 @@ class Appearance(object):
     appearancePtr = property(_robotsim.Appearance_appearancePtr_get, _robotsim.Appearance_appearancePtr_set, doc=r"""appearancePtr : p.void""")
 
     def setTexture1D(self,format,array):
-        """Sets a 1D texture.
+        """
+        Sets a 1D texture.
 
         Args:
             format (str): describes how the array is specified.
@@ -4215,7 +4340,8 @@ class Appearance(object):
             raise ValueError("Can only pass a 1D or 2D array to setTexture1D")
 
     def setTexture2D(self,format,array):
-        """Sets a 2D texture.
+        """
+        Sets a 2D texture.
 
         Args:
             format (str): describes how the array is specified.
@@ -4253,7 +4379,8 @@ class Appearance(object):
             raise ValueError("Can only pass a 2D or 3D array to setTexture2D")
 
     def setTexcoords(self,array):
-        """Sets texture coordinates for the mesh.
+        """
+        Sets texture coordinates for the mesh.
 
         Args:
             array (np.ndarray): a 1D or 2D array, of size N or Nx2, where N is
@@ -4972,13 +5099,21 @@ class Viewport(object):
     ori = property(_robotsim.Viewport_ori_get, _robotsim.Viewport_ori_set, doc=r"""ori : std::string""")
 
     def setClippingPlanes(self, cp):
-        """Provided for backwards compatibility"""
+        """
+        @deprecated
+
+        Provided for backwards compatibility.
+        """
         import warnings
         warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
         self.n, self.f = cp
 
     def getClippingPlanes(self):
-        """Provided for backwards compatibility"""
+        """
+        @deprecated
+
+        Provided for backwards compatibility.
+        """
         import warnings
         warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
         return (self.n, self.f)
@@ -5251,36 +5386,45 @@ class RobotModelLink(object):
         """
         return _robotsim.RobotModelLink_getIndex(self)
 
-    def getParent(self) -> "int":
+    def getParentIndex(self) -> "int":
         r"""
-        getParent(RobotModelLink self) -> int
+        getParentIndex(RobotModelLink self) -> int
 
 
-        Returns the index of the link's parent (on its robot).  
+        Returns the index of the link's parent (on its robot). -1 indicates no parent.  
 
         """
-        return _robotsim.RobotModelLink_getParent(self)
+        return _robotsim.RobotModelLink_getParentIndex(self)
 
-    def parent(self) -> "RobotModelLink":
+    def setParentIndex(self, p: "int") -> "void":
         r"""
-        parent(RobotModelLink self) -> RobotModelLink
+        setParentIndex(RobotModelLink self, int p)
+
+
+        Sets the index of the link's parent (on its robot).  
+
+        """
+        return _robotsim.RobotModelLink_setParentIndex(self, p)
+
+    def getParentLink(self) -> "RobotModelLink":
+        r"""
+        getParentLink(RobotModelLink self) -> RobotModelLink
 
 
         Returns a reference to the link's parent, or a NULL link if it has no parent.  
 
         """
-        return _robotsim.RobotModelLink_parent(self)
+        return _robotsim.RobotModelLink_getParentLink(self)
 
-    def setParent(self, *args) -> "void":
+    def setParentLink(self, l: "RobotModelLink") -> "void":
         r"""
-        setParent(RobotModelLink self, int p)
-        setParent(RobotModelLink self, RobotModelLink l)
+        setParentLink(RobotModelLink self, RobotModelLink l)
 
 
         Sets the link's parent (must be on the same robot).  
 
         """
-        return _robotsim.RobotModelLink_setParent(self, *args)
+        return _robotsim.RobotModelLink_setParentLink(self, l)
 
     def geometry(self) -> "Geometry3D":
         r"""
@@ -5784,8 +5928,23 @@ class RobotModelLink(object):
     robotPtr = property(_robotsim.RobotModelLink_robotPtr_get, _robotsim.RobotModelLink_robotPtr_set, doc=r"""robotPtr : p.Klampt::RobotModel""")
     index = property(_robotsim.RobotModelLink_index_get, _robotsim.RobotModelLink_index_set, doc=r"""index : int""")
 
+    def setParent(self, index_or_link : Union[int,'RobotModelLink']):
+        """
+        Sets the link's parent to an index or link (must be on same robot).
+        """
+        if isinstance(index_or_link, int):
+            self.setParentIndex(index_or_link)
+        else:
+            self.setParentLink(index_or_link)
+
+    def getParent(self) -> int:
+        """
+        Returns the index of the link's parent (on its robot). -1 indicates no parent.
+        """
+        return self.getParentIndex()
+
     name = property(getName, setName)
-    parent = property(getParent, setParent)
+    parent = property(getParentIndex, setParent)
     mass = property(getMass, setMass)
     parentTransform = property(getParentTransform)
     axis = property(getAxis,setAxis)
@@ -6094,7 +6253,7 @@ class RobotModel(object):
         saveFile(RobotModel self, char const * fn, char const * geometryPrefix=None) -> bool
 
 
-        Saves the robot to the file fn.  
+        Saves the robot to the file fn. Geometries may be saved as well.  
 
         If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
         geometry of each link will be saved to files named `geometryPrefix+name`, where
@@ -6123,6 +6282,8 @@ class RobotModel(object):
         r"""
         getName(RobotModel self) -> char const *
 
+
+        Gets the name of the robot.  
 
         """
         return _robotsim.RobotModel_getName(self)
@@ -6815,23 +6976,28 @@ class RobotModel(object):
         """
         return _robotsim.RobotModel_mount(self, link, subRobot, R, t)
 
-    def sensor(self, *args) -> "SimRobotSensor":
+    def numSensors(self) -> "int":
         r"""
-        sensor(RobotModel self, int index) -> SimRobotSensor
-        sensor(RobotModel self, char const * name) -> SimRobotSensor
+        numSensors(RobotModel self) -> int
 
 
-        Returns a sensor by index or by name.  
-
-        If out of bounds or unavailable, a null sensor is returned (i.e.,
-        SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  
+        Returns the number of sensors.  
 
         """
-        return _robotsim.RobotModel_sensor(self, *args)
+        return _robotsim.RobotModel_numSensors(self)
 
-    def addSensor(self, name: "char const *", type: "char const *") -> "SimRobotSensor":
+    def _sensor(self, *args) -> "SensorModel":
         r"""
-        addSensor(RobotModel self, char const * name, char const * type) -> SimRobotSensor
+        _sensor(RobotModel self, int index) -> SensorModel
+        _sensor(RobotModel self, char const * name) -> SensorModel
+
+
+        """
+        return _robotsim.RobotModel__sensor(self, *args)
+
+    def addSensor(self, name: "char const *", type: "char const *") -> "SensorModel":
+        r"""
+        addSensor(RobotModel self, char const * name, char const * type) -> SensorModel
 
 
         Adds a new sensor with a given name and type.  
@@ -6848,16 +7014,379 @@ class RobotModel(object):
     robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Klampt::RobotModel""")
     dirty_dynamics = property(_robotsim.RobotModel_dirty_dynamics_get, _robotsim.RobotModel_dirty_dynamics_set, doc=r"""dirty_dynamics : bool""")
 
+    def getLinks(self) -> Tuple[RobotModelLink]:
+        """
+        Returns a list of all links on the robot.
+        """
+        return tuple(self.link(i) for i in range(self.numLinks()))
+
+    def getLinksDict(self) -> Dict[str,RobotModelLink]:
+        """
+        Returns a dictionary mapping link names to RobotModelLink instances.
+        """
+        return types.MappingProxyType({l.name:l for l in self.getLinks()})
+
+    def getDrivers(self) -> Tuple[RobotModelDriver]:
+        """
+        Returns a list of all drivers on the robot.
+        """
+        return Tuple(self.driver(i) for i in range(self.numDrivers()))
+
+    def getDriversDict(self) -> Dict[str,RobotModelDriver]:
+        """
+        Returns a dictionary mapping driver names to RobotModelDriver instances.
+        """
+        return types.MappingProxyType({d.name:d for d in self.getDrivers()})
+
+    def sensor(self, index_or_name : Union[int,str]) -> 'SensorModel':
+        """
+        Retrieves the sensor with the given index or name.  A KeyError is
+        raised if it does not exist.
+        """
+        res = self._sensor(index_or_name)
+        if len(res.type) == 0:
+            raise KeyError("Invalid sensor name: {}".format(index_or_name))
+        return res
+
+    def getSensors(self) -> Tuple['SensorModel']:
+        """
+        Returns a list of all sensors on the robot.
+        """
+        return Tuple(self.sensor(i) for i in range(self.numSensors()))
+
+    def getSensorsDict(self) -> Dict[str,'SensorModel']:
+        """
+        Returns a dictionary mapping sensor names to SensorModel instances.
+        """
+        return types.MappingProxyType({s.name:s for s in self.getSensors()})
+
     name = property(getName, setName)
     id = property(getID)
     config = property(getConfig,setConfig)
-    velocity = property(getVelocity,setVelocity)
-
+    velocity = property(getVelocity,setVelocity)    
+    links = property(getLinks)
+    linksDict = property(getLinksDict)
+    drivers = property(getDrivers)
+    driversDict = property(getDriversDict)
+    sensors = property(getSensors)
+    sensorsDict = property(getSensorsDict)
 
     __swig_destroy__ = _robotsim.delete_RobotModel
 
 # Register RobotModel in _robotsim:
 _robotsim.RobotModel_swigregister(RobotModel)
+
+class SensorModel(object):
+    r"""
+
+
+    A sensor on a simulated robot.  
+
+    Kinematic models of sensors are retrieved using :meth:`RobotModel.sensor` and
+    can be created using :meth:`RobotModel.addSensor`.  
+
+    Physically-simulated sensors are retrieved from a controller using
+    :meth:`SimRobotController.sensor`, and can be created using
+    :meth:`SimRobotController.addSensor`.  
+
+    Some types of sensors can be kinematically-simulated such that they make
+    sensible measurements. To use kinematic simulation, you may arbitrarily set the
+    robot's position, call :meth:`kinematicReset`, and then call
+    :meth:`kinematicSimulate`. Subsequent calls assume the robot is being driven
+    along a coherent trajectory until the next :meth:`kinematicReset` is called.
+    This is necessary for sensors that estimate accelerations, e.g.,
+    ForceTorqueSensor, Accelerometer  
+
+    Physically-simulated sensors are automatically updated through the
+    :meth:`Simulator.simulate` call.  
+
+    Use :meth:`getMeasurements` to get the currently simulated measurement vector.
+    You may get garbage measurements before kinematicSimulate / Simulator.simulate
+    are called.  
+
+    LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
+    JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
+    FilteredSensor and TimeDelayedSensor also work. The force-related sensors
+    (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.  
+
+    To use get/setSetting, you will need to know the sensor attribute names and
+    types as described in `the Klampt sensor documentation
+    <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
+    Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
+    include:  
+
+    *   rate (float): how frequently the sensor is simulated  
+    *   enabled (bool): whether the simulator simulates this sensor  
+    *   link (int): the link on which this sensor lies (-1 for world)  
+    *   Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
+        of the sensor on the robot / world.  
+
+    C++ includes: robotmodel.h
+
+    """
+
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self, robot: "RobotModel", sensor: "Klampt::SensorBase *"):
+        r"""
+        __init__(SensorModel self, RobotModel robot, Klampt::SensorBase * sensor) -> SensorModel
+
+
+        """
+        _robotsim.SensorModel_swiginit(self, _robotsim.new_SensorModel(robot, sensor))
+
+    def getName(self) -> "std::string":
+        r"""
+        getName(SensorModel self) -> std::string
+
+
+        Returns the name of the sensor.  
+
+        """
+        return _robotsim.SensorModel_getName(self)
+
+    def setName(self, name: "std::string const &") -> "void":
+        r"""
+        setName(SensorModel self, std::string const & name)
+
+
+        Sets the name of the sensor.  
+
+        """
+        return _robotsim.SensorModel_setName(self, name)
+
+    def getType(self) -> "std::string":
+        r"""
+        getType(SensorModel self) -> std::string
+
+
+        Returns the type of the sensor.  
+
+        """
+        return _robotsim.SensorModel_getType(self)
+
+    def robot(self) -> "RobotModel":
+        r"""
+        robot(SensorModel self) -> RobotModel
+
+
+        Returns the model of the robot to which this belongs.  
+
+        """
+        return _robotsim.SensorModel_robot(self)
+
+    def measurementNames(self) -> "std::vector< std::string,std::allocator< std::string > >":
+        r"""
+        measurementNames(SensorModel self) -> stringVector
+
+
+        Returns a list of names for the measurements (one per measurement).  
+
+        """
+        return _robotsim.SensorModel_measurementNames(self)
+
+    def getMeasurements(self) -> "void":
+        r"""
+        getMeasurements(SensorModel self)
+
+
+        Returns an array of measurements from the previous simulation (or
+        kinematicSimulate) timestep.  
+
+        Return type: np.ndarray  
+
+        """
+        return _robotsim.SensorModel_getMeasurements(self)
+
+    def settings(self) -> "std::vector< std::string,std::allocator< std::string > >":
+        r"""
+        settings(SensorModel self) -> stringVector
+
+
+        Returns all setting names.  
+
+        """
+        return _robotsim.SensorModel_settings(self)
+
+    def getSetting(self, name: "std::string const &") -> "std::string":
+        r"""
+        getSetting(SensorModel self, std::string const & name) -> std::string
+
+
+        Returns the value of the named setting (you will need to manually parse this)  
+
+        """
+        return _robotsim.SensorModel_getSetting(self, name)
+
+    def setSetting(self, name: "std::string const &", val: "std::string const &") -> "void":
+        r"""
+        setSetting(SensorModel self, std::string const & name, std::string const & val)
+
+
+        Sets the value of the named setting (you will need to manually cast an
+        int/float/etc to a str)  
+
+        """
+        return _robotsim.SensorModel_setSetting(self, name, val)
+
+    def getEnabled(self) -> "bool":
+        r"""
+        getEnabled(SensorModel self) -> bool
+
+
+        Return whether the sensor is enabled during simulation (helper for getSetting)  
+
+        """
+        return _robotsim.SensorModel_getEnabled(self)
+
+    def setEnabled(self, enabled: "bool") -> "void":
+        r"""
+        setEnabled(SensorModel self, bool enabled)
+
+
+        Sets whether the sensor is enabled in physics simulation.  
+
+        """
+        return _robotsim.SensorModel_setEnabled(self, enabled)
+
+    def _getLink(self) -> "RobotModelLink":
+        r"""
+        _getLink(SensorModel self) -> RobotModelLink
+
+
+        Returns the link on which the sensor is mounted.  
+
+        """
+        return _robotsim.SensorModel__getLink(self)
+
+    def _setLink(self, *args) -> "void":
+        r"""
+        _setLink(SensorModel self, RobotModelLink link)
+        _setLink(SensorModel self, int link)
+
+
+        Sets the link on which the sensor is mounted (helper for setSetting)  
+
+        """
+        return _robotsim.SensorModel__setLink(self, *args)
+
+    def getTransform(self) -> "void":
+        r"""
+        getTransform(SensorModel self)
+
+
+        Returns the local transform of the sensor on the robot's link. (helper for
+        getSetting)  
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        Return type: RigidTransform  
+
+        """
+        return _robotsim.SensorModel_getTransform(self)
+
+    def getTransformWorld(self) -> "void":
+        r"""
+        getTransformWorld(SensorModel self)
+
+
+        Returns the world transform of the sensor given the robot's current
+        configuration. (helper for getSetting)  
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        Return type: RigidTransform  
+
+        """
+        return _robotsim.SensorModel_getTransformWorld(self)
+
+    def setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
+        r"""
+        setTransform(SensorModel self, double const [9] R, double const [3] t)
+
+
+        Sets the local transform of the sensor on the robot's link. (helper for
+        setSetting)  
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        """
+        return _robotsim.SensorModel_setTransform(self, R, t)
+
+    def drawGL(self, *args) -> "void":
+        r"""
+        drawGL(SensorModel self)
+        drawGL(SensorModel self, double * np_array)
+
+
+        Draws a sensor indicator using OpenGL. If measurements are given, the indicator
+        is drawn as though these are the latest measurements, otherwise only an
+        indicator is drawn.  
+
+        """
+        return _robotsim.SensorModel_drawGL(self, *args)
+
+    def kinematicSimulate(self, *args) -> "void":
+        r"""
+        kinematicSimulate(SensorModel self, WorldModel world, double dt)
+        kinematicSimulate(SensorModel self, double dt)
+
+
+        """
+        return _robotsim.SensorModel_kinematicSimulate(self, *args)
+
+    def kinematicReset(self) -> "void":
+        r"""
+        kinematicReset(SensorModel self)
+
+
+        resets a kinematic simulation so that a new initial condition can be set  
+
+        """
+        return _robotsim.SensorModel_kinematicReset(self)
+    robotModel = property(_robotsim.SensorModel_robotModel_get, _robotsim.SensorModel_robotModel_set, doc=r"""robotModel : RobotModel""")
+    sensor = property(_robotsim.SensorModel_sensor_get, _robotsim.SensorModel_sensor_set, doc=r"""sensor : p.Klampt::SensorBase""")
+
+    def getLink(self) -> Optional[RobotModelLink]:
+        """
+        Retrieves the link that this sensor is mounted on, or None for
+        world-mounted sensors.
+        """
+        l = self._getLink()
+        if l.index < 0:
+            return None
+        return l
+
+    def setLink(self, link : Union[int,None,RobotModelLink]):
+        """
+        Sets the link that this sensor is mounted on, or None / -1 for
+        world-mounted sensors.
+        """
+        if link is None:
+            self._setLink(-1)
+        elif isinstance(link,RobotModelLink):
+            self._setLink(link.index)
+        else:
+            self._setLink(link)
+
+    name = property(getName, setName)
+    type = property(getType)
+    """A string giving the sensor's type.  Read-only."""
+
+    enabled = property(getEnabled,setEnabled)
+    """Whether the sensor is enabled in physical simulation."""
+
+    link = property(getLink,setLink)
+    """The link that this sensor lies on.  May be None."""
+
+    __swig_destroy__ = _robotsim.delete_SensorModel
+
+# Register SensorModel in _robotsim:
+_robotsim.SensorModel_swigregister(SensorModel)
 
 class RigidObjectModel(object):
     r"""
@@ -7316,9 +7845,11 @@ class WorldModel(object):
         saveFile(WorldModel self, char const * fn, char const * elementDir=None) -> bool
 
 
-        Saves to a world XML file. If elementDir is provided, then robots, terrains,
-        etc. will be saved there. Otherwise they will be saved to a folder with the same
-        base name as fn (without the trailing .xml)  
+        Saves to a world XML file. Elements in the world will be saved to a folder.  
+
+        If elementDir is provided, then robots, terrains, etc. will be saved there.
+        Otherwise they will be saved to a folder with the same base name as fn (without
+        the trailing .xml)  
 
         """
         return _robotsim.WorldModel_saveFile(self, fn, elementDir)
@@ -7598,6 +8129,50 @@ class WorldModel(object):
         """
         return _robotsim.WorldModel_enableInitCollisions(self, enabled)
     index = property(_robotsim.WorldModel_index_get, _robotsim.WorldModel_index_set, doc=r"""index : int""")
+
+    def getRobots(self) -> Tuple[RobotModel]:
+        """
+        Returns a list of all robots in the world.
+        """
+        return tuple(self.robot(i) for i in range(self.numRobots()))
+
+    def getRobotsDict(self) -> Dict[str,RobotModel]:
+        """
+        Returns a dictionary mapping robot names to RobotModel instances.
+        """
+        return types.MappingProxyType({r.name:r for r in self.getRobots()})
+
+    def getRigidObjects(self) -> Tuple[RigidObjectModel]:
+        """
+        Returns a list of all rigid objects in the world.
+        """
+        return Tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
+
+    def getRigidObjectsDict(self) -> Dict[str,RigidObjectModel]:
+        """
+        Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+        """
+        return types.MappingProxyType({r.name:r for r in self.getRigidObjects()})
+
+    def getTerrains(self) -> Tuple[TerrainModel]:
+        """
+        Returns a list of all rigid objects in the world.
+        """
+        return Tuple(self.terrain(i) for i in range(self.numTerrains()))
+
+    def getTerrainsDict(self) -> Dict[str,TerrainModel]:
+        """
+        Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+        """
+        return types.MappingProxyType({r.name:r for r in self.getTerrains()})
+
+    robots = property(getRobots)
+    robotsDict = property(getRobotsDict)
+    rigidObjects = property(getRigidObjects)
+    rigidObjectsDict = property(getRigidObjectsDict)
+    terrains = property(getTerrains)
+    terrainsDict = property(getTerrainsDict)
+
 
 # Register WorldModel in _robotsim:
 _robotsim.WorldModel_swigregister(WorldModel)
@@ -8536,271 +9111,6 @@ class GeneralizedIKSolver(object):
 # Register GeneralizedIKSolver in _robotsim:
 _robotsim.GeneralizedIKSolver_swigregister(GeneralizedIKSolver)
 
-class SimRobotSensor(object):
-    r"""
-
-
-    A sensor on a simulated robot. Retrieve one from the controller using
-    :meth:`SimRobotController.sensor`, or create a new one using
-    :meth:`SimRobotController.addSensor`. You may also use kinematically-simulated
-    sensors using :meth:`RobotModel.sensor` or create a new one using
-    :meth:`RobotModel.addSensor`.  
-
-    Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
-
-    Sensors are automatically updated through the :meth:`Simulator.simulate` call,
-    and :meth:`getMeasurements` retrieves the updated values. As a result, you may
-    get garbage measurements before the first Simulator.simulate call is made.  
-
-    There is also a mode for doing kinematic simulation, which is supported (i.e.,
-    makes sensible measurements) for some types of sensors when just a robot / world
-    model is given. This is similar to Simulation.fakeSimulate but the entire
-    controller structure is bypassed. You can arbitrarily set the robot's position,
-    call :meth:`kinematicReset`, and then call :meth:`kinematicSimulate`. Subsequent
-    calls assume the robot is being driven along a trajectory until the next
-    :meth:`kinematicReset` is called.  
-
-    LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
-    JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
-    FilteredSensor and TimeDelayedSensor also work. The force-related sensors
-    (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.  
-
-    To use get/setSetting, you will need to know the sensor attribute names and
-    types as described in `the Klampt sensor documentation
-    <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
-    Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
-    include:  
-
-    *   rate (float): how frequently the sensor is simulated  
-    *   enabled (bool): whether the simulator simulates this sensor  
-    *   link (int): the link on which this sensor lies (-1 for world)  
-    *   Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
-        of the sensor on the robot / world.  
-
-    C++ includes: robotsim.h
-
-    """
-
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
-    __repr__ = _swig_repr
-
-    def __init__(self, robot: "RobotModel", sensor: "Klampt::SensorBase *"):
-        r"""
-        __init__(SimRobotSensor self, RobotModel robot, Klampt::SensorBase * sensor) -> SimRobotSensor
-
-
-        """
-        _robotsim.SimRobotSensor_swiginit(self, _robotsim.new_SimRobotSensor(robot, sensor))
-
-    def name(self) -> "std::string":
-        r"""
-        name(SimRobotSensor self) -> std::string
-
-
-        Returns the name of the sensor.  
-
-        """
-        return _robotsim.SimRobotSensor_name(self)
-
-    def type(self) -> "std::string":
-        r"""
-        type(SimRobotSensor self) -> std::string
-
-
-        Returns the type of the sensor.  
-
-        """
-        return _robotsim.SimRobotSensor_type(self)
-
-    def robot(self) -> "RobotModel":
-        r"""
-        robot(SimRobotSensor self) -> RobotModel
-
-
-        Returns the model of the robot to which this belongs.  
-
-        """
-        return _robotsim.SimRobotSensor_robot(self)
-
-    def measurementNames(self) -> "std::vector< std::string,std::allocator< std::string > >":
-        r"""
-        measurementNames(SimRobotSensor self) -> stringVector
-
-
-        Returns a list of names for the measurements (one per measurement).  
-
-        """
-        return _robotsim.SimRobotSensor_measurementNames(self)
-
-    def getMeasurements(self) -> "void":
-        r"""
-        getMeasurements(SimRobotSensor self)
-
-
-        Returns an array of measurements from the previous simulation (or
-        kinematicSimulate) timestep.  
-
-        Return type: np.ndarray  
-
-        """
-        return _robotsim.SimRobotSensor_getMeasurements(self)
-
-    def settings(self) -> "std::vector< std::string,std::allocator< std::string > >":
-        r"""
-        settings(SimRobotSensor self) -> stringVector
-
-
-        Returns all setting names.  
-
-        """
-        return _robotsim.SimRobotSensor_settings(self)
-
-    def getSetting(self, name: "std::string const &") -> "std::string":
-        r"""
-        getSetting(SimRobotSensor self, std::string const & name) -> std::string
-
-
-        Returns the value of the named setting (you will need to manually parse this)  
-
-        """
-        return _robotsim.SimRobotSensor_getSetting(self, name)
-
-    def setSetting(self, name: "std::string const &", val: "std::string const &") -> "void":
-        r"""
-        setSetting(SimRobotSensor self, std::string const & name, std::string const & val)
-
-
-        Sets the value of the named setting (you will need to manually cast an
-        int/float/etc to a str)  
-
-        """
-        return _robotsim.SimRobotSensor_setSetting(self, name, val)
-
-    def getEnabled(self) -> "bool":
-        r"""
-        getEnabled(SimRobotSensor self) -> bool
-
-
-        Return whether the sensor is enabled during simulation (helper for getSetting)  
-
-        """
-        return _robotsim.SimRobotSensor_getEnabled(self)
-
-    def setEnabled(self, enabled: "bool") -> "void":
-        r"""
-        setEnabled(SimRobotSensor self, bool enabled)
-
-
-        Sets whether the sensor is enabled (helper for setSetting)  
-
-        """
-        return _robotsim.SimRobotSensor_setEnabled(self, enabled)
-
-    def getLink(self) -> "RobotModelLink":
-        r"""
-        getLink(SimRobotSensor self) -> RobotModelLink
-
-
-        Returns the link on which the sensor is mounted (helper for getSetting)  
-
-        """
-        return _robotsim.SimRobotSensor_getLink(self)
-
-    def setLink(self, *args) -> "void":
-        r"""
-        setLink(SimRobotSensor self, RobotModelLink link)
-        setLink(SimRobotSensor self, int link)
-
-
-        Sets the link on which the sensor is mounted (helper for setSetting)  
-
-        """
-        return _robotsim.SimRobotSensor_setLink(self, *args)
-
-    def getTransform(self) -> "void":
-        r"""
-        getTransform(SimRobotSensor self)
-
-
-        Returns the local transform of the sensor on the robot's link. (helper for
-        getSetting)  
-
-        If the sensor doesn't have a transform (such as a joint position or torque
-        sensor) an exception will be raised.  
-
-        Return type: RigidTransform  
-
-        """
-        return _robotsim.SimRobotSensor_getTransform(self)
-
-    def getTransformWorld(self) -> "void":
-        r"""
-        getTransformWorld(SimRobotSensor self)
-
-
-        Returns the world transform of the sensor given the robot's current
-        configuration. (helper for getSetting)  
-
-        If the sensor doesn't have a transform (such as a joint position or torque
-        sensor) an exception will be raised.  
-
-        Return type: RigidTransform  
-
-        """
-        return _robotsim.SimRobotSensor_getTransformWorld(self)
-
-    def setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
-        r"""
-        setTransform(SimRobotSensor self, double const [9] R, double const [3] t)
-
-
-        Sets the local transform of the sensor on the robot's link. (helper for
-        setSetting)  
-
-        If the sensor doesn't have a transform (such as a joint position or torque
-        sensor) an exception will be raised.  
-
-        """
-        return _robotsim.SimRobotSensor_setTransform(self, R, t)
-
-    def drawGL(self, *args) -> "void":
-        r"""
-        drawGL(SimRobotSensor self)
-        drawGL(SimRobotSensor self, double * np_array)
-
-
-        Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-        is drawn as though these are the latest measurements, otherwise only an
-        indicator is drawn.  
-
-        """
-        return _robotsim.SimRobotSensor_drawGL(self, *args)
-
-    def kinematicSimulate(self, *args) -> "void":
-        r"""
-        kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)
-        kinematicSimulate(SimRobotSensor self, double dt)
-
-
-        """
-        return _robotsim.SimRobotSensor_kinematicSimulate(self, *args)
-
-    def kinematicReset(self) -> "void":
-        r"""
-        kinematicReset(SimRobotSensor self)
-
-
-        resets a kinematic simulation so that a new initial condition can be set  
-
-        """
-        return _robotsim.SimRobotSensor_kinematicReset(self)
-    robotModel = property(_robotsim.SimRobotSensor_robotModel_get, _robotsim.SimRobotSensor_robotModel_set, doc=r"""robotModel : RobotModel""")
-    sensor = property(_robotsim.SimRobotSensor_sensor_get, _robotsim.SimRobotSensor_sensor_set, doc=r"""sensor : p.Klampt::SensorBase""")
-    __swig_destroy__ = _robotsim.delete_SimRobotSensor
-
-# Register SimRobotSensor in _robotsim:
-_robotsim.SimRobotSensor_swigregister(SimRobotSensor)
-
 class SimRobotController(object):
     r"""
 
@@ -8975,22 +9285,28 @@ class SimRobotController(object):
         """
         return _robotsim.SimRobotController_getSensedTorque(self)
 
-    def sensor(self, *args) -> "SimRobotSensor":
+    def numSensors(self) -> "int":
         r"""
-        sensor(SimRobotController self, int index) -> SimRobotSensor
-        sensor(SimRobotController self, char const * name) -> SimRobotSensor
+        numSensors(SimRobotController self) -> int
 
 
-        Returns a sensor by index or by name. If out of bounds or unavailable, a null
-        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
-        return the empty string.)  
+        Returns the number of sensors.  
 
         """
-        return _robotsim.SimRobotController_sensor(self, *args)
+        return _robotsim.SimRobotController_numSensors(self)
 
-    def addSensor(self, name: "char const *", type: "char const *") -> "SimRobotSensor":
+    def _sensor(self, *args) -> "SensorModel":
         r"""
-        addSensor(SimRobotController self, char const * name, char const * type) -> SimRobotSensor
+        _sensor(SimRobotController self, int index) -> SensorModel
+        _sensor(SimRobotController self, char const * name) -> SensorModel
+
+
+        """
+        return _robotsim.SimRobotController__sensor(self, *args)
+
+    def addSensor(self, name: "char const *", type: "char const *") -> "SensorModel":
+        r"""
+        addSensor(SimRobotController self, char const * name, char const * type) -> SensorModel
 
 
         Adds a new sensor with a given name and type.  
@@ -9233,6 +9549,33 @@ class SimRobotController(object):
     index = property(_robotsim.SimRobotController_index_get, _robotsim.SimRobotController_index_set, doc=r"""index : int""")
     sim = property(_robotsim.SimRobotController_sim_get, _robotsim.SimRobotController_sim_set, doc=r"""sim : p.Simulator""")
     controller = property(_robotsim.SimRobotController_controller_get, _robotsim.SimRobotController_controller_set, doc=r"""controller : p.Klampt::SimRobotController""")
+
+    def sensor(self, index_or_name : Union[int,str]) -> SensorModel:
+       """
+       Retrieves the sensor with the given index or name.  A KeyError is
+       raised if it does not exist.
+       """
+       res = self._sensor(index_or_name)
+       if len(res.type) == 0:
+           raise KeyError("Invalid sensor name: {}".format(index_or_name))
+       return res
+
+    def getSensors(self) -> Tuple[SensorModel]:
+        """
+        Returns a list of all sensors on the robot.
+        """
+        return Tuple(self.sensor(i) for i in range(self.numSensors()))
+
+    def getSensorsDict(self) -> Dict[str,SensorModel]:
+        """
+        Returns a dictionary mapping sensor names to SensorModel instances.
+        """
+        return types.MappingProxyType({s.name:s for s in self.getSensors()})
+
+    rate = property(getRate, setRate)
+    sensors = property(getSensors)
+    sensorsDict = property(getSensorsDict)
+
 
 # Register SimRobotController in _robotsim:
 _robotsim.SimRobotController_swigregister(SimRobotController)
@@ -10578,6 +10921,8 @@ def equilibrium_torques(*args) -> "PyObject *":
     return _robotsim.equilibrium_torques(*args)
 
 import warnings
+
+SimRobotSensor = SensorModel
 
 def _deprecated_func(oldName,newName):
     import sys

@@ -36,8 +36,12 @@ Other utilities
 unified geometries.
 
 :func:`triangle_normals` computes triangle normals for a TriangleMesh.
+Note: should be replaced with TriangleMesh.triangle_normals() for future
+code.
 
 :func:`vertex_normals` computes vertex normals for a TriangleMesh.
+Note: should be replaced with TriangleMesh.triangle_normals() for future
+code.
 .. versionadded:: 0.9.2
 
 :func:`sample_surface` samples points on the surface of a Geometry3D.
@@ -205,7 +209,7 @@ def point_cloud_normals(pc : Union[Geometry3D,PointCloud], estimation_radius=Non
     under the ``normal_x, normal_y, normal_z`` properties.
 
     Returns:
-        A N x 3 numpy array of normals.
+        A N x 3 numpy array of normals in the local frame of the point cloud.
 
     """
     geom = None
@@ -668,7 +672,7 @@ def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
         raise ValueError("Invalid colors in point cloud? found "+str(len(rgbchannels))+" color channels")
 
 
-def point_cloud_set_colors(pc : PointCloud, colors, color_format='rgb',pc_property='auto') -> None:
+def point_cloud_set_colors(pc : PointCloud, colors : Union[list,np.ndarray], color_format='rgb',pc_property='auto') -> None:
     """Sets the colors of a point cloud.
 
     Args:
@@ -787,15 +791,8 @@ def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:
         assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to triangle_normals"
         trimesh = trimesh.getTriangleMesh()
     assert isinstance(trimesh,TriangleMesh),"Must provide a TriangleMesh to triangle_normals"
-    verts=trimesh.vertices
-    tris=trimesh.indices
-    #normals = np.zeros(tris.shape)
-    dba = verts[tris[:,1]]-verts[tris[:,0]]
-    dca = verts[tris[:,2]]-verts[tris[:,0]]
-    n = np.cross(dba,dca)
-    norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
-    n = np.divide(n,norms,where=norms!=0)
-    return n
+    return trimesh.triangleNormals()
+
 
 def vertex_normals(trimesh : Union[TriangleMesh,Geometry3D], area_weighted=True) -> np.ndarray:
     """
@@ -814,25 +811,7 @@ def vertex_normals(trimesh : Union[TriangleMesh,Geometry3D], area_weighted=True)
         assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to vertex_normals"
         trimesh = trimesh.getTriangleMesh()
     assert isinstance(trimesh,TriangleMesh),"Must provide a TriangleMesh to vertex_normals"
-    verts=trimesh.vertices
-    tris=trimesh.indices
-    dba = verts[tris[:,1]]-verts[tris[:,0]]
-    dca = verts[tris[:,2]]-verts[tris[:,0]]
-    n = np.cross(dba,dca)
-    normals = [np.zeros(3) for i in range(len(verts))]
-    if area_weighted:
-        for i,t in enumerate(tris):
-            for j in range(3):
-                normals[t[j]] += n[i]
-    else:
-        norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
-        n = np.divide(n,norms,where=norms!=0)
-        for i,t in enumerate(tris):
-            for j in range(3):
-                normals[t[j]] += n[i]
-    normals = np.array(normals)
-    norms = np.linalg.norm(normals,axis=1)[:, np.newaxis]
-    return np.divide(normals,norms,where=norms!=0)
+    return trimesh.vertexNormals()
 
 
 def merge(*items) -> Geometry3D:
@@ -948,7 +927,7 @@ def sample_surface(geom : Geometry3D,
                         vindices[j] = i
                 elements = vindices
             if want_normals:
-                normals = vertex_normals(geom)
+                normals = geom.vertexNormals(geom)
         else:
             #need to sample the surface
             dba = verts[tris[:,1]]-verts[tris[:,0]]

@@ -4361,14 +4361,14 @@ int RobotModelLink::getIndex()
   return index;
 }
 
-int RobotModelLink::getParent()
+int RobotModelLink::getParentIndex()
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   return robotPtr->parents[index];
 }
 
-RobotModelLink RobotModelLink::parent()
+RobotModelLink RobotModelLink::getParentLink()
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -4383,7 +4383,7 @@ RobotModelLink RobotModelLink::parent()
   }
 }
 
-void RobotModelLink::setParent(int p)
+void RobotModelLink::setParentIndex(int p)
 {
   if(p < -1 || p >= (int)robotPtr->links.size())
     throw PyException("Invalid parent index");
@@ -4393,14 +4393,14 @@ void RobotModelLink::setParent(int p)
   robotPtr->parents[index] = p;
 }
 
-void RobotModelLink::setParent(const RobotModelLink& link)
+void RobotModelLink::setParentLink(const RobotModelLink& link)
 {
   if(link.robotPtr == NULL)
-    setParent(-1);
+    setParentIndex(-1);
   else {
     if(link.robotPtr != robotPtr)
       throw PyException("Can't set a link to have a parent on a different robot");
-    setParent(link.index);
+    setParentIndex(link.index);
   }
 }
 
@@ -5616,7 +5616,23 @@ void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],con
   }
 }
 
-SimRobotSensor RobotModel::sensor(int sensorIndex)
+
+int RobotModel::numSensors() const
+{
+  if(!robot) throw PyException("RobotModel is empty");
+  shared_ptr<WorldData> worldData = worlds[this->world];
+  if(index >= (int)worldData->robotSensors.size())
+    worldData->robotSensors.resize(index+1);
+  if(!worldData->robotSensors[index]) {
+    worldData->robotSensors[index].reset(new Klampt::RobotSensors);
+    worldData->robotSensors[index]->MakeDefault(robot);
+  }
+  Klampt::RobotSensors* sensors = worldData->robotSensors[index].get();
+  Assert(sensors != NULL);
+  return (int)sensors->sensors.size();
+}
+
+SensorModel RobotModel::_sensor(int sensorIndex)
 {
   if(!robot) throw PyException("RobotModel is empty");
   shared_ptr<WorldData> worldData = worlds[this->world];
@@ -5629,11 +5645,11 @@ SimRobotSensor RobotModel::sensor(int sensorIndex)
   Klampt::RobotSensors* sensors = worldData->robotSensors[index].get();
   Assert(sensors != NULL);
   if(sensorIndex < 0 || sensorIndex >= (int)sensors->sensors.size()) 
-    return SimRobotSensor(*this,NULL);
-  return SimRobotSensor(*this,sensors->sensors[sensorIndex].get());
+    return SensorModel(*this,NULL);
+  return SensorModel(*this,sensors->sensors[sensorIndex].get());
 }
 
-SimRobotSensor RobotModel::sensor(const char* name)
+SensorModel RobotModel::_sensor(const char* name)
 {
   if(!robot) throw PyException("RobotModel is empty");
   shared_ptr<WorldData> worldData = worlds[this->world];
@@ -5649,10 +5665,10 @@ SimRobotSensor RobotModel::sensor(const char* name)
   if(sensor==NULL) {
     fprintf(stderr,"RobotModel.sensor(): Warning, sensor %s does not exist\n",name);
   }
-  return SimRobotSensor(*this,sensor.get());
+  return SensorModel(*this,sensor.get());
 }
 
-SimRobotSensor RobotModel::addSensor(const char* name,const char* type)
+SensorModel RobotModel::addSensor(const char* name,const char* type)
 {
   if(!robot) throw PyException("RobotModel is empty");
   shared_ptr<WorldData> worldData = worlds[world];
@@ -5673,7 +5689,7 @@ SimRobotSensor RobotModel::addSensor(const char* name,const char* type)
   }
   newsensor->name = name;
   worldData->robotSensors[index]->sensors.push_back(newsensor);
-  return SimRobotSensor(*this,worldData->robotSensors[index]->sensors.back().get());
+  return SensorModel(*this,worldData->robotSensors[index]->sensors.back().get());
 }
 
 
@@ -6835,29 +6851,32 @@ void SimRobotController::getSensedTorque(std::vector<double>& t)
   }
 }
 
-SimRobotSensor::SimRobotSensor(const RobotModel& _robot,Klampt::SensorBase* _sensor)
+SensorModel::SensorModel(const RobotModel& _robot,Klampt::SensorBase* _sensor)
   :robotModel(_robot),sensor(_sensor)
 {}
 
-
-
-RobotModel SimRobotSensor::robot()
+RobotModel SensorModel::robot()
 {
   return robotModel;
 }
 
-std::string SimRobotSensor::name()
+std::string SensorModel::getName() const
 {
   if(!sensor) return std::string();
   return sensor->name;
 }
-std::string SimRobotSensor::type()
+void SensorModel::setName(const std::string& name)
+{
+  if(!sensor) throw PyException("Empty sensor reference, cannot set name");
+  sensor->name = name;
+}
+std::string SensorModel::getType() const
 {
   if(!sensor) return std::string();
   return sensor->Type();
 }
 
-std::vector<std::string> SimRobotSensor::measurementNames()
+std::vector<std::string> SensorModel::measurementNames()
 {
   std::vector<std::string> res;
   if(!sensor) return res;
@@ -6865,7 +6884,7 @@ std::vector<std::string> SimRobotSensor::measurementNames()
   return res;
 }
 
-void SimRobotSensor::getMeasurements(double** out,int* m)
+void SensorModel::getMeasurements(double** out,int* m)
 {
   if(!sensor) {
     *out = (double*)malloc(0);
@@ -6879,7 +6898,7 @@ void SimRobotSensor::getMeasurements(double** out,int* m)
   copy(vout.begin(),vout.end(),*out);
 }
 
-std::vector<std::string> SimRobotSensor::settings()
+std::vector<std::string> SensorModel::settings()
 {
   std::vector<std::string> res;
   if(!sensor) return res;
@@ -6889,7 +6908,7 @@ std::vector<std::string> SimRobotSensor::settings()
   return res;
 }
 
-std::string SimRobotSensor::getSetting(const std::string& name)
+std::string SensorModel::getSetting(const std::string& name)
 {
   if(!sensor) return std::string();
   std::string val;
@@ -6897,13 +6916,13 @@ std::string SimRobotSensor::getSetting(const std::string& name)
   return val;
 }
 
-void SimRobotSensor::setSetting(const std::string& name,const std::string& val)
+void SensorModel::setSetting(const std::string& name,const std::string& val)
 {
   if(!sensor) return;
   if(!sensor->SetSetting(name,val)) throw PyException("Setting "+name+" not supported or value not formatted correctly");
 }
 
-bool SimRobotSensor::getEnabled()
+bool SensorModel::getEnabled()
 {
   if(!sensor) return false;
   string enabled;
@@ -6912,14 +6931,14 @@ bool SimRobotSensor::getEnabled()
   else return true;
 }
 
-void SimRobotSensor::setEnabled(bool enabled)
+void SensorModel::setEnabled(bool enabled)
 {
   if(!sensor) return;
   if(enabled) sensor->SetSetting("enabled","1");
   else sensor->SetSetting("enabled","0");
 }
 
-RobotModelLink SimRobotSensor::getLink()
+RobotModelLink SensorModel::_getLink()
 {
   if(!sensor) return RobotModelLink();
   std::string val;
@@ -6935,12 +6954,12 @@ RobotModelLink SimRobotSensor::getLink()
     return robotModel.link(index);
 }
 
-void SimRobotSensor::setLink(const RobotModelLink& link)
+void SensorModel::_setLink(const RobotModelLink& link)
 {
-  setLink(link.index);
+  _setLink(link.index);
 }
 
-void SimRobotSensor::setLink(int link)
+void SensorModel::_setLink(int link)
 {
   if(!sensor) return;
   string temp;
@@ -6951,7 +6970,7 @@ void SimRobotSensor::setLink(int link)
   sensor->SetSetting("link",ss.str());
 }
 
-void SimRobotSensor::getTransform(double out[9],double out2[3])
+void SensorModel::getTransform(double out[9],double out2[3])
 {
   if(!sensor) return;
   RigidTransform T;
@@ -6969,7 +6988,7 @@ void SimRobotSensor::getTransform(double out[9],double out2[3])
   T.t.get(out2);
 }
 
-void SimRobotSensor::getTransformWorld(double out[9],double out2[3])
+void SensorModel::getTransformWorld(double out[9],double out2[3])
 {
   if(!sensor) return;
   RigidTransform Tlocal,Tlink;
@@ -6977,7 +6996,7 @@ void SimRobotSensor::getTransformWorld(double out[9],double out2[3])
   getTransform(R,t);
   Tlocal.R.set(R);
   Tlocal.t.set(t);
-  RobotModelLink link=getLink();
+  RobotModelLink link=_getLink();
   if(link.index < 0) Tlink.setIdentity();
   else {
     link.getTransform(R,t);
@@ -6989,7 +7008,7 @@ void SimRobotSensor::getTransformWorld(double out[9],double out2[3])
   Tworld.t.get(out2);
 }
 
-void SimRobotSensor::setTransform(const double R[9],const double t[3])
+void SensorModel::setTransform(const double R[9],const double t[3])
 {
   if(!sensor) return;
   string temp;
@@ -7003,14 +7022,14 @@ void SimRobotSensor::setTransform(const double R[9],const double t[3])
   sensor->SetSetting("Tsensor",ss.str());
 }
 
-void SimRobotSensor::drawGL()
+void SensorModel::drawGL()
 {
   if(!sensor) return;
   vector<double> measurements;
   sensor->DrawGL(*robotModel.robot,measurements);
 }
 
-void SimRobotSensor::drawGL(double* np_array,int m)
+void SensorModel::drawGL(double* np_array,int m)
 {
   if(!sensor) return;
   std::vector<double> measurements(m);
@@ -7018,37 +7037,43 @@ void SimRobotSensor::drawGL(double* np_array,int m)
   sensor->DrawGL(*robotModel.robot,measurements);
 }
 
-void SimRobotSensor::kinematicSimulate(double dt)
+void SensorModel::kinematicSimulate(double dt)
 {
   if(!sensor) return;
   sensor->SimulateKinematic(*robotModel.robot,*worlds[robotModel.world]->world);
   sensor->Advance(dt);
 }
 
-void SimRobotSensor::kinematicSimulate(WorldModel& world,double dt)
+void SensorModel::kinematicSimulate(WorldModel& world,double dt)
 {
   if(!sensor) return;
   sensor->SimulateKinematic(*robotModel.robot,*worlds[world.index]->world);
   sensor->Advance(dt);
 }
 
-void SimRobotSensor::kinematicReset()
+void SensorModel::kinematicReset()
 {
   if(!sensor) return;
   sensor->Reset();
 }
 
 
-SimRobotSensor SimRobotController::sensor(int sensorIndex)
+int SimRobotController::numSensors() const
+{
+  if(!controller) return 0;
+  return controller->sensors.sensors.size();
+}
+
+SensorModel SimRobotController::_sensor(int sensorIndex)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
   Klampt::RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size()) 
-    return SimRobotSensor(RobotModel(),NULL);
-  return SimRobotSensor(model(),sensors.sensors[sensorIndex].get());
+    return SensorModel(RobotModel(),NULL);
+  return SensorModel(model(),sensors.sensors[sensorIndex].get());
 }
 
-SimRobotSensor SimRobotController::sensor(const char* name)
+SensorModel SimRobotController::_sensor(const char* name)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
   Klampt::RobotSensors& sensors = controller->sensors;
@@ -7056,10 +7081,10 @@ SimRobotSensor SimRobotController::sensor(const char* name)
   if(sensor==NULL) {
     fprintf(stderr,"SimRobotController.sensor(): Warning, sensor %s does not exist\n",name);
   }
-  return SimRobotSensor(model(),sensor.get());
+  return SensorModel(model(),sensor.get());
 }
 
-SimRobotSensor SimRobotController::addSensor(const char* name,const char* type)
+SensorModel SimRobotController::addSensor(const char* name,const char* type)
 {
   shared_ptr<Klampt::SensorBase> newsensor = controller->sensors.CreateByType(type);
   if(!newsensor) {
@@ -7071,7 +7096,7 @@ SimRobotSensor SimRobotController::addSensor(const char* name,const char* type)
   newsensor->name = name;
   controller->sensors.sensors.push_back(newsensor);
   controller->nextSenseTime.push_back(controller->curTime);
-  return SimRobotSensor(model(),controller->sensors.sensors.back().get());
+  return SensorModel(model(),controller->sensors.sensors.back().get());
 }
 
 std::vector<std::string> SimRobotController::commands()

@@ -13,7 +13,7 @@ class RobotModel;
 class RobotModelLink;
 class RigidObjectModel;
 class TerrainModel;
-class SimRobotSensor;
+class SensorModel;
 
 //forward definitions for pointers to internal objects
 namespace Klampt {
@@ -21,6 +21,7 @@ namespace Klampt {
   class RigidObjectModel;
   class TerrainModel;
   class RobotModel;
+  class SensorBase;
 
 } //namespace Klampt
 
@@ -134,14 +135,14 @@ class RobotModelLink
   RobotModel robot();
   ///Returns the index of the link (on its robot).
   int getIndex();
-  ///Returns the index of the link's parent (on its robot).
-  int getParent();
-  ///Returns a reference to the link's parent, or a NULL link if it has no parent
-  RobotModelLink parent();
+  ///Returns the index of the link's parent (on its robot). -1 indicates no parent.
+  int getParentIndex();
   ///Sets the index of the link's parent (on its robot).
-  void setParent(int p);
+  void setParentIndex(int p);
+  ///Returns a reference to the link's parent, or a NULL link if it has no parent
+  RobotModelLink getParentLink();
   ///Sets the link's parent (must be on the same robot).
-  void setParent(const RobotModelLink& l);
+  void setParentLink(const RobotModelLink& l);
   ///Returns a reference to the link's geometry
   Geometry3D geometry();
   ///Returns a reference to the link's appearance
@@ -531,7 +532,7 @@ class RobotModel
   ///    True if successful, False if failed.
   /// 
   bool loadFile(const char* fn);
-  ///Saves the robot to the file fn.
+  ///Saves the robot to the file fn.  Geometries may be saved as well.
   ///
   ///If ``geometryPrefix == None`` (default), the geometry is not saved. 
   ///Otherwise, the geometry of each link will be saved to files named
@@ -545,6 +546,7 @@ class RobotModel
   ///    The world ID is not the same as the robot index.
   ///
   int getID() const;
+  ///Gets the name of the robot 
   const char* getName() const;
   ///Sets the name of the robot
   void setName(const char* name);
@@ -853,29 +855,142 @@ class RobotModel
   ///unless subRobot.getName() is '', in which case the link names are preserved.
   void mount(int link,const RobotModel& subRobot,const double R[9],const double t[3]);
 
-  /// Returns a sensor by index or by name. 
-  ///
-  ///If out of bounds or unavailable, a null sensor is returned (i.e.,
-  ///SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)
-  SimRobotSensor sensor(int index);
-  //note: only the last overload docstring is added to the documentation
-  /// Returns a sensor by index or by name. 
-  ///
-  ///If out of bounds or unavailable, a null sensor is returned (i.e.,
-  ///SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)
-  SimRobotSensor sensor(const char* name);
+  ///Returns the number of sensors
+  int numSensors() const; 
+  SensorModel _sensor(int index);
+  SensorModel _sensor(const char* name);
   ///Adds a new sensor with a given name and type
   ///
   ///Returns:
   ///
   ///    The new sensor.
   ///
-  SimRobotSensor addSensor(const char* name,const char* type);
+  SensorModel addSensor(const char* name,const char* type);
 
   int world;
   int index;
   Klampt::RobotModel* robot;
   bool dirty_dynamics;
+};
+
+/** @brief A sensor on a simulated robot.
+ * 
+ * Kinematic models of sensors are retrieved using :meth:`RobotModel.sensor`
+ * and can be created using  :meth:`RobotModel.addSensor`.  
+ * 
+ * Physically-simulated sensors are retrieved from a controller using
+ * :meth:`SimRobotController.sensor`, and can be created using
+ * :meth:`SimRobotController.addSensor`.  
+ *
+ * Some types of sensors can be kinematically-simulated such that they make
+ * sensible measurements.
+ * To use kinematic simulation, you may arbitrarily set the robot's position,
+ * call :meth:`kinematicReset`, and then call :meth:`kinematicSimulate`.
+ * Subsequent calls assume the robot is being driven along a coherent trajectory
+ * until the next :meth:`kinematicReset` is called.  This is necessary for
+ * sensors that estimate accelerations, e.g., ForceTorqueSensor, Accelerometer
+ *
+ * Physically-simulated sensors are automatically updated through the
+ * :meth:`Simulator.simulate` call.
+ * 
+ * Use  :meth:`getMeasurements` to get the currently simulated measurement
+ * vector. You may get garbage measurements before kinematicSimulate /
+ * Simulator.simulate are called.
+ * 
+ * LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
+ * JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
+ * FilteredSensor and TimeDelayedSensor also work.  The force-related sensors 
+ * (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.
+ *
+ * To use get/setSetting, you will need to know the sensor attribute names
+ * and types as described in `the Klampt sensor documentation <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-Control.md#sensors>`_
+ * (same as in the world or sensor XML file). Common settings include:
+ * 
+ * - rate (float): how frequently the sensor is simulated
+ * - enabled (bool): whether the simulator simulates this sensor
+ * - link (int): the link on which this sensor lies (-1 for world)
+ * - Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
+ *    of the sensor on the robot / world.
+ * 
+ */
+class SensorModel
+{
+ public:
+  SensorModel(const RobotModel& robot,Klampt::SensorBase* sensor);
+
+  ///Returns the name of the sensor
+  std::string getName() const;
+  ///Sets the name of the sensor
+  void setName(const std::string& name);
+  ///Returns the type of the sensor
+  std::string getType() const;
+  ///Returns the model of the robot to which this belongs
+  RobotModel robot();
+  ///Returns a list of names for the measurements (one per measurement).
+  std::vector<std::string> measurementNames();
+  ///Returns an array of measurements from the previous simulation (or
+  ///kinematicSimulate) timestep
+  ///
+  ///Return type: np.ndarray
+  void getMeasurements(double** np_out,int* m);
+  ///Returns all setting names
+  ///
+  std::vector<std::string> settings();
+  ///Returns the value of the named setting (you will need to manually parse this)
+  std::string getSetting(const std::string& name);
+  ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
+  void setSetting(const std::string& name,const std::string& val);
+  ///Return whether the sensor is enabled during simulation (helper for getSetting)
+  bool getEnabled();
+  ///Sets whether the sensor is enabled in physics simulation.
+  void setEnabled(bool enabled);
+  ///Returns the link on which the sensor is mounted
+  RobotModelLink _getLink();
+  ///Sets the link on which the sensor is mounted (helper for setSetting)
+  void _setLink(const RobotModelLink& link);
+  ///Sets the link on which the sensor is mounted (helper for setSetting)
+  void _setLink(int link);
+  ///Returns the local transform of the sensor on the robot's link. 
+  ///(helper for getSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  ///
+  ///Return type: RigidTransform
+  void getTransform(double out[9],double out2[3]);
+  ///Returns the world transform of the sensor given the robot's current
+  ///configuration. (helper for getSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  ///
+  ///Return type: RigidTransform
+  void getTransformWorld(double out[9],double out2[3]);
+  ///Sets the local transform of the sensor on the robot's link.
+  ///(helper for setSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  void setTransform(const double R[9],const double t[3]);
+  //note: only the last overload docstring is added to the documentation
+  ///Draws a sensor indicator using OpenGL.  If measurements are given,
+  ///the indicator is drawn as though these are the latest measurements,
+  ///otherwise only an indicator is drawn.
+  void drawGL();
+  //note: only the last overload docstring is added to the documentation
+  ///Draws a sensor indicator using OpenGL.  If measurements are given,
+  ///the indicator is drawn as though these are the latest measurements,
+  ///otherwise only an indicator is drawn.
+  void drawGL(double* np_array,int m);
+
+  ///simulates / advances the kinematic simulation
+  void kinematicSimulate(WorldModel& world,double dt);
+  void kinematicSimulate(double dt);
+  ///resets a kinematic simulation so that a new initial condition can be set
+  void kinematicReset();
+
+  RobotModel robotModel;
+  Klampt::SensorBase* sensor;
 };
 
 /** @brief A rigid movable object.
@@ -1061,7 +1176,10 @@ class WorldModel
   bool readFile(const char* fn);
   ///Alias of readFile
   bool loadFile(const char* fn);
-  ///Saves to a world XML file.  If elementDir is provided, then robots, terrains, etc.
+  ///Saves to a world XML file.  Elements in the world will be saved to a
+  ///folder.
+  ///
+  ///If elementDir is provided, then robots, terrains, etc.
   ///will be saved there.  Otherwise they will be saved to a folder with the same base
   ///name as fn (without the trailing .xml)
   bool saveFile(const char* fn,const char* elementDir=NULL);

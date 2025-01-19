@@ -2988,7 +2988,7 @@ Returns:
 
 %feature("docstring") RobotModel::saveFile "
 
-Saves the robot to the file fn.  
+Saves the robot to the file fn. Geometries may be saved as well.  
 
 If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
 geometry of each link will be saved to files named `geometryPrefix+name`, where
@@ -3007,6 +3007,8 @@ Returns the ID of the robot in its world.
 ";
 
 %feature("docstring") RobotModel::getName "
+
+Gets the name of the robot.  
 ";
 
 %feature("docstring") RobotModel::setName "
@@ -3469,20 +3471,15 @@ link.getName() unless subRobot.getName() is '', in which case the link names are
 preserved.  
 ";
 
-%feature("docstring") RobotModel::sensor "
+%feature("docstring") RobotModel::numSensors "
 
-Returns a sensor by index or by name.  
-
-If out of bounds or unavailable, a null sensor is returned (i.e.,
-SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  
+Returns the number of sensors.  
 ";
 
-%feature("docstring") RobotModel::sensor "
+%feature("docstring") RobotModel::_sensor "
+";
 
-Returns a sensor by index or by name.  
-
-If out of bounds or unavailable, a null sensor is returned (i.e.,
-SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  
+%feature("docstring") RobotModel::_sensor "
 ";
 
 %feature("docstring") RobotModel::addSensor "
@@ -3669,22 +3666,22 @@ Returns a reference to the link's robot.
 Returns the index of the link (on its robot).  
 ";
 
-%feature("docstring") RobotModelLink::getParent "
+%feature("docstring") RobotModelLink::getParentIndex "
 
-Returns the index of the link's parent (on its robot).  
+Returns the index of the link's parent (on its robot). -1 indicates no parent.  
 ";
 
-%feature("docstring") RobotModelLink::parent "
-
-Returns a reference to the link's parent, or a NULL link if it has no parent.  
-";
-
-%feature("docstring") RobotModelLink::setParent "
+%feature("docstring") RobotModelLink::setParentIndex "
 
 Sets the index of the link's parent (on its robot).  
 ";
 
-%feature("docstring") RobotModelLink::setParent "
+%feature("docstring") RobotModelLink::getParentLink "
+
+Returns a reference to the link's parent, or a NULL link if it has no parent.  
+";
+
+%feature("docstring") RobotModelLink::setParentLink "
 
 Sets the link's parent (must be on the same robot).  
 ";
@@ -4049,6 +4046,190 @@ current Appearance is honored. Otherwise, just the geometry is drawn.
 %feature("docstring") RobotPoser::clearIKConstraints "
 ";
 
+// File: classSensorModel.xml
+
+
+%feature("docstring") SensorModel "
+
+A sensor on a simulated robot.  
+
+Kinematic models of sensors are retrieved using :meth:`RobotModel.sensor` and
+can be created using :meth:`RobotModel.addSensor`.  
+
+Physically-simulated sensors are retrieved from a controller using
+:meth:`SimRobotController.sensor`, and can be created using
+:meth:`SimRobotController.addSensor`.  
+
+Some types of sensors can be kinematically-simulated such that they make
+sensible measurements. To use kinematic simulation, you may arbitrarily set the
+robot's position, call :meth:`kinematicReset`, and then call
+:meth:`kinematicSimulate`. Subsequent calls assume the robot is being driven
+along a coherent trajectory until the next :meth:`kinematicReset` is called.
+This is necessary for sensors that estimate accelerations, e.g.,
+ForceTorqueSensor, Accelerometer  
+
+Physically-simulated sensors are automatically updated through the
+:meth:`Simulator.simulate` call.  
+
+Use :meth:`getMeasurements` to get the currently simulated measurement vector.
+You may get garbage measurements before kinematicSimulate / Simulator.simulate
+are called.  
+
+LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
+JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
+FilteredSensor and TimeDelayedSensor also work. The force-related sensors
+(ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.  
+
+To use get/setSetting, you will need to know the sensor attribute names and
+types as described in `the Klampt sensor documentation
+<https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
+Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
+include:  
+
+*   rate (float): how frequently the sensor is simulated  
+*   enabled (bool): whether the simulator simulates this sensor  
+*   link (int): the link on which this sensor lies (-1 for world)  
+*   Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
+    of the sensor on the robot / world.  
+
+C++ includes: robotmodel.h
+";
+
+%feature("docstring") SensorModel::SensorModel "
+";
+
+%feature("docstring") SensorModel::getName "
+
+Returns the name of the sensor.  
+";
+
+%feature("docstring") SensorModel::setName "
+
+Sets the name of the sensor.  
+";
+
+%feature("docstring") SensorModel::getType "
+
+Returns the type of the sensor.  
+";
+
+%feature("docstring") SensorModel::robot "
+
+Returns the model of the robot to which this belongs.  
+";
+
+%feature("docstring") SensorModel::measurementNames "
+
+Returns a list of names for the measurements (one per measurement).  
+";
+
+%feature("docstring") SensorModel::getMeasurements "
+
+Returns an array of measurements from the previous simulation (or
+kinematicSimulate) timestep.  
+
+Return type: np.ndarray  
+";
+
+%feature("docstring") SensorModel::settings "
+
+Returns all setting names.  
+";
+
+%feature("docstring") SensorModel::getSetting "
+
+Returns the value of the named setting (you will need to manually parse this)  
+";
+
+%feature("docstring") SensorModel::setSetting "
+
+Sets the value of the named setting (you will need to manually cast an
+int/float/etc to a str)  
+";
+
+%feature("docstring") SensorModel::getEnabled "
+
+Return whether the sensor is enabled during simulation (helper for getSetting)  
+";
+
+%feature("docstring") SensorModel::setEnabled "
+
+Sets whether the sensor is enabled in physics simulation.  
+";
+
+%feature("docstring") SensorModel::_getLink "
+
+Returns the link on which the sensor is mounted.  
+";
+
+%feature("docstring") SensorModel::_setLink "
+
+Sets the link on which the sensor is mounted (helper for setSetting)  
+";
+
+%feature("docstring") SensorModel::_setLink "
+
+Sets the link on which the sensor is mounted (helper for setSetting)  
+";
+
+%feature("docstring") SensorModel::getTransform "
+
+Returns the local transform of the sensor on the robot's link. (helper for
+getSetting)  
+
+If the sensor doesn't have a transform (such as a joint position or torque
+sensor) an exception will be raised.  
+
+Return type: RigidTransform  
+";
+
+%feature("docstring") SensorModel::getTransformWorld "
+
+Returns the world transform of the sensor given the robot's current
+configuration. (helper for getSetting)  
+
+If the sensor doesn't have a transform (such as a joint position or torque
+sensor) an exception will be raised.  
+
+Return type: RigidTransform  
+";
+
+%feature("docstring") SensorModel::setTransform "
+
+Sets the local transform of the sensor on the robot's link. (helper for
+setSetting)  
+
+If the sensor doesn't have a transform (such as a joint position or torque
+sensor) an exception will be raised.  
+";
+
+%feature("docstring") SensorModel::drawGL "
+
+Draws a sensor indicator using OpenGL. If measurements are given, the indicator
+is drawn as though these are the latest measurements, otherwise only an
+indicator is drawn.  
+";
+
+%feature("docstring") SensorModel::drawGL "
+
+Draws a sensor indicator using OpenGL. If measurements are given, the indicator
+is drawn as though these are the latest measurements, otherwise only an
+indicator is drawn.  
+";
+
+%feature("docstring") SensorModel::kinematicSimulate "
+
+simulates / advances the kinematic simulation  
+";
+
+%feature("docstring") SensorModel::kinematicSimulate "
+";
+
+%feature("docstring") SensorModel::kinematicReset "
+
+resets a kinematic simulation so that a new initial condition can be set  
+";
+
 // File: classSimBody.xml
 
 
@@ -4405,18 +4586,15 @@ model().numDrivers())
 Note: a default robot doesn't have a torque sensor, so this will be 0  
 ";
 
-%feature("docstring") SimRobotController::sensor "
+%feature("docstring") SimRobotController::numSensors "
 
-Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
-return the empty string.)  
+Returns the number of sensors.  
 ";
 
-%feature("docstring") SimRobotController::sensor "
+%feature("docstring") SimRobotController::_sensor "
+";
 
-Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
-return the empty string.)  
+%feature("docstring") SimRobotController::_sensor "
 ";
 
 %feature("docstring") SimRobotController::addSensor "
@@ -4575,181 +4753,6 @@ Sets the PID gains. Arguments have size model().numDrivers().
 %feature("docstring") SimRobotController::getPIDGains "
 
 Returns the PID gains for the PID controller.  
-";
-
-// File: classSimRobotSensor.xml
-
-
-%feature("docstring") SimRobotSensor "
-
-A sensor on a simulated robot. Retrieve one from the controller using
-:meth:`SimRobotController.sensor`, or create a new one using
-:meth:`SimRobotController.addSensor`. You may also use kinematically-simulated
-sensors using :meth:`RobotModel.sensor` or create a new one using
-:meth:`RobotModel.addSensor`.  
-
-Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
-
-Sensors are automatically updated through the :meth:`Simulator.simulate` call,
-and :meth:`getMeasurements` retrieves the updated values. As a result, you may
-get garbage measurements before the first Simulator.simulate call is made.  
-
-There is also a mode for doing kinematic simulation, which is supported (i.e.,
-makes sensible measurements) for some types of sensors when just a robot / world
-model is given. This is similar to Simulation.fakeSimulate but the entire
-controller structure is bypassed. You can arbitrarily set the robot's position,
-call :meth:`kinematicReset`, and then call :meth:`kinematicSimulate`. Subsequent
-calls assume the robot is being driven along a trajectory until the next
-:meth:`kinematicReset` is called.  
-
-LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
-JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
-FilteredSensor and TimeDelayedSensor also work. The force-related sensors
-(ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.  
-
-To use get/setSetting, you will need to know the sensor attribute names and
-types as described in `the Klampt sensor documentation
-<https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
-Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
-include:  
-
-*   rate (float): how frequently the sensor is simulated  
-*   enabled (bool): whether the simulator simulates this sensor  
-*   link (int): the link on which this sensor lies (-1 for world)  
-*   Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
-    of the sensor on the robot / world.  
-
-C++ includes: robotsim.h
-";
-
-%feature("docstring") SimRobotSensor::SimRobotSensor "
-";
-
-%feature("docstring") SimRobotSensor::name "
-
-Returns the name of the sensor.  
-";
-
-%feature("docstring") SimRobotSensor::type "
-
-Returns the type of the sensor.  
-";
-
-%feature("docstring") SimRobotSensor::robot "
-
-Returns the model of the robot to which this belongs.  
-";
-
-%feature("docstring") SimRobotSensor::measurementNames "
-
-Returns a list of names for the measurements (one per measurement).  
-";
-
-%feature("docstring") SimRobotSensor::getMeasurements "
-
-Returns an array of measurements from the previous simulation (or
-kinematicSimulate) timestep.  
-
-Return type: np.ndarray  
-";
-
-%feature("docstring") SimRobotSensor::settings "
-
-Returns all setting names.  
-";
-
-%feature("docstring") SimRobotSensor::getSetting "
-
-Returns the value of the named setting (you will need to manually parse this)  
-";
-
-%feature("docstring") SimRobotSensor::setSetting "
-
-Sets the value of the named setting (you will need to manually cast an
-int/float/etc to a str)  
-";
-
-%feature("docstring") SimRobotSensor::getEnabled "
-
-Return whether the sensor is enabled during simulation (helper for getSetting)  
-";
-
-%feature("docstring") SimRobotSensor::setEnabled "
-
-Sets whether the sensor is enabled (helper for setSetting)  
-";
-
-%feature("docstring") SimRobotSensor::getLink "
-
-Returns the link on which the sensor is mounted (helper for getSetting)  
-";
-
-%feature("docstring") SimRobotSensor::setLink "
-
-Sets the link on which the sensor is mounted (helper for setSetting)  
-";
-
-%feature("docstring") SimRobotSensor::setLink "
-
-Sets the link on which the sensor is mounted (helper for setSetting)  
-";
-
-%feature("docstring") SimRobotSensor::getTransform "
-
-Returns the local transform of the sensor on the robot's link. (helper for
-getSetting)  
-
-If the sensor doesn't have a transform (such as a joint position or torque
-sensor) an exception will be raised.  
-
-Return type: RigidTransform  
-";
-
-%feature("docstring") SimRobotSensor::getTransformWorld "
-
-Returns the world transform of the sensor given the robot's current
-configuration. (helper for getSetting)  
-
-If the sensor doesn't have a transform (such as a joint position or torque
-sensor) an exception will be raised.  
-
-Return type: RigidTransform  
-";
-
-%feature("docstring") SimRobotSensor::setTransform "
-
-Sets the local transform of the sensor on the robot's link. (helper for
-setSetting)  
-
-If the sensor doesn't have a transform (such as a joint position or torque
-sensor) an exception will be raised.  
-";
-
-%feature("docstring") SimRobotSensor::drawGL "
-
-Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-is drawn as though these are the latest measurements, otherwise only an
-indicator is drawn.  
-";
-
-%feature("docstring") SimRobotSensor::drawGL "
-
-Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-is drawn as though these are the latest measurements, otherwise only an
-indicator is drawn.  
-";
-
-%feature("docstring") SimRobotSensor::kinematicSimulate "
-
-simulates / advances the kinematic simulation  
-";
-
-%feature("docstring") SimRobotSensor::kinematicSimulate "
-";
-
-%feature("docstring") SimRobotSensor::kinematicReset "
-
-resets a kinematic simulation so that a new initial condition can be set  
 ";
 
 // File: classSimulator.xml
@@ -5594,9 +5597,11 @@ Alias of readFile.
 
 %feature("docstring") WorldModel::saveFile "
 
-Saves to a world XML file. If elementDir is provided, then robots, terrains,
-etc. will be saved there. Otherwise they will be saved to a folder with the same
-base name as fn (without the trailing .xml)  
+Saves to a world XML file. Elements in the world will be saved to a folder.  
+
+If elementDir is provided, then robots, terrains, etc. will be saved there.
+Otherwise they will be saved to a folder with the same base name as fn (without
+the trailing .xml)  
 ";
 
 %feature("docstring") WorldModel::numRobots "

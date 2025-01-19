@@ -31,8 +31,7 @@ basic_types = {'int','float','str','bytes','bool'}
 #location to inject typing string
 typing_inject_location = 'import __builtin__'
 typing_header = """
-import numpy as np
-from typing import Sequence,List,Tuple,Iterator
+from typing import Sequence,List,Tuple,Iterator,Union,Optional,Dict
 from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
 """
 

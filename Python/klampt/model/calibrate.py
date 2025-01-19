@@ -19,16 +19,7 @@ Key = Union[int,str]
 
 def robot_sensors(robot : RobotModel, type : Optional[str] = None):
     """Returns all sensors on the robot of the given type."""
-    res = []
-    sindex = 0
-    while True:
-        s = robot.sensor(sindex)
-        if s.name() == '':
-            break
-        if type is None or s.type() == type:
-            res.append(s)
-        sindex += 1
-    return res
+    return [s for s in robot.sensors if type is None or s.type == type]
 
 
 class PointMarker:
@@ -338,16 +329,16 @@ class RobotExtrinsicCalibration:
                 sensors = [sensors]
             for sindex in sensors:
                 s = self.robot.sensor(sindex)
-                if s.name() == '':
+                if s is None:
                     raise ValueError("Invalid sensor {}, not in robot model".format(sindex))
-                if s.type() != 'CameraSensor':
+                if s.type != 'CameraSensor':
                     raise ValueError("Invalid sensor {}, not a CameraSensor".format(sindex))
                 simsensors.append(s)
         for s in simsensors:
             caminfo = CameraInfo(int(s.getSetting('link')))
             caminfo.intrinsics = sensing.camera_to_intrinsics(s,'json')
             caminfo.local_coordinates = sensing.get_sensor_xform(s)
-            self.cameras[s.name()] = caminfo
+            self.cameras[s.name] = caminfo
 
     def editTrajectory(self, world : WorldModel = None, name='calibration_trajectory') -> RobotTrajectory:
         """Returns a RobotTrajectory that passes through all calibration
@@ -448,8 +439,6 @@ class RobotExtrinsicCalibration:
                     s = simsensors[i]
             else:
                 s = self.robot.sensor(i)
-                if s.name()=='':
-                    s = None
             if s is None:
                 #create a new camera on the robot
                 s = self.robot.addSensor(str(i),'CameraSensor')
@@ -517,7 +506,7 @@ class RobotExtrinsicCalibration:
                         sensing.set_sensor_xform(sensors[k],c.local_coordinates)
                     except Exception:
                         print("Error setting sensor transform. Does your camera name shadow a non-camera sensor in the RobotModel?")
-                        print("   Camera",k,"sensor type",sensors[k].type())
+                        print("   Camera",k,"sensor type",sensors[k].type)
                         continue
                     re_read_cameras.append(k)
             for k in re_read_markers: #make sure to get released configuration
@@ -1108,7 +1097,7 @@ class RobotExtrinsicCalibration:
         for i,c in self.cameras.items():
             try:
                 s = self.robot.sensor(i)
-                if s.name()=='':
+                if s is None:
                     raise ValueError()
             except Exception:
                 #create a new camera on the robot

@@ -15,12 +15,11 @@ from klampt.model.typing import Rotation, RigidTransform
 from typing import Union
 
 def trimesh_to_rr(mesh : klampt.TriangleMesh, appearance : klampt.Appearance = None) -> rr.Mesh3D:
-    from klampt.model.geometry import vertex_normals
     vertex_colors = None
     vertex_texcoords = None
     albedo_texture = None
     albedo_factor = None
-    normals = vertex_normals(mesh)
+    normals = mesh.vertexNormals()
     if appearance is not None:
         vertex_colors = appearance.getColors(klampt.Appearance.VERTICES)
         if vertex_colors.shape[0] == 1:  #no vertex colors
@@ -65,7 +64,6 @@ def trimesh_to_rr(mesh : klampt.TriangleMesh, appearance : klampt.Appearance = N
                      albedo_factor=albedo_factor)
 
 def point_cloud_to_rr(pc : klampt.PointCloud, appearance : klampt.Appearance = None) -> rr.Points3D:
-    from klampt.model.geometry import point_cloud_colors
     point_colors = None
     if appearance is not None:
         try:
@@ -73,7 +71,7 @@ def point_cloud_to_rr(pc : klampt.PointCloud, appearance : klampt.Appearance = N
         except Exception:
             if appearance.getColor() is not None:
                 point_colors = np.array([appearance.getColor()]*len(pc.points))
-    pc_colors = point_cloud_colors(pc,('r','g','b'))
+    pc_colors = pc.getColors(('r','g','b'))
     if point_colors is None:
         point_colors = pc_colors
     elif pc_colors is not None:

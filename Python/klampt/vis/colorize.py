@@ -270,11 +270,10 @@ def colorize(object : Union[Geometry3D,PointCloud,TriangleMesh,Heightmap,Appeara
                 raise NotImplementedError("Can't get normals from heightmaps yet")
             else:
                 assert isinstance(geometrydata,TriangleMesh)
-                from ..model.geometry import vertex_normals,triangle_normals
                 if feature == 'vertices':
-                    normals = vertex_normals(geometrydata)
+                    normals = geometrydata.vertexNormals(geometrydata)
                 else:
-                    normals = triangle_normals(geometrydata)
+                    normals = geometrydata.triangleNormals(geometrydata)
         if feature == 'faces':
             assert isinstance(geometrydata,TriangleMesh)
             if lighting is not None or value in ['position','x','y','z']:

@@ -67,23 +67,14 @@ class _SimControlInterface(RobotInterfaceBase):
         return 1.0/self.sim_controller.getRate()
 
     def sensors(self):
-        sensorNames = []
-        index = 0
-        while True:
-            s = self.sim_controller.sensor(index)
-            sname = s.name()
-            if len(sname) > 0:
-                sensorNames.append(sname)
-            else:
-                break
-            index += 1
+        sensorNames = [s.name for s in self.sim_controller.sensors]
         return sensorNames
 
     def enabledSensors(self):
         return self.sensors()
 
     def hasSensor(self,sensor):
-        return len(self.sim_controller.sensor(sensor).type()) > 0
+        return self.sim_controller.sensor(sensor) is not None
 
     def enableSensor(self,sensor,enabled=True):
         if not enabled:
@@ -311,16 +302,7 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         return 200.0
 
     def sensors(self):
-        sensorNames = []
-        index = 0
-        while True:
-            s = self.robot.sensor(index)
-            sname = s.name()
-            if len(sname) > 0:
-                sensorNames.append(sname)
-            else:
-                break
-            index += 1
+        sensorNames = [s.name for s in self.robot.sensors]
         return sensorNames
 
     def enabledSensors(self):

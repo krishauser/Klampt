@@ -1,4 +1,4 @@
-__all__ = ['WorldModel','RobotModel','RobotModelLink','RigidObjectModel','TerrainModel','Mass','ContactParameters',
+__all__ = ['WorldModel','RobotModel','RobotModelLink','RigidObjectModel','TerrainModel','SensorModel','Mass','ContactParameters',
            'SimRobotController','SimRobotSensor','SimBody','SimJoint','Simulator',
            'Geometry3D','Appearance','DistanceQuerySettings','DistanceQueryResult','ContactQueryResult',
            'TriangleMesh','PointCloud','GeometricPrimitive','ConvexHull','VolumeGrid','Heightmap',

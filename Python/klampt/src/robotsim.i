@@ -442,6 +442,12 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %feature("autodoc","1");
 %include "docs/docs.i"
 
+ 
+%pythoncode {
+    import numpy as np
+    import types
+}
+
 %extend Mass { 
 %pythoncode {
      com = property(getCom, setCom)
@@ -453,8 +459,23 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend RobotModelLink { 
 %pythoncode {
+     def setParent(self, index_or_link : Union[int,'RobotModelLink']):
+         """
+         Sets the link's parent to an index or link (must be on same robot).
+         """
+         if isinstance(index_or_link, int):
+             self.setParentIndex(index_or_link)
+         else:
+             self.setParentLink(index_or_link)
+     
+     def getParent(self) -> int:
+         """
+         Returns the index of the link's parent (on its robot). -1 indicates no parent.
+         """
+         return self.getParentIndex()
+     
      name = property(getName, setName)
-     parent = property(getParent, setParent)
+     parent = property(getParentIndex, setParent)
      mass = property(getMass, setMass)
      parentTransform = property(getParentTransform)
      axis = property(getAxis,setAxis)
@@ -476,11 +497,62 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend RobotModel { 
 %pythoncode {
+     def getLinks(self) -> Tuple[RobotModelLink]:
+         """
+         Returns a list of all links on the robot.
+         """
+         return tuple(self.link(i) for i in range(self.numLinks()))
+
+     def getLinksDict(self) -> Dict[str,RobotModelLink]:
+         """
+         Returns a dictionary mapping link names to RobotModelLink instances.
+         """
+         return types.MappingProxyType({l.name:l for l in self.getLinks()})
+
+     def getDrivers(self) -> Tuple[RobotModelDriver]:
+         """
+         Returns a list of all drivers on the robot.
+         """
+         return Tuple(self.driver(i) for i in range(self.numDrivers()))
+     
+     def getDriversDict(self) -> Dict[str,RobotModelDriver]:
+         """
+         Returns a dictionary mapping driver names to RobotModelDriver instances.
+         """
+         return types.MappingProxyType({d.name:d for d in self.getDrivers()})
+
+     def sensor(self, index_or_name : Union[int,str]) -> 'SensorModel':
+         """
+         Retrieves the sensor with the given index or name.  A KeyError is
+         raised if it does not exist.
+         """
+         res = self._sensor(index_or_name)
+         if len(res.type) == 0:
+             raise KeyError("Invalid sensor name: {}".format(index_or_name))
+         return res
+
+     def getSensors(self) -> Tuple['SensorModel']:
+         """
+         Returns a list of all sensors on the robot.
+         """
+         return Tuple(self.sensor(i) for i in range(self.numSensors()))
+
+     def getSensorsDict(self) -> Dict[str,'SensorModel']:
+         """
+         Returns a dictionary mapping sensor names to SensorModel instances.
+         """
+         return types.MappingProxyType({s.name:s for s in self.getSensors()})
+
      name = property(getName, setName)
      id = property(getID)
      config = property(getConfig,setConfig)
-     velocity = property(getVelocity,setVelocity)
-
+     velocity = property(getVelocity,setVelocity)    
+     links = property(getLinks)
+     linksDict = property(getLinksDict)
+     drivers = property(getDrivers)
+     driversDict = property(getDriversDict)
+     sensors = property(getSensors)
+     sensorsDict = property(getSensorsDict)
 }
 }
 
@@ -500,6 +572,121 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 }
 
+%extend SensorModel { 
+%pythoncode {
+     def getLink(self) -> Optional[RobotModelLink]:
+         """
+         Retrieves the link that this sensor is mounted on, or None for
+         world-mounted sensors.
+         """
+         l = self._getLink()
+         if l.index < 0:
+             return None
+         return l
+    
+     def setLink(self, link : Union[int,None,RobotModelLink]):
+         """
+         Sets the link that this sensor is mounted on, or None / -1 for
+         world-mounted sensors.
+         """
+         if link is None:
+             self._setLink(-1)
+         elif isinstance(link,RobotModelLink):
+             self._setLink(link.index)
+         else:
+             self._setLink(link)
+
+     name = property(getName, setName)
+     type = property(getType)
+     """A string giving the sensor's type.  Read-only."""
+
+     enabled = property(getEnabled,setEnabled)
+     """Whether the sensor is enabled in physical simulation."""
+
+     link = property(getLink,setLink)
+     """The link that this sensor lies on.  May be None."""
+}
+}
+
+%extend WorldModel { 
+%pythoncode {
+     def getRobots(self) -> Tuple[RobotModel]:
+         """
+         Returns a list of all robots in the world.
+         """
+         return tuple(self.robot(i) for i in range(self.numRobots()))
+
+     def getRobotsDict(self) -> Dict[str,RobotModel]:
+         """
+         Returns a dictionary mapping robot names to RobotModel instances.
+         """
+         return types.MappingProxyType({r.name:r for r in self.getRobots()})
+
+     def getRigidObjects(self) -> Tuple[RigidObjectModel]:
+         """
+         Returns a list of all rigid objects in the world.
+         """
+         return Tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
+     
+     def getRigidObjectsDict(self) -> Dict[str,RigidObjectModel]:
+         """
+         Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+         """
+         return types.MappingProxyType({r.name:r for r in self.getRigidObjects()})
+
+     def getTerrains(self) -> Tuple[TerrainModel]:
+         """
+         Returns a list of all rigid objects in the world.
+         """
+         return Tuple(self.terrain(i) for i in range(self.numTerrains()))
+     
+     def getTerrainsDict(self) -> Dict[str,TerrainModel]:
+         """
+         Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+         """
+         return types.MappingProxyType({r.name:r for r in self.getTerrains()})
+
+     robots = property(getRobots)
+     robotsDict = property(getRobotsDict)
+     rigidObjects = property(getRigidObjects)
+     rigidObjectsDict = property(getRigidObjectsDict)
+     terrains = property(getTerrains)
+     terrainsDict = property(getTerrainsDict)
+}
+}
+
+
+%extend SimRobotController { 
+%pythoncode {
+     def sensor(self, index_or_name : Union[int,str]) -> SensorModel:
+        """
+        Retrieves the sensor with the given index or name.  A KeyError is
+        raised if it does not exist.
+        """
+        res = self._sensor(index_or_name)
+        if len(res.type) == 0:
+            raise KeyError("Invalid sensor name: {}".format(index_or_name))
+        return res
+
+     def getSensors(self) -> Tuple[SensorModel]:
+         """
+         Returns a list of all sensors on the robot.
+         """
+         return Tuple(self.sensor(i) for i in range(self.numSensors()))
+
+     def getSensorsDict(self) -> Dict[str,SensorModel]:
+         """
+         Returns a dictionary mapping sensor names to SensorModel instances.
+         """
+         return types.MappingProxyType({s.name:s for s in self.getSensors()})
+
+     rate = property(getRate, setRate)
+     sensors = property(getSensors)
+     sensorsDict = property(getSensorsDict)
+}
+}
+
+
 %extend IKObjective {
 %pythoncode {
     def __reduce__(self):
@@ -512,7 +699,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend Appearance {
 %pythoncode {
     def setTexture1D(self,format,array):
-        """Sets a 1D texture.
+        """
+        Sets a 1D texture.
 
         Args:
             format (str): describes how the array is specified.
@@ -548,7 +736,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             raise ValueError("Can only pass a 1D or 2D array to setTexture1D")
 
     def setTexture2D(self,format,array):
-        """Sets a 2D texture.
+        """
+        Sets a 2D texture.
 
         Args:
             format (str): describes how the array is specified.
@@ -586,7 +775,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             raise ValueError("Can only pass a 2D or 3D array to setTexture2D")
 
     def setTexcoords(self,array):
-        """Sets texture coordinates for the mesh.
+        """
+        Sets texture coordinates for the mesh.
 
         Args:
             array (np.ndarray): a 1D or 2D array, of size N or Nx2, where N is
@@ -611,10 +801,59 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     """The triangles of the mesh, given as indices into the vertices array."""
 
     def triangle(self, i) -> Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
-        """Returns the i'th triangle of the mesh as a tuple of 3 3-tuples."""
+        """
+        Returns the i'th triangle of the mesh as a tuple of 3 3-tuples.
+        """
         a,b,c = self.indices[i]
         v = self.vertices
         return (v[a],v[b],v[c])
+    
+    def triangleNoormals(self) -> np.ndarray:
+        """
+        Computes outward triangle normals.
+        
+        Returns:
+            An N x 3 matrix of triangle normals with N the number of triangles.
+        """
+        verts=self.vertices
+        tris=self.indices
+        dba = verts[tris[:,1]]-verts[tris[:,0]]
+        dca = verts[tris[:,2]]-verts[tris[:,0]]
+        n = np.cross(dba,dca)
+        norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
+        n = np.divide(n,norms,where=norms!=0)
+        return n
+
+    def vertexNormals(self, area_weighted=True) -> np.ndarray:
+        """
+        Computes outward vertex normals.
+        
+        Args:
+            area_weighted (bool): whether to compute area-weighted average or
+                simple average.
+
+        Returns:
+            An N x 3 matrix of vertex normals with N the number of vertices.
+        """
+        verts=self.vertices
+        tris=self.indices
+        dba = verts[tris[:,1]]-verts[tris[:,0]]
+        dca = verts[tris[:,2]]-verts[tris[:,0]]
+        n = np.cross(dba,dca)
+        normals = [np.zeros(3) for i in range(len(verts))]
+        if area_weighted:
+            for i,t in enumerate(tris):
+                for j in range(3):
+                    normals[t[j]] += n[i]
+        else:
+            norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
+            n = np.divide(n,norms,where=norms!=0)
+            for i,t in enumerate(tris):
+                for j in range(3):
+                    normals[t[j]] += n[i]
+        normals = np.array(normals)
+        norms = np.linalg.norm(normals,axis=1)[:, np.newaxis]
+        return np.divide(normals,norms,where=norms!=0)
 
     def __reduce__(self):
         from klampt.io import loader
@@ -632,7 +871,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     """The properties of the point cloud."""
 
     def getPropertyNames(self) -> List[str]:
-        """Returns the names of the properties."""
+        """
+        Returns the names of the properties.
+        """
         return [self.getPropertyName(i) for i in range(self.numProperties())]
 
     def __reduce__(self):
@@ -640,18 +881,24 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         jsonobj = loader.to_json(self,'PointCloud')
         return (loader.from_json,(jsonobj,'PointCloud'))
 
-    def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
+    def setDepthImage(self,intrinsics:Union[Sequence[float],Dict[str,float]], depth : np.ndarray, depth_scale:float=1.0):
         """
         Sets a structured point cloud from a depth image.
 
         Args:
-            intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
+            intrinsics (list or dict): intrinsics parameters [fx,fy,cx,cy] or a
+                dictionary containing keys 'fx', 'fy', 'cx', 'cy'.
             depth (np.ndarray): the depth values, of shape (h,w).  Should have
                 dtype float, np.float32, or np.uint16 for best performance.
             depth_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        if len(intrinsics) != 4:
+        if isinstance(intrinsics,dict):
+            try:
+                intrinsics = intrinsics['fx'],intrinsics['fy'],intrinsics['cx'],intrinsics['cy']
+            except Exception:
+                raise ValueError("Invalid value for the intrinsics parameters")
+        elif len(intrinsics) != 4:
             raise ValueError("Invalid value for the intrinsics parameters")
         if depth.dtype == float:
             return self.setDepthImage_d(intrinsics,depth,depth_scale)
@@ -662,12 +909,13 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         else:
             return self.setDepthImage_d(intrinsics,depth,depth_scale)
 
-    def setRGBDImages(self,intrinsics,color,depth,depth_scale=1.0):
+    def setRGBDImages(self,intrinsics:Union[Sequence[float],Dict[str,float]], color : np.ndarray, depth : np.ndarray, depth_scale:float=1.0):
         """
         Sets a structured point cloud from a color,depth image pair.
 
         Args:
-            intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
+            intrinsics (list or dict): intrinsics parameters [fx,fy,cx,cy] or a
+                dictionary containing keys 'fx', 'fy', 'cx', 'cy'.
             color (np.ndarray): the color values, of shape (h,w) or (h,w,3).
                 In first case, must have dtype np.uint32 with r,g,b values
                 packed in 0xrrggbb order.  In second case, if dtype is
@@ -678,7 +926,12 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             depth_scale (float, optional): converts depth image values to real
                 depth units.
         """
-        if len(intrinsics) != 4:
+        if isinstance(intrinsics,dict):
+            try:
+                intrinsics = intrinsics['fx'],intrinsics['fy'],intrinsics['cx'],intrinsics['cy']
+            except Exception:
+                raise ValueError("Invalid value for the intrinsics parameters")
+        elif len(intrinsics) != 4:
             raise ValueError("Invalid value for the intrinsics parameters")
         if color.shape[0] != depth.shape[0] or color.shape[1] != depth.shape[1]:
             raise ValueError("Color and depth images need to have matching dimensions")
@@ -705,6 +958,73 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             else:
                 return self.setRGBDImages_i_d(intrinsics,color,depth,depth_scale)
 
+    def getColors(self, format='rgb') -> np.ndarray:
+        """
+        Returns the colors of the point cloud in the given format.  If the
+        point cloud has no colors, this returns None.  If the point cloud has no
+        colors but has opacity, this returns white colors.
+
+        Args:
+            format: describes the output color format, either:
+
+                - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
+                bits used),
+                - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
+                bits used),
+                - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
+                - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
+                - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
+                - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
+                - ('r','g','b'): triple with each channel in range [0,1]
+                - ('r','g','b','a'): tuple with each channel in range [0,1]
+                - 'channels': returns a list of channels, in the form (r,g,b) or 
+                (r,g,b,a), where each value in the channel has range [0,1].
+                - 'opacity': returns opacity only, in the range [0,1].
+
+        Returns:
+            A an array of len(pc.points) colors corresponding to 
+            the points in the point cloud.  If format='channels', the return
+            value is a tuple (r,g,b) or (r,g,b,a).
+        """
+        from klampt.model.geometry import point_cloud_colors
+        return point_cloud_colors(self,format)
+
+    def setColors(self, colors : Union[list,np.ndarray], color_format='rgb',pc_property='auto'):
+        """
+        Sets the colors of the point cloud.
+
+        Args:
+            colors (list or numpy.ndarray): the array of colors, and each color 
+                can be either ints, tuples, or channels, depending on color_format.
+            color_format: describes the format of each element of ``colors``, and
+                can be:
+
+                - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
+                bits used),
+                - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
+                bits used),
+                - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
+                - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
+                - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
+                - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
+                - ('r','g','b'): triple with each channel in range [0,1]. Also use
+                this if colors is an n x 3 numpy array.
+                - ('r','g','b','a'): tuple with each channel in range [0,1]. Also 
+                use this if colors is an n x 4 numpy array.
+                - 'channels': ``colors`` is a list of 3 or 4 channels, in the form
+                (r,g,b) or (r,g,b,a), where each element in a channel has range
+                [0,1].
+                - 'opacity': opacity only, in the range [0,1].
+
+            pc_property (str): describes to which property the colors should be
+                set.  'auto' determines chooses the property from the point cloud
+                if it's already colored, or color_format if not.  'channels' sets
+                the 'r', 'g', 'b', and optionally 'a' properties.
+
+        """
+        from klampt.model.geometry import point_cloud_set_colors
+        return point_cloud_set_colors(self,colors,color_format,pc_property)
+ 
 }
 }
 
@@ -744,7 +1064,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     """The upper bound of the domain."""
 
     def setBounds(self, bounds):
-        """@deprecated
+        """
+        @deprecated
         
         Provided for backwards compatibility
         """
@@ -754,7 +1075,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         self.bmax = bounds[3:6]
     
     def getBounds(self):
-        """@deprecated
+        """
+        @deprecated
         
         Provided for backwards compatibility
         """
@@ -912,13 +1234,21 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend Viewport { 
 %pythoncode {
     def setClippingPlanes(self, cp):
-        """Provided for backwards compatibility"""
+        """
+        @deprecated
+
+        Provided for backwards compatibility.
+        """
         import warnings
         warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
         self.n, self.f = cp
     
     def getClippingPlanes(self):
-        """Provided for backwards compatibility"""
+        """
+        @deprecated
+
+        Provided for backwards compatibility.
+        """
         import warnings
         warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
         return (self.n, self.f)
@@ -946,6 +1276,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 //PEP8 deprecations
 %pythoncode {
     import warnings
+
+    SimRobotSensor = SensorModel
 
     def _deprecated_func(oldName,newName):
         import sys

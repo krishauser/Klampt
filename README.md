@@ -56,10 +56,10 @@ Quick start (Python API only):
 
 To run a visualization (you may need to replace `pip` with `pip3` and `python` with `python3`):
 - `pip install PyOpenGL`
-- `pip install PyQt5`
+- `pip install PyQt6`
 - `git clone http://github.com/krishauser/Klampt-examples` (this is needed to run example programs)
-- `cd Klampt-examples/Python3/demos`
-- `python gl_vis.py`
+- `cd Klampt-examples/Python3/demos/sim`
+- `python sensor_test.py`
 
 Installation instructions are also available for
 - [Linux](Cpp/docs/Tutorials/Install-Linux.md)
@@ -99,17 +99,27 @@ Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the 
 -   None
 
 **0.10.0** (1/20/2024)
--   New geometry types `OccupancyGrid` and `Heightmap`.  `OccupancyGrid` uses the same `VolumeGrid` data structure as `ImplicitSurface`.  `Heightmap` can represent orthographic heightmaps (e.g., elevation maps) as well as depth maps coming from RGB-D cameras. 
--   Viewport data structure now accepts non-square pixels and non-centered focal points.  API breaking change; to resize viewports and keep the FOV and relative center, use `Viewport.resize(w,h)`.
+-   New geometry types `OccupancyGrid` and `Heightmap`.  `OccupancyGrid` uses the same `VolumeGrid` data structure as `ImplicitSurface`.  `Heightmap` can represent orthographic heightmaps (e.g., elevation maps) as well as depth maps coming from RGB-D cameras. Many more [proximity queries](blob/master/Cpp/docs/Manual-Geometry.md) are implemented / accelerated.
+-   Viewport data structure now accepts non-square pixels and non-centered focal points, making it compatible with calibrated camera intrinsics.  API breaking change; to resize viewports and keep the FOV and relative center, use `Viewport.resize(w,h)`.
 -   C++ API: Breaking changes to KrisLibrary Geometry API, now reflected in KrisLibrary `0.2` and later.  Older builds of Klampt will need to pull KrisLibrary branch `0.1`. 
 -   C++ API: Renamed `Merge` to `Union` for all geometries. Added `Merge` function that merges a single geometry into the current geometry's representation.
--   Python API: Upgraded to support PyQt6, deprecated PyQt4.  Changed to using ``QOpenGLWidget`` for visualization, which may introduce visualization bugs as we work through the kinks.  Klampt windows can now be run in concert with OpenCV visualizations, although only in single-threaded (`vis.loop` / `vis.run`) mode (see [opencvtest.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/vis/opencvtest.py)).  Also, when simulating sensors and showing them in matplotlib, `vis.scene().window.makeCurrent() / doneCurrent()` needs to be called (see [sensor_matplotlib.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/vis/sensor_matplotlib.py)).  For example, grabbing depth maps from the viewport is no longer supported.  However, you can still get depth maps from `SimRobotSensor`s.
--   Python API: Geometry3D data objects now use Numpy accessors.  Also, they now support zero copying for setting and getting data, making large geometry updates much faster!
--   Python API: Added Rerun.io visualization frontend.  Try `vis.init('Rerun')`.  Unsupported functions: multi-window, coordinates module items, ContactPoints, Holds.
+-   Python API: many more setters / getters to make access more Pythonic, i.e., treating `WorldModel.robots` / `RobotModel.sensors` as Python tuples.  -   Python API: Upgraded to support PyQt6, deprecated PyQt4.  Changed to using ``QOpenGLWidget`` for visualization, which may introduce visualization bugs as we work through the kinks.  Klampt windows can now be run in concert with OpenCV visualizations, although only in single-threaded (`vis.loop` / `vis.run`) mode (see [opencvtest.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/vis/opencvtest.py)).  Also, when simulating sensors and showing them in matplotlib, `vis.scene().window.makeCurrent() / doneCurrent()` needs to be called (see [sensor_matplotlib.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/vis/sensor_matplotlib.py)).  For example, grabbing depth maps from the viewport is no longer supported.  However, you can still get depth maps from `SimRobotSensor`s.
+-   Python API: Geometry3D data objects now use Numpy accessors.  Also, they now support zero copying for setting and getting data, making large geometry updates much faster!  You may also use `PointCloud.getColors/setColors`, `TriangleMesh.triangleNormals/vertexNormals`.
+-   Python API: Renamed SimRobotSensor to SensorModel.  `SensorModel.name()/type()` are changed to attributes `SensorModel.name/type`. 
+-   Python API: `klampt.model.sensing` API change.  No longer need `robot` argument to functions.  Rely on SensorModel to get sensor transforms.
 -   Python API: Added Geometry3D `merge` function that can be used for SDF and heightmap fusion.
+-   Python API: Added Rerun.io visualization frontend.  Try `vis.init('Rerun')`.  Unsupported functions: multi-window, coordinates module items, ContactPoints, Holds.
 -   Python API: can control draw order of transparent objects with `draw_order` attribute.
 -   Python API: Text and plots are drawn at a more sensible size (points rather than pixels) for high-resolution screens.
--   Klampt-examples: moved "boring" Python tests to the `Klampt-examples/Python3/testing/pytest` folder and made compatible with pytest.
+-   Klampt-examples: moved "boring" C++ tests to the `Klampt-examples/Cpp/testing` folder. Moved "boring" Python tests to the `Klampt-examples/Python3/testing/pytest` folder and made compatible with pytest.  Broke test files that had multiple selectable tests into individual tests.
+-   Various bug fixes.
+
+Known issues:
+-   Multiple PyQt editors cause a stall
+-   Camera simulation isn't working (RGB shows up as black, depth is OK)
+-   Open3D volume to VolumeGrid not working
+-   TSDFs aren't drawn correctly
+-   
 
 **0.9.2** (8/13/2024)
 -   Python API: pip packages now built with Numpy 2+.

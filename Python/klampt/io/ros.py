@@ -613,7 +613,7 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
             frame = frame_prefix + '/'
         else:
             frame = '.'
-        frame += klampt_sensor.robot().getName()+'/' + klampt_sensor.name()
+        frame += klampt_sensor.robot().name+'/' + klampt_sensor.name
 
     stype = klampt_sensor.type()
     if stype == 'CameraSensor':
@@ -1074,7 +1074,7 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
             Tsensor_link = (so3.mul(Tsensor_link[0],klampt_to_ros_lidar),Tsensor_link[1])
         q = so3.quaternion(Tsensor_link[0])
         robot = klampt_obj.robot()
-        broadcaster.sendTransform(Tsensor_link[1],(q[1],q[2],q[3],q[0]),stamp,frameprefix+"/"+klampt_obj.name(),frameprefix+"/"+robot.link(link).getName())
+        broadcaster.sendTransform(Tsensor_link[1],(q[1],q[2],q[3],q[0]),stamp,frameprefix+"/"+klampt_obj.name,frameprefix+"/"+robot.link(link).getName())
         return
     transform = None
     if isinstance(klampt_obj,(list,tuple)):

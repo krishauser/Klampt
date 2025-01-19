@@ -120,8 +120,8 @@ The main interface to sensors is :class:`~klampt.SimRobotSensor`.
    SimRobotSensor reference from a :class:`SimRobotController`.
 -  ``sensor = SimRobotSensor(controller,name,type)``: creates a new
    sensor for the SimRobotController of the given name and type string.
--  ``sensor.name()``: gets the sensor’s name string
--  ``sensor.type()``: gets the sensor’s type string
+-  ``sensor.name``: gets/sets the sensor’s name string
+-  ``sensor.type``: gets the sensor’s type string
 -  ``sensor.measurementNames()``: returns a list of strings naming the
    sensor’s measurements
 -  ``sensor.getMeasurements()``: returns a list of floats giving the

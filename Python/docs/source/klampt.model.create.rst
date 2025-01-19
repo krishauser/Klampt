@@ -15,9 +15,9 @@ Submodules
 ----------
 
 .. autosummary::
-    ~klampt.model.create.moving_base_robot
-    ~klampt.model.create.pile
-    ~klampt.model.create.primitives
+    ~moving_base_robot
+    ~pile
+    ~primitives
 
 
 klampt.model.create.moving\_base\_robot module

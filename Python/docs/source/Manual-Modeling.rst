@@ -127,25 +127,30 @@ Parallel mechanisms are not directly supported.
 API summary
 ~~~~~~~~~~~
 
-The following lsits the key kinematic operations of the :class:`~klampt.RobotModel` class.
+The following lists the key kinematic operations of the :class:`~klampt.RobotModel` class.
 
 -  ``robot = world.robot([name or index])``: access RobotModel reference
    by name or index
--  ``robot.getID()``: gets the unique ID of the RobotModel in its
-   WorldModel
+-  ``robot.id`` (int): gets the unique ID of the RobotModel in its  WorldModel
 -  ``robot.num[Links/Drivers]()``: returns the number of links or
    drivers (joints are abstracted away in the Python API)
--  ``robot.get[Link/Driver](index)``: returns a reference to the
+-  ``robot.[link/driver](index)``: returns a reference to the
    index'th RobotModelLink / RobotModelDriver
--  ``robot.get[Link/Driver](name)``: returns a reference to the
+-  ``robot.[link/driver](name)``: returns a reference to the
    RobotModelLink / RobotModelDriver with the given name (name must have
    type str)
--  ``robot.get[Config/Velocity]()``: returns the model's
-   Configuration/Velocity as a list of floats with length ``numLinks()``
--  ``robot.setConfig(q)``: sets the model's Configuration to q given as
-   a list/tuple of floats with length ``numLinks()``. Also, updates the
+-  ``robot.links`` (list of RobotModelLink): a list of all
+   links in the robot
+-  ``robot.linksDict`` (dict of str to RobotModelLink): a dict of all
+   links in the robot
+-  ``robot.drivers`` (list of RobotModelDriver): a list of all
+   drivers in the robot
+-  ``robot.driversDict`` (dict of str to RobotModelDriver): a dict of all
+   drivers in the robot
+-  ``robot.config`` (Vector): gets/sets the model's Configuration as a
+   list of floats with length ``numLinks()``.  When setting, updates the
    forward kinematics of all Robot Links.
--  ``robot.setVelocity(dq)``: sets the model's Velocity to dq given as a
+-  ``robot.velocity`` (Vector): gets/sets the model's velocity to dq, given as a
    list/tuple of floats with length ``numLinks()``
 -  ``robot.get[Joint/Velocity/Acceleration]Limits()``: returns
    minimum/maximum of model's Configuration/Velocity/acceleration as a
@@ -201,31 +206,23 @@ of the robot:
 
 -  ``link = robot.link([name or index])``: access RobotModelLink
    reference
--  ``link.getID()``: gets the unique ID of this link in the WorldModel
--  ``link.getName()``: returns a string naming this link
--  ``link.getRobot()``: returns a RobotModel to which this link belongs
--  ``link.getIndex()``: returns the link index on the RobotModel for
+-  ``link.id`` (int): gets the unique ID of this link in the WorldModel
+-  ``link.name`` (str): gets/sets a string naming this link
+-  ``link.robot()``: returns a RobotModel to which this link belongs
+-  ``link.getIndex()`` (int): returns the link index on the RobotModel for
    this link
--  ``link.getParent()``: returns the index of the link's parent (-1 for
+-  ``link.parent`` (int): gets/sets the index of the link's parent (-1 for
    no parent)
--  ``link.setParent(p)``: sets the index of the link's parent (-1 for no
-   parent)
--  ``link.getAxis()``: returns a 3-tuple of the link's
-   rotation/translation axis in local coordinates
--  ``link.setAxis(axis)``: sets the link's rotation/translation axis to
-   the given 3-tuple, specifying its local coordinates
--  ``link.getParentTransform()``: returns a pair (R,t) defining the
-   reference coordinate transform of this link with respect to its
+-  ``link.axis`` (Vector3):  gets/sets the link's rotation/translation axis
+   in local coordinates
+-  ``link.parentTransform`` (RigidTransform): gets/sets a pair (R,t) defining 
+   the reference coordinate transform of this link with respect to its
    parent (see klampt.so3 for the format of R)
--  ``link.setParentTransform(R,t)``: sets the reference coordinate
-   transform of this link with respect to its parent (see klampt.so3 for
-   the format of R)
 -  ``link.geometry()``: returns a reference to the Geometry3D attached
    to this link
 -  ``link.appearance()``: returns a reference to the Appearance attached
    to this link
--  ``link.getMass()``: returns the link's Mass structure
--  ``link.setMass(mass)``: sets the link's Mass structure
+-  ``link.mass`` (Mass): gets/sets the link's inertial properties
 -  ``link.drawLocalGL()``: renders the link's geometry in OpenGL in
    local coordinates
 

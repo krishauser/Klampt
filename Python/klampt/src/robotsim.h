@@ -9,7 +9,6 @@
 
 //declarations for internal objects
 namespace Klampt {
-  class SensorBase;
   class Simulator;
   class SimRobotController;
   class ODEGeometry;
@@ -18,128 +17,13 @@ typedef struct dxBody *dBodyID;
 typedef struct dxJoint *dJointID;
 
 //forward declarations
-class SimRobotSensor;
+class SensorModel;
 class SimRobotController;
 class SimBody;
 class Simulator;
 
 using namespace std;
 
-/** @brief A sensor on a simulated robot.  Retrieve one from the controller
- * using :meth:`SimRobotController.sensor`, or create a new one
- * using :meth:`SimRobotController.addSensor`.  You may also use
- * kinematically-simulated sensors using :meth:`RobotModel.sensor` or create
- * a new one using :meth:`RobotModel.addSensor`.
- *
- * Use  :meth:`getMeasurements` to get the currently simulated measurement
- * vector.
- *
- * Sensors are automatically updated through the :meth:`Simulator.simulate` call,
- * and :meth:`getMeasurements` retrieves the updated values.  As a result,
- * you may get garbage measurements before the first Simulator.simulate call is
- * made.
- * 
- * There is also a mode for doing kinematic simulation, which is supported
- * (i.e., makes sensible measurements) for some types of sensors when just 
- * a robot / world model is given. This is similar to Simulation.fakeSimulate
- * but the entire controller structure is bypassed.  You can arbitrarily set the
- * robot's position, call :meth:`kinematicReset`, and then call
- * :meth:`kinematicSimulate`.  Subsequent calls assume the robot is being
- * driven along a trajectory until the next :meth:`kinematicReset` is called.
- * 
- * LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
- * JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
- * FilteredSensor and TimeDelayedSensor also work.  The force-related sensors 
- * (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.
- *
- * To use get/setSetting, you will need to know the sensor attribute names
- * and types as described in `the Klampt sensor documentation <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-Control.md#sensors>`_
- * (same as in the world or sensor XML file). Common settings include:
- * 
- * - rate (float): how frequently the sensor is simulated
- * - enabled (bool): whether the simulator simulates this sensor
- * - link (int): the link on which this sensor lies (-1 for world)
- * - Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
- *    of the sensor on the robot / world.
- * 
- */
-class SimRobotSensor
-{
- public:
-  SimRobotSensor(const RobotModel& robot,Klampt::SensorBase* sensor);
-
-  ///Returns the name of the sensor
-  std::string name();
-  ///Returns the type of the sensor
-  std::string type();
-  ///Returns the model of the robot to which this belongs
-  RobotModel robot();
-  ///Returns a list of names for the measurements (one per measurement).
-  std::vector<std::string> measurementNames();
-  ///Returns an array of measurements from the previous simulation (or
-  ///kinematicSimulate) timestep
-  ///
-  ///Return type: np.ndarray
-  void getMeasurements(double** np_out,int* m);
-  ///Returns all setting names
-  ///
-  std::vector<std::string> settings();
-  ///Returns the value of the named setting (you will need to manually parse this)
-  std::string getSetting(const std::string& name);
-  ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
-  void setSetting(const std::string& name,const std::string& val);
-  ///Return whether the sensor is enabled during simulation (helper for getSetting)
-  bool getEnabled();
-  ///Sets whether the sensor is enabled (helper for setSetting)
-  void setEnabled(bool enabled);
-  ///Returns the link on which the sensor is mounted (helper for getSetting)
-  RobotModelLink getLink();
-  ///Sets the link on which the sensor is mounted (helper for setSetting)
-  void setLink(const RobotModelLink& link);
-  ///Sets the link on which the sensor is mounted (helper for setSetting)
-  void setLink(int link);
-  ///Returns the local transform of the sensor on the robot's link. 
-  ///(helper for getSetting)
-  ///
-  ///If the sensor doesn't have a transform (such as a joint position or
-  ///torque sensor) an exception will be raised.
-  ///
-  ///Return type: RigidTransform
-  void getTransform(double out[9],double out2[3]);
-  ///Returns the world transform of the sensor given the robot's current
-  ///configuration. (helper for getSetting)
-  ///
-  ///If the sensor doesn't have a transform (such as a joint position or
-  ///torque sensor) an exception will be raised.
-  ///
-  ///Return type: RigidTransform
-  void getTransformWorld(double out[9],double out2[3]);
-  ///Sets the local transform of the sensor on the robot's link.
-  ///(helper for setSetting)
-  ///
-  ///If the sensor doesn't have a transform (such as a joint position or
-  ///torque sensor) an exception will be raised.
-  void setTransform(const double R[9],const double t[3]);
-  //note: only the last overload docstring is added to the documentation
-  ///Draws a sensor indicator using OpenGL.  If measurements are given,
-  ///the indicator is drawn as though these are the latest measurements,
-  ///otherwise only an indicator is drawn.
-  void drawGL();
-  //note: only the last overload docstring is added to the documentation
-  ///Draws a sensor indicator using OpenGL.  If measurements are given,
-  ///the indicator is drawn as though these are the latest measurements,
-  ///otherwise only an indicator is drawn.
-  void drawGL(double* np_array,int m);
-
-  ///simulates / advances the kinematic simulation
-  void kinematicSimulate(WorldModel& world,double dt);
-  void kinematicSimulate(double dt);
-  ///resets a kinematic simulation so that a new initial condition can be set
-  void kinematicReset();
-
-  RobotModel robotModel;
-  Klampt::SensorBase* sensor;
-};
 
 /** @brief A controller for a simulated robot.
  *
@@ -239,22 +123,17 @@ class SimRobotController
   /// Note: a default robot doesn't have a torque sensor, so this will be 0
   void getSensedTorque(std::vector<double>& out);
 
-  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
-  /// a null sensor is returned (i.e., SimRobotSensor.name() or
-  /// SimRobotSensor.type()) will return the empty string.)
-  SimRobotSensor sensor(int index);
-  //note: only the last overload docstring is added to the documentation
-  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
-  ///     a null sensor is returned (i.e., SimRobotSensor.name() or
-  ///     SimRobotSensor.type()) will return the empty string.)
-  SimRobotSensor sensor(const char* name);
+  /// Returns the number of sensors
+  int numSensors() const; 
+  SensorModel _sensor(int index);
+  SensorModel _sensor(const char* name);
   ///Adds a new sensor with a given name and type
   ///
   /// Returns:
   ///
   ///     The new sensor.
   ///
-  SimRobotSensor addSensor(const char* name,const char* type);
+  SensorModel addSensor(const char* name,const char* type);
   
   /// Returns a custom command list
   std::vector<std::string> commands();

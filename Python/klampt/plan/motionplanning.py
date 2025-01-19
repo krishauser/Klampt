@@ -21,8 +21,7 @@ try:
 except ImportError:
     import __builtin__
 
-import numpy as np
-from typing import Sequence,List,Tuple,Iterator
+from typing import Sequence,List,Tuple,Iterator,Union,Optional,Dict
 from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
 
 
@@ -400,7 +399,7 @@ def set_plan_setting(*args) -> None:
 
     Args:
         setting (str): 
-        value (str or float): 
+        value (float or str): 
 
     Valid numeric values are:  
 
