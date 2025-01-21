@@ -114,10 +114,6 @@ Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the 
 -   Klampt-examples: moved "boring" C++ tests to the `Klampt-examples/Cpp/testing` folder. Moved "boring" Python tests to the `Klampt-examples/Python3/testing/pytest` folder and made compatible with pytest.  Broke test files that had multiple selectable tests into individual tests.
 -   Various bug fixes.
 
-Known issues:
--   Multiple PyQt editors cause a stall
--   TSDFs aren't drawn correctly
-
 **0.9.2** (8/13/2024)
 -   Python API: pip packages now built with Numpy 2+.
 -   Python API: Improved calibration routines in `klampt.model.calibrate`.
