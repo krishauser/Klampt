@@ -1871,7 +1871,7 @@ def followCamera(target,translate=True,rotate=False,center=False) -> None:
       were fixed to the object.
 
     Args:
-        target (str, SimRobotSensor, Trajectory, or None): the target that is
+        target (str, SensorModel, Trajectory, or None): the target that is
             to be followed. If None, the camera stops following anything.
         translate (bool, optional): whether the camera should follow using
             translation.
@@ -2537,7 +2537,7 @@ def _default_attributes(item,type=None):
         pass
     elif isinstance(item,IKObjective):
         return _default_IKObjective_attributes
-    elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,ConvexHull,Heightmap,Geometry3D)):
+    elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,ConvexHull,ImplicitSurface,OccupancyGrid,Heightmap,Geometry3D)):
         return _default_Geometry_attributes
     else:
         if type is not None:
@@ -2548,7 +2548,7 @@ def _default_attributes(item,type=None):
                 res["type"]=itypes
             except Exception as e:
                 if hasattr(item,'drawGL'):
-                    #assume it's a SimRobotSensor, Appearance, or SubRobotModel
+                    #assume it's a SensorModel, Appearance, or SubRobotModel
                     return {}
                 warnings.warn(str(e))
                 warnings.warn("Unsupported object type {} of type {}".format(item,item.__class__.__name__))
@@ -4116,7 +4116,7 @@ class VisualizationScene:
                 self.cameraController = None
         elif isinstance(target,Trajectory):
             self.cameraController = _TrajectoryCameraController(vp,target)
-        elif isinstance(target,SimRobotSensor):
+        elif isinstance(target,SensorModel):
           self.cameraController = _SimCamCameraController(vp,target)
         else:
             raise ValueError("Invalid value for target, must either be str or a Trajectory")
@@ -4471,7 +4471,7 @@ class _SimCamCameraController:
         self.target = target
     def update(self,t):
         from ..model import sensing
-        T = sensing.get_sensor_xform(self.target,self.target.robot())
+        T = self.target.getTransformWorld()
         self.vp.set_transform(T)
         return self.vp
 

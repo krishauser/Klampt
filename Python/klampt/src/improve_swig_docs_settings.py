@@ -1,9 +1,9 @@
 #all of the classes defined in the package that you'd like to cross-reference
 classes = {'RobotModel','WorldModel','RobotModelLink','RobotModelDriver','TerrainModel','RigidObjectModel',
     'IKObjective','IKSolver',
-    'Geometry3D','Appearance','Viewport','Widget','TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull',
+    'Geometry3D','Appearance','Viewport','Widget','TriangleMesh','PointCloud','ImplicitSurface','OccupancyGrid','GeometricPrimitive','ConvexHull',
     'ContactParameters','Mass','DistanceQueryResult','DistanceQuerySettings','ContactQueryResult',
-    'SimRobotSensor','SimRobotController','SimBody','Simulator',
+    'SimRobotSensor','SensorModel','SimRobotController','SimBody','Simulator',
     'CSpaceInterface','MotionPlanInterface',
     'ContactPoint','Trajectory','RobotTrajectory','HermiteTrajectory','MultiPath',
     'CSpace','MotionPlan'

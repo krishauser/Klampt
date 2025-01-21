@@ -403,8 +403,8 @@ class SubRobotModel:
         raise NotImplementedError("Can't reduce a sub-robot")
     def mount(self,link,subRobot,R,t):
         self._robot.mount(self.tofull(link),subRobot,R,t)
-    def sensor(self,index) -> 'SimRobotSensor':
-        """Returns the SimRobotSensor corresponding to index. Note however that
+    def sensor(self,index) -> 'SensorModel':
+        """Returns the SensorModel corresponding to index. Note however that
         you shouldn't set the sensor's "link" setting according to this
         SubRobotModel.
 

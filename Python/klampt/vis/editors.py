@@ -1381,16 +1381,16 @@ class WorldEditor(VisualEditorBase):
 
 
 class SensorEditor(RigidTransformEditor):
-    """Edits a SimRobotSensor.
+    """Edits a SensorModel.
 
     Assumes that the sensor is attached to the first robot in the world, if
     ``world`` is provided.
     """
     def __init__(self,name,value,description,world):
-        from klampt import SimRobotSensor
+        from klampt import SensorModel
         from ..model import sensing
-        assert isinstance(value,SimRobotSensor),"Need to provide SensorEditor with a SimRobotSensor"
-        T = sensing.get_sensor_xform(value)
+        assert isinstance(value,SensorModel),"Need to provide SensorEditor with a SensorModel"
+        T = value.getTransform()
         link_frame = None
         if world is not None:
             robot = world.robot(0)
@@ -1439,7 +1439,7 @@ class SensorEditor(RigidTransformEditor):
     def display(self):
         from ..model import sensing
         sensor = self.value
-        self.value = sensing.get_sensor_xform(sensor)
+        self.value = sensor.getTransform()
         RigidTransformEditor.display(self)
         self.value = sensor
 
@@ -1476,7 +1476,7 @@ class SensorEditor(RigidTransformEditor):
     def mousefunc(self,button,state,x,y):
         from ..model import sensing
         sensor = self.value
-        self.value = sensing.get_sensor_xform(sensor)
+        self.value = sensor.getTransform()
         res = RigidTransformEditor.mousefunc(self,button,state,x,y)
         if res:
             sensing.set_sensor_xform(sensor,self.value)
@@ -1489,7 +1489,7 @@ class SensorEditor(RigidTransformEditor):
     def motionfunc(self,x,y,dx,dy):
         from ..model import sensing
         sensor = self.value
-        self.value = sensing.get_sensor_xform(sensor)
+        self.value = sensor.getTransform()
         res = RigidTransformEditor.motionfunc(self,x,y,dx,dy)
         sensing.set_sensor_xform(sensor,self.value)
         self.value = sensor
@@ -1498,7 +1498,7 @@ class SensorEditor(RigidTransformEditor):
     def update_value_from_gui(self):
         sensor = self.value
         from ..model import sensing
-        self.value = sensing.get_sensor_xform(sensor)
+        self.value = sensor.getTransform()
         RigidTransformEditor.update_value_from_gui(self)
         sensing.set_sensor_xform(sensor,self.value)
         self.value = sensor
@@ -1506,7 +1506,7 @@ class SensorEditor(RigidTransformEditor):
     def update_gui_from_value(self):
         sensor = self.value
         from ..model import sensing
-        self.value = sensing.get_sensor_xform(sensor)
+        self.value = sensor.getTransform()
         RigidTransformEditor.update_gui_from_value(self)
         self.value = sensor
 
@@ -1533,6 +1533,9 @@ def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
 
     """
     from klampt.vis import glinit
+    from klampt.vis import visualization 
+    if glinit.active() is None:
+        visualization.init('PyQt')
     if not glinit.active().startswith('PyQt'):
         raise ValueError("Unable to perform visual editing without Qt")
     #Import Qt stuff into global namespace

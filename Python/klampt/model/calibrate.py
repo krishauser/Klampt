@@ -337,7 +337,7 @@ class RobotExtrinsicCalibration:
         for s in simsensors:
             caminfo = CameraInfo(int(s.getSetting('link')))
             caminfo.intrinsics = sensing.camera_to_intrinsics(s,'json')
-            caminfo.local_coordinates = sensing.get_sensor_xform(s)
+            caminfo.local_coordinates = s.getTransform()
             self.cameras[s.name] = caminfo
 
     def editTrajectory(self, world : WorldModel = None, name='calibration_trajectory') -> RobotTrajectory:
@@ -451,7 +451,7 @@ class RobotExtrinsicCalibration:
             #for k in s.settings():
             #    print(k,s.getSetting(k))
             vis.add('Camera_widget {}'.format(i),s)
-            vis.add('Camera {}'.format(i),sensing.get_sensor_xform(s,self.robot))
+            vis.add('Camera {}'.format(i),s.getTransformWorld())
         for i,m in self.markers.items():
             if isinstance(m,PointMarker):
                 coords = _worldPosition(m.link,self.robot,m.local_coordinates)

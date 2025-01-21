@@ -58,7 +58,7 @@ class SimRobotControllerToInterface(object):
             sensorNames = self.robotInterface.sensors()
             if index_or_name < 0 or index_or_name >= len(sensorNames):
                 #"null" sensor
-                return _SimRobotSensorFromInterface(self.robotInterface,None)
+                return _SensorModelFromInterface(self.robotInterface,None)
             name = sensorNames[index_or_name]
         else:
             name = index_or_name
@@ -66,9 +66,9 @@ class SimRobotControllerToInterface(object):
             if name not in enabled:
                 if not self.robotInterface.hasSensor(name):
                     #"null" sensor
-                    return _SimRobotSensorFromInterface(self.robotInterface,None)
+                    return _SensorModelFromInterface(self.robotInterface,None)
                 self.robotInterface.enableSensor(name)
-        return _SimRobotSensorFromInterface(self.robotInterface,name)
+        return _SensorModelFromInterface(self.robotInterface,name)
     def commands(self):
         return ['estop','softStop','reset']
     def sendCommand(self,name,args):
@@ -116,7 +116,7 @@ class SimRobotControllerToInterface(object):
         return None,None,None
 
 
-class _SimRobotSensorFromInterface(object):
+class _SensorModelFromInterface(object):
     def __init__(self, iface : RobotInterfaceBase, name : str):
         self.iface = iface
         self._name = name

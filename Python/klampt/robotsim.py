@@ -1999,13 +1999,13 @@ class ImplicitSurface(object):
 
     def __init__(self, *args):
         r"""
-        __init__ (): :obj:`ImplicitSurface`
+        __init__ (): :class:`~klampt.ImplicitSurface`
 
-        __init__ (rhs): :obj:`ImplicitSurface`
+        __init__ (rhs): :class:`~klampt.ImplicitSurface`
 
 
         Args:
-            rhs (:obj:`ImplicitSurface`, optional): 
+            rhs (:class:`~klampt.ImplicitSurface`, optional): 
         """
         _robotsim.ImplicitSurface_swiginit(self, _robotsim.new_ImplicitSurface(*args))
 
@@ -2066,7 +2066,7 @@ class ImplicitSurface(object):
 
 
         Args:
-            arg2 (:obj:`ImplicitSurface`, optional): 
+            arg2 (:class:`~klampt.ImplicitSurface`, optional): 
             value (float, optional): 
             i (int, optional): 
             j (int, optional): 
@@ -2224,13 +2224,13 @@ class OccupancyGrid(object):
 
     def __init__(self, *args):
         r"""
-        __init__ (): :obj:`OccupancyGrid`
+        __init__ (): :class:`~klampt.OccupancyGrid`
 
-        __init__ (rhs): :obj:`OccupancyGrid`
+        __init__ (rhs): :class:`~klampt.OccupancyGrid`
 
 
         Args:
-            rhs (:obj:`OccupancyGrid`, optional): 
+            rhs (:class:`~klampt.OccupancyGrid`, optional): 
         """
         _robotsim.OccupancyGrid_swiginit(self, _robotsim.new_OccupancyGrid(*args))
 
@@ -2291,7 +2291,7 @@ class OccupancyGrid(object):
 
 
         Args:
-            arg2 (:obj:`OccupancyGrid`, optional): 
+            arg2 (:class:`~klampt.OccupancyGrid`, optional): 
             value (float, optional): 
             i (int, optional): 
             j (int, optional): 
@@ -3162,7 +3162,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.ConvexHull` or :obj:`OccupancyGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud` or :obj:`ImplicitSurface` or :class:`~klampt.TriangleMesh` or :obj:`Heightmap`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.TriangleMesh` or :obj:`Heightmap`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -3338,7 +3338,7 @@ class Geometry3D(object):
         Sets this Geometry3D to an ImplicitSurface.  
 
         Args:
-            grid (:obj:`ImplicitSurface`)
+            grid (:class:`~klampt.ImplicitSurface`)
         """
         return _robotsim.Geometry3D_setImplicitSurface(self, grid)
 
@@ -3347,7 +3347,7 @@ class Geometry3D(object):
         Sets this Geometry3D to an OccupancyGrid.  
 
         Args:
-            grid (:obj:`OccupancyGrid`)
+            grid (:class:`~klampt.OccupancyGrid`)
         """
         return _robotsim.Geometry3D_setOccupancyGrid(self, grid)
 
@@ -6808,9 +6808,9 @@ class RobotModel(object):
 
     def _sensor(self, *args) ->  "SensorModel":
         r"""
-        _sensor (index): :obj:`SensorModel`
+        _sensor (index): :class:`~klampt.SensorModel`
 
-        _sensor (name): :obj:`SensorModel`
+        _sensor (name): :class:`~klampt.SensorModel`
 
 
         Args:
@@ -8731,7 +8731,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -9031,9 +9031,9 @@ class SimRobotController(object):
 
     def _sensor(self, *args) ->  "SensorModel":
         r"""
-        _sensor (index): :obj:`SensorModel`
+        _sensor (index): :class:`~klampt.SensorModel`
 
-        _sensor (name): :obj:`SensorModel`
+        _sensor (name): :class:`~klampt.SensorModel`
 
 
         Args:

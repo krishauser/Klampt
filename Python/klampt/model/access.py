@@ -133,7 +133,7 @@ class map:
         - \*commandedVelocity (list of floats)
         - \*sensedConfig (list of floats)
         - \*sensedVelocity (list of floats)
-        - \*sensors (list/dict of SimRobotSensors)
+        - \*sensors (list/dict of SensorModels)
     
     dicts, lists, tuples: behave like normal
     
