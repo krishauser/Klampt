@@ -3171,8 +3171,9 @@ save/restore the configuration as follows::
 
     q = robot.getConfig()
     do some stuff that may touch the robot's configuration...
-    robot.setConfig(q)
- The model maintains configuration/velocity/acceleration/torque limits. However,
+    robot.setConfig(q)  
+
+The model maintains configuration/velocity/acceleration/torque limits. However,
 these are not enforced by the model, so you can happily set configurations
 outside the limits. Valid commands must rather be enforced by the planner /
 controller / simulator.  

@@ -513,7 +513,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          Returns a list of all drivers on the robot.
          """
-         return Tuple(self.driver(i) for i in range(self.numDrivers()))
+         return tuple(self.driver(i) for i in range(self.numDrivers()))
      
      def getDriversDict(self) -> Dict[str,RobotModelDriver]:
          """
@@ -535,7 +535,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          Returns a list of all sensors on the robot.
          """
-         return Tuple(self.sensor(i) for i in range(self.numSensors()))
+         return tuple(self.sensor(i) for i in range(self.numSensors()))
 
      def getSensorsDict(self) -> Dict[str,'SensorModel']:
          """
@@ -626,7 +626,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          Returns a list of all rigid objects in the world.
          """
-         return Tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
+         return tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
      
      def getRigidObjectsDict(self) -> Dict[str,RigidObjectModel]:
          """
@@ -638,7 +638,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          Returns a list of all rigid objects in the world.
          """
-         return Tuple(self.terrain(i) for i in range(self.numTerrains()))
+         return tuple(self.terrain(i) for i in range(self.numTerrains()))
      
      def getTerrainsDict(self) -> Dict[str,TerrainModel]:
          """
@@ -672,7 +672,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          Returns a list of all sensors on the robot.
          """
-         return Tuple(self.sensor(i) for i in range(self.numSensors()))
+         return tuple(self.sensor(i) for i in range(self.numSensors()))
 
      def getSensorsDict(self) -> Dict[str,SensorModel]:
          """

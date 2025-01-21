@@ -6434,8 +6434,9 @@ class RobotModel(object):
 
         q = robot.getConfig()
         do some stuff that may touch the robot's configuration...
-        robot.setConfig(q)
-     The model maintains configuration/velocity/acceleration/torque limits. However,
+        robot.setConfig(q)  
+
+    The model maintains configuration/velocity/acceleration/torque limits. However,
     these are not enforced by the model, so you can happily set configurations
     outside the limits. Valid commands must rather be enforced by the planner /
     controller / simulator.  
@@ -7270,7 +7271,7 @@ class RobotModel(object):
         """
         Returns a list of all drivers on the robot.
         """
-        return Tuple(self.driver(i) for i in range(self.numDrivers()))
+        return tuple(self.driver(i) for i in range(self.numDrivers()))
 
     def getDriversDict(self) -> Dict[str,RobotModelDriver]:
         """
@@ -7292,7 +7293,7 @@ class RobotModel(object):
         """
         Returns a list of all sensors on the robot.
         """
-        return Tuple(self.sensor(i) for i in range(self.numSensors()))
+        return tuple(self.sensor(i) for i in range(self.numSensors()))
 
     def getSensorsDict(self) -> Dict[str,'SensorModel']:
         """
@@ -8389,7 +8390,7 @@ class WorldModel(object):
         """
         Returns a list of all rigid objects in the world.
         """
-        return Tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
+        return tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
 
     def getRigidObjectsDict(self) -> Dict[str,RigidObjectModel]:
         """
@@ -8401,7 +8402,7 @@ class WorldModel(object):
         """
         Returns a list of all rigid objects in the world.
         """
-        return Tuple(self.terrain(i) for i in range(self.numTerrains()))
+        return tuple(self.terrain(i) for i in range(self.numTerrains()))
 
     def getTerrainsDict(self) -> Dict[str,TerrainModel]:
         """
@@ -9807,7 +9808,7 @@ class SimRobotController(object):
         """
         Returns a list of all sensors on the robot.
         """
-        return Tuple(self.sensor(i) for i in range(self.numSensors()))
+        return tuple(self.sensor(i) for i in range(self.numSensors()))
 
     def getSensorsDict(self) -> Dict[str,SensorModel]:
         """
