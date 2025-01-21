@@ -72,8 +72,13 @@ def toGlutButton(button):
         return 0
     elif button==Button.RightButton:
         return 2
-    elif button==Button.MidButton:
-        return 1
+    else:
+        if PYQT_VERSION == 6:
+            if button==Button.MiddleButton:
+                return 1
+        else:
+            if button==Button.MidButton:
+                return 1
     return 0
 
 def toModifierList(modifiers):
