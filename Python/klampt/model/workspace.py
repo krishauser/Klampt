@@ -4,7 +4,7 @@ feasibility conditions.
 .. versionadded:: 0.9
 """
 
-from klampt import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,VolumeGrid,IKObjective
+from klampt import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,OccupancyGrid,ImplicitSurface,IKObjective
 from klampt import vis
 from klampt.math import vectorops,so3,se3
 from klampt.model import ik
@@ -18,7 +18,7 @@ def compute_occupancy_grid(points : Sequence[Vector3],
                            resolution=0.05,
                            dimensions=None,
                            bounds=None,
-                           value='occupancy') -> VolumeGrid:
+                           value='occupancy') -> OccupancyGrid:
     """
     Helper to compute an occupancy grid given a set of points.
 
@@ -100,9 +100,10 @@ def compute_occupancy_grid(points : Sequence[Vector3],
             reachable[ind] += 1
         if value == 'probability' and len(points)>0:
             reachable *= 1.0/len(points)
-    vg = VolumeGrid()
-    vg.setBounds(lower_corner,upper_corner)
-    vg.setValues(reachable)
+    vg = OccupancyGrid()
+    vg.bmin = lower_corner
+    vg.bmax = upper_corner
+    vg.values = reachable
     return vg
 
 
@@ -112,7 +113,7 @@ def compute_field_grid(points : Sequence[Vector3],
                        dimensions=None,
                        bounds=None,
                        aggregator='max',
-                       initial_value='auto') -> VolumeGrid:
+                       initial_value='auto') -> ImplicitSurface:
     """
     Helper to compute a gridded value field over a set of scattered points.
 
@@ -243,9 +244,10 @@ def compute_field_grid(points : Sequence[Vector3],
                         result[i,j,k] = g(value_grid[i,j,k])
         else:
             result = value_grid
-    vg = VolumeGrid()
-    vg.setBounds(lower_corner,upper_corner)
-    vg.setValues(result)
+    vg = ImplicitSurface()
+    vg.bmin = lower_corner
+    vg.bmax = upper_corner
+    vg.values = result
     return vg
 
 
@@ -264,7 +266,7 @@ def compute_workspace(link : RobotModelLink,
                       self_collision : bool = True,
                       feasibility_test : Callable = None,
                       value='occupancy',
-                      all_tests=True) -> Union[VolumeGrid,Dict[str,VolumeGrid]]:
+                      all_tests=True) -> Union[OccupancyGrid,Dict[str,OccupancyGrid]]:
     """Compute the reachable workspace of a point on a robot's end effector.
     Has several options to ensure various feasibility conditions.  Ensures that
     the robot does not collide with itself, optionally with obstacles.
@@ -428,7 +430,7 @@ def compute_workspace(link : RobotModelLink,
                 if res:
                     points.append(target)
                     
-            res = VolumeGrid(points,resolution=None,dimensions=vg_temp.dims,bounds=(bmin,bmax),value=value)
+            res = OccupancyGrid(points,resolution=None,dimensions=vg_temp.dims,bounds=(bmin,bmax),value=value)
         else:
             vg_temp,points1,_ = _naive_workspace_occupancy(robot,link,point_local,Nsamples,
                 resolution,dimensions,overall_feasibility_test)
@@ -458,7 +460,7 @@ def compute_workspace_field(link : RobotModelLink,
                             gravity : Vector3 = (0,0,-9.8),
                             self_collision : bool = True,
                             feasibility_test : Callable = None,
-                            default_value = 0.0) -> VolumeGrid:
+                            default_value = 0.0) -> ImplicitSurface:
     """Compute a scalar field over the reachable workspace of a point on a 
     robot's end effector. Has several options to ensure various feasibility 
     conditions. Ensures that the robot does not collide with itself, optionally
@@ -564,7 +566,7 @@ def compute_workspace_field(link : RobotModelLink,
                 resolution,dimensions)
         bmin,bmax = [vg_temp.bbox[0],vg_temp.bbox[1],vg_temp.bbox[2]],[vg_temp.bbox[3],vg_temp.bbox[4],vg_temp.bbox[5]]
         cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.dims)
-        vals = vg_temp.getValues()
+        vals = vg_temp.values
 
         #now solve the IK constraint
         i,j,k = vals.nonzero()

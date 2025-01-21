@@ -26,6 +26,7 @@ Imported into the main ``klampt`` package.
     ~klampt.RobotModel
     ~klampt.RobotModelLink
     ~klampt.RobotModelDriver
+    ~klampt.SensorModel
     ~klampt.RigidObjectModel
     ~klampt.TerrainModel
     ~klampt.Mass
@@ -44,7 +45,8 @@ Imported into the main ``klampt`` package.
     ~klampt.GeometricPrimitive
     ~klampt.TriangleMesh
     ~klampt.PointCloud
-    ~klampt.VolumeGrid
+    ~klampt.ImplicitSurface
+    ~klampt.OccupancyGrid
     ~klampt.ConvexHull
     ~klampt.DistanceQuerySettings
     ~klampt.DistanceQueryResult
@@ -71,7 +73,6 @@ Imported into the main ``klampt`` package.
     ~klampt.SimBody
     ~klampt.SimJoint
     ~klampt.SimRobotController
-    ~klampt.SimRobotSensor
 
 Equilibrium testing
 -------------------
@@ -104,16 +105,19 @@ Imported into the ``klampt.io`` package
 Visualization
 --------------
 
-For use in :class:`~klampt.vis.glcommon.GLWidgetPlugin`.
+:class:`~klampt.Viewport` is used to model cameras (:class:`~klampt.SensorModel`) and heightmaps ((:class:`~klampt.Heightmap`)).
+
+Widgets and posers are used in :class:`~klampt.vis.glcommon.GLWidgetPlugin`.
 
 .. autosummary::
+    ~klampt.robotsim.Viewport
     ~klampt.robotsim.Widget
     ~klampt.robotsim.WidgetSet
     ~klampt.robotsim.ObjectPoser
     ~klampt.robotsim.RobotPoser
     ~klampt.robotsim.PointPoser
     ~klampt.robotsim.TransformPoser
-    ~klampt.robotsim.Viewport
+
 
 Module contents
 ----------------
@@ -123,7 +127,7 @@ Module contents
     :members:
     :undoc-members:
     :show-inheritance:
-    :exclude-members: doubleArray, doubleVector, floatArray, floatVector, intArray, intVector, stringArray, stringVector, doubleMatrix
+    :exclude-members: doubleArray, doubleVector, floatArray, floatVector, intArray, intVector, stringArray, stringVector, doubleMatrix, thisown, dataPtr, geomPtr, isStandalone, dirty_dynamics
 
 .. autofunction:: klampt.robotsim.set_random_seed
 

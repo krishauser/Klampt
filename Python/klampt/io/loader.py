@@ -98,7 +98,7 @@ EXTENSION_TO_TYPES = {'.config':['Config'],
                    }
 """dict mapping file extensions to lists of compatible Klampt types."""
 
-UNSUPPORTED_JSON_TYPES = ['Geometry3D','TriangleMesh','PointCloud','GeometricPrimitive','VolumeGrid',
+UNSUPPORTED_JSON_TYPES = ['Geometry3D','TriangleMesh','PointCloud','GeometricPrimitive',
     'RobotModel','RigidObjectModel','TerrainModel','WorldModel']
 """List of Klampt types that cannot currently be exported to JSON"""
 
@@ -731,11 +731,25 @@ def load(type,fn):
 
     if type in loaders:
         return loaders[type](fn)
-    elif type in readers or type == 'json':
+    elif type in readers:
         text = None
         with open(fn,'r') as f:
             text = ''.join(f.readlines())
         return read(type,text)
+    elif type == 'json':
+        import json
+        with open(fn,'r') as f:
+            jsonobj = json.load(f)
+        if 'type' in jsonobj and jsonobj['type'] == 'Heightmap':
+            #use Geometry3D loader
+            g = Geometry3D()
+            if not g.loadFile(fn):
+                raise IOError("Error reading Heightmap from "+fn)
+            h = Heightmap()
+            h.set(g.getHeightmap())
+            return h
+        else:
+            return from_json(jsonobj)
     else:
         raise ValueError("Loading of type "+type+" is not supported")
 
@@ -775,7 +789,7 @@ def to_json(obj,type='auto'):
                         raise TypeError("Could not parse object "+str(obj))
         elif isinstance(obj,(bool,int,float,str)):
             type = 'Value'
-        elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath','GeometricPrimitive','TriangleMesh','ConvexHull','PointCloud','VolumeGrid','Geometry3D']:
+        elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath','GeometricPrimitive','TriangleMesh','ConvexHull','PointCloud','ImplicitSurface','OccupancyGrid','Geometry3D']:
             type = obj.__class__.__name__
         elif isinstance(obj,Trajectory):   #some subclasses of Trajectory may be used here too
             type = obj.__class__.__name__
@@ -825,36 +839,25 @@ def to_json(obj,type='auto'):
             pass
         return res
     elif type == 'TriangleMesh':
-        inds = list(obj.indices)
-        inds = [inds[i*3:i*3+3] for i in range(len(inds)//3)]
-        verts = list(obj.vertices)
-        verts = [verts[i*3:i*3+3] for i in range(len(verts)//3)]
-        return {'type':type,'indices':inds,'vertices':verts}
+        return {'type':type,'indices':obj.indices.tolist(),'vertices':obj.vertices.tolist()}
     elif type == 'PointCloud':
-        verts = list(obj.vertices)
-        verts = [verts[i*3:i*3+3] for i in range(len(verts)//3)]
-        res = {'type':type,'vertices':verts}
-        propNames = list(obj.propertyNames)
-        if len(propNames) > 0:
-            res['propertyNames'] = propNames
-        if len(verts) * len(propNames) > 0:
-            n = len(verts)
-            k = len(propNames)
-            props = list(obj.properties)
-            props = [props[i*k:i*k+k] for i in range(n)]
-            res['properties'] = props
+        points = obj.points.tolist()
+        res = {'type':type,'points':points}
+        if obj.numProperties() > 0:
+            res['propertyNames'] = [obj.propertyName(i) for i in range(obj.numProperties())]
+        if len(points) * obj.numProperties() > 0:
+            res['properties'] = obj.properties.tolist()
         #TODO: settings
         return res
-    elif type == 'VolumeGrid':
+    elif type in ['ImplicitSurface','OccupancyGrid']:
         res = {'type':type}
-        res['bmin'] = [obj.bbox[i] for i in range(3)]
-        res['bmax'] = [obj.bbox[i] for i in range(3,6)]
-        res['dims'] = list(obj.dims)
-        res['values'] = list(obj.values)
+        res['bmin'] = [v for v in obj.bmin]
+        res['bmax'] = [v for v in obj.bmax]
+        res['dims'] = obj.values.shape
+        res['values'] = obj.values.flatten().tolist()
         return res
     elif type == 'ConvexHull':
-        points = [[obj.points[i],obj.points[i+1],obj.points[i+2]] for i in range(0,len(obj.points),3)]
-        return {'type':type,'points':points}
+        return {'type':type,'points':obj.points.tolist()}
     elif type == 'Geometry3D':
         data = None
         gtype = obj.type()
@@ -866,8 +869,10 @@ def to_json(obj,type='auto'):
             data = to_json(obj.getPointCloud(),gtype)
         elif gtype == 'ConvexHull':
             data = to_json(obj.getConvexHull(),gtype)
-        elif gtype == 'VolumeGrid':
-            data = to_json(obj.getVolumeGrid(),gtype)
+        elif gtype in ['VolumeGrid','ImplicitSurface']:
+            data = to_json(obj.getImplicitSurface(),gtype)
+        elif gtype == 'OccupancyGrid':
+            data = to_json(obj.getOccupancyGrid(),gtype)
         elif gtype == 'Group':
             data = [to_json(obj.getElement(i)) for i in range(obj.numElements())]
         return {'type':type,'datatype':gtype,'data':data}
@@ -978,54 +983,49 @@ def from_json(jsonobj,type='auto'):
         else:
             raise ValueError("Invalid IK rotation constraint "+rotConstraint)
     elif type == 'TriangleMesh':
-        inds = sum(jsonobj['indices'],[])
-        verts = sum(jsonobj['vertices'],[])
+        import numpy as np
+        inds = np.array(jsonobj['indices'])
+        verts = np.array(jsonobj['vertices'])
         mesh = TriangleMesh()
-        mesh.indices.resize(len(inds))
-        mesh.vertices.resize(len(verts))
-        for i,v in enumerate(inds):
-            mesh.indices[i] = v
-        for i,v in enumerate(verts):
-            mesh.vertices[i] = v
+        mesh.indices = inds
+        mesh.vertices = verts
         return mesh
     elif type == 'PointCloud':
+        import numpy as np
         pc = PointCloud()
-        verts = sum(jsonobj['vertices'],[])
-        pc.vertices.resize(len(verts))
-        for i,v in enumerate(verts):
-            pc.vertices[i] = v
+        verts = np.array(jsonobj['points'])
+        pc.points = verts
         if 'propertyNames' in jsonobj:
             propNames = jsonobj['propertyNames']
-            pc.propertyNames.resize(len(propNames))
             for i,v in enumerate(propNames):
-                pc.propertyNames[i] = v
+                pc.addProperty(v)
             if 'properties' in jsonobj:
-                props = sum(jsonobj['properties'])
-                pc.properties.resize(len(props))
-                for i,v in enumerate(props):
-                    pc.properties[i] = v
+                props = np.array(jsonobj['properties'])
+                pc.properties = props
         #TODO: settings
         return pc
-    elif type == 'VolumeGrid':
-        vg = VolumeGrid()
-        bbox = jsonobj['bmin'] + jsonobj['bmax']
-        vg.bbox.resize(6)
-        for i,v in enumerate(bbox):
-            vg.bbox[i] = v
-        vg.dims.resize(3)
-        for i,v in enumerate(jsonobj['dims']):
-            vg.dims[i] = v
-        values = jsonobj['values']
-        vg.values.resize(len(values))
-        for i,v in enumerate(values):
-            vg.values[i] = v
+    elif type in ['VolumeGrid','ImplicitSurface']:
+        import numpy as np
+        vg = ImplicitSurface()
+        vg.bmin = jsonobj['bmin']
+        vg.bmax = jsonobj['bmax']
+        dims = jsonobj['dims']
+        values = np.array(jsonobj['values']).reshape(dims)
+        vg.values = values
         return vg
+    elif type == 'OccupancyGrid':
+        import numpy as np
+        og = OccupancyGrid()
+        og.bmin = jsonobj['bmin']
+        og.bmax = jsonobj['bmax']
+        dims = jsonobj['dims']
+        values = np.array(jsonobj['values']).reshape(dims)
+        og.values = values
+        return og
     elif type == 'ConvexHull':
+        import numpy as np
         ch = ConvexHull()
-        points = sum(jsonobj['points'])
-        ch.points.resize(len(points))
-        for i,v in enumerate(points):
-            ch.points[i] = v
+        ch.points = np.array(jsonobj['points'])
         return ch
     elif type == 'Geometry3D':
         gtype = jsonobj['datatype']
@@ -1037,52 +1037,3 @@ def from_json(jsonobj,type='auto'):
     else:
         raise ValueError("Unknown or unsupported type "+type)
 
-def _deprecated_func(oldName,newName):
-    import sys
-    mod = sys.modules[__name__]
-    f = getattr(mod,newName)
-    def depf(*args,**kwargs):
-        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
-        return f(*args,**kwargs)
-    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
-    setattr(mod,oldName,depf)
-
-_deprecated_func("filenameToType","filename_to_type")
-_deprecated_func("filenameToTypes","filename_to_type")
-_deprecated_func("toJson","to_json")
-_deprecated_func("fromJson","from_json")
-
-from collections import UserDict, UserList
-class _DeprecatedDict(dict):
-    def __init__(self,oldname,newname,*args,**kwargs):
-        UserDict.__init__(self,*args,**kwargs)
-        self._oldname = oldname
-        self._newname = newname
-        self._warned = False
-    def __getitem__(self,key):
-        if not self._warned:
-            self._warned = True
-            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
-        return UserDict.__getitem__(self,key)
-
-class _DeprecatedList(UserList):
-    def __init__(self,oldname,newname,*args,**kwargs):
-        UserList.__init__(self,*args,**kwargs)
-        self._oldname = oldname
-        self._newname = newname
-        self._warned = False
-    def __getitem__(self,key):
-        if not self._warned:
-            self._warned = True
-            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
-        return UserList.__getitem__(self,key)
-    def __contains__(self,key):
-        if not self._warned:
-            self._warned = True
-            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
-        return UserList.__contains__(self,key)
-
-
-extensionToTypes = _DeprecatedDict("extensionToTypes","EXTENSION_TO_TYPES",EXTENSION_TO_TYPES)
-typeToExtensions = _DeprecatedDict("typeToExtensions","TYPE_TO_EXTENSIONS",TYPE_TO_EXTENSIONS)
-unsupportedJsonTypes = _DeprecatedList("unsupportedJsonTypes","UNSUPPORTED_JSON_TYPES",UNSUPPORTED_JSON_TYPES)

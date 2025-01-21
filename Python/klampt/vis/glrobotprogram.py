@@ -174,17 +174,11 @@ class GLSimulationPlugin(GLWorldPlugin):
         if self.drawSensors:
             for i in range(self.world.numRobots()):
                 c = self.sim.controller(i)
-                j = 0
-                while j >= 0:
-                    s = c.sensor(j)
-                    if s.name() == '':
-                        j = -1
-                        break
+                for s in c.sensors:
                     if self.drawSensors == 'full':
                         s.drawGL(s.getMeasurements())
                     else:
                         s.drawGL()
-                    j += 1
         return True
 
     def control_loop(self):

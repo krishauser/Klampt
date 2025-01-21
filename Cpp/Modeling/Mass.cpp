@@ -87,7 +87,7 @@ Vector3 CenterOfMass(const Meshing::PointCloud3D& pc,Real surfaceFraction)
   return center / pc.points.size();
 }
 
-Vector3 CenterOfMass(const Meshing::VolumeGrid& grid,Real surfaceFraction)
+Vector3 CenterOfMassImplicitSurface(const Meshing::VolumeGrid& grid,Real surfaceFraction)
 {
   Vector3 mean(Zero);
   Real sum=0;
@@ -97,6 +97,22 @@ Vector3 CenterOfMass(const Meshing::VolumeGrid& grid,Real surfaceFraction)
       i.getCellCenter(c);
       sum += 1.0;
       mean += *c;
+    }
+  }
+  if(sum == 0) return mean;
+  return mean / sum;
+}
+
+Vector3 CenterOfMassOccupancyGrid(const Meshing::VolumeGrid& grid,Real surfaceFraction)
+{
+  Vector3 mean(Zero);
+  Real sum=0;
+  for(VolumeGridIterator<Real> i=grid.getIterator();!i.isDone();++i) {
+    if(*i > 0) {
+      Vector3 c;
+      i.getCellCenter(c);
+      sum += *i;
+      mean += (*i)*(*c);
     }
   }
   if(sum == 0) return mean;
@@ -117,23 +133,34 @@ Vector3 CenterOfMass(const vector<AnyGeometry3D>& group,Real surfaceFraction)
 Vector3 CenterOfMass(const AnyGeometry3D& geom,Real surfaceFraction)
 {
   switch(geom.type) {
-  case AnyGeometry3D::Primitive:
+  case AnyGeometry3D::Type::Primitive:
     return CenterOfMass(geom.AsPrimitive(),surfaceFraction);
-  case AnyGeometry3D::TriangleMesh:
+  case AnyGeometry3D::Type::TriangleMesh:
     return CenterOfMass(geom.AsTriangleMesh(),surfaceFraction);
-  case AnyGeometry3D::PointCloud:
+  case AnyGeometry3D::Type::PointCloud:
     return CenterOfMass(geom.AsPointCloud(),surfaceFraction);
-  case AnyGeometry3D::ImplicitSurface:
-    return CenterOfMass(geom.AsImplicitSurface(),surfaceFraction);
-  case AnyGeometry3D::Group:
+  case AnyGeometry3D::Type::ImplicitSurface:
+    return CenterOfMassImplicitSurface(geom.AsImplicitSurface(),surfaceFraction);
+  case AnyGeometry3D::Type::OccupancyGrid:
+    return CenterOfMassOccupancyGrid(geom.AsOccupancyGrid(),surfaceFraction);
+  case AnyGeometry3D::Type::Group:
     return CenterOfMass(geom.AsGroup(),surfaceFraction);
-  case AnyGeometry3D::ConvexHull:
+  case AnyGeometry3D::Type::ConvexHull:
     {
       AnyGeometry3D mesh;
-      geom.Convert(AnyGeometry3D::TriangleMesh,mesh);
+      geom.Convert(AnyGeometry3D::Type::TriangleMesh,mesh);
       return CenterOfMass(mesh.AsTriangleMesh(),surfaceFraction);
     }
     break;
+  case AnyGeometry3D::Type::Heightmap:
+    {
+      AnyGeometry3D mesh;
+      geom.Convert(AnyGeometry3D::Type::TriangleMesh,mesh);
+      return CenterOfMass(mesh.AsTriangleMesh(),1.0);  //assume only surface representation
+    }
+    break;
+  default:
+    FatalError("Can't estimate a center of mass for a geometry of type %s",geom.TypeName());
   }
   return Vector3(0.0);
 }
@@ -222,7 +249,7 @@ Matrix3 Covariance(const PointCloud3D& pc,const Vector3& center,Real surfaceFrac
   return A;
 }
 
-Matrix3 Covariance(const VolumeGrid& grid,const Vector3& center,Real surfaceFraction)
+Matrix3 CovarianceImplicitSurface(const VolumeGrid& grid,const Vector3& center,Real surfaceFraction)
 {
   Matrix3 cov(Zero);
   Real sum=0;
@@ -234,6 +261,25 @@ Matrix3 Covariance(const VolumeGrid& grid,const Vector3& center,Real surfaceFrac
       AddOuterProduct(temp,c-center,c-center);
       cov += temp;
       sum += 1.0;
+    }
+  }
+  if(sum == 0) return cov;
+  cov *= 1.0/sum;
+  return cov;
+}
+
+Matrix3 CovarianceOccupancyGrid(const VolumeGrid& grid,const Vector3& center,Real surfaceFraction)
+{
+  Matrix3 cov(Zero);
+  Real sum=0;
+  for(VolumeGridIterator<Real> i=grid.getIterator();!i.isDone();++i) {
+    if(*i > 0) {
+      Vector3 c;
+      i.getCellCenter(c);
+      Matrix3 temp; temp.setZero();
+      AddOuterProduct(temp,c-center,c-center);
+      cov += temp*(*i);
+      sum += *i;
     }
   }
   if(sum == 0) return cov;
@@ -265,28 +311,67 @@ Matrix3 Covariance(const vector<AnyGeometry3D>& group,const Vector3& center,Real
 Matrix3 Covariance(const AnyGeometry3D& geom,const Vector3& center,Real surfaceFraction)
 {
   switch(geom.type) {
-  case AnyGeometry3D::Primitive:
+  case AnyGeometry3D::Type::Primitive:
     return Covariance(geom.AsPrimitive(),center,surfaceFraction);
-  case AnyGeometry3D::TriangleMesh:
+  case AnyGeometry3D::Type::TriangleMesh:
     return Covariance(geom.AsTriangleMesh(),center,surfaceFraction);
-  case AnyGeometry3D::PointCloud:
+  case AnyGeometry3D::Type::PointCloud:
     return Covariance(geom.AsPointCloud(),center,surfaceFraction);
-  case AnyGeometry3D::ImplicitSurface:
-    return Covariance(geom.AsImplicitSurface(),center,surfaceFraction);
-  case AnyGeometry3D::Group:
+  case AnyGeometry3D::Type::ImplicitSurface:
+    return CovarianceImplicitSurface(geom.AsImplicitSurface(),center,surfaceFraction);
+  case AnyGeometry3D::Type::OccupancyGrid:
+    return CovarianceOccupancyGrid(geom.AsOccupancyGrid(),center,surfaceFraction);
+  case AnyGeometry3D::Type::Group:
     return Covariance(geom.AsGroup(),center,surfaceFraction);
-  case AnyGeometry3D::ConvexHull:
+  case AnyGeometry3D::Type::ConvexHull:
     {
       AnyGeometry3D mesh;
-      geom.Convert(AnyGeometry3D::TriangleMesh,mesh);
+      geom.Convert(AnyGeometry3D::Type::TriangleMesh,mesh);
       return Covariance(mesh.AsTriangleMesh(),surfaceFraction);
     }
     break;
+  case AnyGeometry3D::Type::Heightmap:
+    {
+      AnyGeometry3D mesh;
+      geom.Convert(AnyGeometry3D::Type::TriangleMesh,mesh);
+      return Covariance(mesh.AsTriangleMesh(),1.0);  //assume only surface points
+    }
+    break;
+  default:
+    FatalError("Can't estimate a covariance for a geometry of type %s",geom.TypeName());
   }
   return Matrix3();
 }
 
-Matrix3 Inertia(const Math3D::GeometricPrimitive3D& geom,const Vector3& center,Real mass,Real surfaceFraction)
+
+
+Matrix3 Inertia(const Meshing::TriMesh& mesh,const Vector3& center,Real mass,Real surfaceFraction)
+{
+  Matrix3 cov=Covariance(mesh,center,surfaceFraction);
+  Matrix3 H;
+  H.setNegative(cov);
+  H(0,0) = cov(1,1)+cov(2,2);
+  H(1,1) = cov(0,0)+cov(2,2);
+  H(2,2) = cov(0,0)+cov(1,1);
+  H *= mass;
+  return H;
+}
+
+
+Matrix3 Inertia(const Meshing::PointCloud3D& mesh,const Vector3& center,Real mass,Real surfaceFraction)
+{
+  Matrix3 cov=Covariance(mesh,center,surfaceFraction);
+  Matrix3 H;
+  H.setNegative(cov);
+  H(0,0) = cov(1,1)+cov(2,2);
+  H(1,1) = cov(0,0)+cov(2,2);
+  H(2,2) = cov(0,0)+cov(1,1);
+  H *= mass;
+  return H;
+}
+
+
+Matrix3 Inertia(const AnyGeometry3D& geom,const Vector3& center,Real mass,Real surfaceFraction)
 {
   Matrix3 cov=Covariance(geom,center,surfaceFraction);
   Matrix3 H;
@@ -296,82 +381,6 @@ Matrix3 Inertia(const Math3D::GeometricPrimitive3D& geom,const Vector3& center,R
   H(2,2) = cov(0,0)+cov(1,1);
   H *= mass;
   return H;
-}
-
-
-Matrix3 Inertia(const TriMesh& mesh,const Vector3& center,Real mass,Real surfaceFraction)
-{
-  Matrix3 cov=Covariance(mesh,center,surfaceFraction);
-  Matrix3 H;
-  H.setNegative(cov);
-  H(0,0) = cov(1,1)+cov(2,2);
-  H(1,1) = cov(0,0)+cov(2,2);
-  H(2,2) = cov(0,0)+cov(1,1);
-  H *= mass;
-  return H;
-}
-
-Matrix3 Inertia(const PointCloud3D& mesh,const Vector3& center,Real mass,Real surfaceFraction)
-{
-  Matrix3 cov=Covariance(mesh,center,surfaceFraction);
-  Matrix3 H;
-  H.setNegative(cov);
-  H(0,0) = cov(1,1)+cov(2,2);
-  H(1,1) = cov(0,0)+cov(2,2);
-  H(2,2) = cov(0,0)+cov(1,1);
-  H *= mass;
-  return H;
-}
-
-Matrix3 Inertia(const VolumeGrid& mesh,const Vector3& center,Real mass,Real surfaceFraction)
-{
-  Matrix3 cov=Covariance(mesh,center,surfaceFraction);
-  Matrix3 H;
-  H.setNegative(cov);
-  H(0,0) = cov(1,1)+cov(2,2);
-  H(1,1) = cov(0,0)+cov(2,2);
-  H(2,2) = cov(0,0)+cov(1,1);
-  H *= mass;
-  return H;
-}
-
-
-Matrix3 Inertia(const vector<AnyGeometry3D>& group,const Vector3& center,Real mass,Real surfaceFraction)
-{
-  Matrix3 cov=Covariance(group,center,surfaceFraction);
-  Matrix3 H;
-  H.setNegative(cov);
-  H(0,0) = cov(1,1)+cov(2,2);
-  H(1,1) = cov(0,0)+cov(2,2);
-  H(2,2) = cov(0,0)+cov(1,1);
-  H *= mass;
-  return H;
-}
-
-
-
-Matrix3 Inertia(const AnyGeometry3D& geom,const Vector3& center,Real mass,Real surfaceFraction)
-{
-  switch(geom.type) {
-  case AnyGeometry3D::Primitive:
-    return Inertia(geom.AsPrimitive(),center,mass,surfaceFraction);
-  case AnyGeometry3D::TriangleMesh:
-    return Inertia(geom.AsTriangleMesh(),center,mass,surfaceFraction);
-  case AnyGeometry3D::PointCloud:
-    return Inertia(geom.AsPointCloud(),center,mass,surfaceFraction);
-  case AnyGeometry3D::ImplicitSurface:
-    return Inertia(geom.AsImplicitSurface(),center,mass,surfaceFraction);
-  case AnyGeometry3D::Group:
-    return Inertia(geom.AsGroup(),center,mass,surfaceFraction);
-  case AnyGeometry3D::ConvexHull:
-    {
-      AnyGeometry3D mesh;
-      geom.Convert(AnyGeometry3D::TriangleMesh,mesh);
-      return Inertia(mesh.AsTriangleMesh(),surfaceFraction);
-    }
-    break;
-  }
-  return Matrix3();
 }
 
 

@@ -14,7 +14,7 @@ from ..math.geodesic import *
 import warnings
 from ..robotsim import RobotModel,RobotModelLink
 from .subrobot import SubRobotModel
-from typing import Iterable,Optional,Union,Sequence,List,Tuple,Callable
+from typing import Iterable,Optional,Union,Sequence,List,Tuple,Callable,Literal
 from .typing import Vector3,Vector,Rotation,RigidTransform
 MetricType = Callable[[Vector,Vector],float]
 
@@ -112,7 +112,7 @@ class Trajectory:
                 raise ValueError("Invalid milestone size")
         return
 
-    def getSegment(self, t: float, endBehavior: str = 'halt')  -> Tuple[int,float]:
+    def getSegment(self, t: float, endBehavior: Literal['halt','loop'] = 'halt')  -> Tuple[int,float]:
         """Returns the index and interpolation parameter for the
         segment at time t. 
 
@@ -230,7 +230,7 @@ class Trajectory:
     def concat(self,
             suffix: 'Trajectory',
             relative: bool = False,
-            jumpPolicy: str = 'strict'
+            jumpPolicy: Literal['strict','blend','jump'] = 'strict'
         ) -> 'Trajectory':
         """Returns a new trajectory with another trajectory
         concatenated onto self.
@@ -239,15 +239,16 @@ class Trajectory:
             suffix (Trajectory): the suffix trajectory
             relative (bool):  If True, then the suffix's time domain is shifted
                 so that self.times[-1] is added on before concatenation.
-            jumpPolicy (str):  If the suffix starts exactly at the existing trajectory's
-                end time, then jumpPolicy is checked.  Can be:
+            jumpPolicy (str):  If the suffix starts exactly at the existing
+                trajectory's end time, then jumpPolicy is checked.  Options
+                include:
 
-                - 'strict': the suffix's first milestone has to be equal to the
-                  existing trajectory's last milestone. Otherwise an exception
-                  is raised.
-                - 'blend': the existing trajectory's last milestone is
-                  discarded.
-                - 'jump': a discontinuity is added to the trajectory.
+                    'strict': the suffix's first milestone has to be equal to
+                        the existing trajectory's last milestone. Otherwise an
+                        exception is raised.
+                    'blend': the existing trajectory's last milestone is
+                        discarded.
+                    'jump': a discontinuity is added to the trajectory.
 
         """
         if self.__class__ is not suffix.__class__:
@@ -265,7 +266,7 @@ class Trajectory:
                 if jumpPolicy=='strict' and suffix.milestones[0] != self.milestones[-1]:
                     print("Suffix start:",suffix.milestones[0])
                     print("Self end:",self.milestones[-1])
-                    raise ValueError("Concatenation would cause a jump in configuration")
+                    raise ValueError("Concatenation would cause a jump in configuration, distance %g"%(vectorops.distance(suffix.milestones[0],self.milestones[-1])))
                 if jumpPolicy=='strict' or (jumpPolicy=='blend' and suffix.milestones[0] != self.milestones[-1]):
                     #discard last milestone of self
                     times = self.times[:-1] + [t+offset for t in suffix.times]
@@ -349,7 +350,7 @@ class Trajectory:
             suffix: 'Trajectory',
             time: List[float] = None,
             relative: bool = False,
-            jumpPolicy: str = 'strict'
+            jumpPolicy: Literal['strict','blend','jump'] = 'strict'
         ) -> 'Trajectory':
         """Returns a path such that the suffix is spliced in at some time
 
@@ -360,7 +361,7 @@ class Trajectory:
                 or the given time if specified.
             jumpPolicy (str): if 'strict', then it is required that
                 suffix(t0)=path(t0) where t0 is the absolute start time
-                of the suffix.
+                of the suffix. (see jumpPolicy argument to concat())
 
         """
         offset = 0
@@ -2028,7 +2029,7 @@ def execute_path(
         cq0 = controller.commandedPosition()
         if cq0[0] is None:
             cq0 = controller.sensedPosition()
-        q0 = controller.configFromKlampt(cq0)
+        q0 = controller.configToKlampt(cq0)
     else:
         raise ValueError("Invalid type of controller, must be SimRobotController or RobotInterfaceBase")
     if activeDofs is not None:

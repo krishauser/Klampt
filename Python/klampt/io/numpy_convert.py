@@ -8,7 +8,7 @@ from ..model import types
 
 SUPPORTED_TYPES = set(['Vector3','Point','Matrix3','Rotation','RigidTransform',
         'Config','Configs','Trajectory',
-        'TriangleMesh','PointCloud','VolumeGrid','Geometry3D' ])
+        'TriangleMesh','PointCloud','ImplicitSurface','OccupancyGrid','Geometry3D' ])
 """set of supported types for numpy I/O"""
 
 def to_numpy(obj,type='auto'):
@@ -24,7 +24,7 @@ def to_numpy(obj,type='auto'):
     * Trajectory: returns a pair (times,milestones)
     * TriangleMesh: returns a pair (verts,indices)
     * PointCloud: returns a n x (3+k) array, where k is the # of properties
-    * VolumeGrid: returns a triple (bmin,bmax,array)
+    * ImplicitSurface , OccupancyGrid: returns a triple (bmin,bmax,array)
     * Geometry3D: returns a pair (T,geomdata)
 
     If you want to get a transformed point cloud or mesh, you can pass in a
@@ -53,7 +53,7 @@ def to_numpy(obj,type='auto'):
             R = to_numpy(obj.getCurrentTransform()[0],'Matrix3')
             t = to_numpy(obj.getCurrentTransform()[1],'Vector3')
             return (np.dot(R,res[0])+t,res[1])
-        return (obj.getVertices(),obj.getIndices())
+        return (obj.vertices,obj.indices)
     elif type == 'PointCloud':
         from klampt import Geometry3D
         if isinstance(obj,Geometry3D):
@@ -63,15 +63,15 @@ def to_numpy(obj,type='auto'):
             t = to_numpy(obj.getCurrentTransform()[1],'Vector3')
             res[:,:3] = np.dot(R,res[:,:3])+t
             return res
-        points = obj.getPoints()
-        if obj.numProperties() == 0:
+        points = obj.points
+        properties = obj.properties
+        if len(properties) == 0:
             return points
-        properties = obj.getAllProperties()
         return np.hstack((points,properties))
-    elif type == 'VolumeGrid':
-        bmin = np.array(obj.bbox)[:3]
-        bmax = np.array(obj.bbox)[3:]
-        values = obj.getValues()
+    elif type in ['ImplicitSurface','VoluemGrid','OccupancyGrid']:
+        bmin = np.array(obj.bmin)
+        bmax = np.array(obj.bmax)
+        values = obj.values
         return (bmin,bmax,values)
     elif type == 'Geometry3D':
         if obj.type() == 'PointCloud':
@@ -83,8 +83,13 @@ def to_numpy(obj,type='auto'):
             meshdata = to_numpy(mesh,obj.type())
             meshdata = (meshdata[0].copy(),meshdata[1].copy())
             return to_numpy(obj.getCurrentTransform(),'RigidTransform'),meshdata
-        elif obj.type() == 'VolumeGrid':
-            grid = obj.getVolumeGrid()
+        elif obj.type() == 'ImplicitSurface':
+            grid = obj.getImplicitSurface()
+            griddata = to_numpy(grid,obj.type())
+            griddata = (griddata[0],griddata[1],griddata[2].copy())
+            return to_numpy(obj.getCurrentTransform(),'RigidTransform'),griddata
+        elif obj.type() == 'OccupancyGrid':
+            grid = obj.getOccupancyGrid()
             griddata = to_numpy(grid,obj.type())
             griddata = (griddata[0],griddata[1],griddata[2].copy())
             return to_numpy(obj.getCurrentTransform(),'RigidTransform'),griddata
@@ -93,6 +98,8 @@ def to_numpy(obj,type='auto'):
             for i in range(obj.numElements()):
                 arrays.append(to_numpy(obj.getElement(i),'Geometry3D'))
             return to_numpy(obj.getCurrentTransform(),'RigidTransform'),arrays
+        else:
+            raise ValueError("Can't convert Geometry3D of type "+obj.type()+" yet")
     else:
         return np.array(obj)
 
@@ -109,7 +116,7 @@ def from_numpy(obj,type='auto',template=None):
     * Trajectory: accepts a pair (times,milestones)
     * TriangleMesh: accepts a pair (verts,indices)
     * PointCloud: accepts a n x (3+k) array, where k is the # of properties
-    * VolumeGrid: accepts a triple (bmin,bmax,array)
+    * ImplicitSurface, OccupancyGrid: accepts a triple (bmin,bmax,array)
     * Geometry3D: accepts a pair (T,geomdata)
     """
     global SUPPORTED_TYPES 
@@ -134,7 +141,7 @@ def from_numpy(obj,type='auto',template=None):
                         type = 'TriangleMesh'
                 if len(obj)==3:
                     if obj[0].shape == (3,) and obj[1].shape == (3,):
-                        type = 'VolumeGrid'
+                        type = 'ImplicitSurface'
                 if type == 'auto':
                     raise ValueError("Can't auto-detect type of list of shapes"+', '.join(str(v.shape) for v in obj))
             else:
@@ -183,27 +190,25 @@ def from_numpy(obj,type='auto',template=None):
         #res.setPoints(points)
         res.setPointsAndProperties(obj.astype(float))
         if template is not None:
-            if len(template.propertyNames) != numproperties:
+            if template.numProperties() != numproperties:
                 raise ValueError("Template object doesn't have the same properties as the numpy object")
-            res.propertyNames.resize(len(template.propertyNames))
-            for i in range(len(template.propertyNames)):
-                res.propertyNames[i] = template.propertyNames[i]
+            for i in range(template.numProperties()):
+                res.setPropertyName(i,template.getPropertyName(i))
         else:
             #properties are already indicated with setPointsAndProperties
             pass
-        #if len(res.propertyNames) > 0:
-        #    res.properties.resize(len(res.propertyNames)*points.shape[0])
-        #if obj.shape[1] >= 3:
-        #    res.setProperties(properties)
         return res
-    elif type == 'VolumeGrid':
-        from klampt import VolumeGrid
-        assert len(obj) == 3,"VolumeGrid format is (bmin,bmax,values)"
-        assert len(obj[2].shape) == 3,"VolumeGrid values must be a 3D array"
+    elif type in ['ImplicitSurface','VolumeGrid','OccupancyGrid']:
+        from klampt import ImplicitSurface,OccupancyGrid
+        assert len(obj) == 3,"ImplicitSurface format is (bmin,bmax,values)"
+        assert len(obj[2].shape) == 3,"ImplicitSurface values must be a 3D array"
         bmin = obj[0]
         bmax = obj[1]
         values = obj[2]
-        res = VolumeGrid()
+        if type == 'OccupancyGrid':
+            res = OccupancyGrid()
+        else:
+            res = ImplicitSurface()
         res.bbox.append(bmin[0])
         res.bbox.append(bmin[1])
         res.bbox.append(bmin[2])
@@ -246,12 +251,10 @@ def from_numpy(obj,type='auto',template=None):
                     subtype = 'TriangleMesh'
             if len(geomdata)==3:
                 if geomdata[0].shape == (3,) and geomdata[1].shape == (3,):
-                    subtype = 'VolumeGrid'
-        g = Geometry3D(from_numpy(obj,subtype))
+                    subtype = 'ImplicitSurface'
+        g = Geometry3D(from_numpy(geomdata,subtype))
         g.setCurrentTransform(*T)
         return g
     else:
         return obj.flatten()
 
-from .loader import _DeprecatedList
-supportedTypes = _DeprecatedList("supportedTypes","SUPPORTED_TYPES",SUPPORTED_TYPES)

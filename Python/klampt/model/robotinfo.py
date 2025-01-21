@@ -226,8 +226,8 @@ class RobotInfo:
         """
         if not isinstance(sensor,SimRobotSensor):
             return self.configureSensor(self.klamptModel().sensor(sensor))
-        if sensor.name() in self.calibrationFiles:
-            calib_file = self.calibrationFiles[sensor.name()]
+        if sensor.name in self.calibrationFiles:
+            calib_file = self.calibrationFiles[sensor.name]
             if calib_file.endswith('.json'):
                 with open(calib_file,'r') as f:
                     calib = json.load(f)
@@ -240,7 +240,7 @@ class RobotInfo:
                 calib = np.load(calib_file)
             else:
                 raise ValueError("Invalid calibration file format, must be .json or .yaml")
-            if sensor.type() == 'CameraSensor':
+            if sensor.type == 'CameraSensor':
                 #might be an intrinsics calibration
                 from klampt.model import sensing
                 if not isinstance(calib,dict):
@@ -383,12 +383,7 @@ class RobotInfo:
 
         #configure simulated sensor
         simcontroller = sim.controller(robot)
-        sindex = 0
-        while True:
-            s = simcontroller.sensor(sindex)
-            if s.type() == '':
-                break
-            sindex += 1
+        for s in simcontroller.sensors:
             self.configureSensor(s)
         
 

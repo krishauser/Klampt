@@ -6,20 +6,20 @@ from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
-from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,ConvexHull,VolumeGrid
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,ConvexHull,Heightmap,ImplicitSurface,OccupancyGrid
 import warnings
 
 _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
                 'IntArray','StringArray',
                 'Configs','Trajectory','LinearPath','MultiPath','SE3Trajectory','SO3Trajectory',
                 'IKGoal','ContactPoint','Hold',
-                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D',
+                'TriangleMesh','PointCloud','ImplicitSurface','OccupancyGrid','GeometricPrimitive','ConvexHull','Heightmap','Geometry3D',
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
 
 _vectorLikeTypes = set(['Vector2','Vector3','Matrix3','Point','Rotation','Vector','Config'])
 _arrayLikeTypes = set(['Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config','IntArray','StringArray','Configs'])
 _pathLikeTypes = set(['Configs','Trajectory','LinearPath','MultiPath','SE3Trajectory','SO3Trajectory'])
-_geometryTypes = set(['TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D'])
+_geometryTypes = set(['TriangleMesh','PointCloud','ImplicitSurface','OccupancyGrid','GeometricPrimitive','ConvexHull','Heightmap','Geometry3D'])
 
 def known_types():
     """Returns a set of all known Klampt types"""
@@ -50,10 +50,14 @@ def object_to_types(object,world=None):
         return 'TriangleMesh'
     elif isinstance(object,PointCloud):
         return 'PointCloud'
-    elif isinstance(object,VolumeGrid):
-        return 'VolumeGrid'
+    elif isinstance(object,ImplicitSurface):
+        return 'ImplicitSurface'
+    elif isinstance(object,OccupancyGrid):
+        return 'OccupancyGrid'
     elif isinstance(object,ConvexHull):
         return 'ConvexHull'
+    elif isinstance(object,Heightmap):
+        return 'Heightmap'
     elif isinstance(object,Geometry3D):
         return ['Geometry3D',object.type()]
     elif isinstance(object,WorldModel):
@@ -214,10 +218,14 @@ def make(type,object=None):
         p = GeometricPrimitive()
         p.setPoint((0,0,0))
         return p
-    elif type == 'VolumeGrid':
-        return VolumeGrid()
+    elif type in ['VolumeGrid','ImplicitSurface']:
+        return ImplicitSurface()
+    elif type == 'OccupancyGrid':
+        return OccupancyGrid()
     elif type == 'ConvexHull':
         return ConvexHull()
+    elif type == 'Heightmap':
+        return Heightmap()
     elif type == 'IntArray':
         return [0]
     elif type == 'StringArray':
@@ -276,13 +284,13 @@ def info(object,world=None) -> dict:
         res["position dimensions constrained"] = object.numPosDims()
         res["rotation dimensions constrained"] = object.numRotDims()
     elif otype == "TriangleMesh":
-        res["vertices"] = len(object.vertices)//3
-        res["triangles"] = len(object.indices)//3
+        res["vertices"] = len(object.vertices)
+        res["triangles"] = len(object.indices)
         bmin,bmax = Geometry3D(object).getBBTight()
         res["lower bound"] = bmin
         res["upper bound"] = bmax
     elif otype == "PointCloud":
-        res["points"] = object.numPoints()
+        res["points"] = len(object.points)
         res["properties"] = object.numProperties()
         bmin,bmax = Geometry3D(object).getBBTight()
         res["lower bound"] = bmin
@@ -292,8 +300,13 @@ def info(object,world=None) -> dict:
         if len(object.values) > 0:
             res["minimum value"] = min(object.values)
             res["maximum value"] = max(object.values)
-        res["lower bound"] = [object.bbox[0],object.bbox[1],object.bbox[2]]
-        res["upper bound"] = [object.bbox[3],object.bbox[4],object.bbox[5]]
+        res["lower bound"] = object.bmin
+        res["upper bound"] = object.bmax
+    elif otype == "Heightmap":
+        res["dims"] = [object.heights.shape[0],object.heights.shape[1]]
+        if len(object.heights) > 0:
+            res["minimum value"] = object.heights.min()
+            res["maximum value"] = object.heights.min()
     elif otype == "Geometry3D":
         res["geometry type"] = object.type()
         res["#elements"] = object.numElements()

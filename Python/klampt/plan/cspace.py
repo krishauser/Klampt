@@ -426,13 +426,13 @@ class MotionPlan:
             c += sum(self.edgeCost(a,b) for (a,b) in zip(path[:-1],path[1:]))
         return c
 
-optimizingPlanners = set(['fmm*','rrt*','prm*','lazyprm*','lazyrrg*'])
+OPTIMIZING_PLANNERS = set(['fmm*','rrt*','prm*','lazyprm*','lazyrrg*'])
 """set: The set of natively optimizing planners. 
 
 Goal set planners, random-restart, and shortcut planners also support optimization
 """
 
-costAcceptingPlanners = set(['prm','rrt','rrt*','prm*','lazyprm*','lazyrrg*'])
+COST_ACCEPTING_PLANNERS = set(['prm','rrt','rrt*','prm*','lazyprm*','lazyrrg*'])
 """set: The set of planners that natively accept costs.
 
 Goal set planners, random-restart, and shortcut planners also support costs.
@@ -484,8 +484,8 @@ def configure_planner(space : CSpace, start : Config, goal : Union[Config,Tuple[
         called to produce a plan, and a dictionary giving the relevant
         settings.
     """
-    global optimizingPlanners
-    global costAcceptingPlanners
+    global OPTIMIZING_PLANNERS
+    global COST_ACCEPTING_PLANNERS
     import math
 
     if type == 'auto':
@@ -517,11 +517,11 @@ def configure_planner(space : CSpace, start : Config, goal : Union[Config,Tuple[
     restartTermCond="{foundSolution:1,maxIters:%d}"%(restartIters,)
 
     isgoalset = callable(goal) or callable(goal[0])
-    optimizingPlanner = (type in optimizingPlanners) or shortcut or restart or isgoalset
+    optimizingPlanner = (type in OPTIMIZING_PLANNERS) or shortcut or restart or isgoalset
     if optimizingPlanner != optimizing:
         warnings.warn("Returned planner is %soptimizing but requested a %soptimizing planner"%(('' if optimizingPlanner else 'not '),('' if optimizing else 'not ')))
     if edgeCost is not None or terminalCost is not None:
-        if not shortcut and not restart and type not in costAcceptingPlanners:
+        if not shortcut and not restart and type not in COST_ACCEPTING_PLANNERS:
             warnings.warn("Planner %s does not accept cost functions"%(type,))
     if isgoalset:
         if type in ['prm*','rrt*','lazyprm*','lazyrrg*']:

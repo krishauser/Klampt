@@ -54,7 +54,7 @@ def triangle(a,b,c,lighting=True,filled=True):
     GL.glVertex3f(*a)
     GL.glVertex3f(*b)
     GL.glVertex3f(*c)
-    GL.glEnd();
+    GL.glEnd()
 
 
 def quad(a,b,c,d,lighting=True,filled=True):
@@ -73,7 +73,7 @@ def quad(a,b,c,d,lighting=True,filled=True):
     GL.glVertex3f(*b)
     GL.glVertex3f(*c)
     GL.glVertex3f(*d)
-    GL.glEnd();
+    GL.glEnd()
 
 def box(a=(0,0,0),b=(1,1,1),lighting=True,filled=True):
     """Draws a 3D axis-aligned bounding box with lower corner a and

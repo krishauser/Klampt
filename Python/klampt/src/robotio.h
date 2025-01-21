@@ -13,6 +13,14 @@ class WorldModel;
  */
 
 /** @brief Subscribes a Geometry3D to a stream.
+ *
+ * Only ROS point clouds (PointCloud2) are supported for now.
+ * Note that you can also call ``Geometry3D.loadFile("ros://[ROS_TOPIC]")``
+ * or ``Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")``
+ * to accomplish the same thing.
+ *
+ * TODO: It has not yet been determined whether this interferes with Rospy,
+ * i.e., klampt.io.ros.
  * 
  * Args:
  * 
@@ -23,16 +31,10 @@ class WorldModel;
  *         to be subscribed to. If not, tries to determine the type
  *         automatically.
  *
- * Only ROS point clouds (PointCloud2) are supported for now.
- * Note that you can also call ``Geometry3D.loadFile("ros://[ROS_TOPIC]")``
- * or ``Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")``
- * to accomplish the same thing.
- *
- * TODO: It has not yet been determined whether this interferes with Rospy,
- * i.e., klampt.io.ros.
- *
+ * 
  * Returns:
- *     (bool): True if successful.
+ * 
+ *     bool: True if successful.
  */
 bool subscribe_to_stream(Geometry3D& g,const char* protocol,const char* name,const char* type="");
 
@@ -48,16 +50,18 @@ bool detach_from_stream(const char* protocol,const char* name);
  *     protocol (str): either name the protocol to be updated, or "all" for
  *         updating all subscribed streams
  * 
+ * 
  * Returns:
- *     (bool): True if any stream was updated.
+ * 
+ *     bool: True if any stream was updated.
  */
 bool process_streams(const char* protocol="all");
 
 /** @brief Waits up to timeout seconds for an update on the given stream
  * 
- * Return:
+ * Returns:
  * 
- *     (bool): True if the stream was updated.
+ *     bool: True if the stream was updated.
  */
 bool wait_for_stream(const char* protocol,const char* name,double timeout);
 

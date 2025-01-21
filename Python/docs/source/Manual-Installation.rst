@@ -1,6 +1,24 @@
 Installing Klamp't
 ================================================
 
+TL;DR
+----------------
+
+For most platforms, the following lines will install Klampt Python and recommended dependencies::
+
+   pip install klampt PyOpenGL PyQt6 pyqtgraph pillow imageio
+
+And for Linux systems, you will need an OpenGL installation. If you have a graphics card::
+
+   sudo apt-get install sudo apt install libopengl0
+
+And if not, you should use::
+
+   sudo apt-get install libgl1-mesa-dev
+
+Versions and optional dependencies
+----------------------------------
+
 If you only need the Python API, you can install using pip. Simply open
 up a command line window and call::
 
@@ -15,12 +33,13 @@ want those you will need to build from source.  As of 2022 we have stopped
 supporting Python 2.x, although older versions of Klampt (0.8 and earlier)
 are still available on pip for older platforms.
 
+
 You should also obtain:
 
 -  For Linux platforms, an OpenGL installation for your graphics card.  If you do not have a graphics card (e.g., are running a bare Docker container), you can install the Mesa software renderer. You may try ``sudo apt-get install sudo apt install libopengl0`` (if you have a graphics card) or ``sudo apt-get install libgl1-mesa-dev`` (if you have no graphics card). 
 -  PyOpenGL for visualization. Try ``pip install PyOpenGL``.
--  PyQt5 is highly recommended for resource editing and improved
-   visualization. Try ``pip install PyQt5``. 
+-  PyQt5 or PyQt6 are highly recommended for resource editing and improved
+   visualization. Try ``pip install PyQt6``. 
 
 To enable all features, you may also obtain the following optional packages:
 
@@ -28,7 +47,7 @@ To enable all features, you may also obtain the following optional packages:
    Try ``pip install pyqtgraph``.
 -  Python Imaging Library (PIL) is required for saving screenshots to
    disk. Try ``pip install pillow``.
--  ffmpeg is needed to save movies.
+-  ``imageio`` or ffmpeg are needed to save movies.  Try ``pip install imageio``.
 -  cvxpy is needed to use the :mod:`klampt.plan.kinetrajopt` module. 
    If you are interested in collision-free trajectory optimization, try
    ``pip install cvxpy``.

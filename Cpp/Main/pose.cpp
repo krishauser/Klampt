@@ -1086,10 +1086,6 @@ int main(int argc, char** argv)
     return 0;
   }
   WorldModel world;
-  world.lights.resize(1);
-  world.lights[0].setColor(GLColor(1,1,1));
-  world.lights[0].setDirectionalLight(Vector3(0.2,-0.4,1));
-  world.lights[0].setColor(GLColor(1,1,1));
   RobotPoseProgram program(&world);
   if(!program.LoadCommandLine(argc,argv)) return 1;
 

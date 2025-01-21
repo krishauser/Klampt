@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
         }
     }
     a.setQuitOnLastWindowClosed(true);
-    w.directory=dir;
+    w.directory.setPath(dir);
     w.show();
     return a.exec();
 }

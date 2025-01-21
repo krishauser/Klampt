@@ -110,17 +110,21 @@ class LaserRangeSensor : public SensorBase
  *
  * For optimal performance using the graphics card, you must install the GLEW package
  * on your system.  You must also initialize OpenGL before running the simulator, 
- * which typically requires popping up a visualization window.
+ * which typically requires popping up a visualization window or setting up an off-
+ * screen render buffer attached to an OpenGL context.
  *
  * Configurable settings:
- * - link: int
- * - Tsensor: RigidTransform
- * - rgb,depth: bool
- * - xres,yres: int
- * - xfov,yfov: float
- * - zmin,zmax: float
- * - zresolution: int
- * - zvarianceLinear,zvarianceConstant: float
+ * - link (int): the index of the link on which this camera lies, or -1 for a world-mounted camera
+ * - Tsensor (RigidTransform)
+ * - rgb,depth (bool): whether to provide color and depth measurements
+ * - xres,yres (int): width and height of camera in pixels
+ * - xfov,yfov (float): field of view in x and y directions (radians). 
+ * - fx,fy (float): focal lengths of the camera in pixels, or -1 to use xfov, yfov to determine them.
+ * - cx,cy (float): the focal point of the camera in pixels, or -1 (default) if the
+ *   camera is centered at the image center.
+ * - zmin,zmax (float): the min and max range of the depth component.
+ * - zresolution (int): the number of quantization levels in the depth component.
+ * - zvarianceLinear,zvarianceConstant (float): added noise to the depth component.
  */
 class CameraSensor : public SensorBase
 {
@@ -147,10 +151,12 @@ class CameraSensor : public SensorBase
 
   int link;
   RigidTransform Tsensor; ///< z is forward, x is to the right of image, and y is *down*
-  bool rgb,depth;  ///< If rgb is true, gives color measurements. If depth is true, gives depth measurements.
-  int xres,yres;  ///< resolution of camera in x and y directions (# of pixels)
+  bool rgb,depth;   ///< If rgb is true, gives color measurements. If depth is true, gives depth measurements.
+  int xres,yres;    ///< resolution of camera in x and y directions (# of pixels)
   double xfov,yfov; ///< field of view in x and y directions (radians)
-  double zmin,zmax;  ///< range limits, > 0
+  double fx,fy;     ///< focal lengths of the camera in pixels, or -1 to use xfov, yfov
+  double cx,cy;     ///< focal point of the camera in pixels, or -1 for centered at the image center
+  double zmin,zmax; ///< range limits, > 0
   int zresolution;  ///< resolution in z direction
   double zvarianceLinear;  ///< variance in z estimates, linear term
   double zvarianceConstant;  ///< variance in z estimates, constant term

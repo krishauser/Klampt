@@ -2,6 +2,8 @@ klampt.control package
 ======================
 
 .. toctree::
+    :maxdepth: 2
+
     klampt.control.robotinterface
     klampt.control.robotinterfaceutils
     klampt.control.simrobotinterface
@@ -16,6 +18,7 @@ klampt.control package
     ~klampt.control.robotinterface
     ~klampt.control.robotinterfaceutils
     ~klampt.control.simrobotinterface
+    ~klampt.control.networkrobotinterface
     ~klampt.control.interop
     ~klampt.control.blocks
     ~klampt.control.io

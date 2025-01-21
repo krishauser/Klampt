@@ -120,8 +120,8 @@ The main interface to sensors is :class:`~klampt.SimRobotSensor`.
    SimRobotSensor reference from a :class:`SimRobotController`.
 -  ``sensor = SimRobotSensor(controller,name,type)``: creates a new
    sensor for the SimRobotController of the given name and type string.
--  ``sensor.name()``: gets the sensor’s name string
--  ``sensor.type()``: gets the sensor’s type string
+-  ``sensor.name``: gets/sets the sensor’s name string
+-  ``sensor.type``: gets the sensor’s type string
 -  ``sensor.measurementNames()``: returns a list of strings naming the
    sensor’s measurements
 -  ``sensor.getMeasurements()``: returns a list of floats giving the
@@ -215,7 +215,9 @@ Settings are:
 -  ``rgb`` (bool): if true, the camera provides RGB output.
 -  ``depth`` (bool): if true, the camera provides depth output.
 -  ``xres``, ``yres`` (int): the x and y resolution of the sensor.
--  ``xfov``, ``yfov`` (float): the x and y field of view, in radians.
+-  ``xfov``, ``yfov`` (float): the x and y field of view, in radians. (DEPRECATED, but still supported)
+-  ``fx``, ``fy`` (float): the x and y focal lengths of the sensor, in pixels.
+-  ``cx``, ``cy`` (float): the focal point of the sensor, in pixels.
 -  ``zmin``, ``zmax`` (float): minimum and maximum range of the depth
    sensor.
 -  ``zresolution`` (float): the resolution of the depth sensor. 0 indicates no quantization.

@@ -6,6 +6,7 @@ from klampt.model.robotinfo import RobotInfo,_resolve_file
 from klampt.io import loader
 from klampt.vis.glcommon import GLWidgetPlugin
 from klampt.vis import gldraw
+from klampt.vis import glinit
 from klampt.control.robotinterface import RobotInterfaceBase
 from klampt.control.networkrobotinterface import XMLRPCRobotInterfaceClient,XMLRPCRobotInterfaceServer
 from klampt.model import trajectory, ik, types
@@ -18,12 +19,20 @@ import io
 
 #from klampt.control.robotinterfaceutils import StepContext,klamptCartesianPosition
 
-vis.init("PyQt5")
+vis.init("PyQt")
+if glinit.active() == 'PyQt6':
+    from PyQt6 import QtGui
+    from PyQt6 import QtCore
+    from PyQt6 import QtWidgets
+    from PyQt6 import uic
+    PYQT_VERSION = 6
+else:
+    from PyQt5 import QtGui
+    from PyQt5 import QtCore
+    from PyQt5 import QtWidgets
+    from PyQt5 import uic
+    PYQT_VERSION = 5
 
-from PyQt5 import QtGui
-from PyQt5 import QtCore
-from PyQt5 import QtWidgets
-from PyQt5 import uic
 from OpenGL import GL
 
 
@@ -343,7 +352,10 @@ class ControllerGUI(QtWidgets.QMainWindow):
         ui_file = resolve_resource_file('klampt','data/klampt_control.ui')
         uic.loadUi(ui_file, self.panel)
         self.glwidget.setFixedSize(QtWidgets.QWIDGETSIZE_MAX,QtWidgets.QWIDGETSIZE_MAX)
-        self.glwidget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,QtWidgets.QSizePolicy.Expanding))
+        if PYQT_VERSION > 5:
+            self.glwidget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,QtWidgets.QSizePolicy.Policy.Expanding))
+        else:
+            self.glwidget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,QtWidgets.QSizePolicy.Expanding))
         self.glwidget.adjustSize()
         self.glwidget.refresh()
         self.splitter.setHandleWidth(7)

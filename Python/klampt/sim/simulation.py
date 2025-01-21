@@ -36,13 +36,8 @@ class DefaultSensorEmulator(SensorEmulator):
         if mode == "PID":
             measurements['qcmd'] = self.controller.getCommandedConfig()
             measurements['dqcmd'] = self.controller.getCommandedVelocity()
-        k = 0
-        while True:
-            s = self.controller.sensor(k)
-            if s.type()=='':
-                break;
-            measurements[s.name()] = s.getMeasurements()
-            k+=1
+        for s in self.controller.sensors:
+            measurements[s.name] = s.getMeasurements()
         return measurements
     def drawGL(self) -> None:
         if self.controller.getControlType() == "PID":
@@ -127,7 +122,7 @@ class DefaultActuatorEmulator(ActuatorEmulator):
             c.setTorque(commands['torquecmd'])
         for (k,v) in commands.items():
             if k not in defaultVals:
-                if c.model().sensor(k).type() != '':
+                if c.model().sensor(k) is not None:
                     continue
                 if c.sendCommand(k,str(v)):
                     print("Sent command",k,v,"to low level controller")

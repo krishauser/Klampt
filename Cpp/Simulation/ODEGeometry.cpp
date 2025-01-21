@@ -39,10 +39,8 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
   //printf("ODEGeometry: Collision detection method: %s\n",(useCustomMesh?"custom":"GIMPACT"));
   Clear();
   if(!useCustomMesh) {
-    Assert(geom->type == AnyGeometry3D::TriangleMesh);
-	const TriMesh* meshp = AnyCast<TriMesh>(&geom->data);
-    if(!meshp) FatalError("Geometry is not a triangle mesh");
-    const TriMesh& mesh = *AnyCast<TriMesh>(&geom->data);
+    Assert(geom->type == AnyGeometry3D::Type::TriangleMesh);
+  	const TriMesh& mesh = geom->AsTriangleMesh();
     Assert(numVertComponents == 3 || numVertComponents == 4);
 #if USING_GIMPACT
     //GIMPACT needs this
@@ -205,7 +203,7 @@ Real ODEGeometry::GetPadding()
 AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
   if(padding==0) return geom;
   switch(geom->type) {
-  case AnyCollisionGeometry3D::Primitive:
+  case AnyCollisionGeometry3D::Type::Primitive:
     if(geom->AsPrimitive().type == GeometricPrimitive3D::Sphere) {
       Sphere3D* s = AnyCast<Sphere3D>(&geom->AsPrimitive().data);
       Sphere3D s2 = *s;
@@ -215,10 +213,10 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
     }
     fprintf(stderr,"SetPaddingWithPreshink: Cannot shrink geometric primitives\n");
     return geom;
-  case AnyCollisionGeometry3D::PointCloud:
+  case AnyCollisionGeometry3D::Type::PointCloud:
     fprintf(stderr,"SetPaddingWithPreshink: Cannot shrink point clouds\n");
     return geom;
-  case AnyCollisionGeometry3D::TriangleMesh:
+  case AnyCollisionGeometry3D::Type::TriangleMesh:
     {
       const Meshing::TriMesh& morig = geom->AsTriangleMesh();
       Meshing::TriMeshWithTopology mnew;
@@ -234,7 +232,7 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
       return res;
     }
     break;
-  case AnyCollisionGeometry3D::ImplicitSurface:
+  case AnyCollisionGeometry3D::Type::ImplicitSurface:
     {
       //this doesn't really make sense to do, but if the user wants it...
       const Meshing::VolumeGrid& vgrid = geom->AsImplicitSurface();
@@ -244,14 +242,8 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
       res->margin = geom->margin;
       return res;
     }
-  case AnyCollisionGeometry3D::Group:
-    {
-      fprintf(stderr,"TODO: Can't do preshrink for group geometries yet\n");
-      return geom;
-    }
-    break;
   default: 
-    FatalError("Invalid geometry type %s\n",geom->TypeName());
+    fprintf(stderr,"TODO: Can't do preshrink for geometries of type %s yet\n",geom->TypeName());
     return geom;
   }
 }
@@ -268,7 +260,7 @@ AnyCollisionGeometry3D* ODEGeometry::SetPaddingWithPreshrink(Real padding,bool i
       if(inplace) {
 	//modify original geometry
 	collisionGeometry->data = newgeom->data;
-	collisionGeometry->collisionData = newgeom->collisionData;
+	collisionGeometry->collider = newgeom->collider;
       }
       else {
 	//changing geometry without touching original pointer, need to re-add to the geom's space

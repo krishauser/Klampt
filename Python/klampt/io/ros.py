@@ -412,12 +412,10 @@ def to_Mesh(klampt_mesh):
             mesh.transform(*T)
         klampt_mesh = mesh
     ros_mesh = Mesh()
-    for i in range(len(klampt_mesh.vertices)//3):
-        k = i*3
-        ros_mesh.vertices.append(Vector3(klampt_mesh.vertices[k],klampt_mesh.vertices[k+1],klampt_mesh.vertices[k+2]))
-    for i in range(len(klampt_mesh.indices)//3):
-        k = i*3
-        ros_mesh.triangles.append(MeshTriangle([klampt_mesh.indices[k],klampt_mesh.indices[k+1],klampt_mesh.indices[k+2]]))
+    for p in klampt_mesh.vertices.tolist():
+        ros_mesh.vertices.append(Vector3(*p))
+    for t in klampt_mesh.indices.tolist():
+        ros_mesh.triangles.append(MeshTriangle(t))
     return ros_mesh
 
 def from_PointCloud2(ros_pc):
@@ -425,6 +423,7 @@ def from_PointCloud2(ros_pc):
     from klampt import PointCloud
     from sensor_msgs.msg import PointField
     from sensor_msgs import point_cloud2
+    import numpy as np
     pc = PointCloud()
     if ros_pc.header.seq > 0:
         pc.setSetting("id",str(ros_pc.header.seq))
@@ -437,13 +436,13 @@ def from_PointCloud2(ros_pc):
     proplist = []
     if ros_pc.height > 1:
         structured = True
-        pc.settings.set("width",str(pc.width));
-        pc.settings.set("height",str(pc.height));
+        pc.settings.set("width",str(pc.width))
+        pc.settings.set("height",str(pc.height))
     for p in point_cloud2.read_points(ros_pc):
-        plist += [p[0],p[1],p[2]]
-        proplist += [float(v) for v in p[3:]]
-    pc.setPoints(len(plist)//3,plist)
-    pc.setProperties(proplist)
+        plist.append([p[0],p[1],p[2]])
+        proplist.append([float(v) for v in p[3:]])
+    pc.points = np.array(plist)
+    pc.properties = np.array(proplist)
     return pc
 
 def to_PointCloud2(klampt_pc,frame='0',stamp='now'):
@@ -475,13 +474,13 @@ def to_PointCloud2(klampt_pc,frame='0',stamp='now'):
     fields = [PointField('x', 0, PointField.FLOAT32, 1),
               PointField('y', 4, PointField.FLOAT32, 1),
               PointField('z', 8, PointField.FLOAT32, 1)]
-    for i in range(len(klampt_pc.propertyNames)):
-        fields.append(PointField(klampt_pc.propertyNames[i],12+i*4,PointField.FLOAT32,1))
+    for i in range(len(klampt_pc.numProperties())):
+        fields.append(PointField(klampt_pc.getPropertyName(i),12+i*4,PointField.FLOAT32,1))
     import numpy
-    points = numpy.array(klampt_pc.vertices).reshape((klampt_pc.numPoints(),3))
+    points = klampt_pc.points
     alldata = points
     if len(fields) > 3:
-        properties = numpy.array(klampt_pc.properties).reshape((klampt_pc.numPoints(),len(klampt_pc.propertyNames)))
+        properties = klampt_pc.properties
         alldata = numpy.hstack((points,properties))
     seq_no = 0
     try:
@@ -496,7 +495,7 @@ def to_PointCloud2(klampt_pc,frame='0',stamp='now'):
         ros_pc.height = int(h)
     except:
         ros_pc.height = 1
-        ros_pc.width = klampt_pc.numPoints()
+        ros_pc.width = len(klampt_pc.points)
     return ros_pc
 
 
@@ -507,43 +506,39 @@ def to_CameraInfo(klampt_obj):
     from sensor_msgs.msg import CameraInfo
     from klampt import SimRobotSensor,Viewport
     msg = CameraInfo()
-    msg.distortion_model = "plumb_bob";
+    msg.distortion_model = "plumb_bob"
     msg.D = [0.0]*5
     if isinstance(klampt_obj,SimRobotSensor):
         if klampt_obj.type() != 'CameraSensor':
             raise ValueError("Can't publish CameraInfo with a non-camera sensor")
-        msg.width = klampt_obj.getSetting('xres');
-        msg.height = klampt_obj.getSetting('yres');    
-        fx = 0.5*klampt_obj.getSetting('xres')/math.tan(klampt_obj.getSetting('xfov')*0.5);
-        fy = 0.5*klampt_obj.getSetting('yres')/math.tan(klampt_obj.getSetting('yfov')*0.5);
+        msg.width = klampt_obj.getSetting('xres')
+        msg.height = klampt_obj.getSetting('yres')    
+        fx = klampt_obj.getSetting('fx')
+        fy = klampt_obj.getSetting('fy')
+        cx = klampt_obj.getSetting('cx')
+        cy = klampt_obj.getSetting('cy')
     elif isinstance(klampt_obj,Viewport):
         msg.width = klampt_obj.w
         msg.height = klampt_obj.h
-        fx = klampt_obj.scale
-        fy = klampt_obj.scale
-    elif hasattr(klampt_obj,'to_viewport'):
-        vp = klampt_obj.to_viewport()
-        msg.width = vp.w
-        msg.height = vp.h
-        fx = vp.scale
-        fy = vp.scale
+        fx = klampt_obj.fx
+        fy = klampt_obj.fy
+        cx = klampt_obj.cx
+        cy = klampt_obj.cy
     else:
         raise ValueError("Invalid object type: "+klampt_obj.__class__.__name__)
-    cx = 0.5*msg.width
-    cy = 0.5*msg.height
-    msg.K[0] = fx;
-    msg.K[4] = fy;
-    msg.K[8] = 1;
-    msg.K[3] = cx;
-    msg.K[7] = cy;
-    msg.R[0] = 1;
-    msg.R[4] = 1;
-    msg.R[8] = 1;
-    msg.P[0] = fx;
-    msg.P[5] = fy;
-    msg.P[10] = 1;
-    msg.P[3] = cx;
-    msg.P[8] = cy;
+    msg.K[0] = fx
+    msg.K[4] = fy
+    msg.K[8] = 1
+    msg.K[2] = cx
+    msg.K[5] = cy
+    msg.R[0] = 1
+    msg.R[4] = 1
+    msg.R[8] = 1
+    msg.P[0] = fx
+    msg.P[5] = fy
+    msg.P[10] = 1
+    msg.P[3] = cx
+    msg.P[8] = cy
     return msg
 
 def from_CameraInfo(ros_ci,klampt_obj):
@@ -553,6 +548,8 @@ def from_CameraInfo(ros_ci,klampt_obj):
     from klampt import SimRobotSensor,Viewport
     fx = ros_ci.K[0]
     fy = ros_ci.K[4]
+    cx = ros_ci.K[2]
+    cy = ros_ci.K[5]
     w = ros_ci.width
     h = ros_ci.height
     x = 0
@@ -562,26 +559,21 @@ def from_CameraInfo(ros_ci,klampt_obj):
     if isinstance(klampt_obj,SimRobotSensor):
         if klampt_obj.type() != 'CameraSensor':
             raise ValueError("Can't publish CameraInfo with a non-camera sensor")
-        klampt_obj.setSetting('xres',str(w));
-        klampt_obj.setSetting('yres',str(h)); 
-        klampt_obj.setSetting('xfov',str(2*math.atan(0.5*w/fx)))
-        klampt_obj.setSetting('yfov',str(2*math.atan(0.5*h/fy)))
+        klampt_obj.setSetting('xres',str(w))
+        klampt_obj.setSetting('yres',str(h)) 
+        klampt_obj.setSetting('fx',str(fx))
+        klampt_obj.setSetting('fy',str(fy))
+        klampt_obj.setSetting('cx',str(cx))
+        klampt_obj.setSetting('cy',str(cy))
     elif isinstance(klampt_obj,Viewport):
         klampt_obj.x = x
         klampt_obj.y = y
         klampt_obj.w = w
         klampt_obj.h = h
-        if fx != fy:
-            warnings.warn("from_CameraInfo: can't handle non-square pixels in Viewport")
-        klampt_obj.scale = fx
-    elif hasattr(klampt_obj,'to_viewport'):
-        klampt_obj.x = x
-        klampt_obj.y = y
-        klampt_obj.w = w
-        klampt_obj.h = h
-        if fx != fy:
-            warnings.warn("from_CameraInfo: can't handle non-square pixels in GLViewport")
-        klampt_obj.xfov = 2*math.atan(0.5*w/fx)
+        klampt_obj.fx = fx
+        klampt_obj.fy = fy
+        klampt_obj.cx = cx
+        klampt_obj.cy = cy
     else:
         raise ValueError("Invalid object type: "+klampt_obj.__class__.__name__)
     return klampt_obj
@@ -621,7 +613,7 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
             frame = frame_prefix + '/'
         else:
             frame = '.'
-        frame += klampt_sensor.robot().getName()+'/' + klampt_sensor.name()
+        frame += klampt_sensor.robot().name+'/' + klampt_sensor.name
 
     stype = klampt_sensor.type()
     if stype == 'CameraSensor':
@@ -642,9 +634,9 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
         if int(camera.getSetting('rgb')):
             msg = Image()
             msg.header.frame_id = frame
-            w = msg.width = int(camera.getSetting('xres'));
-            h = msg.height = int(camera.getSetting('yres'));
-            msg.encoding = "rgb8";
+            w = msg.width = int(camera.getSetting('xres'))
+            h = msg.height = int(camera.getSetting('yres'))
+            msg.encoding = "rgb8"
             msg.is_bigendian = (numpy.uint32.byteorder == '>' or (numpy.uint32.byteorder == '=' and sys_bigendian))
             msg.step = msg.width*3
             abgr = numpy.array(measurements[0:w*h]).reshape(h,w).astype(numpy.uint32)
@@ -653,9 +645,9 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
         if int(camera.getSetting('depth')):
             msg = Image()
             msg.header.frame_id = frame
-            msg.width = int(camera.getSetting('xres'));
-            msg.height = int(camera.getSetting('yres'));
-            msg.encoding = "32FC1";
+            msg.width = int(camera.getSetting('xres'))
+            msg.height = int(camera.getSetting('yres'))
+            msg.encoding = "32FC1"
             msg.is_bigendian = (numpy.uint32.byteorder == '>' or (numpy.float32.byteorder == '=' and sys_bigendian))
             msg.step = msg.width*4
             ofs = 0
@@ -1082,7 +1074,7 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
             Tsensor_link = (so3.mul(Tsensor_link[0],klampt_to_ros_lidar),Tsensor_link[1])
         q = so3.quaternion(Tsensor_link[0])
         robot = klampt_obj.robot()
-        broadcaster.sendTransform(Tsensor_link[1],(q[1],q[2],q[3],q[0]),stamp,frameprefix+"/"+klampt_obj.name(),frameprefix+"/"+robot.link(link).getName())
+        broadcaster.sendTransform(Tsensor_link[1],(q[1],q[2],q[3],q[0]),stamp,frameprefix+"/"+klampt_obj.name,frameprefix+"/"+robot.link(link).getName())
         return
     transform = None
     if isinstance(klampt_obj,(list,tuple)):

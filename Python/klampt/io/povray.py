@@ -132,16 +132,14 @@ def geometry_to_povray(appearance,geometry,object,transform,properties):
             ret+=geometry_to_povray(appearance=appearance,geometry=elem,object=object,transform=transform,properties=properties)
     elif geometry.type()=="TriangleMesh":
         tm=geometry.getTriangleMesh()
-        
+
+        vss=[se3.apply(transform,v) for v in tm.vertices.tolist()]
+        iss=[tuple(t) for t in tm.indices.tolist()]
         if get_property_yes(properties,[geometry,object],"smooth"):
-            vss=[se3.apply(transform,tuple(tm.vertices[i*3:i*3+3])) for i in range(len(tm.vertices)//3)]
-            iss=[tuple(tm.indices[i*3:i*3+3]) for i in range(len(tm.indices)//3)]
             mesh_param=[vp.VertexVectors(*([len(vss)]+vss)),vp.FaceIndices(*([len(iss)]+iss))]
             mesh_param.append(tex)
             mesh=vp.Mesh2(*mesh_param)
         else:
-            vss=[se3.apply(transform,tuple(tm.vertices[i*3:i*3+3])) for i in range(len(tm.vertices)//3)]
-            iss=[tuple(tm.indices[i*3:i*3+3]) for i in range(len(tm.indices)//3)]
             mesh_param=[vp.Triangle(vss[it[0]],vss[it[1]],vss[it[2]]) for it in iss]
             mesh_param.append(tex)
             mesh=vp.Mesh(*mesh_param)
@@ -166,8 +164,8 @@ def geometry_to_povray(appearance,geometry,object,transform,properties):
         cloud_param=[]
         cloud=geometry.getPointCloud()
         rad=get_property(properties,[cloud,geometry,object],"radius")
-        for id in range(len(cloud.vertices)//3):
-            cloud_param.append(vp.Sphere(cloud.vertices[id*3:id*3+3],rad))
+        for pt in cloud.points.tolist():
+            cloud_param.append(vp.Sphere(pt,rad))
         cloud_param.append(tex)
         mesh=vp.Union(*cloud_param)
         ret.append(mesh)
@@ -271,18 +269,17 @@ def to_povray(vis,world,properties={}):
     patch_vapory()
     
     #camera
-    mat=vis.view.camera.matrix()
+    mat=vis.view.controller.matrix()
     pos=mat[1]
     right=mat[0][0:3]
     up=mat[0][3:6]
     dir=op.mul(mat[0][6:9],-1)
     tgt=op.add(mat[1],dir)
     #scale
-    fovy=vis.view.fov*vis.view.h/vis.view.w
-    fovx=math.atan(vis.view.w*math.tan(fovy*math.pi/360.)/vis.view.h)*360./math.pi
+    fovx = 2.0*vis.view.fx/vis.view.w
     right=op.mul(right,-float(vis.view.w)/vis.view.h)
     #camera
-    camera_params=['orthographic' if vis.view.orthogonal else 'perspective',
+    camera_params=['orthographic' if not vis.view.perspective else 'perspective',
                    'location',[pos[0],pos[1],pos[2]],
                    'look_at',[tgt[0],tgt[1],tgt[2]],
                    'right',[right[0],right[1],right[2]],

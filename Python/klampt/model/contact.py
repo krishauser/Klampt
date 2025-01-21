@@ -419,12 +419,8 @@ def contact_map_holds(contactmap):
 def skew(x):
     """Returns the skew-symmetric cross-product matrix corresponding to the
     matrix x"""
-    try:
-        import numpy
-    except ImportError:
-        raise RuntimeError("skew(x) needs numpy")
     assert(len(x) == 3)
-    xhat = numpy.zeros((3,3))
+    xhat = np.zeros((3,3))
     xhat[0,1] = -x[2]
     xhat[1,0] = x[2]
     xhat[0,2] = x[1]
@@ -440,11 +436,7 @@ def inv_mass_matrix(obj):
         [0 mI]
 
     about the origin."""
-    try:
-        import numpy
-    except ImportError:
-        raise RuntimeError("invMassMatrix(obj) needs numpy")
-    Hinv = numpy.zeros((6,6))
+    Hinv = np.zeros((6,6))
     if obj == None or isinstance(obj,TerrainModel):
         #infinite inertia
         return Hinv
@@ -454,12 +446,12 @@ def inv_mass_matrix(obj):
     minv = 1.0/m.mass
     Hinv[3,3]=Hinv[4,4]=Hinv[5,5]=minv
     #offset the inertia matrix about the COM
-    H = numpy.array((3,3))
-    H[0,:] = numpy.array(m.inertia[0:3])
-    H[1,:] = numpy.array(m.inertia[3:6])
-    H[2,:] = numpy.array(m.inertia[6:9])
+    H = np.array((3,3))
+    H[0,:] = np.array(m.inertia[0:3])
+    H[1,:] = np.array(m.inertia[3:6])
+    H[2,:] = np.array(m.inertia[6:9])
     H -= skew(m.com)*skew(m.com)*m.mass
-    Hinv[0:3,0:3] = numpy.inv(H)
+    Hinv[0:3,0:3] = np.inv(H)
     return Hinv
 
 def wrench_matrices(contactMap):
@@ -475,29 +467,25 @@ def wrench_matrices(contactMap):
 
     W2 is similar, but is the jacobian regarding the force on o1.
     """
-    try:
-        import numpy
-    except ImportError:
-        raise RuntimeError("wrenchMatrices(contactMap) needs numpy")
     res = dict()
     for ((o1,o2),clist) in contactMap:
-        w1 = numpy.zeros((6,3*len(clist)))
-        w2 = numpy.zeros((6,3*len(clist)))
+        w1 = np.zeros((6,3*len(clist)))
+        w2 = np.zeros((6,3*len(clist)))
         for (i,c) in enumerate(clist):
-            arm = numpy.array(c.x)
+            arm = np.array(c.x)
             if o1 != None:
-                arm -= numpy.array(o1.getTransform()[1])
+                arm -= np.array(o1.getTransform()[1])
             #skew symmetric product matrix
             w1[0:3,3*i:3*i+3] = skew(arm)            
-            w1[3:6,3*i:3*i+3] = -numpy.eye(3)
+            w1[3:6,3*i:3*i+3] = -np.eye(3)
             
         for (i,c) in enumerate(clist):
-            arm = numpy.array(c.x)
+            arm = np.array(c.x)
             if o1 != None:
-                arm -= numpy.array(o1.getTransform()[1])
+                arm -= np.array(o1.getTransform()[1])
             #negative skew symmetric product matrix
             w2[0:3,3*i:3*i+3] = -skew(arm)
-            w2[3:6,3*i:3*i+3] = numpy.eye(3)
+            w2[3:6,3*i:3*i+3] = np.eye(3)
             
         res[(o1,o2)]=(w1,w2)
 

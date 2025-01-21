@@ -53,7 +53,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'sphinx_automodapi.automodapi',
-    'sphinxcontrib.napoleon',
+    'sphinx.ext.napoleon',
     'autodocsumm'
 ]
 

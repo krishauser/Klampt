@@ -1,21 +1,36 @@
-"""Used for testing code that works with the Klamp't Robot Interface Layer on a
-simualted robot.  Defines a variety of RobotInterfaceBase interfaces that work
-with Klamp't simulations.
+"""Defines Klamp't Robot Interface Layer objects for simulated robots. 
+Defines a variety of RobotInterfaceBase classes that work with
+Klamp't simulations to emulate different types of real-world robots.
 
-For each of the classes in this module, if you provide the simulator argument
-then this will automatically update your simulation upon each beginStep() /
-endStep() pair.  Otherwise, you will have to step the simulation manually.
+For non-physical simulation, use KinematicSimControlInterface.  This class
+just sets the robot's configuration to the last setPosition command, and
+can perform kinematic simulation of sensors.  
+
+If your real robot is PID position controlled, use SimPositionControlInterface
+for the closest match.  If your real robot is velocity controlled, use
+SimVelocityControlInterface.  If your real robot has smooth position control,
+use SimMoveToControlInterface.  If your real robot has multiple paradigms,
+use SimFullControlInterface.
+
+For each of the SimX classes in this module, if you provide the `simulator`
+argument then this will automatically update your simulation upon each
+beginStep() / endStep() pair.  Otherwise, you will have to step the simulation
+manually in your execution loop.
 """
 
 from .robotinterface import RobotInterfaceBase
 from klampt.model.robotinfo import RobotInfo
 from klampt.model import robotinfo
 from klampt import RobotModel,Simulator,SimRobotController
+from typing import Optional
 import functools
 import warnings
 
 class _SimControlInterface(RobotInterfaceBase):
-    def __init__(self,sim_controller,simulator=None,robotInfo=None):
+    """Base class for the position, velocity, move-to, and full control
+    simulation interfaces.  This should not be used directly.
+    """
+    def __init__(self, sim_controller : SimRobotController, simulator : Optional[Simulator]=None, robotInfo : Optional[RobotInfo]=None):
         RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
         assert isinstance(sim_controller,SimRobotController)
         self.sim_controller = sim_controller
@@ -39,9 +54,6 @@ class _SimControlInterface(RobotInterfaceBase):
         self._status = 'ok'
         return True
 
-    def klamptModel(self):
-        return self.robot
-
     @functools.lru_cache(maxsize=None)
     def parts(self):
         if self.robotInfo is None:
@@ -55,23 +67,14 @@ class _SimControlInterface(RobotInterfaceBase):
         return 1.0/self.sim_controller.getRate()
 
     def sensors(self):
-        sensorNames = []
-        index = 0
-        while True:
-            s = self.sim_controller.sensor(index)
-            sname = s.name()
-            if len(sname) > 0:
-                sensorNames.append(sname)
-            else:
-                break
-            index += 1
+        sensorNames = [s.name for s in self.sim_controller.sensors]
         return sensorNames
 
     def enabledSensors(self):
         return self.sensors()
 
     def hasSensor(self,sensor):
-        return len(self.sim_controller.sensor(sensor).type()) > 0
+        return self.sim_controller.sensor(sensor) is not None
 
     def enableSensor(self,sensor,enabled=True):
         if not enabled:
@@ -99,7 +102,7 @@ class SimPositionControlInterface(_SimControlInterface):
     should use :class:`RobotInterfaceCompleter` to fill in move-to control,
     cartesian control, velocity control, etc.
     """
-    def __init__(self,sim_controller,simulator=None,robotInfo=None):
+    def __init__(self, sim_controller : SimRobotController, simulator : Optional[Simulator]=None, robotInfo : Optional[RobotInfo]=None):
         _SimControlInterface.__init__(self,sim_controller,simulator,robotInfo)
 
     def setPosition(self,q):
@@ -120,7 +123,7 @@ class SimVelocityControlInterface(_SimControlInterface):
     should use :class:`RobotInterfaceCompleter` to fill in move-to control,
     cartesian control, position control, etc.
     """
-    def __init__(self,sim_controller,simulator=None,robotInfo=None):
+    def __init__(self, sim_controller : SimRobotController, simulator : Optional[Simulator]=None, robotInfo : Optional[RobotInfo]=None):
         _SimControlInterface.__init__(self,sim_controller,simulator,robotInfo)
 
     def setVelocity(self,v,ttl=None):
@@ -143,7 +146,7 @@ class SimMoveToControlInterface(_SimControlInterface):
     should use :class:`RobotInterfaceCompleter` to fill in position control,
     cartesian control, velocity control, etc.
     """
-    def __init__(self,sim_controller,simulator=None,robotInfo=None):
+    def __init__(self, sim_controller : SimRobotController, simulator : Optional[Simulator]=None, robotInfo : Optional[RobotInfo]=None):
         _SimControlInterface.__init__(self,sim_controller,simulator,robotInfo)
 
     def moveToPosition(self,q,speed=1.0):
@@ -168,7 +171,7 @@ class SimFullControlInterface(_SimControlInterface):
     You should use :class:`RobotInterfaceCompleter` to fill in move-to control,
     cartesian control, velocity control, etc.
     """
-    def __init__(self,sim_controller,simulator=None,robotInfo=None):
+    def __init__(self, sim_controller : SimRobotController, simulator : Optional[Simulator]=None, robotInfo : Optional[RobotInfo]=None):
         _SimControlInterface.__init__(self,sim_controller,simulator,robotInfo)
 
     def setPosition(self,q):
@@ -260,7 +263,7 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     Also performs joint limit testing and self collision checking. These change
     the status of the interface to non-'ok' error codes.
     """
-    def __init__(self,robot,robotInfo=None):
+    def __init__(self, robot : RobotModel, robotInfo : Optional[RobotInfo] = None):
         RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
         assert isinstance(robot,RobotModel)
         self.robot = robot
@@ -299,16 +302,7 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         return 200.0
 
     def sensors(self):
-        sensorNames = []
-        index = 0
-        while True:
-            s = self.robot.sensor(index)
-            sname = s.name()
-            if len(sname) > 0:
-                sensorNames.append(sname)
-            else:
-                break
-            index += 1
+        sensorNames = [s.name for s in self.robot.sensors]
         return sensorNames
 
     def enabledSensors(self):

@@ -5,17 +5,33 @@ import sys
 import weakref
 import time
 import threading
+from typing import Optional,List
 
 if not glinit.available('PyQt'):
     raise ImportError("Can't import vis_qt without first calling glinit.init() or vis.init()")
 
-if glinit.available('PyQt5'):
+if glinit.active() == 'PyQt6':
+    from PyQt6.QtCore import *
+    from PyQt6.QtWidgets import *
+    from PyQt6.QtGui import QAction
+    PYQT_VERSION = 6
+elif glinit.active() == 'PyQt5':
     from PyQt5.QtCore import *
     from PyQt5.QtWidgets import *
+    PYQT_VERSION = 5
 else:
-    from PyQt4.QtGui import *
-    from PyQt4.QtCore import *
+    raise RuntimeError("Can't load vis_qt without previously initializing with glinit module")
 
+
+def first_nonexistent_file(pattern, start_index=0):
+    """Finds the first file in a sequence that doesn't exist."""
+    import os
+    while start_index < 999:
+        file_name = pattern % start_index
+        if not os.path.exists(file_name):
+            return file_name
+        start_index += 1
+    raise RuntimeError("Too many files in sequence")
 
 class MyQThread(QThread):
     def __init__(self,func,*args):
@@ -29,10 +45,9 @@ class MyQThread(QThread):
 class QtWindowManager(_ThreadedWindowManager):
     def __init__(self):
         self._frontend = GLVisualizationFrontend()
-        #list of WindowInfo's
-        self.windows = []
+        self.windows = []   # type : List[WindowInfo]
         #the index of the current window
-        self.current_window = None
+        self.current_window = None # type: Optional[int]
         #the name of a window, if no windows exist yet
         self.window_title = "Klamp't visualizer (%s)"%(sys.argv[0],)
         #the current temp frontend if len(self.windows)=0, or windows[current_window].frontend
@@ -162,7 +177,7 @@ class QtWindowManager(_ThreadedWindowManager):
             if self.windows[self.current_window].mode == 'hidden':
                 self.windows[self.current_window].mode = 'shown'
         glinit._GLBackend.initialize("Klamp't visualization")
-        
+
         res = None
         while not self.quit:
             _globalLock.acquire()
@@ -178,7 +193,7 @@ class QtWindowManager(_ThreadedWindowManager):
                         w.glwindow.refresh()
                     if w.doRefresh:
                         if w.mode != 'hidden':
-                            w.glwindow.updateGL()
+                            w.glwindow.update()
                         w.doRefresh = False
                     if w.doReload and w.glwindow is not None:
                         w.glwindow.setProgram(w.frontend)
@@ -191,29 +206,35 @@ class QtWindowManager(_ThreadedWindowManager):
                             #    w.glwindow.setParent(w.guidata)
                         w.doReload = False
                     if w.mode == 'dialog':
-                        print("#########################################")
-                        print("klampt.vis: Dialog on window",i)
-                        print("#########################################")
-                        if w.custom_ui is None:
-                            dlg = _MyDialog(w)
-                        else:
-                            dlg = w.custom_ui(w.glwindow)
-                        if dlg is not None:
-                            w.glwindow.show()
-                            self.in_app_thread = True
-                            _globalLock.release()
-                            res = dlg.exec_()
-                            _globalLock.acquire()
+                        if w.guidata is None:
+                            #create dialog
+                            print("#########################################")
+                            print("klampt.vis: Dialog on window",i,"starting")
+                            print("#########################################")
+                            if w.custom_ui is None:
+                                dlg = _MyDialog(w)
+                            else:
+                                dlg = w.custom_ui(w.glwindow)
+                            if dlg is not None:
+                                w.glwindow.show()
+                                self.in_app_thread = True
+                                dlg.show()
+                            w.glwindow.painted = False
+                            w.guidata = dlg
+                        #run dialog and check exit status
+                        #for some stupid reason, Qt requires calling update() constantly to keep the window alive
+                        if not w.glwindow.painted:
+                            w.glwindow.update()
+                        if not w.guidata.isVisible():
+                            res = w.guidata.result()
+                            print("#########################################")
+                            print("klampt.vis: Dialog done on window",i,"result",res)
+                            print("#########################################")
                             w.glwindow.hide()
                             w.glwindow.setParent(None)
-                                
+                            w.mode = 'hidden'
+                            w.guidata = None
                             self.in_app_thread = False
-                        print("#########################################")
-                        print("klampt.vis: Dialog done on window",i)
-                        print("#########################################")
-                        w.glwindow.hide()
-                        w.glwindow.setParent(None)
-                        w.mode = 'hidden'
                     if w.mode == 'shown' and w.guidata is None:
                         print("#########################################")
                         print("klampt.vis: Making window",i)
@@ -222,6 +243,7 @@ class QtWindowManager(_ThreadedWindowManager):
                             w.guidata = _MyWindow(w)
                         else:
                             w.guidata = w.custom_ui(w.glwindow)
+                        w.glwindow.painted = False
                         def closeMonkeyPatch(self,event,windowinfo=w,index=i,oldcloseevent=w.guidata.closeEvent):
                             oldcloseevent(event)
                             if not event.isAccepted():
@@ -254,6 +276,8 @@ class QtWindowManager(_ThreadedWindowManager):
                             w.glwindow.setParent(w.guidata)
                         w.glwindow.show()
                         w.guidata.show()
+                    if w.mode == 'shown' and not w.glwindow.painted:
+                        w.glwindow.update()
                     if w.mode == 'hidden' and w.guidata is not None:
                         #prevent deleting the GL window
                         if hasattr(w.guidata,'detachGLWindow'):
@@ -333,7 +357,6 @@ class QtWindowManager(_ThreadedWindowManager):
                 #single threaded
                 w.mode = 'dialog'
                 if w.glwindow is None:
-                    print("vis: creating GL window")
                     w.glwindow = glinit._GLBackend.createWindow(w.name)
                     w.glwindow.setProgram(w.frontend)
                     w.glwindow.setParent(None)
@@ -348,7 +371,10 @@ class QtWindowManager(_ThreadedWindowManager):
                 res = None
                 if dlg is not None:
                     w.glwindow.show()
-                    res = dlg.exec_()
+                    if PYQT_VERSION >= 5:
+                        res = dlg.exec()
+                    else:
+                        res = dlg.exec_()
                 print("#########################################")
                 print("klampt.vis: Dialog done on window",self.current_window)
                 print("#########################################")
@@ -357,59 +383,64 @@ class QtWindowManager(_ThreadedWindowManager):
                 w.mode = 'hidden'
                 return res
                 raise RuntimeError("Can't call dialog() inside loop().")
-            #just show the dialog and let the thread take over
-            assert w.mode == 'hidden',"dialog() called inside dialog?"
-            print("#########################################")
-            print("klampt.vis: Creating dialog on window",self.current_window)
-            print("#########################################")
-            _globalLock.acquire()
-            w.mode = 'dialog'
-            _globalLock.release()
-
-            if not self.in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
-                print("vis.dialog(): Waiting for dialog on window",self.current_window,"to complete....")
-                assert w.mode == 'dialog'
-                while w.mode == 'dialog':
-                    time.sleep(0.1)
-                if w.mode == 'shown':
-                    print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
-                print("vis.dialog(): ... dialog done")
             else:
-                #called from another dialog or window!
-                print("vis: Creating a dialog from within another dialog or window")
+                #just show the dialog and let the thread take over
+                assert w.mode == 'hidden',"dialog() called inside dialog?"
+                print("#########################################")
+                print("klampt.vis: Creating dialog on window",self.current_window)
+                print("#########################################")
                 _globalLock.acquire()
-                if w.glwindow is None:
-                    print("vis: creating GL window")
-                    w.glwindow = glinit._GLBackend.createWindow(w.name)
-                    w.glwindow.setProgram(w.frontend)
-                    w.glwindow.setParent(None)
-                    w.glwindow.refresh()
-                if w.custom_ui is None:
-                    dlg = _MyDialog(w)
-                else:
-                    dlg = w.custom_ui(w.glwindow)
-                print("#########################################")
-                print("klampt.vis: Dialog starting on window",self.current_window)
-                print("#########################################")
-                if dlg is not None:
-                    w.glwindow.show()
-                    _globalLock.release()
-                    res = dlg.exec_()
-                    _globalLock.acquire()
-                print("#########################################")
-                print("klampt.vis: Dialog done on window",self.current_window)
-                print("#########################################")
-                w.glwindow.hide()
-                w.glwindow.setParent(None)
-                w.mode = 'hidden'
-                for i,w2 in enumerate(self.windows):
-                    print("Returning from dialog items",i,w2.mode)
+                w.mode = 'dialog'
                 _globalLock.release()
-            return None
+
+                if not self.in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
+                    #called dialog() in multithreaded mode from the main thread, just wait for it to be done
+                    print("vis.dialog(): waiting for window",self.current_window,"on vis thread to complete....")
+                    assert w.mode == 'dialog'
+                    while w.mode == 'dialog':
+                        time.sleep(0.1)
+                    if w.mode == 'shown':
+                        print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
+                    print("vis.dialog(): ... dialog done")
+                else:
+                    #called from another dialog or window!  This will need to block the vis thread.
+                    print("vis: Creating a dialog from within another dialog or window")
+                    _globalLock.acquire()
+                    if w.glwindow is None:
+                        print("vis: creating GL window")
+                        w.glwindow = glinit._GLBackend.createWindow(w.name)
+                        w.glwindow.setProgram(w.frontend)
+                        w.glwindow.setParent(None)
+                        w.glwindow.refresh()
+                    if w.custom_ui is None:
+                        dlg = _MyDialog(w)
+                    else:
+                        dlg = w.custom_ui(w.glwindow)
+                    print("#########################################")
+                    print("klampt.vis: Dialog starting on window",self.current_window)
+                    print("#########################################")
+                    if dlg is not None:
+                        w.glwindow.show()
+                        _globalLock.release()
+                        if PYQT_VERSION >= 5:
+                            res = dlg.exec()
+                        else:
+                            res = dlg.exec_()
+                        _globalLock.acquire()
+                    print("#########################################")
+                    print("klampt.vis: Dialog done on window",self.current_window)
+                    print("#########################################")
+                    w.glwindow.hide()
+                    w.glwindow.setParent(None)
+                    w.mode = 'hidden'
+                    for i,w2 in enumerate(self.windows):
+                        print("Returning from dialog items",i,w2.mode)
+                    _globalLock.release()
+                return None
         else:
             w.mode = 'dialog'
             if self.multithreaded():
-                print("#########################################")
+                print("################################################################")
                 print("klampt.vis: Running multi-threaded dialog, waiting to complete...")
                 self._start_app_thread()
                 assert w.mode == 'dialog'
@@ -417,22 +448,21 @@ class QtWindowManager(_ThreadedWindowManager):
                     time.sleep(0.1)
                 if w.mode == 'shown':
                     print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
-                print("klampt.vis: ... dialog done")
-                print("#########################################")
+                print("klampt.vis: ... dialog done, leaving thread open")
+                print("################################################################")
                 return None
             else:
-                print("#########################################")
+                print("################################################################")
                 print("klampt.vis: Running single-threaded dialog")
                 self.in_vis_loop = True
                 res = self.run_app_thread()
                 self.in_vis_loop = False
-                print("klampt.vis: ... dialog done.")
-                print("#########################################")
+                print("klampt.vis: ... return from single-threaded dialog.")
+                print("################################################################")
                 return res
 
     def set_custom_ui(self,func):
         if len(self.windows)==0:
-            print("Making first window for custom ui")
             self.windows.append(WindowInfo(self.window_title,self._frontend))
             self.current_window = 0
         self.windows[self.current_window].custom_ui = func
@@ -471,9 +501,9 @@ class QtWindowManager(_ThreadedWindowManager):
     def screenshot(self,format,want_depth):
         if not self.multithreaded() or self.in_vis_loop or (self.in_app_thread and threading.current_thread().__class__.__name__ != '_MainThread'):
             #already in visualization loop -- just get the image
-            return self._frontend.get_screen(format,want_depth)
+            return self.windows[self.current_window].glwindow.get_screen(format,want_depth)
         if not self.vis_thread_running:
-            raise RuntimeError("Can't call screenshot until the thread is running")
+            raise RuntimeError("Can't call screenshot until the vis thread is running")
         return_values = []
         def storeScreenshot(img,depth=None,return_values=return_values):
             return_values.append((img,depth))
@@ -486,11 +516,11 @@ class QtWindowManager(_ThreadedWindowManager):
             return res[0]
         else:
             return res
-
+    
     def screenshotCallback(self,fn,format,want_depth):
         # if not self.multithreaded() or self.in_vis_loop:
         #     #already in visualization loop -- just get the image
-        #     res = self._frontend.get_screen(format,want_depth)
+        #     res = self.get_screen(format,want_depth)
         #     if want_depth:
         #         fn(*res)
         #     else:
@@ -499,7 +529,7 @@ class QtWindowManager(_ThreadedWindowManager):
             if not self._frontend.rendered:
                 self.threadCall(do_screenshot_callback)
                 return
-            res = self._frontend.get_screen(format,want_depth)
+            res = self.windows[self.current_window].glwindow.get_screen(format,want_depth)
             self._frontend.rendered = False  #don't do this callback until another frame is drawn
             if want_depth:
                 fn(*res)
@@ -516,14 +546,23 @@ class _MyDialog(QDialog):
         glwidget = windowinfo.glwindow
         glwidget.setMinimumSize(640,480)
         glwidget.setMaximumSize(4000,4000)
-        glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+        if PYQT_VERSION == 6:
+            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Maximum,QSizePolicy.Policy.Maximum))
+        else:
+            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
 
         self.description = QLabel("Press OK to continue")
-        self.description.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,QSizePolicy.Fixed))
+        if PYQT_VERSION == 6:
+            self.description.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Preferred,QSizePolicy.Policy.Fixed))
+        else:
+            self.description.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,QSizePolicy.Fixed))
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(glwidget)
         self.layout.addWidget(self.description)
-        self.buttons = QDialogButtonBox(QDialogButtonBox.Ok,Qt.Horizontal, self)
+        if PYQT_VERSION == 6: 
+            self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok,Qt.Orientation.Horizontal, self)
+        else:
+            self.buttons = QDialogButtonBox(QDialogButtonBox.Ok,Qt.Horizontal, self)
         self.buttons.accepted.connect(self.accept)
         self.layout.addWidget(self.buttons)
         self.setWindowTitle(windowinfo.name)
@@ -536,16 +575,21 @@ class _MyWindow(QMainWindow):
         self.glwidget = windowinfo.glwindow
         self.glwidget.setMinimumSize(self.glwidget.width,self.glwidget.height)
         self.glwidget.setMaximumSize(4000,4000)
-        self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+        if PYQT_VERSION == 6:
+            self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Maximum,QSizePolicy.Policy.Maximum))
+        else:
+            self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
         self.setCentralWidget(self.glwidget)
         self.glwidget.setParent(self)
         self.setWindowTitle(windowinfo.name)
         self.glwidget.name = windowinfo.name
         self.saving_movie = False
+        self.screenshot_frame = 0
         self.movie_timer = QTimer(self)
         self.movie_timer.timeout.connect(self.movie_update)
         self.movie_frame = 0
         self.movie_time_last = 0
+        self.movie_writer = None
         self.saving_html = False
         self.html_saver = None
         self.html_start_time = 0
@@ -576,6 +620,11 @@ class _MyWindow(QMainWindow):
         a = QAction('Load camera...', self)
         a.setStatusTip('Loads camera settings')
         a.triggered.connect(self.load_camera)
+        visMenu.addAction(a)
+        a = QAction('Quick screenshot', self)
+        a.setShortcut('Ctrl+S')
+        a.setStatusTip('Saves the image to disk')
+        a.triggered.connect(self.screenshot)
         visMenu.addAction(a)
         a = QAction('Start/stop movie output', self)
         a.setShortcut('Ctrl+M')
@@ -629,7 +678,7 @@ class _MyWindow(QMainWindow):
         fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
             fn = fn[0]
-        if fn is None:
+        if fn is None or len(fn) == 0:
             return
         v = scene.getViewport()
         v.save_file(fn)
@@ -641,7 +690,7 @@ class _MyWindow(QMainWindow):
         fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
             fn = fn[0]
-        if fn is None:
+        if fn is None or len(fn) == 0:
             return
         v.load_file(fn)
         scene.setViewport(v)
@@ -677,43 +726,86 @@ class _MyWindow(QMainWindow):
                         p.getItem('world').setItem(w)
                 """
     
+    def screenshot(self):
+        """Callback: take a screenshot"""
+        fn = 'screenshot%04d.png'%self.screenshot_frame
+        self.glwidget.program.save_screen(fn)
+        self.screenshot_frame += 1
+
     def toggle_movie_mode(self):
+        """Callback: start / stop movie mode"""
         self.saving_movie = not self.saving_movie
         if self.saving_movie:
             self.movie_timer.start(33)
             time_source = self.getTimeSource()
             if time_source is not None:
                 self.movie_time_last = time_source()
+            try:
+                import imageio
+                fn = first_nonexistent_file('klampt_record_%04d.mp4')
+                print("Saving movie to",fn)
+                try:
+                    self.movie_writer = imageio.get_writer(fn,fps=30,codec='libx264')
+                except Exception as e:
+                    print("Error creating movie writer, trying ffmpeg method")
+                    self.movie_writer = None
+            except ImportError:
+                pass
         else:
             self.movie_timer.stop()
-            dlg =  QInputDialog(self)                 
-            dlg.setInputMode( QInputDialog.TextInput) 
-            dlg.setLabelText("Command")
-            dlg.setTextValue('ffmpeg -y -i image%04d.png -vcodec libx264 -pix_fmt yuv420p klampt_record.mp4')
-            dlg.resize(600,100)                             
-            ok = dlg.exec_()                                
-            cmd = dlg.textValue()
-            #(cmd,ok) = QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
-            if ok:
-                import os,glob
-                os.system(str(cmd))
-                print("Removing temporary files")
-                for fn in glob.glob('image*.png'):
-                    os.remove(fn)
+            if self.movie_writer is None:
+                print("imageio library not available, using backup ffmpeg method")
+                dlg =  QInputDialog(self)
+                dlg.setInputMode( QInputDialog.TextInput) 
+                dlg.setLabelText("Command")
+                fn = first_nonexistent_file('klampt_record_%04d.mp4')
+                dlg.setTextValue('ffmpeg -y -i image%04d.png -vcodec libx264 -pix_fmt yuv420p '+fn)
+                dlg.resize(600,100)                             
+                if PYQT_VERSION >= 5: 
+                    ok = dlg.exec()
+                else:
+                    ok = dlg.exec_()
+                cmd = dlg.textValue()
+                #(cmd,ok) = QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                if ok:
+                    import os,glob
+                    os.system(str(cmd))
+                    print("Removing temporary files")
+                    for fn in glob.glob('image*.png'):
+                        os.remove(fn)
+            else:
+                print("... done saving movie.")
+                self.movie_writer.close()
+                self.movie_writer = None
     
+    def write_movie_image(self,frame_index):
+        if self.movie_writer is None:
+            #save to image
+            self.glwidget.program.save_screen('image%04d.png'%(frame_index))
+        else:
+            #write to imageio writer
+            image = self.glwidget.program.get_screen('numpy')
+            try:
+                self.movie_writer.append_data(image)
+            except Exception:
+                print("Unable to write image to movie writer, saving to image file instead")
+                self.glwidget.program.save_screen('image%04d.png'%(frame_index))
+                self.movie_writer = None
+
     def movie_update(self):
         time_source = self.getTimeSource()
         if time_source is not None:
             tnow = time_source()
             while tnow >= self.movie_time_last + 1.0/30.0:
-                self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
+                self.write_movie_image(self.movie_frame)
                 self.movie_frame += 1
                 self.movie_time_last += 1.0/30.0
         else:
-            self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
+            self.write_movie_image(self.movie_frame)
             self.movie_frame += 1
     
     def toggle_html_mode(self):
+        """Callback: start / stop saving HTML mode"""
         self.saving_html = not self.saving_html
         if self.saving_html:
             world = self.getWorld()
@@ -745,6 +837,7 @@ class _MyWindow(QMainWindow):
         self.html_saver.animate(t)
     
     def edit_gui(self):
+        """Callback: launch the GUI edit window"""
         if self.edit_gui_window:
             self.edit_gui_window.close()
             self.edit_gui_window = None

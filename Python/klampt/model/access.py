@@ -282,14 +282,8 @@ class map:
                 return (map(self.obj.getObjectVelocity(),lambda twist:self.obj.setObjectVelocity(*twist)))
         elif isinstance(self.obj,SimRobotController):
             if name=='sensors':
-                sensors = []
-                index = 0
-                while True:
-                    s = self.obj.getSensor(index)
-                    if s.type() == '': break
-                    sensors.append(s)
-                    index += 1
-                return _index_name_map(sensors,[s.name() for s in sensors])
+                sensors = self.obj.sensors
+                return _index_name_map(sensors,[s.name for s in sensors])
         elif isinstance(self.obj,(list,tuple,dict)):
             #print("Accessing",name,"from",self.obj)
             return self.obj[name]

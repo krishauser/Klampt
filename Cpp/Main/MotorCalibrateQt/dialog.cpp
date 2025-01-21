@@ -109,4 +109,5 @@ int Dialog::DoCalibrate(){
 motorcalibrate.settings and run \n\
   ./MotorCalibrate motorcalibrate.settings"<<endl;
   cout<<settings<<endl;
+  return 1;
 }

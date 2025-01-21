@@ -150,7 +150,9 @@ Settings are:
 - `rgb` (bool): if true, the camera provides RGB output.
 - `depth` (bool): if true, the camera provides depth output.
 - `xres`, `yres` (int): the x and y resolution of the sensor.
-- `xfov`, `yfov` (float): the x and y field of view, in radians.
+- `xfov`, `yfov` (float): the x and y field of view, in radians. (DEPRECATED, but still supported)
+- `fx`, `fy` (float): the x and y focal lengths of the sensor, in pixels.
+- `cx`, `cy` (float): the focal point of the sensor, in pixels.
 - `zmin`, `zmax` (float): minimum and maximum range of the depth sensor.
 
 [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classCameraSensor.html).

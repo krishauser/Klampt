@@ -342,7 +342,8 @@ def set_random_seed(seed: "int") -> "void":
     set_random_seed(int seed)
 
 
-    Sets the random seed used by the motion planner.  
+    Sets the random seed used by the RobotModel.randomizeConfig() method and
+    sampling-based motion planners.  
 
     """
     return _motionplanning.set_random_seed(seed)
@@ -454,9 +455,8 @@ class CSpaceInterface(object):
 
     ..note::  
 
-        The native Python CSpace interface class in cspace.py is easier to use.  
-
-    You can either set a single feasibility test function using setFeasibility() or
+        The native Python CSpace interface class in cspace.py is easier to use.
+     You can either set a single feasibility test function using setFeasibility() or
     add several feasibility tests, all of which need to be satisfied, using
     addFeasibilityTest(). In the latter case, planners may be able to provide
     debugging statistics, solve Minimum Constraint Removal problems, run faster by

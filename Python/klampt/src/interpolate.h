@@ -14,6 +14,7 @@ using namespace std;
 ///     interpolation.  If a path cannot be found, then empty arrays are
 ///     returned.
 ///
+///Return type: Tuple[List[float],List[float],List[float]]
 void interpolate_1d_min_time(double x0,double v0,double x1,double v1,
              double xmin,double xmax,double vmax,double amax,
              vector<double>& out,vector<double>& out2,vector<double>& out3);
@@ -27,6 +28,8 @@ void interpolate_1d_min_time(double x0,double v0,double x1,double v1,
 ///     (times,positions,velocities) which may be interpolated using hermite
 ///     interpolation.  If a path cannot be found, then empty arrays are
 ///     returned.
+///
+///Return type: Tuple[List[float],List[float],List[float]]
 void interpolate_1d_min_accel(double x0,double v0,double x1,double v1,
               double endTime,double xmin,double xmax,double vmax,
               vector<double>& out,vector<double>& out2,vector<double>& out3);
@@ -51,6 +54,7 @@ void interpolate_1d_min_accel(double x0,double v0,double x1,double v1,
 ///     ``hermite(times[i],positions[i],velocities[i])``
 ///     will give the path for that channel.
 /// 
+///Return type: Tuple[List[Vector,Vector,Vector]]
 void interpolate_nd_min_time(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
              const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,const vector<double>& amax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
@@ -73,6 +77,7 @@ void interpolate_nd_min_time(const vector<double>& x0,const vector<double>& v0,c
 ///     ``hermite(times[i],positions[i],velocities[i])`` will give the path
 ///     for that channel.
 /// 
+///Return type: Tuple[List[Vector],List[Vector],List[Vector]]
 void interpolate_nd_min_accel(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
              double endTime,const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
@@ -91,6 +96,7 @@ void interpolate_nd_min_accel(const vector<double>& x0,const vector<double>& v0,
 ///     ND interpolator ``hermite(times,positions[i],velocities[i])``
 ///     will give the optimized trajectory.
 ///
+///Return type: Tuple[List[float],List[Vector],List[Vector]]
 void interpolate_nd_min_time_linear(const vector<double>& x0,const vector<double>& x1,
              const vector<double>& vmax,const vector<double>& amax,
              vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
@@ -103,6 +109,7 @@ void interpolate_nd_min_time_linear(const vector<double>& x0,const vector<double
 ///     (times,positions,velocities) which may be interpolated using cubic
 ///     interpolation.
 ///
+///Return type: Tuple[List[float],List[float],List[float]]
 void brake_1d(double x0,double v0,double amax,
               vector<double>& out,vector<double>& out2,vector<double>& out3);
 
@@ -127,6 +134,7 @@ void brake_1d(double x0,double v0,double amax,
 ///     ND interpolator ``hermite(times,positions[i],velocities[i])``
 ///     will give the optimized trajectory.
 ///
+///Return type: Tuple[List[Vector],List[Vector],List[Vector]]
 void brake_nd(const vector<double>& x0,const vector<double>& v0,
               const vector<double>& xmin,const vector<double>& xmax,const vector<double>& amax,
               vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
@@ -138,6 +146,8 @@ void brake_nd(const vector<double>& x0,const vector<double>& v0,
 ///
 /// Use this to post-process the results from :func:`interpolate_nd_min_time` 
 /// and :func:`interpolate_nd_min_accel`.
+///
+/// Return type: Tuple[List[float],List[Vector],List[Vector]]
 void combine_nd_cubic(const vector<vector<double> >& times,const vector<vector<double> >& positions,const vector<vector<double> >& velocities,
     vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
 

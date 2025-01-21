@@ -3191,9 +3191,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    status (int): 0 if pVFObj = NULL, 1 otherwise.  \n"
-		"\n"
-		"See vectorfield.py for an abstract base class that can be overridden to produce\n"
+		"    status (int): 0 if pVFObj = NULL, 1 otherwise.\n"
+		" See vectorfield.py for an abstract base class that can be overridden to produce\n"
 		"one of these objects.  \n"
 		"\n"
 		""},
@@ -3215,7 +3214,8 @@ static PyMethodDef SwigMethods[] = {
 		"            - 4: maximum iterations reached\n"
 		"            - 5: numerical error occurred\n"
 		"\n"
-		"        and x is the final point and n is the number of iterations used  \n"
+		"        and x is the final point and n is the number of iterations used\n"
+		"\n"
 		"\n"
 		""},
 	 { "findRootsBounded", _wrap_findRootsBounded, METH_VARARGS, "\n"

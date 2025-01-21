@@ -74,14 +74,24 @@ class IKObjective
   ///Manual: Sets an axial rotation constraint
   void setAxialRotConstraint(const double alocal[3],const double aworld[3]);
   ///Returns the local and global position of the position constraint
+  ///
+  ///Return type: Tuple[Vector3,Vector3]
   void getPosition(double out[3],double out2[3]) const;
   ///For linear and planar constraints, returns the direction
+  ///
+  ///Return type: Vector3
   void getPositionDirection(double out[3]) const;
   ///For fixed rotation constraints, returns the orientation
+  ///
+  ///Return type: Matrix3
   void getRotation(double out[9]) const;
   ///For axis rotation constraints, returns the local and global axes
+  ///
+  ///Return type: Tuple[Vector3,Vector3]
   void getRotationAxis(double out[3],double out2[3]) const;
   ///For fixed-transform constraints, returns the transform (R,t)
+  ///
+  ///Return type: RigidTransform
   void getTransform(double out[9],double out2[3]) const;
   ///Tranforms the target position/rotation of this IK constraint by transform (R,t)
   void transform(const double R[9],const double t[3]);
@@ -96,10 +106,14 @@ class IKObjective
 
   ///Gets the transform T that's closest to the transform (R,t) and 
   ///that satisfies the IK goal's constraints.
+  ///
+  ///Return type: RigidTransform
   void closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const;
 
   ///Returns a transformation (R,t) from link relative to link2, sampled at random from
   ///the space of transforms that satisfies the objective obj.
+  ///
+  ///Return type: RigidTransform
   void sampleTransform(double out[9],double out2[3]) const;
 
   ///Loads the objective from a Klamp't-native formatted string. For a
@@ -167,24 +181,36 @@ class IKSolver
   /// Sets the active degrees of freedom
   void setActiveDofs(const std::vector<int>& active);
   /// Returns the active degrees of freedom
+  ///
+  ///Return type: List[int]
   void getActiveDofs(std::vector<int>& out);
   /// Sets limits on the robot's configuration.  If empty, this turns off joint limits.
   void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
   /// Returns the limits on the robot's configuration (by default this is the robot's joint limits
+  ///
+  ///Return type: Tuple[Vector,Vector]
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
   /// Biases the solver to approach a given configuration.  Setting an empty vector clears the bias term.
   void setBiasConfig(const std::vector<double>& biasConfig);
   /// Returns the solvers' bias configuration
+  ///
+  ///Return type: Vector
   void getBiasConfig(std::vector<double>& out);
 
   /// Returns True if the current configuration residual is less than tol
   bool isSolved();
   /// Returns the vector describing the error of the objective at the current configuration
+  ///
+  ///Return type: Vector
   void getResidual(std::vector<double>& out);
   /// Computes the matrix describing the instantaneous derivative of the objective
   /// with respect to the active Dofs
+  ///
+  ///Return type: np.ndarray
   void getJacobian(double** np_out2,int* m,int* n);
   /// Returns the vector describing the error of the secondary objective at the current configuration
+  ///
+  ///Return type: Vector
   void getSecondaryResidual(std::vector<double>& out);
 
   /** Tries to find a configuration that satifies all simultaneous objectives

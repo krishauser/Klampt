@@ -101,15 +101,9 @@ class RobotControllerBlock(Block):
         self.robotModel = robotModel
         inputs = ['t','dt','q','dq','torque','qcmd','dqcmd']
         if self.robotModel is not None:
-            i = 0
-            while True:
-                s = self.robotModel.sensor(i)
-                i += 1
-                if s.name()=='':
-                    break
-                if s.name() in ['q','dq']:
-                    continue
-                inputs.append(s.name())
+            for (k,v) in self.robotModel.sensorDict.items():
+                if v.name not in inputs:
+                    inputs.append(v.name)
         Block.__init__(self,inputs,['qcmd','dqcmd','tcmd','torquecmd'])
 
 class RobotControllerIO:

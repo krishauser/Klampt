@@ -177,11 +177,6 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
 {
   vector<string> configs;
 
-  world->lights.resize(1);
-  world->lights[0].setColor(GLColor(1,1,1));
-  world->lights[0].setDirectionalLight(Vector3(0.2,-0.4,1));
-  world->lights[0].setColor(GLColor(1,1,1));
-
   for(int i=1;i<argc;i++) {
     if(argv[i][0] == '-') {
       if(0==strcmp(argv[i],"-config")) {
@@ -255,9 +250,8 @@ void WorldGUIBackend::Start()
   camera.dist = 6;
   viewport.n = 0.1f;
   viewport.f = 100;
-  viewport.setLensAngle(DtoR(60.0f));
-  //viewport.setLensAngle(DtoR(90.0f));
-
+  viewport.setFOV(DtoR(60.0f));
+  
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
   glClearColor(world->background.rgba[0],world->background.rgba[1],world->background.rgba[2],world->background.rgba[3]);

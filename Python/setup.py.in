@@ -180,7 +180,7 @@ setup(name='Klampt',
       ],
       install_requires=[
         'PyOpenGL',
-        'numpy>='+numpy_oldest_acceptable_version,
+        'numpy>='+numpy_oldest_acceptable_version
       ],
      )
 

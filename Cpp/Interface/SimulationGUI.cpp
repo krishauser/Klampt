@@ -195,10 +195,6 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
   vector<string> paths;
   vector<string> milestones;
   vector<string> configs;
-  world->lights.resize(1);
-  world->lights[0].setColor(GLColor(1,1,1));
-  world->lights[0].setDirectionalLight(Vector3(0.2,-0.4,1));
-  world->lights[0].setColor(GLColor(1,1,1));
 
   for(int i=1;i<argc;i++) {
     if(argv[i][0] == '-') {

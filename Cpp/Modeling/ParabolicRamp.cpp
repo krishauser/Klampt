@@ -742,8 +742,8 @@ int PPRamp::CalcSwitchTimes(Real a,Real& t1,Real& t2) const
     Real c = (Sqr(dx0)-Sqr(dx1))*0.5+(x0-x1)*a;
     res=quadratic(a*a,b,c,t1,t2);
   }
-  if(res == 0) {
-    return res;
+  if(res <= 0) {
+    return 0;
   }
   else if(res == 2) {
     if(t1 < 0 && t1 > -EpsilonT*0.1) t1=0;
@@ -771,7 +771,7 @@ Real PPRamp::CalcSwitchTime(Real a) const
 {
   Real t1,t2;
   int res = CalcSwitchTimes(a,t1,t2);
-  if(res == 0) {
+  if(res <= 0) {
     return -1;
   }
   else if(res == 2) {
@@ -812,6 +812,16 @@ Real PPRamp::CalcMinAccel(Real endTime,Real sign,Real& switchTime) const
   c = (dx1 - dx0)*endTime;
   Real rat1,rat2;
   int res=quadratic(a,b,c,rat1,rat2);
+  if(res < 0) { //both dx0 and dx1 are 0
+    rat1 = rat2 = 0.5;
+  }
+  else if(res == 0) {
+    PARABOLIC_RAMP_PERROR("QUADRATIC FAILED: %g %g %g, det %g",a,b,c,b*b - 4*a*c);
+    PARABOLIC_RAMP_ASSERT(res != 0);
+  }
+  else if(res == 1) {
+    rat2 = rat1;
+  }
   Real accel1 = (dx1-dx0)/rat1;
   Real accel2 = (dx1-dx0)/rat2;
   Real switchTime1 = endTime*0.5+0.5*rat1;

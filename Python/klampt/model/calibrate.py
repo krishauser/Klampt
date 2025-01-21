@@ -17,18 +17,9 @@ import random
 
 Key = Union[int,str]
 
-def robot_sensors(robot : RobotModel, type = None):
+def robot_sensors(robot : RobotModel, type : Optional[str] = None):
     """Returns all sensors on the robot of the given type."""
-    res = []
-    sindex = 0
-    while True:
-        s = robot.sensor(sindex)
-        if s.name() == '':
-            break
-        if type is None or s.type() == type:
-            res.append(s)
-        sindex += 1
-    return res
+    return [s for s in robot.sensors if type is None or s.type == type]
 
 
 class PointMarker:
@@ -42,7 +33,7 @@ class PointMarker:
         variable (bool): whether this should be optimized
 
     """
-    def __init__(self,link=None,local_coordinates=None):
+    def __init__(self,link : Optional[Key]=None, local_coordinates : Optional[Vector3]=None):
         self.link = link                             # type: Optional[Key]
         self.size = 0.01                             # type: float
         self.local_coordinates = local_coordinates   # type: Vector3
@@ -62,7 +53,9 @@ class TransformMarker:
         variable (bool): whether this should be optimized
         
     """
-    def __init__(self,link=None,local_coordinates=None,local_features=None):
+    def __init__(self, link : Optional[Key]=None,
+                 local_coordinates : Optional[RigidTransform]=None,
+                 local_features : Optional[List[Vector3]]=None):
         self.link = link                            # type: Optional[Key]
         self.size = 0.1                             # type: float
         self.local_coordinates = local_coordinates  # type: RigidTransform
@@ -70,7 +63,7 @@ class TransformMarker:
         self.variable = True                        # type: bool
 
     @staticmethod
-    def chessboard(nrows,ncols,square_size,link=None):
+    def chessboard(nrows:int, ncols:int ,square_size:float, link:Optional[Key]=None):
         """Creates a chessboard marker with the given number of rows and
         columns, and the given square size.
         
@@ -99,7 +92,9 @@ class CameraInfo:
         variable (bool): whether this should be optimized
 
     """
-    def __init__(self,link,intrinsics=None,local_coordinates=None):
+    def __init__(self,link:Optional[Key],
+                 intrinsics : Optional[dict] = None,
+                 local_coordinates : Optional[RigidTransform]=None):
         self.link = link                            # type: Optional[Key]
         self.intrinsics = intrinsics                # type: dict
         self.local_coordinates = local_coordinates  # type: RigidTransform
@@ -111,7 +106,7 @@ class PointObservation:
 
     X is to the right, Y is down, Z is forward.  Units are in m.
     """
-    def __init__(self,value,camera_id,frame_id,marker_id,feature_id=None):
+    def __init__(self, value : Vector3, camera_id : Key, frame_id : int, marker_id : Key, feature_id : Optional[int]=None):
         self.camera_id = camera_id
         self.frame_id = frame_id
         self.marker_id = marker_id
@@ -126,7 +121,7 @@ class TransformObservation:
 
     X is to the right, Y is down, Z is forward.  Translation units are in m.
     """
-    def __init__(self,value,camera_id,frame_id,marker_id):
+    def __init__(self, value: RigidTransform, camera_id : Key, frame_id : int, marker_id : Key,):
         self.camera_id = camera_id
         self.frame_id = frame_id
         self.marker_id = marker_id
@@ -140,7 +135,7 @@ class PixelObservation:
 
     X is to the right, Y is down.  Units are in pixels.
     """
-    def __init__(self,value,camera_id,frame_id,marker_id,feature_id=None):
+    def __init__(self, value : Vector2, camera_id : Key, frame_id : int, marker_id : Key, feature_id : Optional[int]=None):
         self.camera_id = camera_id
         self.frame_id = frame_id
         self.marker_id = marker_id
@@ -152,7 +147,8 @@ class PixelObservation:
 
 class RobotExtrinsicCalibration:
     """Stores a calibration dataset and helps perform extrinsic (hand-eye)
-    calibration.
+    calibration.  Supports multiple cameras, both eye in hand and fixed camera
+    setups, and multiple marker types (pixels, 3d points, QR / Aruco tags).
 
     Examples
     ------------
@@ -333,16 +329,16 @@ class RobotExtrinsicCalibration:
                 sensors = [sensors]
             for sindex in sensors:
                 s = self.robot.sensor(sindex)
-                if s.name() == '':
+                if s is None:
                     raise ValueError("Invalid sensor {}, not in robot model".format(sindex))
-                if s.type() != 'CameraSensor':
+                if s.type != 'CameraSensor':
                     raise ValueError("Invalid sensor {}, not a CameraSensor".format(sindex))
                 simsensors.append(s)
         for s in simsensors:
             caminfo = CameraInfo(int(s.getSetting('link')))
             caminfo.intrinsics = sensing.camera_to_intrinsics(s,'json')
             caminfo.local_coordinates = sensing.get_sensor_xform(s)
-            self.cameras[s.name()] = caminfo
+            self.cameras[s.name] = caminfo
 
     def editTrajectory(self, world : WorldModel = None, name='calibration_trajectory') -> RobotTrajectory:
         """Returns a RobotTrajectory that passes through all calibration
@@ -443,8 +439,6 @@ class RobotExtrinsicCalibration:
                     s = simsensors[i]
             else:
                 s = self.robot.sensor(i)
-                if s.name()=='':
-                    s = None
             if s is None:
                 #create a new camera on the robot
                 s = self.robot.addSensor(str(i),'CameraSensor')
@@ -512,7 +506,7 @@ class RobotExtrinsicCalibration:
                         sensing.set_sensor_xform(sensors[k],c.local_coordinates)
                     except Exception:
                         print("Error setting sensor transform. Does your camera name shadow a non-camera sensor in the RobotModel?")
-                        print("   Camera",k,"sensor type",sensors[k].type())
+                        print("   Camera",k,"sensor type",sensors[k].type)
                         continue
                     re_read_cameras.append(k)
             for k in re_read_markers: #make sure to get released configuration
@@ -640,14 +634,18 @@ class RobotExtrinsicCalibration:
                 if isinstance(det,(PixelObservation,PointObservation,TransformObservation)):
                     det.camera_id = camera_id
                     det.frame_id = frame_id
-                    self.robot.setConfig(q)
-                    camera_link = self.cameras[camera_id].link
-                    if det.marker_id not in self.markers:
-                        print("Uh... invalid marker?",det.marker_id,list(self.markers.keys()))
-                    marker_link = self.markers[det.marker_id].link
-                    camera_link_transform = _linkTransform(camera_link,self.robot)
-                    marker_link_transform = _linkTransform(marker_link,self.robot)
-                    det.hand_eye_transform = se3.mul(se3.inv(camera_link_transform),marker_link_transform)
+                    if q is not None:
+                        self.robot.setConfig(q)
+                        camera_link = self.cameras[camera_id].link
+                        if det.marker_id not in self.markers:
+                            print("Uh... invalid marker?",det.marker_id,list(self.markers.keys()))
+                        marker_link = self.markers[det.marker_id].link
+                        camera_link_transform = _linkTransform(camera_link,self.robot)
+                        marker_link_transform = _linkTransform(marker_link,self.robot)
+                        det.hand_eye_transform = se3.mul(se3.inv(camera_link_transform),marker_link_transform)
+                    else:
+                        if det.hand_eye_transform is not None:
+                            raise ValueError("Need to provide a hand-eye transform or configuration to determine the camera / marker transforms")
                     self.observations.append(det)
                 else:
                     marker,value = det
@@ -1099,7 +1097,7 @@ class RobotExtrinsicCalibration:
         for i,c in self.cameras.items():
             try:
                 s = self.robot.sensor(i)
-                if s.name()=='':
+                if s is None:
                     raise ValueError()
             except Exception:
                 #create a new camera on the robot

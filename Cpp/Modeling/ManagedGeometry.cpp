@@ -1,6 +1,7 @@
 #include "ManagedGeometry.h"
 #include "IO/ROS.h"
 #include <KrisLibrary/meshing/PointCloud.h>
+#include <KrisLibrary/geometry/GeometryTypeImpl.h>
 #include <string.h>
 #include <KrisLibrary/Timer.h>
 #include <KrisLibrary/utils/stringutils.h>
@@ -95,7 +96,6 @@ shared_ptr<Geometry::AnyCollisionGeometry3D> ManagedGeometry::CreateEmpty()
   geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
   appearance = make_shared<GLDraw::GeometryAppearance>();
   SetupDefaultAppearance(*appearance);
-  appearance->geom = geometry.get();
   return geometry;
 }
 
@@ -192,7 +192,6 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       return false;
     }
     appearance->Set(*geometry);
-    geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
     return true;
   }
   if(0==strncmp(fn,"ros:PointCloud2//",17)) {
@@ -237,20 +236,20 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       double t = timer.ElapsedTime();
       if(t > 0.2) 
         LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: loaded "<<filename<<" in time "<<t<<"s");
-      if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
+      if(geometry->type == Geometry::AnyGeometry3D::Type::TriangleMesh) {
         if(geometry->TriangleMeshAppearanceData() != NULL) {
           appearance = make_shared<GLDraw::GeometryAppearance>(*geometry->TriangleMeshAppearanceData());
-          SetupDefaultAppearance(*appearance);
           appearance->Set(*geometry);
-        }
+          SetupDefaultAppearance(*appearance);
+          }
         else {
           appearance->Set(*geometry);
+          SetupDefaultAppearance(*appearance);
         }
       }
       else {
         appearance->Set(*geometry);
       }
-      geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
       return true;
     }
     else {
@@ -358,7 +357,13 @@ void ManagedGeometry::SetUnique()
   if(i->second.geoms.size() > 1) {
     //has duplicates, actually have to copy the geometry and remove this
     geometry = make_shared<Geometry::AnyCollisionGeometry3D>(*geometry);
-    OnGeometryChange();
+    //OnGeometryChange();
+    if(appearance) {
+      //don't need to completely reset appearance, just the geometry pointers
+      appearance->geom = geometry.get();
+      appearance->collisionGeom = geometry.get();
+      appearance->RefreshGeometry();
+    }
     RemoveFromCache();
   }
 }
@@ -383,7 +388,9 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
         //geometry = prev->geometry;
         if(appearance.use_count() > 1)   //don't share with prior transformed geometry or the un-transformed geometry
           appearance = make_shared<GLDraw::GeometryAppearance>(*appearance);
+        //don't need to completely reset apperance, just the geometry pointers
         appearance->geom = geometry.get();
+        appearance->collisionGeom = geometry.get();
         cacheKey = newCacheKey;
 #if CACHE_DEBUG
         LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: transformed version of "<<cacheKey<<" was in cache.");
@@ -406,16 +413,19 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
       cacheKey = newCacheKey;
       manager.cache[newCacheKey].geoms.push_back(this);
     }
-    OnGeometryChange();
+    //OnGeometryChange();
+    if(appearance) appearance->RefreshGeometry();
   }
 }
 
 void ManagedGeometry::OnGeometryChange()
 {
-  //may need to refresh appearance?
+  //geometry has changed, may need to refresh appearance
   if(geometry && appearance) {
-     appearance->Set(*geometry);
-     geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
+    if(appearance->geom != geometry.get())
+      appearance->Set(*geometry);
+    else
+      appearance->RefreshGeometry();
   }
 }
 
@@ -476,7 +486,6 @@ void ManagedGeometry::DrawGL()
   //Assert(appearance->geom == geometry.get());
   if(appearance->geom == NULL) {
     appearance->Set(*geometry);
-    geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
   }
   appearance->DrawGL();
 }
@@ -488,7 +497,6 @@ void ManagedGeometry::DrawGLOpaque(bool opaque)
   //Assert(appearance->geom == geometry.get());
   if(appearance->geom == NULL) {
     appearance->Set(*geometry);
-    geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
   }
   GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::ALL_OPAQUE : GLDraw::GeometryAppearance::ALL_TRANSPARENT);
   appearance->DrawGL(e);

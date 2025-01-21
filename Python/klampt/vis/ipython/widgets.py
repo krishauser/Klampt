@@ -229,9 +229,10 @@ class KlamptWidget(widgets.DOMWidget):
             if isinstance(item,SE3Trajectory):
                 res = []
                 ttraj = []
-                for i in item.milestones:
-                    T = item.to_se3(item.milestones[i])
-                    res += self.add(name+"_milestone_"+str(i),T)
+                for i,q in enumerate(item.milestones):
+                    T = item.to_se3(q)
+                    xform_items = self.add(name+"_milestone_"+str(i),T,'RigidTransform')
+                    res += xform_items
                     ttraj.append(T[1])
                 res += self.add(name,ttraj,**kwargs)
                 self._extras[name] = ('Trajectory',res)
@@ -274,8 +275,7 @@ class KlamptWidget(widgets.DOMWidget):
             return [name]
         elif type == 'PointCloud':
             pc = item
-            from klampt.model import geometry
-            colors = geometry.point_cloud_colors(pc,'rgb')
+            colors = pc.getColors('rgb')
             data = ([v for v in pc.vertices],colors)
             self._extras[name] = ('Points',data)
             msg = {'type':'add_points','name':name,'verts':data[0],'size':kwargs.get('size',0.01)}

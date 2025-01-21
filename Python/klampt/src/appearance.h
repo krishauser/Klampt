@@ -66,6 +66,7 @@ class Appearance
   ///feature.  feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE,
   ///or SPECULAR.
   void setColor(int feature,float r,float g, float b,float a);
+  ///Return type: Tuple[float,float,float,float]
   void getColor(float out[4]);
   ///Gets color of the object or a feature
   ///
@@ -74,6 +75,8 @@ class Appearance
   ///If 1 arguments are given, returns the color of the given feature.
   ///feature.  feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE,
   ///or SPECULAR.
+  ///
+  ///Return type: Tuple[float,float,float,float]
   void getColor(int feature,float out[4]);
   ///Sets per-element color for elements of the given feature type.  Must be an mxn
   ///array.  m is the number of features of that type, and n is either 3 or 4.
@@ -84,10 +87,19 @@ class Appearance
   ///
   ///Only supports feature=VERTICES and feature=FACES
   void setColors(int feature,float* np_array2, int m, int n);
+  /// Retrieves per-element color for elements of the given feature type.  If
+  /// per-element colors are not enabled, then a 1 x 4 array is returned.
+  /// Otherwise, returns an m x 4 array, where m is the number of featuress of
+  /// that type. 
+  ///
+  ///Return type: np.ndarray
+  void getColors(int feature,float** np_out2, int* m, int* n);
   ///Sets a temporary tint color that modulates the appearance of the object.
   ///This works with both flat colors and per-vertex / per-face colors.
   void setTintColor(const float color[4],float strength);
   ///Retrieves the tint color
+  ///
+  ///Return type: Tuple[float,float,float,float]
   void getTintColor(float out[4]);
   ///Retrieves the tint strength
   float getTintStrength();
@@ -100,6 +112,8 @@ class Appearance
   ///Sets the per-element color for the given feature
   void setElementColor(int feature,int element,float r,float g,float b,float a=1);
   ///Gets the per-element color for the given feature
+  ///
+  ///Return type: Tuple[float,float,float,float]
   void getElementColor(int feature,int element,float out[4]);
   ///Sets a 1D texture of the given width.  Valid format strings are
   ///
@@ -125,7 +139,13 @@ class Appearance
   /// - l8: unsigned byte grayscale colors, one channel
   ///
   void setTexture1D_channels(const char* format,unsigned char* np_array2,int m,int n);
-  //note: only docs for last overload are included
+  /// Retrieves a 1D texture format, returning '' if the texture is not set
+  const char* getTexture1D_format();
+  /// Retrieves a view into the 1D texture data. If the texture is not set,
+  /// throws an exception. 
+  ///
+  ///Return type: np.ndarray
+  void getTexture1D_channels(unsigned char** np_view2,int* m,int* n);
   ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D_b` for 
   ///valid format strings.
   ///
@@ -144,20 +164,43 @@ class Appearance
   ///The array is given in top to bottom order if ``topdown==True``.
   ///Otherwise, it is given in order bottom to top.
   void setTexture2D_channels(const char* format,unsigned char* np_array3,int m,int n,int p,bool topdown=true);
-  //note: only docs for last overload are included
+  /// Retrieves a 2D texture format, returning '' if the texture is not set
+  const char* getTexture2D_format();
+  /// Retrieves a view into the 2D texture data. If the texture is not set,
+  /// throws an exception. 
+  ///
+  ///Return type: np.ndarray
+  void getTexture2D_channels(unsigned char** np_view3,int* m,int* n,int* p);
   ///Sets per-vertex texture coordinates for a 1D texture.
   ///
   ///You may also set uvs to be empty, which turns off texture mapping altogether.
   void setTexcoords1D(double* np_array,int m);
+  /// Gets per-vertex texture coordinates for a 1D texture.  If no 1D texture
+  /// is set, throws an exception.
+  /// 
+  ///Return type: np.ndarray
+  void getTexcoords1D(double** np_out,int* m);
   ///Sets per-vertex texture coordinates for a 2D texture.  uvs is an array of
   ///shape (nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]]. 
   ///
   ///You may also set uvs to be empty, which turns off texture mapping altogether.
   void setTexcoords2D(double* np_array2,int m,int n);
+  /// Gets per-vertex texture coordinates for a 2D texture.  If no 2D texture
+  /// is set, throws an exception.
+  /// 
+  ///Return type: np.ndarray
+  void getTexcoords2D(double** np_out2,int* m,int* n);
   ///Sets the texture generation.  The array must be size m x 4, with m in the 
   ///range 0,...,4.  If worldcoordinates=true, the texture generation is 
   ///performed in world coordinates rather than object coordinates.
   void setTexgen(double* np_array2,int m,int n,bool worldcoordinates=false);
+  /// Retrieves the texture generation.  The array will be size m x 4, with m
+  /// in the range 0,...,4.  The texture generation is performed in  
+  /// 
+  ///Return type: np.ndarray
+  void getTexgenMatrix(double** np_out2,int* m,int* n);
+  /// Returns whether texture generation is performed in world coordinates 
+  bool isTexgenWorld();
   ///Sets whether textures are to wrap (default true)
   void setTexWrap(bool wrap);
   ///For point clouds, sets the point size.

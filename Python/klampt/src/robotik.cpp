@@ -481,6 +481,8 @@ void IKSolver::getResidual(std::vector<double>& out)
   size = 0;
   for(size_t i=0;i<objectives.size();i++) {
     const IKGoal& goal = objectives[i].goal;
+    Assert(goal.link >= 0 && goal.link < robot.robot->q.n);
+    Assert(goal.destLink >= -1 && goal.destLink < robot.robot->q.n);
     int m=IKGoal::NumDims(goal.posConstraint);
     int n=IKGoal::NumDims(goal.rotConstraint);
     Real poserr[3],orierr[3];
@@ -510,6 +512,8 @@ void IKSolver::getSecondaryResidual(std::vector<double>& out)
   size = 0;
   for(size_t i=0;i<secondary_objectives.size();i++) {
     const IKGoal& goal = secondary_objectives[i].goal;
+    Assert(goal.link >= 0 && goal.link < robot.robot->q.n);
+    Assert(goal.destLink >= -1 && goal.destLink < robot.robot->q.n);
     int m=IKGoal::NumDims(goal.posConstraint);
     int n=IKGoal::NumDims(goal.rotConstraint);
     Real poserr[3],orierr[3];
@@ -531,8 +535,12 @@ void IKSolver::getJacobian(double** out,int* m,int* n)
 {
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
-  for(size_t i=0;i<objectives.size();i++)
-    goals[i] = objectives[i].goal;
+  for(size_t i=0;i<objectives.size();i++) {
+    const IKGoal& goal = objectives[i].goal;
+    Assert(goal.link >= 0 && goal.link < robot.robot->q.n);
+    Assert(goal.destLink >= -1 && goal.destLink < robot.robot->q.n);
+    goals[i] = goal;
+  }
   f.UseIK(goals);
   if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
   else f.activeDofs.mapping = activeDofs;
@@ -615,17 +623,20 @@ void SetupSolver(IKSolver* s,RobotIKFunction& f,RobotIKSolver& solver,bool add_s
       }
     }
   }
-  vector<IKGoal> goals(s->objectives.size());
-  for(size_t i=0;i<s->objectives.size();i++)
-    goals[i] = s->objectives[i].goal;
+  vector<const IKGoal*> goals(s->objectives.size());  // function stores *reference* to goal
+  for(size_t i=0;i<s->objectives.size();i++) {
+    goals[i] = &s->objectives[i].goal;
+  }
   if(add_secondary) {
     goals.resize(s->objectives.size()+s->secondary_objectives.size());
     for(size_t i=0;i<s->secondary_objectives.size();i++)
-      goals[i+s->objectives.size()] = s->secondary_objectives[i].goal;
+      goals[i+s->objectives.size()] = &s->secondary_objectives[i].goal;
   }
-  for(size_t i=0;i<goals.size();i++) 
-    if(goals[i].link < 0 || goals[i].link > robot->q.n) throw PyException("Invalid goal link");
-  f.UseIK(goals);
+  for(size_t i=0;i<goals.size();i++) {
+    if(goals[i]->link < 0 || goals[i]->link >= robot->q.n) throw PyException("Invalid IKObjective link");
+    if(goals[i]->destLink < -1 || goals[i]->destLink >= robot->q.n) throw PyException("Invalid IKObjective destination link");
+    f.UseIK(*goals[i]);
+  }
 
   for(size_t i=0;i<s->objectives.size();i++) {
     IKGoalFunction* obji = dynamic_cast<IKGoalFunction*>(f.functions[i].get());
@@ -639,7 +650,12 @@ void SetupSolver(IKSolver* s,RobotIKFunction& f,RobotIKSolver& solver,bool add_s
       obji->rotationScale = s->secondary_objectives[i].rotationScale;
     }
   }
-  if(s->activeDofs.empty()) GetDefaultIKDofs(*robot,goals,f.activeDofs);
+  if(s->activeDofs.empty()) {
+    vector<IKGoal> goalCopy(goals.size());
+    for(size_t i=0;i<goals.size();i++)
+      goalCopy[i] = *goals[i];
+    GetDefaultIKDofs(*robot,goalCopy,f.activeDofs);
+  }
   else f.activeDofs.mapping = s->activeDofs;
   robot->ConfigureDriverConstraints(f);
 

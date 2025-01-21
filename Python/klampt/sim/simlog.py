@@ -72,17 +72,12 @@ class SimLogger:
             for j in range(world.robot(i).numDrivers()):
                 elements.append(n+'_t['+str(j)+']')
             if self.saveSensors:
-                j = 0
-                while True:
-                    s = self.sim.controller(i).sensor(j)
-                    if len(s.name())==0:
-                        break
+                for s in self.sim.controller(i).sensors:
                     names = s.measurementNames()
                     for sn in range(len(names)):
-                        elements.append(n+'_'+s.name()+'['+names[sn]+']')
-                    j += 1
+                        elements.append(n+'_'+s.name+'['+names[sn]+']')
         for i in range(world.numRigidObjects()):
-            n = world.rigidObject(i).getName()
+            n = world.rigidObject(i).name
             elements += [n+'_'+suffix for suffix in ['comx','comy','comz','x','y','z','rx','ry','rz','dx','dy','dz','wx','wy','wz']]
         if extra:
             elements += extra
@@ -121,15 +116,10 @@ class SimLogger:
             assert len(sim.getActualTorques(i)) == world.robot(i).numDrivers()
             values += sim.getActualTorques(i)
             if self.saveSensors:
-                j = 0
-                while True:
-                    s = self.sim.controller(i).sensor(j)
-                    if len(s.name())==0:
-                        break
+                for s in self.sim.controller(i).sensors:
                     meas = s.getMeasurements()
                     assert len(meas) == len(s.measurementNames())
                     values += meas
-                    j += 1
         for i in range(world.numRigidObjects()):
             obj = world.rigidObject(i)
             T = obj.getTransform()

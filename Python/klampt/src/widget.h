@@ -10,25 +10,7 @@
 class RigidObjectModel;
 class RobotModel;
 class IKObjective;
-
-class Viewport
-{
- public:
-  bool fromJson(const std::string& str);
-  std::string toJson() const;
-  void setModelviewMatrix(const double M[16]);
-  void setRigidTransform(const double R[9],const double t[3]);
-  void getRigidTransform(double out[9],double out2[3]);
-
-  bool perspective;
-  float scale;
-  
-  int x,y,w,h;
-  double n, f;
-
-  //column major model view transform matrix
-  std::vector<double> xform;
-};
+class Viewport;
 
 class Widget
 {
