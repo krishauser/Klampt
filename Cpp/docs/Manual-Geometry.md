@@ -318,23 +318,24 @@ Example computation speeds are given below (in ms):
 
 |    | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |----------------|-------|-------|-------|-------|-------|-------|-------|
-| Primitive      | 0.001 | 0.006 | 0.003 | 0.003 | 0.001 |       |       | 
-| ConvexHull     | 0.006 | 0.005 |       | 0.034 |       |       |       | 
-| TriangleMesh   | 0.003 |       | 0.186 | 0.762 |       |       |       | 
-| PointCloud     | 0.003 | 0.034 | 0.762 | 0.138 | 0.046 |       |       | 
-| ImplicitSurface| 0.001 |       |       | 0.046 |       |       |       | 
+| Primitive      | 0.001 | 0.005 | 0.003 | 0.003 | 0.001 |       |       | 
+| ConvexHull     | 0.005 | 0.005 |       | 0.036 |       |       |       | 
+| TriangleMesh   | 0.003 |       | 0.208 | 0.699 |       |       |       | 
+| PointCloud     | 0.003 | 0.036 | 0.699 | 0.165 | 0.047 |       |       | 
+| ImplicitSurface| 0.001 |       |       | 0.047 |       |       |       | 
 | OccupancyGrid  |       |       |       |       |       |       |       | 
 | Heightmap      |       |       |       |       |       |       |       | 
+
 
 *Complex geometries*
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |----------------|-------|-------|-------|-------|-------|-------|-------|
-| Primitive      |       | 0.028 | 58.720 | 3.375 |       |       |       | 
-| ConvexHull     | 0.028 | 0.065 |       | 1.124 |       |       |       | 
-| TriangleMesh   | 58.720 |       | 0.351 | 11.014 |       |       |       | 
-| PointCloud     | 3.375 | 1.124 | 11.014 | 37.619 | 2.434 |       |       | 
-| ImplicitSurface|       |       |       | 2.434 |       |       |       | 
+| Primitive      |       | 0.025 | 0.068 | 0.062 |       |       |       | 
+| ConvexHull     | 0.025 | 0.056 |       | 0.149 |       |       |       | 
+| TriangleMesh   | 0.068 |       | 0.635 | 13.961 |       |       |       | 
+| PointCloud     | 0.062 | 0.149 | 13.961 | 34.039 | 1.883 |       |       | 
+| ImplicitSurface|       |       |       | 1.883 |       |       |       | 
 | OccupancyGrid  |       |       |       |       |       |       |       | 
 | Heightmap      |       |       |       |       |       |       |       | 
 
@@ -365,26 +366,32 @@ Example computation speeds are given below (in ms):
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |----------------|-------|-------|-------|-------|-------|-------|-------|
-| Primitive      | 0.000 | 0.005 | 0.001 | 0.001 | 0.001 |       |       | 
-| ConvexHull     | 0.005 | 0.001 |       |       |       |       |       | 
-| TriangleMesh   | 0.001 |       | 0.018 | 0.631 | 0.192 |       |       | 
-| PointCloud     | 0.001 |       | 0.631 | 0.252 | 0.004 |       |       | 
-| ImplicitSurface| 0.001 |       | 0.192 | 0.004 |       |       |       | 
+| Primitive      | 0.000 | 0.004 | 0.001 | 0.001 | 0.001 |       |       | 
+| ConvexHull     | 0.004 | 0.001 |       | 0.001 |       |       |       | 
+| TriangleMesh   | 0.001 |       | 0.022 | 0.630 | 0.194 |       |       | 
+| PointCloud     | 0.001 | 0.001 | 0.630 | 0.244 | 0.002 |       |       | 
+| ImplicitSurface| 0.001 |       | 0.194 | 0.002 |       |       |       | 
 | OccupancyGrid  |       |       |       |       |       |       |       | 
 | Heightmap      |       |       |       |       |       |       |       | 
+
 
 
 *Complex geometries*
 
 |  | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap |
 |----------------|-------|-------|-------|-------|-------|-------|-------|
-| Primitive      |       | 0.017 | 7.516 | 0.001 |       |       |       | 
-| ConvexHull     | 0.017 | 0.003 |       |       |       |       |       | 
-| TriangleMesh   | 7.516 |       | 0.009 | 9.136 | 21.625 |       |       | 
-| PointCloud     | 0.001 |       | 9.136 | 29.329 | 0.006 |       |       | 
-| ImplicitSurface|       |       | 21.625 | 0.006 |       |       |       | 
+| Primitive      |       | 0.016 | 0.002 | 0.001 |       |       |       | 
+| ConvexHull     | 0.016 | 0.003 |       |       |       |       |       | 
+| TriangleMesh   | 0.002 |       | 0.007 | 12.555 | 23.283 |       |       | 
+| PointCloud     | 0.001 |       | 12.555 | 17.852 | 0.022 |       |       | 
+| ImplicitSurface|       |       | 23.283 | 0.022 |       |       |       | 
 | OccupancyGrid  |       |       |       |       |       |       |       | 
 | Heightmap      |       |       |       |       |       |       |       | 
+
+
+
+
+
 
 
 #### Geometric operations
@@ -526,6 +533,22 @@ Proper rendering of transparent objects requires some care to draw objects from 
 
 ## Known issues and plans
 
+- GeometricPrimitive support for segments, triangles, and polygons is sparse.  Not sure how much demand there is for these primitives.
+- PointCloud per-point radius support is spotty and has not been tested thoroughly.
+- Want to include Gaussian Splatting representations in PointCloud at some point in the future.
+- TSDF proximity detection routines are largely incorrect.
+- Heightmap interpolation is still unimplemented.
+
+### Visualization
+
+-   TSDFs aren't drawn correctly, showing back faces at -truncationDistance.  TODO: throw out back faces.
+-   Fractional occupancy grids are drawn as binary.  TODO: draw fractional cells transparently?  Or build a higher level function.
+
+### Conversions and merging
+
+-   Heightmap -> TriangleMesh conversions does not throw out discontinuities.  TODO: interpret parameter as depth threshold.
+-   Heightmap merging could benefit from GPU acceleration.  Need to devise a coherent strategy for caching OpenGL elements with geometries.
+
 ### Collisions
 
 Availability
@@ -535,9 +558,9 @@ Availability
 Speed
 - ImplicitSurface - OccupancyGrid slow when close but not colliding
 - OccupancyGrid - OccupancyGrid slow when close but not colliding
-- Primitive - Heightmap is slow for perspective heightmaps when the primitive is near origin
-- ConvexHull - Heightmap is slow for perspective heightmaps when the convex hull is near origin
-- PointCloud - ImplicitSurface is slow when colliding
+- Primitive - Heightmap is slow for perspective heightmaps when the primitive is near origin.  Could benefit from GPU acceleration.
+- ConvexHull - Heightmap is slow for perspective heightmaps when the convex hull is near origin.  Could benefit from GPU acceleration.
+- PointCloud - ImplicitSurface is slow when colliding.  Can we use BVHs?
 - PointCloud - OccupancyGrid is slow when colliding
 
 Correctness
@@ -546,15 +569,17 @@ Correctness
 ### Within distance
 
 Availability (in addition to collision detection issues) 
-- Primitive box - OccupancyGrid isn't implemented (requires box-box distance computation)
-- OccupancyGrid - OccupancyGrid isn't implemented (requires box-box distance computation)
-- Heightmap - anything isn't implemented 
+- OccupancyGrid - OccupancyGrid isn't implemented -- need to walk around nearby cells
+- Heightmap - anything isn't implemented.  Should at least be able to do this for points and spheres -- need to walk around nearby cells.
 
 Correctness
 - Reported implicit surface elements can be outside of the actual geometry by tolerance
 
 Speed (in addition to collision detection issues)
 - PointCloud - PointCloud is slow
+- OccupancyGrid - almost anything is slow
+
+
 
 
 ### Distance
@@ -564,7 +589,10 @@ Availability
 - Heightmap - anything isn't implemented.  Could implement iterative detection for primitives and convex hulls.
 
 Speed
-- Primitive - TriangleMesh is slow 
-- Primitive - PointCloud is slow
 - point cloud - point cloud is slow
-- point cloud - convex hull is slow
+- point cloud - triangle mesh is slow
+
+
+### Contacts
+
+All the weaknesses of WithinDistance are inherited.
