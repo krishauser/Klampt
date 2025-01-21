@@ -161,9 +161,9 @@ void ThreeJSExport(const WorldModel& world,AnyCollection& out,ThreeJSCache& cach
       light["type"] = "DirectionalLight";
       AnyCollection pos;
       pos.resize(3);
-      pos[0] = -lights[i].position[0]*20;
-      pos[1] = -lights[i].position[1]*20;
-      pos[2] = -lights[i].position[2]*20;
+      pos[0] = lights[i].position[0]*20;
+      pos[1] = lights[i].position[1]*20;
+      pos[2] = lights[i].position[2]*20;
       AnyCollection zero;
       zero.resize(3);
       zero[0] = 0;
