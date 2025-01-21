@@ -360,8 +360,8 @@ def compute_workspace(link : RobotModelLink,
             vg_temp,_,_ = _naive_workspace_occupancy(robot,link,point_local,Nsamples,
                 resolution,dimensions)
             vg_temp,_,_ = _expand_workspace_occupancy(robot,link,point_local,vg_temp)
-            bmin,bmax = [vg_temp.bbox[0],vg_temp.bbox[1],vg_temp.bbox[2]],[vg_temp.bbox[3],vg_temp.bbox[4],vg_temp.bbox[5]]
-            cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.dims)
+            bmin,bmax = vg_temp.bmin,vg_temp.bmax
+            cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.values.shape)
             vals = vg_temp.getValues()
 
             #now solve the IK constraint
@@ -386,11 +386,11 @@ def compute_workspace(link : RobotModelLink,
             print("With IK constraint, reached",len(points[name]),"/",len(i),"cells")
             res = {}
             for name in points:
-                res[name] = compute_occupancy_grid(points[name],resolution=None,dimensions=vg_temp.dims,bounds=(bmin,bmax),value=value)
+                res[name] = compute_occupancy_grid(points[name],resolution=None,dimensions=vg_temp.values.shape,bounds=(bmin,bmax),value=value)
         else:
             vg_temp,temppoints,configs = _naive_workspace_occupancy(robot,link,point_local,Nsamples,
                 resolution,dimensions)
-            bmin,bmax = [vg_temp.bbox[0],vg_temp.bbox[1],vg_temp.bbox[2]],[vg_temp.bbox[3],vg_temp.bbox[4],vg_temp.bbox[5]]
+            bmin,bmax = vg_temp.bmin,vg_temp.bmax
             for target,q in zip(temppoints,configs):
                 robot.setConfig(q)
                 feasible = True
@@ -403,7 +403,7 @@ def compute_workspace(link : RobotModelLink,
                     points['workspace'].append(target)
             res = {}
             for name in points:
-                res[name] = compute_occupancy_grid(points[name],resolution=None,dimensions=vg_temp.dims,bounds=(bmin,bmax),value=value)
+                res[name] = compute_occupancy_grid(points[name],resolution=None,dimensions=vg_temp.values.shape,bounds=(bmin,bmax),value=value)
                 if name=='workspace':
                     res[name],_,_ = _expand_workspace_occupancy(robot,link,point_local,res[name],overall_feasibility_test)
                 else:
@@ -415,8 +415,8 @@ def compute_workspace(link : RobotModelLink,
             vg_temp,_,_ = _naive_workspace_occupancy(robot,link,point_local,Nsamples,
                 resolution,dimensions)
             vg_temp,_,_ = _expand_workspace_occupancy(robot,link,point_local,vg_temp)
-            bmin,bmax = [vg_temp.bbox[0],vg_temp.bbox[1],vg_temp.bbox[2]],[vg_temp.bbox[3],vg_temp.bbox[4],vg_temp.bbox[5]]
-            cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.dims)
+            bmin,bmax =  vg_temp.bmin,vg_temp.bmax
+            cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.values.shape)
             vals = vg_temp.getValues()
 
             #now solve the IK constraint
@@ -430,13 +430,13 @@ def compute_workspace(link : RobotModelLink,
                 if res:
                     points.append(target)
                     
-            res = OccupancyGrid(points,resolution=None,dimensions=vg_temp.dims,bounds=(bmin,bmax),value=value)
+            res = OccupancyGrid(points,resolution=None,dimensions=vg_temp.values.shape,bounds=(bmin,bmax),value=value)
         else:
             vg_temp,points1,_ = _naive_workspace_occupancy(robot,link,point_local,Nsamples,
                 resolution,dimensions,overall_feasibility_test)
             vg_temp,points2,_ = _expand_workspace_occupancy(robot,link,point_local,vg_temp)
-            bmin,bmax = [v for v in vg_temp.bbox[0:3]],[v for v in vg_temp.bbox[3:6]]
-            res = compute_occupancy_grid(points1+points2,dimensions=vg_temp.dims,bounds=(bmin,bmax),value=value)
+            bmin,bmax =  vg_temp.bmin,vg_temp.bmax
+            res = compute_occupancy_grid(points1+points2,dimensions=vg_temp.values.shape,bounds=(bmin,bmax),value=value)
 
     #restore original limits
     robot.setJointLimits(qmin_orig,qmax_orig)
@@ -564,8 +564,8 @@ def compute_workspace_field(link : RobotModelLink,
         #first do a run to figure out the possible cells        
         vg_temp,_,_ = _naive_workspace_occupancy(robot,link,point_local,Nsamples,
                 resolution,dimensions)
-        bmin,bmax = [vg_temp.bbox[0],vg_temp.bbox[1],vg_temp.bbox[2]],[vg_temp.bbox[3],vg_temp.bbox[4],vg_temp.bbox[5]]
-        cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.dims)
+        bmin,bmax = vg_temp.bmin,vg_temp.bmax
+        cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.values.shape)
         vals = vg_temp.values
 
         #now solve the IK constraint
@@ -701,8 +701,8 @@ def _naive_workspace_occupancy(robot,link,point_local,
 
 def _expand_workspace_occupancy(robot,link,point_local,vg_temp,
     feasibility_test=None):
-    bmin,bmax = [vg_temp.bbox[0],vg_temp.bbox[1],vg_temp.bbox[2]],[vg_temp.bbox[3],vg_temp.bbox[4],vg_temp.bbox[5]]
-    cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.dims)
+    bmin,bmax = vg_temp.bmin,vg_temp.bmax
+    cellsize = vectorops.div(vectorops.sub(bmax,bmin),vg_temp.values.shape)
     vals = vg_temp.getValues()
     
     fringe = set()
