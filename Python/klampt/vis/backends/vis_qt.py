@@ -209,7 +209,7 @@ class QtWindowManager(_ThreadedWindowManager):
                         if w.guidata is None:
                             #create dialog
                             print("#########################################")
-                            print("klampt.vis: Dialog on window",i)
+                            print("klampt.vis: Dialog on window",i,"starting")
                             print("#########################################")
                             if w.custom_ui is None:
                                 dlg = _MyDialog(w)
@@ -219,6 +219,7 @@ class QtWindowManager(_ThreadedWindowManager):
                                 w.glwindow.show()
                                 self.in_app_thread = True
                                 dlg.show()
+                            w.glwindow.painted = False
                             w.guidata = dlg
                         #run dialog and check exit status
                         #for some stupid reason, Qt requires calling update() constantly to keep the window alive
@@ -242,6 +243,7 @@ class QtWindowManager(_ThreadedWindowManager):
                             w.guidata = _MyWindow(w)
                         else:
                             w.guidata = w.custom_ui(w.glwindow)
+                        w.glwindow.painted = False
                         def closeMonkeyPatch(self,event,windowinfo=w,index=i,oldcloseevent=w.guidata.closeEvent):
                             oldcloseevent(event)
                             if not event.isAccepted():
@@ -381,62 +383,64 @@ class QtWindowManager(_ThreadedWindowManager):
                 w.mode = 'hidden'
                 return res
                 raise RuntimeError("Can't call dialog() inside loop().")
-            #just show the dialog and let the thread take over
-            assert w.mode == 'hidden',"dialog() called inside dialog?"
-            print("#########################################")
-            print("klampt.vis: Creating dialog on window",self.current_window)
-            print("#########################################")
-            _globalLock.acquire()
-            w.mode = 'dialog'
-            _globalLock.release()
-
-            if not self.in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
-                print("vis.dialog(): Waiting for dialog on window",self.current_window,"to complete....")
-                assert w.mode == 'dialog'
-                while w.mode == 'dialog':
-                    time.sleep(0.1)
-                if w.mode == 'shown':
-                    print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
-                print("vis.dialog(): ... dialog done")
             else:
-                #called from another dialog or window!
-                print("vis: Creating a dialog from within another dialog or window")
+                #just show the dialog and let the thread take over
+                assert w.mode == 'hidden',"dialog() called inside dialog?"
+                print("#########################################")
+                print("klampt.vis: Creating dialog on window",self.current_window)
+                print("#########################################")
                 _globalLock.acquire()
-                if w.glwindow is None:
-                    print("vis: creating GL window")
-                    w.glwindow = glinit._GLBackend.createWindow(w.name)
-                    w.glwindow.setProgram(w.frontend)
-                    w.glwindow.setParent(None)
-                    w.glwindow.refresh()
-                if w.custom_ui is None:
-                    dlg = _MyDialog(w)
-                else:
-                    dlg = w.custom_ui(w.glwindow)
-                print("#########################################")
-                print("klampt.vis: Dialog starting on window",self.current_window)
-                print("#########################################")
-                if dlg is not None:
-                    w.glwindow.show()
-                    _globalLock.release()
-                    if PYQT_VERSION >= 5:
-                        res = dlg.exec()
-                    else:
-                        res = dlg.exec_()
-                    _globalLock.acquire()
-                print("#########################################")
-                print("klampt.vis: Dialog done on window",self.current_window)
-                print("#########################################")
-                w.glwindow.hide()
-                w.glwindow.setParent(None)
-                w.mode = 'hidden'
-                for i,w2 in enumerate(self.windows):
-                    print("Returning from dialog items",i,w2.mode)
+                w.mode = 'dialog'
                 _globalLock.release()
-            return None
+
+                if not self.in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
+                    #called dialog() in multithreaded mode from the main thread, just wait for it to be done
+                    print("vis.dialog(): waiting for window",self.current_window,"on vis thread to complete....")
+                    assert w.mode == 'dialog'
+                    while w.mode == 'dialog':
+                        time.sleep(0.1)
+                    if w.mode == 'shown':
+                        print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
+                    print("vis.dialog(): ... dialog done")
+                else:
+                    #called from another dialog or window!  This will need to block the vis thread.
+                    print("vis: Creating a dialog from within another dialog or window")
+                    _globalLock.acquire()
+                    if w.glwindow is None:
+                        print("vis: creating GL window")
+                        w.glwindow = glinit._GLBackend.createWindow(w.name)
+                        w.glwindow.setProgram(w.frontend)
+                        w.glwindow.setParent(None)
+                        w.glwindow.refresh()
+                    if w.custom_ui is None:
+                        dlg = _MyDialog(w)
+                    else:
+                        dlg = w.custom_ui(w.glwindow)
+                    print("#########################################")
+                    print("klampt.vis: Dialog starting on window",self.current_window)
+                    print("#########################################")
+                    if dlg is not None:
+                        w.glwindow.show()
+                        _globalLock.release()
+                        if PYQT_VERSION >= 5:
+                            res = dlg.exec()
+                        else:
+                            res = dlg.exec_()
+                        _globalLock.acquire()
+                    print("#########################################")
+                    print("klampt.vis: Dialog done on window",self.current_window)
+                    print("#########################################")
+                    w.glwindow.hide()
+                    w.glwindow.setParent(None)
+                    w.mode = 'hidden'
+                    for i,w2 in enumerate(self.windows):
+                        print("Returning from dialog items",i,w2.mode)
+                    _globalLock.release()
+                return None
         else:
             w.mode = 'dialog'
             if self.multithreaded():
-                print("#########################################")
+                print("################################################################")
                 print("klampt.vis: Running multi-threaded dialog, waiting to complete...")
                 self._start_app_thread()
                 assert w.mode == 'dialog'
@@ -444,22 +448,21 @@ class QtWindowManager(_ThreadedWindowManager):
                     time.sleep(0.1)
                 if w.mode == 'shown':
                     print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
-                print("klampt.vis: ... dialog done")
-                print("#########################################")
+                print("klampt.vis: ... dialog done, leaving thread open")
+                print("################################################################")
                 return None
             else:
-                print("#########################################")
+                print("################################################################")
                 print("klampt.vis: Running single-threaded dialog")
                 self.in_vis_loop = True
                 res = self.run_app_thread()
                 self.in_vis_loop = False
-                print("klampt.vis: ... dialog done.")
-                print("#########################################")
+                print("klampt.vis: ... return from single-threaded dialog.")
+                print("################################################################")
                 return res
 
     def set_custom_ui(self,func):
         if len(self.windows)==0:
-            print("Making first window for custom ui")
             self.windows.append(WindowInfo(self.window_title,self._frontend))
             self.current_window = 0
         self.windows[self.current_window].custom_ui = func
