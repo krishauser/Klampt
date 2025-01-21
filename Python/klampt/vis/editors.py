@@ -1624,12 +1624,20 @@ def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
 
         def closeEvent(self,event):
             global _doexit
-            reply = QMessageBox.question(self, 'Message',
-                    "Are you sure you wish to quit the program?", QMessageBox.Yes | 
-                    QMessageBox.No, QMessageBox.No)
+            if glinit.active() == 'PyQt6':
+                reply = QMessageBox.question(self, 'Message',
+                        "Are you sure you wish to quit the program?", QMessageBox.StandardButton.Yes | 
+                        QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+                if reply == QMessageBox.StandardButton.Yes:
+                    _doexit = True
+            else:
+                reply = QMessageBox.question(self, 'Message',
+                        "Are you sure you wish to quit the program?", QMessageBox.Yes | 
+                        QMessageBox.No, QMessageBox.No)
+                if reply == QMessageBox.Yes:
+                    _doexit = True
 
-            if reply == QMessageBox.Yes:
-                _doexit = True
+            if _doexit:
                 event.accept()
             else:
                 event.ignore() 
@@ -1637,18 +1645,18 @@ def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
         def accept(self):
             global _my_dialog_res
             _my_dialog_res = True
-            print("#########################################")
-            print("klampt.vis: EditDialog accept")
-            print("#########################################")
+            print("    #########################################")
+            print("    klampt.vis: EditDialog accept")
+            print("    #########################################")
             self.editorObject.update_value_from_gui()
             return QDialog.accept(self)
 
         def reject(self):
             global _my_dialog_res
             _my_dialog_res = False
-            print("#########################################")
-            print("klampt.vis: EditDialog reject")
-            print("#########################################")
+            print("    #########################################")
+            print("    klampt.vis: EditDialog reject")
+            print("    #########################################")
             return QDialog.reject(self)
 
         def load(self):
