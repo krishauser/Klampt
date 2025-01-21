@@ -3162,7 +3162,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.ConvexHull` or :obj:`Heightmap` or :class:`~klampt.Geometry3D` or :obj:`ImplicitSurface` or :class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :obj:`OccupancyGrid`, optional): 
+            arg2 (:class:`~klampt.ConvexHull` or :obj:`OccupancyGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud` or :obj:`ImplicitSurface` or :class:`~klampt.TriangleMesh` or :obj:`Heightmap`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -6125,8 +6125,9 @@ class RobotModel(object):
 
         q = robot.getConfig()
         do some stuff that may touch the robot's configuration...
-        robot.setConfig(q)
-     The model maintains configuration/velocity/acceleration/torque limits. However,
+        robot.setConfig(q)  
+
+    The model maintains configuration/velocity/acceleration/torque limits. However,
     these are not enforced by the model, so you can happily set configurations
     outside the limits. Valid commands must rather be enforced by the planner /
     controller / simulator.  
@@ -6864,7 +6865,7 @@ class RobotModel(object):
 
         Args:
         """
-        return Tuple(self.driver(i) for i in range(self.numDrivers()))
+        return tuple(self.driver(i) for i in range(self.numDrivers()))
 
     def getDriversDict(self) ->  Dict[str,RobotModelDriver]:
         """
@@ -6895,7 +6896,7 @@ class RobotModel(object):
 
         Args:
         """
-        return Tuple(self.sensor(i) for i in range(self.numSensors()))
+        return tuple(self.sensor(i) for i in range(self.numSensors()))
 
     def getSensorsDict(self) ->  Dict[str,'SensorModel']:
         """
@@ -7098,7 +7099,7 @@ class SensorModel(object):
 
 
         Args:
-            link (:class:`~klampt.RobotModelLink` or int): 
+            link (int or :class:`~klampt.RobotModelLink`): 
         """
         return _robotsim.SensorModel__setLink(self, *args)
 
@@ -7723,7 +7724,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -7877,7 +7878,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
+            (:class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7998,7 +7999,7 @@ class WorldModel(object):
 
         Args:
         """
-        return Tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
+        return tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
 
     def getRigidObjectsDict(self) ->  Dict[str,RigidObjectModel]:
         """
@@ -8016,7 +8017,7 @@ class WorldModel(object):
 
         Args:
         """
-        return Tuple(self.terrain(i) for i in range(self.numTerrains()))
+        return tuple(self.terrain(i) for i in range(self.numTerrains()))
 
     def getTerrainsDict(self) ->  Dict[str,TerrainModel]:
         """
@@ -8730,7 +8731,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -9311,7 +9312,7 @@ class SimRobotController(object):
 
         Args:
         """
-        return Tuple(self.sensor(i) for i in range(self.numSensors()))
+        return tuple(self.sensor(i) for i in range(self.numSensors()))
 
     def getSensorsDict(self) ->  Dict[str,SensorModel]:
         """
@@ -10022,7 +10023,7 @@ class Simulator(object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             SimRobotController:
