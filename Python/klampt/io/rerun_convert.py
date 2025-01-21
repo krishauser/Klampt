@@ -109,7 +109,7 @@ def point_to_rr(pt : list, radius = None, color = None) -> rr.Points3D:
         colors = [color]
     return rr.Points3D([pt], radii=radii, colors = colors)
 
-def camera_to_rr(camera : klampt.SimRobotSensor) -> rr.Pinhole:
+def camera_to_rr(camera : klampt.SensorModel) -> rr.Pinhole:
     if camera.type() != 'CameraSensor':
         raise ValueError("Can only convert CameraSensor types to rerun")
     from klampt.model.sensing import camera_to_intrinsics

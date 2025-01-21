@@ -500,15 +500,15 @@ def to_PointCloud2(klampt_pc,frame='0',stamp='now'):
 
 
 def to_CameraInfo(klampt_obj):
-    """Converts a Klampt SimRobotSensor, GLViewport, or Viewport to a ROS
+    """Converts a Klampt SensorModel, GLViewport, or Viewport to a ROS
     CameraInfo message.
     """
     from sensor_msgs.msg import CameraInfo
-    from klampt import SimRobotSensor,Viewport
+    from klampt import SensorModel,Viewport
     msg = CameraInfo()
     msg.distortion_model = "plumb_bob"
     msg.D = [0.0]*5
-    if isinstance(klampt_obj,SimRobotSensor):
+    if isinstance(klampt_obj,SensorModel):
         if klampt_obj.type() != 'CameraSensor':
             raise ValueError("Can't publish CameraInfo with a non-camera sensor")
         msg.width = klampt_obj.getSetting('xres')
@@ -542,10 +542,10 @@ def to_CameraInfo(klampt_obj):
     return msg
 
 def from_CameraInfo(ros_ci,klampt_obj):
-    """Fills in some information about a Klampt SimRobotSensor, GLViewport,
+    """Fills in some information about a Klampt SensorModel, GLViewport,
     or Viewport using a ROS CameraInfo message.  Modifies the object in-place.
     """
-    from klampt import SimRobotSensor,Viewport
+    from klampt import SensorModel,Viewport
     fx = ros_ci.K[0]
     fy = ros_ci.K[4]
     cx = ros_ci.K[2]
@@ -556,7 +556,7 @@ def from_CameraInfo(ros_ci,klampt_obj):
     y = 0
     if ros_ci.roi.x_offset != 0 or ros_ci.roi.y_offset != 0:
         raise NotImplementedError("TODO: set viewport with an ROI")
-    if isinstance(klampt_obj,SimRobotSensor):
+    if isinstance(klampt_obj,SensorModel):
         if klampt_obj.type() != 'CameraSensor':
             raise ValueError("Can't publish CameraInfo with a non-camera sensor")
         klampt_obj.setSetting('xres',str(w))
@@ -590,7 +590,7 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
     Generic sensors are converted to a Float32MultiArray.
 
     Args:
-        klampt_sensor (SimRobotSensor): the sensor
+        klampt_sensor (SensorModel): the sensor
         frame (str, optional): if given, this is the frame_id used in the 
             ROS message(s).  Otherwise, the id is determined automatically.
         frame_prefix (str, optional): if frame is not given, this is the
@@ -723,7 +723,7 @@ SUPPORTED_KLAMPT_TYPES = {
     'PointCloud':'PointCloud2',
     'TriangleMesh':'Mesh',
     'Geometry3D':'ShapeMsg',
-    'SimRobotSensor':'SensorMsg',
+    'SensorModel':'SensorMsg',
     'Viewport':'CameraInfo',
     'GLViewport':'CameraInfo',
 }
@@ -822,7 +822,7 @@ if ROSPY_AVAILABLE:
             - [topic]/depth_registered/image_rect
 
             Args:
-                camera (SimRobotSensor): an updated sensor of 'CameraSensor' type.
+                camera (SensorModel): an updated sensor of 'CameraSensor' type.
             """
             
             assert camera.type() == 'CameraSensor'
@@ -860,7 +860,7 @@ if ROSPY_AVAILABLE:
                 self.dpub.publish(msgs[offset])
                 
 
-def publisher_SimRobotSensor(topic,klampt_sensor,convert_kwargs=None,**kwargs):
+def publisher_SensorModel(topic,klampt_sensor,convert_kwargs=None,**kwargs):
     stype = klampt_sensor.type()
     if stype == 'CameraSensor':
         frame_id = None
@@ -909,15 +909,15 @@ def object_publisher(topic,klampt_object,convert_kwargs=None,**kwargs):
     the returned publisher  using the same klampt_object (or another
     compatible Klampt objects).
 
-    SimRobotSensors (particularly, cameras) can be published to multiple
+    SensorModels (particularly, cameras) can be published to multiple
     topics of the form [topic]/[subtopic].
 
     Returns:
         KlamptROSPublisher
     """
-    from klampt import SimRobotSensor,Geometry3D
-    if isinstance(klampt_object,SimRobotSensor):
-        return publisher_SimRobotSensor(topic,klampt_object,convert_kwargs,**kwargs)
+    from klampt import SensorModel,Geometry3D
+    if isinstance(klampt_object,SensorModel):
+        return publisher_SensorModel(topic,klampt_object,convert_kwargs,**kwargs)
     ros_type = None
     if isinstance(klampt_object,Geometry3D):
         if klampt_object.type() == 'PointCloud':
@@ -1022,7 +1022,7 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
         If klampt_obj is a Simulator or SimRobotController, then its
         corresponding model will be updated.
     """
-    from klampt import WorldModel,Simulator,RobotModel,SimRobotController,SimRobotSensor
+    from klampt import WorldModel,Simulator,RobotModel,SimRobotController,SensorModel
     if stamp == 'now':
         stamp = rospy.Time.now()
     elif isinstance(stamp,(int,float)):
@@ -1063,9 +1063,9 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
                 q = so3.quaternion(Tparent[0])
                 broadcaster.sendTransform(Tparent[1],(q[1],q[2],q[3],q[0]),stamp,rprefix+"/"+robot.link(j).getName(),rprefix+"/"+robot.link(p).getName())
         return
-    if isinstance(klampt_obj,SimRobotSensor):
+    if isinstance(klampt_obj,SensorModel):
         from ..model import sensing
-        Tsensor_link = sensing.get_sensor_xform(klampt_obj)
+        Tsensor_link = klampt_obj.getTransform()
         link = int(klampt_obj.get_setting('link'))
         if klampt_obj.type() == 'LaserRangeSensor': #the convention between Klampt and ROS is different
             klampt_to_ros_lidar = so3.from_matrix([[0,1,0],

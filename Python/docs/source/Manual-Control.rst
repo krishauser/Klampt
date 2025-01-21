@@ -279,7 +279,7 @@ which is faster.  This usage is summarized in the following diagrams.
 |RobotInterfaceLayer-simulation| |RobotInterfaceLayer-kinematic|
 
 Note that underlying the physics simulation are the simulated robot controller
-:class:`~klampt.SimRobotController` and sensor :class:`~klampt.SimRobotSensor` classes.
+:class:`~klampt.SimRobotController` and sensor :class:`~klampt.SensorModel` classes.
 To configure the behavior of the simulated motors and sensors,
 see :ref:`Robot Controllers in Simulation`, the `simulation documentation <Manual-Simulation.html>`__,
 and the `sensor documentation <Manual-Sensors.html>`__.
@@ -599,7 +599,7 @@ simulations will need to know how robot controllers are simulated more deeply.
 
 The overall structure of a simulated robot controller is shown below. The
 Python wrappers for the simulated items are in the
-:class:`~klampt.SimRobotController` and :class:`~klampt.SimRobotSensor` classes.
+:class:`~klampt.SimRobotController` and :class:`~klampt.SensorModel` classes.
 
 |SimRobotController|
 
@@ -702,7 +702,7 @@ queue to the indicated milestone
    joint encoders
 -  ``controller.getSensedVelocity()``: retrieve sensed velocity from
    joint encoders
--  ``controller.sensor(index or name)``: retrieve :class:`~klampt.SimRobotSensor`
+-  ``controller.sensor(index or name)``: retrieve :class:`~klampt.SensorModel`
    reference by index/name
 
 

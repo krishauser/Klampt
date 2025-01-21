@@ -114,11 +114,11 @@ example of configuring sensors in a world XML file.
 API summary
 ------------
 
-The main interface to sensors is :class:`~klampt.SimRobotSensor`.
+The main interface to sensors is :class:`~klampt.SensorModel`.
 
 -  ``sensor = controller.sensor(index or name)``: retrieves a
-   SimRobotSensor reference from a :class:`SimRobotController`.
--  ``sensor = SimRobotSensor(controller,name,type)``: creates a new
+   SensorModel reference from a :class:`SimRobotController`.
+-  ``sensor = SensorModel(controller,name,type)``: creates a new
    sensor for the SimRobotController of the given name and type string.
 -  ``sensor.name``: gets/sets the sensor’s name string
 -  ``sensor.type``: gets the sensor’s type string
@@ -224,7 +224,7 @@ Settings are:
 -  ``zvarianceLinear``, ``zvarianceConstant`` (float): the simulated noise of the depth sensor has variance ``zvarianceLinear * depth + zvarianceConstant``
 -  ``Tsensor`` (RigidTransform): the camera's transform on the designated link.  Z is forward, X is right, and Y is down.
    Use :func:`~klampt.model.sensing.set_sensor_xform` and
-   :func:`~klampt.model.sensing.get_sensor_xform` to easily set and get this value.
+   :func:`SensorModel.getTransform` to easily set and get this value.
 
 `C++ API
 documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classCameraSensor.html>`__.

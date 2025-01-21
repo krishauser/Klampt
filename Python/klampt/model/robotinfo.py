@@ -20,7 +20,7 @@ from klampt.control.robotinterface import RobotInterfaceBase
 import os
 import sys
 import importlib
-from klampt import WorldModel,RobotModel,Geometry3D,IKSolver,IKObjective,SimRobotSensor
+from klampt import WorldModel,RobotModel,Geometry3D,IKSolver,IKObjective,SensorModel
 from klampt.model.subrobot import SubRobotModel
 import copy
 from klampt.math import vectorops,so3,se3
@@ -218,13 +218,13 @@ class RobotInfo:
                     warnings.warn("Calibration item {} doesn't refer to a sensor or kinematics".format(k))
         return self.robotModel
     
-    def configureSensor(self,sensor : Union[int,str,SimRobotSensor]) -> SimRobotSensor:
+    def configureSensor(self,sensor : Union[int,str,SensorModel]) -> SensorModel:
         """Configures a sensor with a calibration, if present.
 
         The calibration file can be a JSON, YAML, or numpy file.  If the sensor
         is a camera, the calibration file can be an intrinsics calibration.
         """
-        if not isinstance(sensor,SimRobotSensor):
+        if not isinstance(sensor,SensorModel):
             return self.configureSensor(self.klamptModel().sensor(sensor))
         if sensor.name in self.calibrationFiles:
             calib_file = self.calibrationFiles[sensor.name]

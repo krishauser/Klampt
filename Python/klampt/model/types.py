@@ -68,7 +68,7 @@ def object_to_types(object,world=None):
         return 'RigidObjectModel'
     elif isinstance(object,TerrainModel):
         return 'TerrainModel'
-    #this was here for Geometry3D, but might be mistaken with a SimRobotSensor.
+    #this was here for Geometry3D, but might be mistaken with a SensorModel.
     #elif hasattr(object,'type'):
     #    if callable(object.type):
     #        return object.type()
