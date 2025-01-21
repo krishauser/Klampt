@@ -1533,6 +1533,9 @@ def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
 
     """
     from klampt.vis import glinit
+    from klampt.vis import visualization 
+    if glinit.active() is None:
+        visualization.init('PyQt')
     if not glinit.active().startswith('PyQt'):
         raise ValueError("Unable to perform visual editing without Qt")
     #Import Qt stuff into global namespace
