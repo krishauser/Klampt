@@ -341,7 +341,7 @@ class QtGLWindow(QOpenGLWidget):
             ptr = qimg.bits()
             ptr.setsize(height * width * 4)
             rgb = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
-            rgb = rgb[:,:,:3][:,:,::-1]
+            rgb = np.copy(rgb[:,:,:3][:,:,::-1])
         elif format == 'Image':
             from PIL import Image
             buffer = QBuffer()
@@ -365,7 +365,7 @@ class QtGLWindow(QOpenGLWidget):
             except OpenGL.error.GLError:
                 import numpy as np
                 import warnings
-                warnings.warn("Depth screenshots not supported in Qt")
+                warnings.warn("Depth screenshots not supported in QOpenGLWidget")
                 depth = np.zeros((h,w),np.float32)
                 if format == 'Image':
                     from PIL import Image

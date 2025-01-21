@@ -503,7 +503,7 @@ class QtWindowManager(_ThreadedWindowManager):
             #already in visualization loop -- just get the image
             return self.windows[self.current_window].glwindow.get_screen(format,want_depth)
         if not self.vis_thread_running:
-            raise RuntimeError("Can't call screenshot until the thread is running")
+            raise RuntimeError("Can't call screenshot until the vis thread is running")
         return_values = []
         def storeScreenshot(img,depth=None,return_values=return_values):
             return_values.append((img,depth))
