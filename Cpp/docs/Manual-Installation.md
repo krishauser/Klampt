@@ -38,7 +38,9 @@ To configure the dependencies, consider the following notes:
 - KrisLibrary may need to be configured for your particular system. Try running `cmake-gui` and changing the Advanced variables.
 - By default, we compile ODE in double floating-point precision.  The reason for this is that on some Linux systems, ODE becomes unstable in single floating-point precision and may crash with assertion failures. This may be changed on other systems, if you wish, by toggling ODEDOUBLE=0 or 1 in Klampt/Cpp/Dependencies/Makefile. _Note: if you have already built ODE and then later change its precision, you must do a clean build of ODE as well as the CMake cache._
 
-**Enabling Assimp support (optional).** To load a larger variety of 3D meshes, Klamp't can be configured to use the Asset Importer ( [Assimp](http://assimp.sourceforge.net/)) library. Once Assimp 3.0.1270 is installed on your system (if Klampt/Cpp/Depdencies/assimp--3.0.1270-sdk or /usr/lib/libassimp.so exists), KrisLibrary and Klampt should automatically detect it when built.
+NOTE: as of Klampt 0.10.0, we require KrisLibrary 0.2 and above. If you are building earlier versions of Klampt, you will need to check out the `0.1` branch of KrisLibrary before building.
+
+**Enabling Assimp support (optional).** To load a larger variety of 3D meshes, Klamp't can be configured to use the Asset Importer ( [Assimp](http://assimp.sourceforge.net/)) library, versions 3.0+, 4.0+, and 5.0+. Once Assimp is installed on your system (more specifically, if CMake can find the assimp/ include path and libassimp.lib somewhere in the typical system locations), KrisLibrary and Klampt should automatically detect it when built.
 
 **Run CMake to build Klamp't Makefiles.** Run &quot;cmake .&quot; to build the Klamp't makefiles.
 
@@ -83,6 +85,7 @@ TARGET_LINK_LIBRARIES(MyApp ${KLAMPT_LIBRARIES})
 ```
 6. Build your project in standard CMake fashion.
 
+NOTE: as of Klampt 0.10.0, we require KrisLibrary 0.2 and above. If you are building earlier versions of Klampt, you will need to check out the `0.1` branch of KrisLibrary before building.
 
 ### Building Klamp't from source
 
