@@ -4,7 +4,7 @@
 set -e  #error if any step fails
 
 yum clean all
-yum install -y mesa-libGLU-devel ibtool automake autoconf make
+yum install -y mesa-libGLU-devel libtool automake autoconf make
 pip install cmake
 
 #no glpk available on aarch64
