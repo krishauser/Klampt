@@ -109,7 +109,6 @@ class QtGLWindow(QOpenGLWidget):
 
     def __init__(self,name="OpenGL window",parent=None):
         QOpenGLWidget.__init__(self,parent=parent)
-        QtGLWindow._firstWidget = self.context()
         format = QtGui.QSurfaceFormat.defaultFormat()
         if format.depthBufferSize() < 24:
             format.setDepthBufferSize(24)

@@ -7,4 +7,4 @@ Difficulty: moderate
 Time: 30 minutes
 
 
-[The tutorial is now moved here](http://klampt.org/pyklampt_docs/Manual-Sensors.html#example)
+[The tutorial is now moved here](http://motion.cs.illinois.edu/software/klampt/latest/pyklampt_docs/Manual-Sensors.html#example)
