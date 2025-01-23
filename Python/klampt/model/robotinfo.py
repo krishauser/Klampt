@@ -20,7 +20,7 @@ from klampt.control.robotinterface import RobotInterfaceBase
 import os
 import sys
 import importlib
-from klampt import WorldModel,RobotModel,Geometry3D,IKSolver,IKObjective,SensorModel
+from klampt import WorldModel,RobotModel,Geometry3D,IKSolver,IKObjective,SimRobotController,SensorModel
 from klampt.model.subrobot import SubRobotModel
 import copy
 from klampt.math import vectorops,so3,se3
@@ -377,8 +377,12 @@ class RobotInfo:
                 pass
         except Exception:
             raise RuntimeError("Result of make(sim,robotIndex) for module {} is not a pair (controller,emulators)".format(mod.__name__,))
-        sim.setController(robotIndex,controller)
+        if not isinstance(controller,SimRobotController):
+            print("Setting the simulator controller block to",controller.__class__.__name__,"for robot",robotIndex)
+            assert callable(controller) or hasattr(controller,'advance')
+            sim.setController(robotIndex,controller)
         for e in emulators:
+            print("Adding emulator",e.__class__.__name__,"to robot",robotIndex)
             sim.addEmulator(robotIndex,e)
 
         #configure simulated sensor
