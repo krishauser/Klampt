@@ -307,8 +307,12 @@ class QtWindowManager(_ThreadedWindowManager):
                 return
             _globalLock.release()
             self.in_app_thread = True
-            for c in calls:
-                c()
+            if calls:
+                #make sure that the OpenGL context is current before calling thread calls
+                if glinit._GLBackend.window is not None:
+                    glinit._GLBackend.window.makeCurrent()
+                for c in calls:
+                    c()
             glinit._GLBackend.app.processEvents()
             self.in_app_thread = False
             if callback:
