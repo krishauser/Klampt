@@ -3096,10 +3096,11 @@ void PointCloud::setProperties(double* np_array2, int m, int n)
 
 void PointCloud::setPointsAndProperties(double* np_array2, int m,int n)
 {
+  Assert(sizeof(Vector3)==3*sizeof(double));
   GET_GEOMDATA_DATA(this, PointCloud, pc);
   if(m==0) {
     pc.points.resize(0);
-    pc.properties.resize(0,0);
+    pc.properties.clear();
     pc.propertyNames.resize(0);
     return;
   }
@@ -3117,8 +3118,8 @@ void PointCloud::setPointsAndProperties(double* np_array2, int m,int n)
   }
   pc.points.resize(m);
   if(n==3) {
-    pc.properties.resize(0,0);
-    std::copy(np_array2,np_array2+m*3,&pc.points[0]);
+    pc.properties.clear();
+    std::copy(np_array2,np_array2+m*3,&pc.points[0].x);
   }
   else {
     pc.properties.resize(m,n-3);
@@ -3128,7 +3129,6 @@ void PointCloud::setPointsAndProperties(double* np_array2, int m,int n)
       pc.properties.copyRow(i,&np_array2[k+3]);
     }
   }
-  
 }
  
 void PointCloud::getProperties(double** np_view2, int* m, int* n)
@@ -3244,7 +3244,7 @@ void PointCloud::setDepthImage_d(const double intrinsics[4],double* np_depth2,in
   double invfx = 1.0/fx;
   double invfy = 1.0/fy;
   pc.propertyNames.resize(0);
-  pc.properties.resize(0,0);
+  pc.properties.clear();
 
   pc.points.resize(m*n);
   int k=0;
@@ -3270,7 +3270,7 @@ void PointCloud::setDepthImage_f(const double intrinsics[4],float* np_depth2,int
   double invfx = 1.0/fx;
   double invfy = 1.0/fy;
   pc.propertyNames.resize(0);
-  pc.properties.resize(0,0);
+  pc.properties.clear();
 
   pc.points.resize(m*n);
   int k=0;
@@ -3296,7 +3296,7 @@ void PointCloud::setDepthImage_s(const double intrinsics[4],unsigned short* np_d
   double invfx = 1.0/fx;
   double invfy = 1.0/fy;
   pc.propertyNames.resize(0);
-  pc.properties.resize(0,0);
+  pc.properties.clear();
 
   pc.points.resize(m*n);
   int k=0;
