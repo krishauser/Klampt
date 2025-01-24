@@ -4,12 +4,13 @@
 set -e  #error if any step fails
 
 yum clean all
-yum install -y mesa-libGLU-devel git
+yum install -y mesa-libGLU-devel libtool automake autoconf make
 pip install cmake
 
 #no glpk available on aarch64
 git clone https://github.com/firedrakeproject/glpk.git
 pushd glpk
+autoreconf -f -i
 ./configure --disable-shared
 make CFLAGS='-fPIC -O3'
 make install
