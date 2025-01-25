@@ -10,6 +10,7 @@ pip install cmake
 #no glpk available on aarch64
 git clone https://github.com/firedrakeproject/glpk.git
 pushd glpk
+autoupdate
 autoreconf -f -i
 ./configure --disable-shared
 make CFLAGS='-fPIC -O3'
