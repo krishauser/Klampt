@@ -40,7 +40,7 @@ jobs:
         run: python check_mac_universal.py
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2.22.0
         with:
           package-dir: Python
           output-dir: wheelhouse
@@ -50,6 +50,6 @@ jobs:
           CIBW_ARCHS_MACOS: universal2
           LDFLAGS: -framework OpenGL
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: wheelhouse/*.whl
