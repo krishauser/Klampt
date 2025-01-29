@@ -20,16 +20,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04-arm  #change recommended by https://github.com/pypa/cibuildwheel/discussions/2256
             cibw_archs: "aarch64"
 
-    steps:
-    
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-          
+    steps:          
       - uses: actions/checkout@v4
 
       - name: Build wheels 
