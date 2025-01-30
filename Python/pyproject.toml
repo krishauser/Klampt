@@ -7,11 +7,18 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = 'Klampt'
+version = '0.10.0'
+dependencies = [
+    "numpy"
+]
+
 [project.optional-dependencies]
 gui = [
     "PyOpenGL",
     "PyQt6",
     "pyqtgraph",
-    "pillow"
+    "pillow",
     "imageio"
 ]
