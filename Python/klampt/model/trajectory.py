@@ -232,8 +232,7 @@ class Trajectory:
             relative: bool = False,
             jumpPolicy: Literal['strict','blend','jump'] = 'strict'
         ) -> 'Trajectory':
-        """Returns a new trajectory with another trajectory
-        concatenated onto self.
+        """Concatenates two trajectories.
 
         Args:
             suffix (Trajectory): the suffix trajectory
@@ -250,6 +249,8 @@ class Trajectory:
                         discarded.
                     'jump': a discontinuity is added to the trajectory.
 
+        Returns:
+            A new trajectory with the suffix appended onto this.
         """
         if self.__class__ is not suffix.__class__:
             raise ValueError("Can only concatenate like Trajectory classes: %s != %s"%(self.__class__.__name__,suffix.__class__.__name__))

@@ -4,15 +4,15 @@ Installing Klamp't
 TL;DR
 ----------------
 
-For most platforms, the following lines will install Klampt Python and recommended dependencies::
+For most platforms, the following lines will install Klampt Python and recommended dependencies for OpenGL visualizations::
 
-   pip install klampt PyOpenGL PyQt6 pyqtgraph pillow imageio
+   pip install klampt[gui]
 
-And for Linux systems, you will need an OpenGL installation. If you have a graphics card::
+For Linux systems, you will need an OpenGL installation. This may already be present on your system, but if not, if you have a graphics card, run::
 
-   sudo apt-get install sudo apt install libopengl0
+   sudo apt-get install libopengl0
 
-And if not, you should use::
+If you do not have a graphics card, you should use::
 
    sudo apt-get install libgl1-mesa-dev
 
@@ -22,11 +22,17 @@ Versions and optional dependencies
 If you only need the Python API, you can install using pip. Simply open
 up a command line window and call::
 
+   pip install klampt[gui] 
+
+to install the recommended GUI packages, or you can call::
+
     pip install klampt
 
-As of writing, pip packages are available for Linux (CPython 3.6-3.12, PyPy 3.7-3.10, x86_64 architecture),
-Windows (Python 3.5-3.12, 32- and 64-bit), and
-Mac OSX 11  (Python 3.8-3.12). These are built
+for a bare version of klampt without OpenGL visualization dependencies.
+
+As of writing, pip packages are available for Linux (CPython 3.6-3.13, x86_64, aarch64 architectures),
+Windows (Python 3.6-3.13, 32- and 64-bit), and
+Mac OSX 13  (Python 3.8-3.12). These are built
 with Assimp (mesh loading) and GLEW (OpenGL supported rendering of
 camera images). They **do not** have ROS or OMPL support, and if you
 want those you will need to build from source.  As of 2022 we have stopped
@@ -41,7 +47,7 @@ You should also obtain:
 -  PyQt5 or PyQt6 are highly recommended for resource editing and improved
    visualization. Try ``pip install PyQt6``. 
 
-To enable all features, you may also obtain the following optional packages:
+To enable all features, also obtain the following optional packages:
 
 -  PyQtGraph lets you customize PyQt visualizations through the GUI.
    Try ``pip install pyqtgraph``.

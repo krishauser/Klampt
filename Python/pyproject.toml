@@ -6,3 +6,12 @@ requires = [
     "numpy>=1.18.5; python_version<'3.9'"
 ]
 build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+gui = [
+    "PyOpenGL",
+    "PyQt6",
+    "pyqtgraph",
+    "pillow"
+    "imageio"
+]

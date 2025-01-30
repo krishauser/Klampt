@@ -32,10 +32,12 @@ namespace Klampt {
  *     Recommended to use the set/get functions rather than changing the members
  *     directly due to strangeness in SWIG's handling of vectors.
  * 
+ * 
  * .. note:
  * 
  *     The inertia matrix is specified in the local frame of the object
  *     and centered at the center of mass. 
+ * 
  * 
  * Attributes:
  *
@@ -1126,6 +1128,13 @@ class TerrainModel
 
 /** @brief The main world class, containing robots, rigid objects, and static
  * environment geometry.
+ * 
+ * Attributes:
+ * 
+ *     - robots: a list of RobotModel instances
+ *     - rigidObjects: a list of RigidObjectModel instances
+ *     - terrains: a list of TerrainModel instances
+ *
  *
  * .. note:
  * 
@@ -1149,7 +1158,6 @@ class TerrainModel
  *
  * To get an object's ID, you can see the value returned by loadElement
  * and/or object.getID().  
- * states.
  *
  * To save/restore the state of the model, you must manually maintain copies of
  * the states of whichever objects you wish to save/restore.
