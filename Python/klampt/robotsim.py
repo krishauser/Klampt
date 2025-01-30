@@ -1736,9 +1736,9 @@ class PointCloud(object):
             format: describes the output color format, either:
 
                 - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
-                bits used),
+                    bits used),
                 - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
-                bits used),
+                    bits used),
                 - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
                 - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
                 - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
@@ -1746,7 +1746,7 @@ class PointCloud(object):
                 - ('r','g','b'): triple with each channel in range [0,1]
                 - ('r','g','b','a'): tuple with each channel in range [0,1]
                 - 'channels': returns a list of channels, in the form (r,g,b) or 
-                (r,g,b,a), where each value in the channel has range [0,1].
+                    (r,g,b,a), where each value in the channel has range [0,1].
                 - 'opacity': returns opacity only, in the range [0,1].
 
         Returns:
@@ -1769,20 +1769,20 @@ class PointCloud(object):
                 can be:
 
                 - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
-                bits used),
+                    bits used),
                 - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
-                bits used),
+                    bits used),
                 - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
                 - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
                 - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
                 - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
                 - ('r','g','b'): triple with each channel in range [0,1]. Also use
-                this if colors is an n x 3 numpy array.
+                    this if colors is an n x 3 numpy array.
                 - ('r','g','b','a'): tuple with each channel in range [0,1]. Also 
-                use this if colors is an n x 4 numpy array.
+                    use this if colors is an n x 4 numpy array.
                 - 'channels': ``colors`` is a list of 3 or 4 channels, in the form
-                (r,g,b) or (r,g,b,a), where each element in a channel has range
-                [0,1].
+                    (r,g,b) or (r,g,b,a), where each element in a channel has range
+                    [0,1].
                 - 'opacity': opacity only, in the range [0,1].
 
             pc_property (str): describes to which property the colors should be
@@ -3162,7 +3162,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.TriangleMesh` or :obj:`Heightmap`, optional): 
+            arg2 (:class:`~klampt.OccupancyGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.Geometry3D` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.ConvexHull`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -5214,12 +5214,14 @@ class Mass(object):
     .. note::  
 
         Recommended to use the set/get functions rather than changing the members
-        directly due to strangeness in SWIG's handling of vectors.
-     .. note:  
+        directly due to strangeness in SWIG's handling of vectors.  
+
+    .. note:  
 
         The inertia matrix is specified in the local frame of the object
-        and centered at the center of mass.
-     Attributes:  
+        and centered at the center of mass.  
+
+    Attributes:  
 
         mass (float): the actual mass (typically in kg)
         com (list of 3 floats): the center of mass position, in
@@ -7099,7 +7101,7 @@ class SensorModel(object):
 
 
         Args:
-            link (int or :class:`~klampt.RobotModelLink`): 
+            link (:class:`~klampt.RobotModelLink` or int): 
         """
         return _robotsim.SensorModel__setLink(self, *args)
 
@@ -7550,6 +7552,12 @@ class WorldModel(object):
 
     Args:
 
+    Attributes:  
+
+        - robots: a list of RobotModel instances
+        - rigidObjects: a list of RigidObjectModel instances
+        - terrains: a list of TerrainModel instances  
+
     .. note:  
 
         Although a WorldModel instance is typically called a "world" it is
@@ -7571,7 +7579,6 @@ class WorldModel(object):
 
     To get an object's ID, you can see the value returned by loadElement and/or
     object.getID().  
-     states.  
 
     To save/restore the state of the model, you must manually maintain copies of the
     states of whichever objects you wish to save/restore.  
@@ -7878,7 +7885,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -8624,10 +8631,6 @@ class IKSolver(object):
         minimize (secondary_objective,secondary_objective_grad): bool
 
 
-        Args:
-            secondary_objective (:obj:`object`, optional): 
-            secondary_objective_grad (:obj:`object`, optional): 
-
         The relation to `:func:solve` is that `solve` uses a root-finding method that
         tries indirectly to minimize the residual, but it may stall out when the
         objectives are infeasible.  
@@ -8648,10 +8651,11 @@ class IKSolver(object):
         .. note::  
 
             The minimization will occur only over the current active DOFs, which will
-            include default active DOFs for secondary objectives.
-         Arguments: secondary_objective (callable): a function `f(q)->float` that should
-        be minimized. secondary_objective_grad (callable): a function
-        `grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  
+            include default active DOFs for secondary objectives.  
+
+        Args: secondary_objective (callable): a function `f(q)->float` that should be
+        minimized. secondary_objective_grad (callable): a function `grad(q)->`sequence
+        of length `len(q)` giving the gradient of `f` at `q`.  
 
         Returns:  
 
@@ -10023,7 +10027,7 @@ class Simulator(object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             SimRobotController:
@@ -10384,8 +10388,9 @@ def com_equilibrium(*args) -> object:
          fext (3-tuple or list): the external force vector.
          com (3-tuple or list, or None): the center of mass coordinates.  If
              None, assumes that you want to test whether ANY COM may be in
-             equilibrium for the given contacts.
-     Returns:  
+             equilibrium for the given contacts.  
+
+    Returns:  
 
         bool, None, or list: if com is given, and there are feasible
         equilibrium forces, this returns a list of 3 tuples giving
@@ -10428,8 +10433,9 @@ def com_equilibrium_2d(*args) -> object:
          fext (2-tuple or list): the external force vector.
          com (2-tuple or list, or None): the center of mass coordinates.  If None,
              assumes that you want to test whether ANY COM may be in equilibrium
-             for the given contacts.
-     Returns:  
+             for the given contacts.  
+
+    Returns:  
 
         bool, None, or list: if com is given, and there are feasible
         equilibrium forces, this returns a list of 2-tuples giving
@@ -10471,8 +10477,9 @@ def support_polygon(*args) -> object:
              and each inequality gives the entries (ax,ay,az,b) of a constraint
              ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
              the i'th contact.  Each of the k 4-tuples is laid out sequentially
-             per-contact.
-     Returns:  
+             per-contact.  
+
+    Returns:  
 
         list of 3-tuples: The sorted plane boundaries of the support
         polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
@@ -10517,8 +10524,9 @@ def support_polygon_2d(*args) -> object:
              k*3 (for some integer k), and gives the contact force constraints
              (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
              at the i'th contact. Each of the k 3-tuples is laid out sequentially
-             per-contact.
-     Returns:  
+             per-contact.  
+
+    Returns:  
 
         2-tuple: gives the min/max extents of the support polygon.
         If the support interval is empty, (inf,inf) is returned.
@@ -10564,8 +10572,9 @@ def equilibrium_torques(*args) -> object:
 
             To use dynamics, set the robot's joint velocities dq, calculate
             then calculate the torques via robot.torquesFromAccel(ddq), and pass
-            the result into internalTorques.
-     Returns:  
+            the result into internalTorques.  
+
+    Returns:  
 
         pair of lists, optional: a pair (torque,force) if a solution exists,
         giving valid joint torques t and frictional contact forces (f1,...,fn).

@@ -7,6 +7,15 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[project.optional-dependencies]
+gui = [
+    "PyOpenGL",
+    "PyQt6",
+    "pyqtgraph",
+    "pillow"
+    "imageio"
+]
+
 [tool.cibuildwheel.macos]
 repair-wheel-command = [
   "DYLD_LIBRARY_PATH=/usr/local/lib delocate-listdeps {wheel}",

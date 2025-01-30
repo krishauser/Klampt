@@ -255,10 +255,12 @@ class IKSolver
    *     The minimization will occur only over the current active DOFs, which will
    *     include default active DOFs for secondary objectives.
    * 
-   * Arguments:
+   * 
+   * Args:
    *     secondary_objective (callable): a function ``f(q)->float`` that should be minimized.
    *     secondary_objective_grad (callable): a function ``grad(q)->``sequence of length
    *        ``len(q)`` giving the gradient of ``f`` at ``q``.
+   * 
    * 
    * Returns:
    * 

@@ -122,6 +122,7 @@ PyObject* com_equilibrium(double* np_array2,int m,int n,const std::vector<double
  *          None, assumes that you want to test whether ANY COM may be in
  *          equilibrium for the given contacts.
  *
+ * 
  * Returns:
  * 
  *     bool, None, or list: if com is given, and there are feasible
@@ -174,6 +175,7 @@ PyObject* com_equilibrium_2d(double* np_array2,int m,int n,const std::vector<dou
  *          assumes that you want to test whether ANY COM may be in equilibrium
  *          for the given contacts.
  *
+ * 
  * Returns:
  * 
  *     bool, None, or list: if com is given, and there are feasible
@@ -221,6 +223,7 @@ PyObject* support_polygon(double* np_array2,int m,int n);
  *          ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
  *          the i'th contact.  Each of the k 4-tuples is laid out sequentially
  *          per-contact.
+ * 
  * 
  * Returns:
  * 
@@ -272,6 +275,7 @@ PyObject* support_polygon_2d(double* np_array2,int m,int n);
  *          at the i'th contact. Each of the k 3-tuples is laid out sequentially
  *          per-contact.
  *
+ * 
  * Returns:
  *
  *     2-tuple: gives the min/max extents of the support polygon. 
@@ -293,6 +297,7 @@ PyObject* support_polygon_2d(const std::vector<std::vector<double> >& contacts,c
  *         If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm (experimental,
  *          may not get good results)
  *
+ * 
  * Returns:
  *
  *     tuple: a pair (t,f) giving the joint torques and frictional
@@ -337,6 +342,7 @@ PyObject* equilibrium_torques(const RobotModel& robot,
  *         then calculate the torques via robot.torquesFromAccel(ddq), and pass
  *         the result into internalTorques.
  *
+ * 
  * Returns:
  * 
  *     pair of lists, optional: a pair (torque,force) if a solution exists,

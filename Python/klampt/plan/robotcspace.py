@@ -246,10 +246,12 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         interface.
 
         .. note::
+
             This isn't the best thing to do for robots with slow acceleration
             limits and/or high inertias because it ignores acceleration.  A
             better solution can be found in the MInTOS package or the C++ code
             in Klampt/Cpp/Planning/RobotTimeScaling.h.
+
         """
         return self.discretizePath(path,epsilon)
 
@@ -476,6 +478,7 @@ class RobotSubsetCSpace(EmbeddedCSpace):
         klampt.model.trajectory.execute_path.
 
         .. note:
+        
             This assumes a fully actuated robot.  It won't work for robots with
             free-floating bases.
 

@@ -10,7 +10,7 @@ from klampt.vis.glcommon import GLMultiViewportProgram
 from klampt.vis.backends.vis_gl import GLVisualizationPlugin
 import sys,os,time
 vis.init("PyQt")
-if glinit.active() == 'PyQt6' or True:
+if glinit.active() == 'PyQt6':
     from PyQt6 import QtGui
     from PyQt6 import QtCore
     from PyQt6 import QtWidgets

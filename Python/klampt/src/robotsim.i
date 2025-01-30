@@ -968,9 +968,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             format: describes the output color format, either:
 
                 - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
-                bits used),
+                    bits used),
                 - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
-                bits used),
+                    bits used),
                 - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
                 - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
                 - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
@@ -978,7 +978,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
                 - ('r','g','b'): triple with each channel in range [0,1]
                 - ('r','g','b','a'): tuple with each channel in range [0,1]
                 - 'channels': returns a list of channels, in the form (r,g,b) or 
-                (r,g,b,a), where each value in the channel has range [0,1].
+                    (r,g,b,a), where each value in the channel has range [0,1].
                 - 'opacity': returns opacity only, in the range [0,1].
 
         Returns:
@@ -1000,20 +1000,20 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
                 can be:
 
                 - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
-                bits used),
+                    bits used),
                 - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
-                bits used),
+                    bits used),
                 - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
                 - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
                 - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
                 - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
                 - ('r','g','b'): triple with each channel in range [0,1]. Also use
-                this if colors is an n x 3 numpy array.
+                    this if colors is an n x 3 numpy array.
                 - ('r','g','b','a'): tuple with each channel in range [0,1]. Also 
-                use this if colors is an n x 4 numpy array.
+                    use this if colors is an n x 4 numpy array.
                 - 'channels': ``colors`` is a list of 3 or 4 channels, in the form
-                (r,g,b) or (r,g,b,a), where each element in a channel has range
-                [0,1].
+                    (r,g,b) or (r,g,b,a), where each element in a channel has range
+                    [0,1].
                 - 'opacity': opacity only, in the range [0,1].
 
             pc_property (str): describes to which property the colors should be

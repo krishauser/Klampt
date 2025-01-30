@@ -542,8 +542,9 @@ A raw interface for a configuration space.
 
 ..note::  
 
-    The native Python CSpace interface class in cspace.py is easier to use.
- You can either set a single feasibility test function using setFeasibility() or
+    The native Python CSpace interface class in cspace.py is easier to use.  
+
+You can either set a single feasibility test function using setFeasibility() or
 add several feasibility tests, all of which need to be satisfied, using
 addFeasibilityTest(). In the latter case, planners may be able to provide
 debugging statistics, solve Minimum Constraint Removal problems, run faster by
@@ -2277,10 +2278,11 @@ list or tuple of length `len(q)``.
 .. note::  
 
     The minimization will occur only over the current active DOFs, which will
-    include default active DOFs for secondary objectives.
- Arguments: secondary_objective (callable): a function `f(q)->float` that should
-be minimized. secondary_objective_grad (callable): a function
-`grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  
+    include default active DOFs for secondary objectives.  
+
+Args: secondary_objective (callable): a function `f(q)->float` that should be
+minimized. secondary_objective_grad (callable): a function `grad(q)->`sequence
+of length `len(q)` giving the gradient of `f` at `q`.  
 
 Returns:  
 
@@ -2429,12 +2431,14 @@ Stores mass information for a rigid body or robot link.
 .. note::  
 
     Recommended to use the set/get functions rather than changing the members
-    directly due to strangeness in SWIG's handling of vectors.
- .. note:  
+    directly due to strangeness in SWIG's handling of vectors.  
+
+.. note:  
 
     The inertia matrix is specified in the local frame of the object
-    and centered at the center of mass.
- Attributes:  
+    and centered at the center of mass.  
+
+Attributes:  
 
     mass (float): the actual mass (typically in kg)
     com (list of 3 floats): the center of mass position, in
@@ -5645,6 +5649,12 @@ Return type: Vector
 The main world class, containing robots, rigid objects, and static environment
 geometry.  
 
+Attributes:  
+
+    - robots: a list of RobotModel instances
+    - rigidObjects: a list of RigidObjectModel instances
+    - terrains: a list of TerrainModel instances  
+
 .. note:  
 
     Although a WorldModel instance is typically called a \"world\" it is
@@ -5666,7 +5676,6 @@ terrain(0), etc.
 
 To get an object's ID, you can see the value returned by loadElement and/or
 object.getID().  
- states.  
 
 To save/restore the state of the model, you must manually maintain copies of the
 states of whichever objects you wish to save/restore.  
@@ -6305,8 +6314,9 @@ Args:
      fext (3-tuple or list): the external force vector.
      com (3-tuple or list, or None): the center of mass coordinates.  If
          None, assumes that you want to test whether ANY COM may be in
-         equilibrium for the given contacts.
- Returns:  
+         equilibrium for the given contacts.  
+
+Returns:  
 
     bool, None, or list: if com is given, and there are feasible
     equilibrium forces, this returns a list of 3 tuples giving
@@ -6357,8 +6367,9 @@ Args:
      fext (2-tuple or list): the external force vector.
      com (2-tuple or list, or None): the center of mass coordinates.  If None,
          assumes that you want to test whether ANY COM may be in equilibrium
-         for the given contacts.
- Returns:  
+         for the given contacts.  
+
+Returns:  
 
     bool, None, or list: if com is given, and there are feasible
     equilibrium forces, this returns a list of 2-tuples giving
@@ -6407,8 +6418,9 @@ Args:
          and each inequality gives the entries (ax,ay,az,b) of a constraint
          ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
          the i'th contact.  Each of the k 4-tuples is laid out sequentially
-         per-contact.
- Returns:  
+         per-contact.  
+
+Returns:  
 
     list of 3-tuples: The sorted plane boundaries of the support
     polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
@@ -6458,8 +6470,9 @@ Args:
          k*3 (for some integer k), and gives the contact force constraints
          (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
          at the i'th contact. Each of the k 3-tuples is laid out sequentially
-         per-contact.
- Returns:  
+         per-contact.  
+
+Returns:  
 
     2-tuple: gives the min/max extents of the support polygon.
     If the support interval is empty, (inf,inf) is returned.
@@ -6522,8 +6535,9 @@ Args:
 
         To use dynamics, set the robot's joint velocities dq, calculate
         then calculate the torques via robot.torquesFromAccel(ddq), and pass
-        the result into internalTorques.
- Returns:  
+        the result into internalTorques.  
+
+Returns:  
 
     pair of lists, optional: a pair (torque,force) if a solution exists,
     giving valid joint torques t and frictional contact forces (f1,...,fn).

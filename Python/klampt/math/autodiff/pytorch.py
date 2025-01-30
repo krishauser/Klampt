@@ -5,7 +5,7 @@ from typing import Union
 
 class TorchModuleFunction(ad.ADFunctionInterface):
     """Converts a PyTorch function to a Klamp't autodiff function class."""
-    def __init__(self,module : torch.Module):
+    def __init__(self,module : torch.nn.Module):
         self.module=module
         self._eval_params=[]
         torch.set_default_dtype(torch.float64)
@@ -135,7 +135,7 @@ class ADModule(torch.autograd.Function):
         torch.autograd.gradcheck(ADModule.apply,tuple([func,terminals]+params),eps=h,atol=atol,rtol=rtol,raise_exception=True)
 
 
-def torch_to_ad(module : torch.Module, args : tuple) -> ad.ADFunctionCall:
+def torch_to_ad(module : torch.nn.Module, args : tuple) -> ad.ADFunctionCall:
     """Converts a PyTorch function applied to args (list of scalars or numpy
     arrays) to a Klamp't autodiff function call on those arguments."""
     wrapper=TorchModuleFunction(module)
