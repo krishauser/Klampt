@@ -20,7 +20,9 @@ gui = [
     "PyQt6",
     "pyqtgraph",
     "pillow",
-    "imageio"
+    "imageio",
+    "imageio-ffmpeg",  #needed by imageio[ffmpeg]
+    "psutil"           #needed by imageio[ffmpeg]
 ]
 
 [tool.cibuildwheel.macos]

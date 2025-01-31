@@ -760,7 +760,10 @@ class _MyWindow(QMainWindow):
             if self.movie_writer is None:
                 print("imageio library not available, using backup ffmpeg method")
                 dlg =  QInputDialog(self)
-                dlg.setInputMode( QInputDialog.TextInput) 
+                if PYQT_VERSION >= 6:
+                    dlg.setInputMode(QInputDialog.InputMode.TextInput)
+                else:
+                    dlg.setInputMode(QInputDialog.TextInput) 
                 dlg.setLabelText("Command")
                 fn = first_nonexistent_file('klampt_record_%04d.mp4')
                 dlg.setTextValue('ffmpeg -y -i image%04d.png -vcodec libx264 -pix_fmt yuv420p '+fn)
