@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = 'Klampt'
-version = '0.10.0'
+version = '0.10.0.post1'
 dependencies = [
     "numpy"
 ]
