@@ -125,7 +125,7 @@ class RobotCSpace(CSpace):
 
     def executablePath(self,path : Configs) -> Configs:
         """Given a planned CSpace path, returns a path that can be executed using
-        klampt.model.trajectory.execute_path.
+        :func:`klampt.model.trajectory.execute_path`.
         """
         return path
 
@@ -241,9 +241,9 @@ class ClosedLoopRobotCSpace(RobotCSpace):
 
     def executablePath(self,path : Configs, epsilon : float = 1e-2) -> Configs:
         """Given a :class:`CSpace` path, returns a path that can be executed
-        using klampt.model.trajectory.execute_path.  This is the same as
-        discretizePath, but is provided for compatibility with the RobotCSpace
-        interface.
+        using :func:`klampt.model.trajectory.execute_path`.  This is the same 
+        as discretizePath, but is provided for compatibility with the
+        RobotCSpace interface.
 
         .. note::
 
@@ -252,6 +252,9 @@ class ClosedLoopRobotCSpace(RobotCSpace):
             better solution can be found in the MInTOS package or the C++ code
             in Klampt/Cpp/Planning/RobotTimeScaling.h.
 
+        Returns:
+            list of Configs: A closely spaced sequence of configurations
+            discretized at the given resolution.
         """
         return self.discretizePath(path,epsilon)
 
@@ -413,75 +416,3 @@ class EmbeddedRobotCSpace(EmbeddedCSpace):
 
 
 
-class RobotSubsetCSpace(EmbeddedCSpace):
-    """A basic robot cspace that allows collision free motion of a *subset*
-    of joints.  The subset is given by the indices in the list "subset"
-    provided to the constructor.  The configuration space is R^k where k
-    is the number of DOFs in the subset.
-
-    This class will automatically disable all collisions for inactive robot 
-    links in the collider.
-
-    .. note::
-        To convert from start/goal robot configurations to the CSpace, call
-        the `project(qrobot)` method for the start and goal.
-        (see :meth:`EmbeddedCSpace.project`)
-
-    .. note::
-        To convert from a planned path back to the robot's full configuration
-        space, you will need to call the `lift(q)` method for all
-        configurations q in the planned path. (see :meth:`EmbeddedCSpace.lift`) 
-
-    .. warning::
-        If your robot has non-standard joints, like a free-floating base or
-        continuously rotating (spin) joints, you will need to overload the
-        :meth:`sample` method.
-
-    .. deprecated:: 0.8.6
-
-        Deprecated this in favor of EmbeddedRobotCSpace, which is adaptable
-        to ClosedLoopRobotCSpace and ImplicitManifoldRobotCSpace.  To convert
-        code to EmbeddedRobotCSpace, convert
-
-        ``space = RobotSubsetCSpace(robot,subset,collider)`` to
-
-        ``space = EmbeddedCSpace(RobotCSpace(robot,collider),subset);``
-        ``space.disableInactiveCollisions()``
-
-    """
-    def __init__(self,robot : RobotModel, subset : List[int], collider : Optional[collide.WorldCollider]=None):
-        EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
-        self.collider = collider
-        if self.collider:
-            #determine moving objects, which includes all links in the subset and descendants
-            moving = [False]*robot.numLinks()
-            for i in range(robot.numLinks()):
-                if i in subset: moving[i] = True
-                else:
-                    p = robot.link(i).getParent()
-                    if p >= 0 and moving[p]: moving[i]=True
-            #disable self-collisions for non moving objects
-            for i,mv in enumerate(moving):
-                if not mv:
-                    rindices = self.collider.robots[robot.index]
-                    rindex = rindices[i]
-                    if rindex < 0:
-                        continue
-                    newmask = set()
-                    for j in range(robot.numLinks()):
-                        if rindices[j] in self.collider.mask[rindex] and moving[j]:
-                            newmask.add(rindices[j])
-                    self.collider.mask[rindex] = newmask
-
-    def executablePath(self,path : Configs) -> Configs:
-        """Given a planned CSpace path, returns a path that can be executed using
-        klampt.model.trajectory.execute_path.
-
-        .. note:
-        
-            This assumes a fully actuated robot.  It won't work for robots with
-            free-floating bases.
-
-        """
-        lpath = self.liftPath(path)
-        return lpath
