@@ -241,13 +241,13 @@ class Trajectory:
             jumpPolicy (str):  If the suffix starts exactly at the existing
                 trajectory's end time, then jumpPolicy is checked.  Options
                 include:
-
-                    'strict': the suffix's first milestone has to be equal to
-                        the existing trajectory's last milestone. Otherwise an
-                        exception is raised.
-                    'blend': the existing trajectory's last milestone is
-                        discarded.
-                    'jump': a discontinuity is added to the trajectory.
+                
+                - 'strict': the suffix's first milestone has to be equal to
+                    the existing trajectory's last milestone. Otherwise an
+                    exception is raised.
+                - 'blend': the existing trajectory's last milestone is
+                    discarded.
+                - 'jump': a discontinuity is added to the trajectory.
 
         Returns:
             A new trajectory with the suffix appended onto this.

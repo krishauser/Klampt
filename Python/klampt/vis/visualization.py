@@ -1203,13 +1203,13 @@ def add(name : str, item,keepAppearance=False,**kwargs) -> None:
             its color to red.
 
             Common values include:
-            - color: a 3-tuple (r,g,b) or 4-tuple (r,g,b,a) specifying the
-                color of the item.
-            - hide_label: if True, the item's label will be hidden.
-            - type: a string specifying the type of the item.  This is used by
-                the backend to determine how to draw the item if the type is
-                ambiguous.
-            - appearance: an Appearance object specifying the item's appearance.
+                - color: a 3-tuple (r,g,b) or 4-tuple (r,g,b,a) specifying the
+                    color of the item.
+                - hide_label: if True, the item's label will be hidden.
+                - type: a string specifying the type of the item.  This is used by
+                    the backend to determine how to draw the item if the type is
+                    ambiguous.
+                - appearance: an Appearance object specifying the item's appearance.
             
             See :func:`setAttribute` for more information on attributes.
     """

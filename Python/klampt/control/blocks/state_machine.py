@@ -115,9 +115,9 @@ class TransitionStateMachine(StateMachineBase):
         blocks: same as StateMachineBase
         current: same as StateMachineBase
         transitions (list of dicts): a list of transition conditions
-            [{x1:cond1,...,xk:condk},...,{}] so that if j is in transitions[i],
-            then transitions[i][j](*inputs) is a condition that tells the state
-            machine whether to change states from i to j.
+            `[{x1:cond1,...,xk:condk},...,{}]` so that if `j` is in
+            `transitions[i]`, then `transitions[i][j](*inputs)` is a condition
+            that tells the state machine whether to change states from i to j.
     """
     def __init__(self,blocks,transitions=None,inputs=0,start=0,reset_on_enter=True):
         StateMachineBase.__init__(self,blocks,start,reset_on_enter)

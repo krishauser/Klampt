@@ -18,7 +18,7 @@ class WorldModel;
  * Note that you can also call ``Geometry3D.loadFile("ros://[ROS_TOPIC]")``
  * or ``Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")``
  * to accomplish the same thing.
- *
+ * 
  * TODO: It has not yet been determined whether this interferes with Rospy,
  * i.e., klampt.io.ros.
  * 
@@ -30,7 +30,7 @@ class WorldModel;
  *     type (str, optional): If provided, specifies the format of the data
  *         to be subscribed to. If not, tries to determine the type
  *         automatically.
- *
+ * 
  * 
  * Returns:
  * 

@@ -16,6 +16,7 @@
  *     indices (numpy int32 array): an m x 3 list of triangle vertices, given
  *         as indices into the vertices list, i.e., [[a1,b1,c2], [a2,b2,c2], ...]
  *
+ * 
  * Examples::
  *
  *     m = TriangleMesh()
@@ -126,6 +127,7 @@ struct ConvexHull
  *        name of each property is either anonymous or retrieved by
  *        `getPropertyName`.
  *
+ * 
  * Property names are usually lowercase but follow PCL naming convention, and 
  * often include:
  *
@@ -137,6 +139,7 @@ struct ConvexHull
  * - ``r,g,b,a``: color channels, in range [0,1]
  * - ``u,v``: texture coordinate
  * - ``radius``: treats the point cloud as a collection of balls 
+ * 
  * 
  * Settings are usually lowercase but follow PCL naming convention, and often
  * include:
@@ -150,6 +153,7 @@ struct ConvexHull
  *   (qw,qx,qy,qz) the quaternion representation of the orientation (canonical
  *   representation, with X right, Y down, Z forward).
  *
+ * 
  * Examples::
  * 
  *     pc = PointCloud()

@@ -28,22 +28,22 @@ bool force_closure(double* np_array2,int m,int n);
  * 
  * Args:
  * 
- *      contacts (list of 7-float lists or tuples): the list of contacts, each
- *          specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+ *     contacts (list of 7-float lists or tuples): the list of contacts, each
+ *         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
  * 
- *              * (x,y,z): the contact position
- *              * (nx,ny,nz): the contact normal
- *              * k: the coefficient of friction (>= 0)
+ *         - (x,y,z): the contact position
+ *         - (nx,ny,nz): the contact normal
+ *         - k: the coefficient of friction (>= 0)
  * 
- *      contactPositions (list of 3-float lists or tuples): the list of contact
- *          point positions. 
- *      frictionCones (list of lists): Each item of this list specifies linear
- *          inequalities that must be met of the force at the corresponding
- *          contact point.  The item must have length k*4 where k is an integer,
- *          and each inequality gives the entries (ax,ay,az,b) of a constraint
- *          ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
- *          the i'th contact.  Each of the k 4-tuples is laid out sequentially
- *          per-contact.
+ *     contactPositions (list of 3-float lists or tuples): the list of contact
+ *         point positions. 
+ *     frictionCones (list of lists): Each item of this list specifies linear
+ *         inequalities that must be met of the force at the corresponding
+ *         contact point.  The item must have length k*4 where k is an integer,
+ *         and each inequality gives the entries (ax,ay,az,b) of a constraint
+ *         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
+ *         the i'th contact.  Each of the k 4-tuples is laid out sequentially
+ *         per-contact.
  */
 bool force_closure(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double > >& frictionCones);
 
@@ -64,20 +64,20 @@ bool force_closure_2d(double* np_array2,int m,int n);
  * 
  * Args:
  * 
- *      contacts (list of 4-float lists or tuples): the list of contacts, each
- *          specified as a 4-list or tuple [x,y,theta,k], with:
+ *     contacts (list of 4-float lists or tuples): the list of contacts, each
+ *         specified as a 4-list or tuple [x,y,theta,k], with:
  * 
- *              * (x,y): the contact position
- *              * theta: is the normal angle (in radians, CCW to the x axis)
- *              * k: the coefficient of friction (>= 0)
+ *         - (x,y): the contact position
+ *         - theta: is the normal angle (in radians, CCW to the x axis)
+ *         - k: the coefficient of friction (>= 0)
  * 
- *      contactPositions (list of 2-float lists or tuples): the list of contact
- *          point positions. 
- *      frictionCones (list of lists): The i'th element in this list has length
- *          k*3 (for some integer k), and gives the contact force constraints
- *          (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
- *          at the i'th contact. Each of the k 3-tuples is laid out sequentially
- *          per-contact.
+ *     contactPositions (list of 2-float lists or tuples): the list of contact
+ *         point positions. 
+ *     frictionCones (list of lists): The i'th element in this list has length
+ *         k*3 (for some integer k), and gives the contact force constraints
+ *         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
+ *         at the i'th contact. Each of the k 3-tuples is laid out sequentially
+ *         per-contact.
  */
 bool force_closure_2d(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double> >& frictionCones);
 
@@ -101,26 +101,26 @@ PyObject* com_equilibrium(double* np_array2,int m,int n,const std::vector<double
  *
  * Args:
  * 
- *      contacts (list of 7-float lists or tuples): the list of contacts, each
- *          specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+ *     contacts (list of 7-float lists or tuples): the list of contacts, each
+ *         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
  * 
- *              * (x,y,z): the contact position
- *              * (nx,ny,nz): the contact normal
- *              * k: the coefficient of friction (>= 0)
+ *         - (x,y,z): the contact position
+ *         - (nx,ny,nz): the contact normal
+ *         - k: the coefficient of friction (>= 0)
  * 
- *      contactPositions (list of 3-float lists or tuples): the list of contact
- *          point positions. 
- *      frictionCones (list of lists): Each item of this list specifies linear
- *          inequalities that must be met of the force at the corresponding
- *          contact point.  The item must have length k*4 where k is an integer,
- *          and each inequality gives the entries (ax,ay,az,b) of a constraint
- *          ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
- *          the i'th contact.  Each of the k 4-tuples is laid out sequentially
- *          per-contact.
- *      fext (3-tuple or list): the external force vector.
- *      com (3-tuple or list, or None): the center of mass coordinates.  If
- *          None, assumes that you want to test whether ANY COM may be in
- *          equilibrium for the given contacts.
+ *     contactPositions (list of 3-float lists or tuples): the list of contact
+ *         point positions. 
+ *     frictionCones (list of lists): Each item of this list specifies linear
+ *         inequalities that must be met of the force at the corresponding
+ *         contact point.  The item must have length k*4 where k is an integer,
+ *         and each inequality gives the entries (ax,ay,az,b) of a constraint
+ *         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
+ *         the i'th contact.  Each of the k 4-tuples is laid out sequentially
+ *         per-contact.
+ *     fext (3-tuple or list): the external force vector.
+ *     com (3-tuple or list, or None): the center of mass coordinates.  If
+ *         None, assumes that you want to test whether ANY COM may be in
+ *         equilibrium for the given contacts.
  *
  * 
  * Returns:
@@ -156,24 +156,24 @@ PyObject* com_equilibrium_2d(double* np_array2,int m,int n,const std::vector<dou
  *
  * Args:
  * 
- *      contacts (list of 4-float lists or tuples): the list of contacts, each
- *          specified as a 4-list or tuple [x,y,theta,k], with:
+ *     contacts (list of 4-float lists or tuples): the list of contacts, each
+ *         specified as a 4-list or tuple [x,y,theta,k], with:
  * 
- *              * (x,y,z): the contact position
- *              * theta: is the normal angle (in radians, CCW to the x axis)
- *              * k: the coefficient of friction (>= 0)
+ *         - (x,y,z): the contact position
+ *         - theta: is the normal angle (in radians, CCW to the x axis)
+ *         - k: the coefficient of friction (>= 0)
  * 
- *      contactPositions (list of 2-float lists or tuples): the list of contact
- *          point positions. 
- *      frictionCones (list of lists): The i'th element in this list has length
- *          k*3 (for some integer k), and gives the contact force constraints
- *          (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
- *          at the i'th contact. Each of the k 3-tuples is laid out sequentially
- *          per-contact.
- *      fext (2-tuple or list): the external force vector.
- *      com (2-tuple or list, or None): the center of mass coordinates.  If None,
- *          assumes that you want to test whether ANY COM may be in equilibrium
- *          for the given contacts.
+ *     contactPositions (list of 2-float lists or tuples): the list of contact
+ *         point positions. 
+ *     frictionCones (list of lists): The i'th element in this list has length
+ *         k*3 (for some integer k), and gives the contact force constraints
+ *         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
+ *         at the i'th contact. Each of the k 3-tuples is laid out sequentially
+ *         per-contact.
+ *     fext (2-tuple or list): the external force vector.
+ *     com (2-tuple or list, or None): the center of mass coordinates.  If None,
+ *         assumes that you want to test whether ANY COM may be in equilibrium
+ *         for the given contacts.
  *
  * 
  * Returns:
@@ -207,22 +207,22 @@ PyObject* support_polygon(double* np_array2,int m,int n);
  *
  * Args:
  * 
- *      contacts (list of 7-float lists or tuples): the list of contacts, each
- *          specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+ *     contacts (list of 7-float lists or tuples): the list of contacts, each
+ *         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
  * 
- *              * (x,y,z): the contact position
- *              * (nx,ny,nz): the contact normal
- *              * k: the coefficient of friction (>= 0)
+ *         - (x,y,z): the contact position
+ *         - (nx,ny,nz): the contact normal
+ *         - k: the coefficient of friction (>= 0)
  * 
- *      contactPositions (list of 3-float lists or tuples): the list of contact
- *          point positions. 
- *      frictionCones (list of lists): Each item of this list specifies linear
- *          inequalities that must be met of the force at the corresponding
- *          contact point.  The item must have length k*4 where k is an integer,
- *          and each inequality gives the entries (ax,ay,az,b) of a constraint
- *          ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
- *          the i'th contact.  Each of the k 4-tuples is laid out sequentially
- *          per-contact.
+ *     contactPositions (list of 3-float lists or tuples): the list of contact
+ *         point positions. 
+ *     frictionCones (list of lists): Each item of this list specifies linear
+ *         inequalities that must be met of the force at the corresponding
+ *         contact point.  The item must have length k*4 where k is an integer,
+ *         and each inequality gives the entries (ax,ay,az,b) of a constraint
+ *         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
+ *         the i'th contact.  Each of the k 4-tuples is laid out sequentially
+ *         per-contact.
  * 
  * 
  * Returns:
@@ -263,9 +263,9 @@ PyObject* support_polygon_2d(double* np_array2,int m,int n);
  *     contacts (list of 4-float lists or tuples): the list of contacts, each
  *         specified as a 4-list or tuple [x,y,theta,k], with:
  * 
- *             * (x,y,z): the contact position
- *             * theta: is the normal angle (in radians, CCW to the x axis)
- *             * k: the coefficient of friction (>= 0)
+ *         - (x,y,z): the contact position
+ *         - theta: is the normal angle (in radians, CCW to the x axis)
+ *         - k: the coefficient of friction (>= 0)
  * 
  *     contactPositions (list of 2-float lists or tuples): the list of contact
  *         point positions. 
@@ -289,11 +289,11 @@ PyObject* support_polygon_2d(const std::vector<std::vector<double> >& contacts,c
  * 
  * Args:
  *
- * - robot: the robot model, posed in its current configuration
- * - contacts: an nx7 array of contact points, each given as 7-lists [x,y,z,nx,ny,nz,kFriction]
- * - links: a list of the links on which those contact points lie
- * - fext: the external force (e.g., gravity)
- * - norm: the torque norm to minimize.  If 0, minimizes the l-infinity norm (default)
+ *     robot (RobotModel): the robot model, posed in its current configuration
+ *     contacts (np.ndarray): an nx7 array of contact points, each given as 7-lists [x,y,z,nx,ny,nz,kFriction]
+ *     links (list of n ints): a list of the links on which those contact points lie
+ *     fext (Vector3): the external force (e.g., gravity)
+ *     norm (float): the torque norm to minimize.  If 0, minimizes the l-infinity norm (default)
  *         If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm (experimental,
  *          may not get good results)
  *
@@ -333,6 +333,7 @@ PyObject* equilibrium_torques(const RobotModel& robot,
  *         * If 0, minimizes the l-infinity norm (default)
  *         * If 1, minimizes the l-1 norm. 
  *         * If 2, minimizes the l-2 norm (experimental, may not get good results).
+ * 
  *     internalTorques (list of robot.numLinks() floats, optional): allows you to
  *         solve for dynamic situations, e.g., with coriolis forces taken into
  *         account.  These are added to the RHS of the torque balance equation. 
@@ -347,7 +348,6 @@ PyObject* equilibrium_torques(const RobotModel& robot,
  * 
  *     pair of lists, optional: a pair (torque,force) if a solution exists,
  *     giving valid joint torques t and frictional contact forces (f1,...,fn). 
- *
  *     None is returned if no solution exists.
  *
  */
