@@ -10,9 +10,38 @@ build-backend = "setuptools.build_meta"
 [project]
 name = 'Klampt'
 version = '0.10.0'
+authors = [
+  {name = "Kris Hauser", email = "hauser.kris@gmail.com"}
+]
+requires-python = ">= 3.5"
+readme = "README.md"
+description="Python API to Klamp't, a package for robot modeling, simulating, planning, optimization, and visualization",
 dependencies = [
     "numpy"
 ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Scientific/Engineering"
+]
+
+[project.scripts]
+klampt_browser='klampt.apps.klampt_browser:main'
+klampt_control='klampt.apps.klampt_control:main'
+klampt_path='klampt.apps.klampt_path:main'
+klampt_sim='klampt.apps.klampt_sim:main'
+klampt_resource='klampt.apps.klampt_resource:main'
+
+[project.urls]
+Homepage = "https://klampt.org"
+Documentation = "https://pythondocs.klampt.org"
+Repository = "https://github.com/krishauser/Klampt.git"
+Issues = "https://github.com/krishauser/Klampt/issues"
 
 [project.optional-dependencies]
 gui = [
