@@ -24,9 +24,9 @@ What are some examples of cool things that Klampt can do?
    as "assets".
 
 #. *Integrated handling of multiple geometry types*.  Klamp't handles triangle
-   meshes, point clouds, geometric primitives, and implicit surfaces.
-   They can be used in collision detection, planning, and even
-   simulation without preprocessing.
+   meshes, point clouds, geometric primitives, implicit surfaces, occupancy grids,
+   and heightmaps.  They can be used in collision detection, planning, and even
+   simulation without additional processing.
 
 #. *Deploy robotics code using Jupyter notebook*.  The robot and world
    can be visualized, modified, and simulated in 3D (using WebGL) inside the
@@ -37,13 +37,17 @@ What are some examples of cool things that Klampt can do?
    all of them*.  Copying Klamp't worlds is very cheap!  Moreover, you can
    save all the simulation trajectories and browse them easily.
 
+For more examples, download [Klampt-examples](https://github.com/krishauser/Klampt-examples)
+and run the [Recipes notebook](https://github.com/krishauser/Klampt-examples/blob/master/Python3/Recipes.ipynb)
+or browse the [demos](https://github.com/krishauser/Klampt-examples/tree/master/Python3/demos).
 
 Should I learn the Python bindings or C++?
 ------------------------------------------
 
 This is mostly a matter of preference. Python tends to be cleaner,
-easier to use, and faster for prototyping. However, the Python bindings
-provide a subset of the C++ functionality.
+easier to use, and faster for prototyping. However, C++ has a couple of
+nice planning and optimization tools associated with it.  Python visualization
+and robot control support is more advanced, though.
 
 Where should I get started learning the Klampt API?
 ---------------------------------------------------
@@ -58,7 +62,8 @@ will help you become familiarized with what is possible.
 
 It is also essential to become comfortable with
 `visualization <Manual-Visualization.html>`__ to be able to visualize whether
-your programs are making sense.
+your programs are making sense.  At the very least, try passing Klampt objects
+to `vis.debug()`.
 
 After this, depending on your interests, most people choose one of three
 routes:
