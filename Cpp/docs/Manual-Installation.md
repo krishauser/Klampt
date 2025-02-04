@@ -2,7 +2,7 @@
 
 ## Python-only install
 
-If you only need the Python API, please consult the [Python API documentation](http://motion.cs.illinois.edu/sofware/klampt/0.8/pyklampt_docs/Manual-Installation.html) for install instructions.
+If you only need the Python API, please consult the [Python API documentation](http://motion.cs.illinois.edu/software/klampt/latest/pyklampt_docs/Manual-Installation/) for install instructions.
 
 
 ## Building from source
