@@ -15,7 +15,7 @@ authors = [
 ]
 requires-python = ">= 3.5"
 readme = "README.md"
-description="Python API to Klamp't, a package for robot modeling, simulating, planning, optimization, and visualization",
+description="Python API to Klamp't, a package for robot modeling, simulating, planning, optimization, and visualization"
 dependencies = [
     "numpy"
 ]
