@@ -5,9 +5,9 @@
 :: (assumes the zip command line tool is available.  See GnuWin32 zip.)
 
 :: configuration variables
-SET klamptversion=0.9.1
+SET klamptversion=0.10.0
 :: dependency libraries may be kept back to a prior version
-SET klamptdepversion=0.9.1
+SET klamptdepversion=0.10.0
 ::    this is used for Python build (VS 2015)
 SET VS90COMNTOOLS=%VS140COMNTOOLS%
 SET PYTHON35_32=D:\Python35-32\python.exe
@@ -26,8 +26,10 @@ SET PYTHON311_32=D:\Python311-32\python.exe
 SET PYTHON311_64=D:\Python311\python.exe
 SET PYTHON312_32=D:\Python312-32\python.exe
 SET PYTHON312_64=D:\Python312\python.exe
-SET PYTHON_32_VERSIONS=%PYTHON35_32% %PYTHON36_32% %PYTHON37_32% %PYTHON38_32% %PYTHON39_32% %PYTHON310_32% %PYTHON311_32% %PYTHON312_32%
-SET PYTHON_64_VERSIONS=%PYTHON35_64% %PYTHON36_64% %PYTHON37_64% %PYTHON38_64% %PYTHON39_64% %PYTHON310_64% %PYTHON311_64% %PYTHON312_64%
+SET PYTHON313_32=D:\Python313-32\python.exe
+SET PYTHON313_64=D:\Python313\python.exe
+SET PYTHON_32_VERSIONS=%PYTHON36_32% %PYTHON37_32% %PYTHON38_32% %PYTHON39_32% %PYTHON310_32% %PYTHON311_32% %PYTHON312_32% %PYTHON313_32%
+SET PYTHON_64_VERSIONS=%PYTHON36_64% %PYTHON37_64% %PYTHON38_64% %PYTHON39_64% %PYTHON310_64% %PYTHON311_64% %PYTHON312_64% %PYTHON313_64%
 
 
 for %%P in (%PYTHON_32_VERSIONS%) do (
@@ -72,9 +74,9 @@ SET errorlevel=0
 copy /y %buildfolder%\Python\setup.py Python\
 pushd Python
 for %%P in (%PYTHON_32_VERSIONS%) do (
-    %%P -m pip wheel --no-deps -w dist
+    %%P -m pip wheel --no-deps -w dist .
     if %errorlevel% neq 0 exit /b %errorlevel%
-    %%P -m pip install
+    %%P -m pip install --no-deps .
     if %errorlevel% neq 0 exit /b %errorlevel%
   )
 popd
@@ -105,9 +107,9 @@ devenv %buildfolder%\Klampt.sln /build Release /project Klampt
 copy /y %buildfolder%\Python\setup.py Python\
 pushd Python
 for %%P in (%PYTHON_64_VERSIONS%) do (
-    %%P -m pip wheel --no-deps -w dist
+    %%P -m pip wheel --no-deps -w dist .
     if %errorlevel% neq 0 exit /b %errorlevel%
-    %%P -m pip install
+    %%P -m pip install --no-deps .
     if %errorlevel% neq 0 exit /b %errorlevel%
   )
 popd
@@ -165,14 +167,14 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 
 :: upload files to motion website
-copy msvc\Klampt-%klamptversion%-win32.msi d:\iml-webpage\software\klampt\0.9\
+copy msvc\Klampt-%klamptversion%-win32.msi d:\iml-webpage\software\klampt\0.10\
 :: Qt5 doesn't have a 64-bit version
-:: copy msvc64/Klampt-%klamptversion%-win64.msi d:\iml-webpage\software\klampt\0.9\
+:: copy msvc64/Klampt-%klamptversion%-win64.msi d:\iml-webpage\software\klampt\0.10\
 if %errorlevel% neq 0 exit /b %errorlevel%
-copy Klampt-%klamptdepversion%.win32-deps-vs2015.zip d:\iml-webpage\software\klampt\0.9\
-copy Klampt-%klamptdepversion%.win32-deps-vs2015d.zip d:\iml-webpage\software\klampt\0.9\
-copy Klampt-%klamptdepversion%.win64-deps-vs2015.zip d:\iml-webpage\software\klampt\0.9\
-copy Klampt-%klamptdepversion%.win64-deps-vs2015d.zip d:\iml-webpage\software\klampt\0.9\
+copy Klampt-%klamptdepversion%.win32-deps-vs2015.zip d:\iml-webpage\software\klampt\0.10\
+copy Klampt-%klamptdepversion%.win32-deps-vs2015d.zip d:\iml-webpage\software\klampt\0.10\
+copy Klampt-%klamptdepversion%.win64-deps-vs2015.zip d:\iml-webpage\software\klampt\0.10\
+copy Klampt-%klamptdepversion%.win64-deps-vs2015d.zip d:\iml-webpage\software\klampt\0.10\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 
