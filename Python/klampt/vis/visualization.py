@@ -2339,6 +2339,9 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
         if pointColor is None:
             pointColor = (color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
         #R3 trajectory
+        if color[3] < 1.0:
+            GL.glEnable(GL.GL_BLEND)
+            GL.glBlendFunc(GL.GL_SRC_ALPHA,GL.GL_ONE_MINUS_SRC_ALPHA)
         GL.glDisable(GL.GL_LIGHTING)
         GL.glColor4f(*color)
         if len(traj) == 1:
@@ -2360,6 +2363,8 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
             for p in traj:
                 GL.glVertex3fv(p)
             GL.glEnd()
+        if color[3] < 1.0:
+            GL.glDisable(GL.GL_BLEND)
     elif isinstance(traj,SE3Trajectory):
         pointTraj = []
         for m in traj.milestones:
