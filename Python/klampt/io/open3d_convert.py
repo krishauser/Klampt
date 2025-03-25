@@ -125,7 +125,6 @@ def from_open3d(obj):
         assert imin.shape == (3,)
         assert imax.shape == (3,)
         assert imin[0] >= 0 and imin[1] >= 0 and imin[2] >= 0
-        print("SIZE",imin,imax)
         mask = np.zeros((imax[0]+1,imax[1]+1,imax[2]+1),dtype=float)
         mask[occupied[:,0],occupied[:,1],occupied[:,2]] = 1.0
         grid.values = mask
