@@ -34,7 +34,7 @@ if sys.platform == 'win32':
     for fn in extra_shared_libraries:
         shutil.copy(os.path.join("""${KLAMPT_DEPENDENCY_LIB_DIR}""",fn),os.path.join(root_py_folder,fn))
 else:
-    extra_compile_args = ['-std=c++11']
+    extra_compile_args = ['-std=c++17']
     
 #Parse libraries
 if sys.platform == 'win32':
