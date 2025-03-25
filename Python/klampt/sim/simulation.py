@@ -60,7 +60,7 @@ class ActuatorEmulator:
     actuators can be simulated here.
 
     The Python controller is assumed to have the structure of
-    :class:`~klampt.control.blocks.robotcontroller.RobotControllerBlock', which
+    :class:`~klampt.control.blocks.robotcontroller.RobotControllerBlock`, which
     outputs a dictionary of commands every control time step.  The emulator
     will read these with the process() method, and perhaps interact with the
     simulator on substep().

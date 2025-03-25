@@ -2734,9 +2734,10 @@ Attributes:
     vertices (numpy array): a n x 3 array of vertices.
     properties (numpy array): a n x k array of vertex properties.  The
        name of each property is either anonymous or retrieved by
-       `getPropertyName`.
- Property names are usually lowercase but follow PCL naming convention, and
-often include:  
+       `getPropertyName`.  
+
+Property names are usually lowercase but follow PCL naming convention, and often
+include:  
 
 *   `normal_x`, `normal_y`, `normal_z`: the outward normal  
 *   `rgb`, `rgba`: integer encoding of RGB (24 bit int, format 0xrrggbb) or RGBA
@@ -5406,8 +5407,9 @@ Attributes:
 
     vertices (numpy array):  an n x 3 array of vertices.
     indices (numpy int32 array): an m x 3 list of triangle vertices, given
-        as indices into the vertices list, i.e., [[a1,b1,c2], [a2,b2,c2], ...]
- Examples::  
+        as indices into the vertices list, i.e., [[a1,b1,c2], [a2,b2,c2], ...]  
+
+Examples::  
 
     m = TriangleMesh()
     m.addVertex((0,0,0))
@@ -6216,22 +6218,22 @@ constraint planes.
 
 Args:  
 
-     contacts (list of 7-float lists or tuples): the list of contacts, each
-         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+    contacts (list of 7-float lists or tuples): the list of contacts, each
+        specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
 
-             * (x,y,z): the contact position
-             * (nx,ny,nz): the contact normal
-             * k: the coefficient of friction (>= 0)
+        - (x,y,z): the contact position
+        - (nx,ny,nz): the contact normal
+        - k: the coefficient of friction (>= 0)
 
-     contactPositions (list of 3-float lists or tuples): the list of contact
-         point positions.
-     frictionCones (list of lists): Each item of this list specifies linear
-         inequalities that must be met of the force at the corresponding
-         contact point.  The item must have length k*4 where k is an integer,
-         and each inequality gives the entries (ax,ay,az,b) of a constraint
-         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
-         the i'th contact.  Each of the k 4-tuples is laid out sequentially
-         per-contact.
+    contactPositions (list of 3-float lists or tuples): the list of contact
+        point positions.
+    frictionCones (list of lists): Each item of this list specifies linear
+        inequalities that must be met of the force at the corresponding
+        contact point.  The item must have length k*4 where k is an integer,
+        and each inequality gives the entries (ax,ay,az,b) of a constraint
+        ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
+        the i'th contact.  Each of the k 4-tuples is laid out sequentially
+        per-contact.
   
 ";
 
@@ -6255,20 +6257,20 @@ constraint planes.
 
 Args:  
 
-     contacts (list of 4-float lists or tuples): the list of contacts, each
-         specified as a 4-list or tuple [x,y,theta,k], with:
+    contacts (list of 4-float lists or tuples): the list of contacts, each
+        specified as a 4-list or tuple [x,y,theta,k], with:
 
-             * (x,y): the contact position
-             * theta: is the normal angle (in radians, CCW to the x axis)
-             * k: the coefficient of friction (>= 0)
+        - (x,y): the contact position
+        - theta: is the normal angle (in radians, CCW to the x axis)
+        - k: the coefficient of friction (>= 0)
 
-     contactPositions (list of 2-float lists or tuples): the list of contact
-         point positions.
-     frictionCones (list of lists): The i'th element in this list has length
-         k*3 (for some integer k), and gives the contact force constraints
-         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
-         at the i'th contact. Each of the k 3-tuples is laid out sequentially
-         per-contact.
+    contactPositions (list of 2-float lists or tuples): the list of contact
+        point positions.
+    frictionCones (list of lists): The i'th element in this list has length
+        k*3 (for some integer k), and gives the contact force constraints
+        (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
+        at the i'th contact. Each of the k 3-tuples is laid out sequentially
+        per-contact.
   
 ";
 
@@ -6295,26 +6297,26 @@ constraint planes.
 
 Args:  
 
-     contacts (list of 7-float lists or tuples): the list of contacts, each
-         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+    contacts (list of 7-float lists or tuples): the list of contacts, each
+        specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
 
-             * (x,y,z): the contact position
-             * (nx,ny,nz): the contact normal
-             * k: the coefficient of friction (>= 0)
+        - (x,y,z): the contact position
+        - (nx,ny,nz): the contact normal
+        - k: the coefficient of friction (>= 0)
 
-     contactPositions (list of 3-float lists or tuples): the list of contact
-         point positions.
-     frictionCones (list of lists): Each item of this list specifies linear
-         inequalities that must be met of the force at the corresponding
-         contact point.  The item must have length k*4 where k is an integer,
-         and each inequality gives the entries (ax,ay,az,b) of a constraint
-         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
-         the i'th contact.  Each of the k 4-tuples is laid out sequentially
-         per-contact.
-     fext (3-tuple or list): the external force vector.
-     com (3-tuple or list, or None): the center of mass coordinates.  If
-         None, assumes that you want to test whether ANY COM may be in
-         equilibrium for the given contacts.  
+    contactPositions (list of 3-float lists or tuples): the list of contact
+        point positions.
+    frictionCones (list of lists): Each item of this list specifies linear
+        inequalities that must be met of the force at the corresponding
+        contact point.  The item must have length k*4 where k is an integer,
+        and each inequality gives the entries (ax,ay,az,b) of a constraint
+        ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
+        the i'th contact.  Each of the k 4-tuples is laid out sequentially
+        per-contact.
+    fext (3-tuple or list): the external force vector.
+    com (3-tuple or list, or None): the center of mass coordinates.  If
+        None, assumes that you want to test whether ANY COM may be in
+        equilibrium for the given contacts.  
 
 Returns:  
 
@@ -6350,24 +6352,24 @@ constraint planes.
 
 Args:  
 
-     contacts (list of 4-float lists or tuples): the list of contacts, each
-         specified as a 4-list or tuple [x,y,theta,k], with:
+    contacts (list of 4-float lists or tuples): the list of contacts, each
+        specified as a 4-list or tuple [x,y,theta,k], with:
 
-             * (x,y,z): the contact position
-             * theta: is the normal angle (in radians, CCW to the x axis)
-             * k: the coefficient of friction (>= 0)
+        - (x,y,z): the contact position
+        - theta: is the normal angle (in radians, CCW to the x axis)
+        - k: the coefficient of friction (>= 0)
 
-     contactPositions (list of 2-float lists or tuples): the list of contact
-         point positions.
-     frictionCones (list of lists): The i'th element in this list has length
-         k*3 (for some integer k), and gives the contact force constraints
-         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
-         at the i'th contact. Each of the k 3-tuples is laid out sequentially
-         per-contact.
-     fext (2-tuple or list): the external force vector.
-     com (2-tuple or list, or None): the center of mass coordinates.  If None,
-         assumes that you want to test whether ANY COM may be in equilibrium
-         for the given contacts.  
+    contactPositions (list of 2-float lists or tuples): the list of contact
+        point positions.
+    frictionCones (list of lists): The i'th element in this list has length
+        k*3 (for some integer k), and gives the contact force constraints
+        (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
+        at the i'th contact. Each of the k 3-tuples is laid out sequentially
+        per-contact.
+    fext (2-tuple or list): the external force vector.
+    com (2-tuple or list, or None): the center of mass coordinates.  If None,
+        assumes that you want to test whether ANY COM may be in equilibrium
+        for the given contacts.  
 
 Returns:  
 
@@ -6403,22 +6405,22 @@ allows more control over the constraint planes.
 
 Args:  
 
-     contacts (list of 7-float lists or tuples): the list of contacts, each
-         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+    contacts (list of 7-float lists or tuples): the list of contacts, each
+        specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
 
-             * (x,y,z): the contact position
-             * (nx,ny,nz): the contact normal
-             * k: the coefficient of friction (>= 0)
+        - (x,y,z): the contact position
+        - (nx,ny,nz): the contact normal
+        - k: the coefficient of friction (>= 0)
 
-     contactPositions (list of 3-float lists or tuples): the list of contact
-         point positions.
-     frictionCones (list of lists): Each item of this list specifies linear
-         inequalities that must be met of the force at the corresponding
-         contact point.  The item must have length k*4 where k is an integer,
-         and each inequality gives the entries (ax,ay,az,b) of a constraint
-         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
-         the i'th contact.  Each of the k 4-tuples is laid out sequentially
-         per-contact.  
+    contactPositions (list of 3-float lists or tuples): the list of contact
+        point positions.
+    frictionCones (list of lists): Each item of this list specifies linear
+        inequalities that must be met of the force at the corresponding
+        contact point.  The item must have length k*4 where k is an integer,
+        and each inequality gives the entries (ax,ay,az,b) of a constraint
+        ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
+        the i'th contact.  Each of the k 4-tuples is laid out sequentially
+        per-contact.  
 
 Returns:  
 
@@ -6460,9 +6462,9 @@ Args:
     contacts (list of 4-float lists or tuples): the list of contacts, each
         specified as a 4-list or tuple [x,y,theta,k], with:
 
-            * (x,y,z): the contact position
-            * theta: is the normal angle (in radians, CCW to the x axis)
-            * k: the coefficient of friction (>= 0)
+        - (x,y,z): the contact position
+        - theta: is the normal angle (in radians, CCW to the x axis)
+        - k: the coefficient of friction (>= 0)
 
     contactPositions (list of 2-float lists or tuples): the list of contact
         point positions.
@@ -6485,14 +6487,17 @@ Solves for the torques / forces that keep the robot balanced against gravity.
 
 Args:  
 
-*   robot: the robot model, posed in its current configuration  
-*   contacts: an nx7 array of contact points, each given as 7-lists
-    [x,y,z,nx,ny,nz,kFriction]  
-*   links: a list of the links on which those contact points lie  
-*   fext: the external force (e.g., gravity)  
-*   norm: the torque norm to minimize. If 0, minimizes the l-infinity norm
-    (default) If 1, minimizes the l-1 norm. If 2, minimizes the l-2 norm
-    (experimental, may not get good results)  
+    robot (RobotModel): the robot model, posed in its current configuration
+    contacts (np.ndarray): an nx7 array of contact points, each given as 7-lists
+[x,y,z,nx,ny,nz,kFriction]
+    links (list of n ints): a list of the links on which those contact points
+lie
+    fext (Vector3): the external force (e.g., gravity)
+    norm (float): the torque norm to minimize.  If 0, minimizes the l-infinity
+norm (default)
+        If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm
+(experimental,
+         may not get good results)  
 
 Returns:  
 
@@ -6528,6 +6533,7 @@ Args:
         * If 0, minimizes the l-infinity norm (default)
         * If 1, minimizes the l-1 norm.
         * If 2, minimizes the l-2 norm (experimental, may not get good results).
+
     internalTorques (list of robot.numLinks() floats, optional): allows you to
         solve for dynamic situations, e.g., with coriolis forces taken into
         account.  These are added to the RHS of the torque balance equation.
@@ -6541,7 +6547,6 @@ Returns:
 
     pair of lists, optional: a pair (torque,force) if a solution exists,
     giving valid joint torques t and frictional contact forces (f1,...,fn).
-
     None is returned if no solution exists.
   
 ";

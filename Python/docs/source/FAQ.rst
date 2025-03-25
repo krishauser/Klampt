@@ -37,9 +37,9 @@ What are some examples of cool things that Klampt can do?
    all of them*.  Copying Klamp't worlds is very cheap!  Moreover, you can
    save all the simulation trajectories and browse them easily.
 
-For more examples, download [Klampt-examples](https://github.com/krishauser/Klampt-examples)
-and run the [Recipes notebook](https://github.com/krishauser/Klampt-examples/blob/master/Python3/Recipes.ipynb)
-or browse the [demos](https://github.com/krishauser/Klampt-examples/tree/master/Python3/demos).
+For more examples, download `Klampt-examples <https://github.com/krishauser/Klampt-examples>`__
+and run the `Recipes notebook <https://github.com/krishauser/Klampt-examples/blob/master/Python3/Recipes.ipynb>`__
+or browse the `demos <https://github.com/krishauser/Klampt-examples/tree/master/Python3/demos>`__.
 
 Should I learn the Python bindings or C++?
 ------------------------------------------

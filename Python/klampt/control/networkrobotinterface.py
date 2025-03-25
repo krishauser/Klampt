@@ -24,9 +24,12 @@ import warnings
 
 
 class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
-    """Base class for a robot interface that communicates with a server.
-    begin/endStep() will need to be called repeatedly, and on endStep() all
-    the communication is performed.
+    """Base class for a robot interface that communicates with a server.  Users
+    will not use this class directly.
+
+    For subclass implementers: begin/endStep() will need to be called repeatedly.
+    On endStep() all the communication is performed.  Implement `connect()`
+    `disconnect()`, `getInitialData()` and `updateSettingsAndCommands()`, 
     """
     def __init__(self):
         _RobotInterfaceStatefulBase.__init__(self)
@@ -134,7 +137,10 @@ class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
 
 class ServerRobotInterfaceBase(_RobotInterfaceStatefulBase):
     """Base class for an asynchronous robot interface that serves
-    clients.  Subclass will need to start the controller thread, and
+    clients.  End users will not use this class, but implementers will
+    need to subclass it.
+    
+    Subclass implementers will need to start the controller thread, and
     then start a thread that receives RPC calls and call
     getInitialData_impl and updateSettingsAndCommands_impl in response.
 
@@ -142,7 +148,7 @@ class ServerRobotInterfaceBase(_RobotInterfaceStatefulBase):
     the appropriate protocols, e.g., :class:`XMLRPCRobotInterfaceServer` /
     :class:`XMLRPCRobotInterfaceClient`
 
-    Usage (simplified, doesn't do error handling)::
+    Implementation sketch (omitting error handling)::
 
         #TODO: define MyServer as subclass of ServerRobotInterfaceBase
 
@@ -260,7 +266,13 @@ class ServerRobotInterfaceBase(_RobotInterfaceStatefulBase):
 class XMLRPCRobotInterfaceServer(ServerRobotInterfaceBase):
     """A XMLRPC-based server for a RIL robot controller.
     
-Usage
+    Usage::
+
+        raw_interface = MyRobotsInterface(...)
+        interface = RobotInterfaceCompleter(raw_interface)
+        server = XMLRPCRobotInterfaceServer(interface, 'localhost')
+        server.serve()  #will not terminate until Ctrl+C is pressed
+
 
     Args:
         interface (RobotInterfaceBase): the interface to serve
@@ -324,7 +336,20 @@ Usage
 
 
 class XMLRPCRobotInterfaceClient(ClientRobotInterfaceBase):
-    """An XMLRPC-based client that connects to a RobotInterfaceServer.
+    """An XMLRPC-based client that connects to an XMLRPCRobotInterfaceServer.
+
+    No need to call connect, disconnect, etc.  Once this is initialized, just
+    treat it like a normal RIL interface.
+
+    Usage::
+
+        interface = XMLRPCRobotInterfaceClient()
+        if not interface.initialize():
+            print("Couldn't connect to localhost:7881")
+            exit(1)
+        #now can treat like a standard RobotInterfaceBase
+        qsns = interface.sensedPosition()
+        vsns = interface.sensedVelocity()
     
     Args:
         addr (str): the IP address of the server, including port. 
