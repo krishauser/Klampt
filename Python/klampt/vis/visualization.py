@@ -3097,7 +3097,7 @@ class VisAppearance:
                         def drawRaw():
                             gldraw.xform_widget(se3.identity(),self.attributes["length"],self.attributes["width"])
                         t1 = se3.mul(link.getTransform(),(so3.identity(),lp))
-                        t2 = (R,wp) if dest==None else se3.mul(dest.getTransform(),(R,wp))
+                        t2 = (R,wp) if dest is None else se3.mul(dest.getTransform(),(R,wp))
                         self.displayCache[0].draw(drawRaw,transform=t1)
                         self.displayCache[1].draw(drawRaw,transform=t2)
                         vlen = d*0.1
@@ -4022,7 +4022,7 @@ class VisualizationScene:
     def _setAttribute(self,item,attr,value):
         """Internal use only"""
         item.attributes[attr] = value
-        if value==None:
+        if value is None:
             del item.attributes[attr]
         if attr=='color':
             item.useDefaultAppearance = False
