@@ -4,7 +4,7 @@
 set -e  #error if any step fails
 
 yum clean all
-yum install -y mesa-libGLU-devel log4cxx log4cxx-devel git
+yum install -y mesa-libGLU-devel git
 pip install cmake
 
 #no glpk available on aarch64
