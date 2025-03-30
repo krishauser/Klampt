@@ -596,8 +596,11 @@ class Simulator
   std::string initialState;
 };
 
-/// Sets the random seed used by the configuration sampler
+/// Sets the random seed used by the configuration sampler and motion planners
 void set_random_seed(int seed);
+
+/// Sets the global log level for C++ code.  level can be "DEBUG", "INFO", "WARN", "ERROR", or "FATAL"
+void set_log_level(const char* level); 
 
 ///Cleans up all internal data structures.  Useful for multithreaded programs to make sure ODE errors
 ///aren't thrown on exit.  This is called for you on exit when importing the Python klampt module.

@@ -249,6 +249,11 @@ void destroy()
   Klampt::ManagedGeometry::manager.Clear();
 }
 
+void set_log_level(const char* level)
+{
+  KrisLibrary::setLogLevel(level);
+}
+
 void set_random_seed(int seed)
 {
   Math::Srand(seed);
