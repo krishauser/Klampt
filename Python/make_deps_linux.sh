@@ -4,7 +4,7 @@
 set -e  #error if any step fails
 
 yum clean all
-yum install -y glpk glpk-devel mesa-libGLU-devel log4cxx.x86_64 log4cxx-devel.x86_64 git  
+yum install -y glpk glpk-devel mesa-libGLU-devel log4cxx-devel.x86_64 git  
 pip install cmake
 
 #git clone https://github.com/krishauser/Klampt.git
