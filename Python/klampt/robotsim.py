@@ -3164,7 +3164,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.Geometry3D` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.PointCloud` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive`, optional): 
+            arg2 (:class:`~klampt.OccupancyGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive` or :obj:`Heightmap` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -7103,7 +7103,7 @@ class SensorModel(object):
 
 
         Args:
-            link (:class:`~klampt.RobotModelLink` or int): 
+            link (int or :class:`~klampt.RobotModelLink`): 
         """
         return _robotsim.SensorModel__setLink(self, *args)
 
@@ -7887,7 +7887,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -8737,7 +8737,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -10179,6 +10179,10 @@ def set_random_seed(seed: int) -> None:
     """
     return _robotsim.set_random_seed(seed)
 
+def set_log_level(level: str) -> None:
+    r"""set_log_level(char const * level)"""
+    return _robotsim.set_log_level(level)
+
 def destroy() -> None:
     r"""
     destroys internal data structures  
@@ -10190,15 +10194,17 @@ def subscribe_to_stream(*args) -> bool:
     r"""
     Subscribes a Geometry3D to a stream.  
 
-    Only ROS point clouds (PointCloud2) are supported for now. Note that you 
-    can also call ``Geometry3D.loadFile("ros://[ROS_TOPIC]")`` or
-    ``Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")`` to accomplish the 
-    same thing.  
 
-    TODO: It has not yet been determined whether this interferes with Rospy, 
-    i.e., klampt.io.ros.  
+    Only ROS point clouds (PointCloud2) are supported for now. Note that you can
+    also call `Geometry3D.loadFile("ros://[ROS_TOPIC]")` or
+    `Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")` to accomplish the same
+    thing.  
+
+    TODO: It has not yet been determined whether this interferes with Rospy, i.e.,
+    klampt.io.ros.  
 
     Args:  
+
         g (Geometry3D): the geometry that will be updated
         protocol (str): only "ros" accepted for now.
         name (str): the name of the stream, i.e., ROS topic.
@@ -10207,6 +10213,7 @@ def subscribe_to_stream(*args) -> bool:
             automatically.  
 
     Returns:  
+
         bool: True if successful.
     """
     return _robotsim.subscribe_to_stream(*args)
@@ -10370,9 +10377,11 @@ def com_equilibrium(*args) -> object:
 
         contacts (list of 7-float lists or tuples): the list of contacts, each
             specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+
             - (x,y,z): the contact position
             - (nx,ny,nz): the contact normal
             - k: the coefficient of friction (>= 0)
+
         contactPositions (list of 3-float lists or tuples): the list of contact
             point positions.
         frictionCones (list of lists): Each item of this list specifies linear
