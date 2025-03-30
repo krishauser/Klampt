@@ -10753,6 +10753,10 @@ def set_random_seed(seed: "int") -> "void":
     """
     return _robotsim.set_random_seed(seed)
 
+def set_log_level(level: "char const *") -> "void":
+    r"""set_log_level(char const * level)"""
+    return _robotsim.set_log_level(level)
+
 def destroy() -> "void":
     r"""
     destroy()
