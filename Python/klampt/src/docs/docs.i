@@ -6114,7 +6114,13 @@ Exports the WorldModel to a JSON string ready for use in Three.js.
 
 %feature("docstring") Klampt::set_random_seed "
 
-Sets the random seed used by the configuration sampler.  
+Sets the random seed used by the configuration sampler and motion planners.  
+";
+
+%feature("docstring") Klampt::set_log_level "
+
+Sets the global log level for C++ code. level can be \"DEBUG\", \"INFO\",
+\"WARN\", \"ERROR\", or \"FATAL\".  
 ";
 
 %feature("docstring") Klampt::destroy "
