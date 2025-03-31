@@ -25,7 +25,7 @@ popd
 make dep-tinyxml && make dep-ode
 
 pushd KrisLibrary
-cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF  && make -j
+cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF  && make
 popd
 
 popd
