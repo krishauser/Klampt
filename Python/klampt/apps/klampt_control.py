@@ -397,7 +397,10 @@ class ControllerGUI(QtWidgets.QMainWindow):
         #joint control panel
         self.panel.configClipboardButton.clicked.connect(self.onClipConfig)
         self.jointScrollAreaLayout = self.panel.jointScrollAreaLayout
-        self.jointScrollAreaLayout.setAlignment(QtCore.Qt.AlignTop)
+        if PYQT_VERSION > 5:
+            self.jointScrollAreaLayout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        else:
+            self.jointScrollAreaLayout.setAlignment(QtCore.Qt.AlignTop)
         self.jointForms = []
         self.panel.moveToPositionButton.clicked.connect(self.onMoveToPosition)
         self.panel.setPositionButton.clicked.connect(self.onSetPosition)
@@ -1389,9 +1392,9 @@ def main():
         gui = ControllerGUI(gl_backend,info,controller,g_plugin)
         g_plugin.gui = weakref.proxy(gui)
         g_gui = gui
-        dw = QtWidgets.QDesktopWidget()
-        x=int(dw.width()*0.8)
-        y=int(dw.height()*0.8)
+        screen_geom = QtGui.QGuiApplication.primaryScreen().availableGeometry()
+        x=int(screen_geom.width()*0.8)
+        y=int(screen_geom.height()*0.8)
         gui.resize(x,y)
         return gui
     vis.customUI(makefunc)
