@@ -3158,6 +3158,10 @@ class Geometry3D(object):
     :meth:`convert` method. This can also be used to remesh TriangleMesh,
     PointCloud, ImplicitSurface, OccupancyGrid, and Heightmap objects.  
 
+    For more information, please consult the `geometry manual
+    <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
+    Geometry.md>`__ .  
+
     C++ includes: geometry.h
 
     """
@@ -3590,12 +3594,21 @@ class Geometry3D(object):
         interpretation of param depends on the type of conversion, with 0 being a
         reasonable default.  
 
-        Available conversions are:  
+        Interpretations of the parameter are given as follows:  
 
+        *   GeometricPrimitive -> anything. param determines the desired resolution,
+            with default constructing a 20x20x20 grid.  
+        *   ConvexHull -> TriangleMesh. param ignored.  
+        *   ConvexHull -> PointCloud. param is the desired dispersion of the points.
+            Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
+        *   ConvexHull -> ImplicitSurface. param is the grid resolution, by default
+            max(bmax-bmin)/20.  
+        *   ConvexHull -> OccupancyGrid. param is the grid resolution, by default
+            max(bmax-bmin)/20.  
         *   TriangleMesh -> PointCloud. param is the desired dispersion of the points,
             by default set to the average triangle diameter. At least all of the mesh's
             vertices will be returned.  
-        *   TriangleMesh -> ImplicitSurface. Converted using the fast marching method
+        *   TriangleMesh -> ImplicitSurface. Converted using the fast marching method,
             with good results only if the mesh is watertight. param is the grid
             resolution, by default set to the average triangle diameter.  
         *   TriangleMesh -> OccupancyGrid. Converted using rasterization. param is the
@@ -3603,26 +3616,40 @@ class Geometry3D(object):
         *   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
             Otherwise, uses convex decomposition with the HACD library.  
         *   TriangleMesh -> Heightmap. Converted using rasterization. param is the grid
-            resolution, by default set to max mesh dimension / 256.  
+            resolution, by default set to max(bmax-bmin) / 256.  
         *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
             param is the threshold for splitting triangles by depth discontinuity. param
             is by default infinity.  
         *   PointCloud -> OccupancyGrid. param is the grid resolution, by default some
             reasonable number.  
         *   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  
-        *   PointCloud -> Heightmap. param is the grid resolution, by default set to max
-            point cloud dimension / 256.  
-        *   GeometricPrimitive -> anything. param determines the desired resolution.  
+        *   PointCloud -> Heightmap. param is the grid resolution, by default set to
+            max(bmax-bmin) / 256.  
+        *   ImplicitSurface -> ConvexHull. Equivalent to ImplicitSurface -> TriangleMesh
+            -> ConvexHull.  
         *   ImplicitSurface -> TriangleMesh. param determines the level set for the
             marching cubes algorithm.  
         *   ImplicitSurface -> PointCloud. param determines the level set.  
-        *   ImplicitSurface -> Heightmap.  
+        *   ImplicitSurface -> OccupancyGrid. param ignored, result matches this
+            resolution.  
+        *   ImplicitSurface -> Heightmap. param ignored, result matches this resolution.  
+        *   OccupancyGrid -> ConvexHull. Equivalent to OccupancyGrid -> TriangleMesh ->
+            ConvexHull.  
         *   OccupancyGrid -> TriangleMesh. Creates a mesh around each block.  
-        *   OccupancyGrid -> PointCloud. Outputs a point for each block.  
-        *   OccupancyGrid -> Heightmap.  
-        *   ConvexHull -> TriangleMesh.  
-        *   ConvexHull -> PointCloud. param is the desired dispersion of the points.
-            Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
+        *   OccupancyGrid -> PointCloud. Outputs a point at the center of each block.  
+        *   OccupancyGrid -> Heightmap. param ignored, result matches this resolution.  
+        *   Heightmap -> ConvexHull. Equivalent to Heightmap -> TriangleMesh ->
+            ConvexHull.  
+        *   Heightmap -> TriangleMesh. param ignored, result matches this resolution.  
+        *   Heightmap -> PointCloud. param ignored, result matches this resolution.  
+        *   Heightmap -> ImplicitSurface. param is the resolution in the z direction, by
+            default set to heightmap range / 128.  
+        *   Heightmap -> OccupancyGrid. param is the resolution in the z direction, by
+            default set to heightmap range / 128.  
+
+        Available conversions are listed in the `geometry manual
+        <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
+        Geometry.md>`__ .  
 
         """
         return _robotsim.Geometry3D_convert(self, type, param)
