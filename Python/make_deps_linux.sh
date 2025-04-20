@@ -12,7 +12,7 @@ pip install cmake
 #pushd Klampt/Cpp/Dependencies
 pushd Cpp/Dependencies
 make unpack-deps
-git clone https://github.com/assimp/assimp.git
+git clone  --branch v5.2.5 --depth 1 https://github.com/assimp/assimp.git
 
 pushd assimp
 cmake -DASSIMP_BUILD_TESTS=OFF . && make -j && make install
