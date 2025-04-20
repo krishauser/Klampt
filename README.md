@@ -95,9 +95,10 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
-**0.10.1** (3/30/2025)
+**0.10.1** (4/20/2025)
 -   C++ API: Can use `KrisLibrary::setLogLevel()` function to control logging verbosity, with or without use of LOG4CXX library.
 -   Python API: Added `klampt.set_log_level()` function to control logging verbosity, with or without use of LOG4CXX library.
+-   Pip install version `0.10.1.post1` tags a specific version of Assimp to avoid Assimp's recent mesh import bug.
 
 **0.10.0** (1/20/2025)
 -   New geometry types `OccupancyGrid` and `Heightmap`.  The `VolumeGrid` data structure is deprecated but aliases to `ImplicitSurface`.  `Heightmap` can represent orthographic heightmaps (e.g., elevation maps) as well as depth maps coming from RGB-D cameras. Many more [proximity queries](blob/master/Cpp/docs/Manual-Geometry.md) are implemented / accelerated.
