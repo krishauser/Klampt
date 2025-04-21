@@ -356,15 +356,25 @@ inline Klampt::PolynomialMotionQueue* GetMotionQueue(Klampt::RobotController* co
 
 void UpdateRobotSensorsProperty(int world,int robot)
 {
+  Assert(world >= 0 && world < (int)worlds.size());
   shared_ptr<WorldData> worldData = worlds[world];
   if(robot >= (int)worldData->robotSensors.size()) return;  //no change
   Klampt::RobotSensors* sensors = worldData->robotSensors[robot].get();
   Assert(sensors != NULL);
   TiXmlDocument doc;
-  sensors->SaveSettings(doc.RootElement());
+  auto root = new TiXmlElement( "sensors" ); 
+  sensors->SaveSettings(root);
+  doc.LinkEndChild(root);
   stringstream ss;
   ss<<doc;
-  worldData->world->robots[robot]->properties.set("sensors",ss.str());
+  auto s = ss.str();
+  ReplaceAll(s,"&#x09;","\t");
+  ReplaceAll(s,"&#x0A;","\t");
+  ReplaceAll(s,"&amp;","&");
+  if(count(s.begin(),s.end(),'#') >= 1) {
+    printf("WARNING: XML string contains #, which may cause problems in parsing\n");
+  }
+  worldData->world->robots[robot]->properties.set("sensors",s);
 }
 
 
