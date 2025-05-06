@@ -389,8 +389,14 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
         if(appearance.use_count() > 1)   //don't share with prior transformed geometry or the un-transformed geometry
           appearance = make_shared<GLDraw::GeometryAppearance>(*appearance);
         //don't need to completely reset apperance, just the geometry pointers
-        appearance->geom = geometry.get();
-        appearance->collisionGeom = geometry.get();
+        if(geometry->type == Geometry::AnyGeometry3D::Type::Group) {
+          appearance->Set(*geometry); //NOTE: can't just copy pointers for groups because the sub-geometries are different
+          appearance->RefreshGeometry();
+        }
+        else {
+          appearance->geom = geometry.get();
+          appearance->collisionGeom = geometry.get();
+        }
         cacheKey = newCacheKey;
 #if CACHE_DEBUG
         LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: transformed version of "<<cacheKey<<" was in cache.");
