@@ -60,19 +60,19 @@ Geometric operation support
 
 Not all representations support all operations, and some representations yield much better performance
 (speed and accuracy) than others. To get optimal performance from your program, you should learn which
-`operations are suited for which representations<https://motion.cs.illinois.edu/RoboticSystems/Geometry.html>`_. 
+`operations are suited for which representations <https://motion.cs.illinois.edu/RoboticSystems/Geometry.html>`_. 
 
 To get a better sense of how operations affect the geometries, the ``geometrytest.py`` test program in
 ``Klampt-examples`` can be used.  This allows you to convert any two geometries into any supported format
 and perform various queries.  Use the Actions menu to convert and switch between proximity query modes. 
-Klampt-examples and `geometrytest.py<https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/geometry/geometrytest.py>`_ on Github.
+Klampt-examples and `geometrytest.py <https://github.com/krishauser/Klampt-examples/blob/master/Python3/testing/geometry/geometrytest.py>`_ on Github.
 
 |geometrytest.py|
 
 .. |geometrytest.py| image:: _static/images/geometrytest.png
 
 The rest of this section provides detailed information about Klampt's support for various geometry operations.  (Here, 🕑 means support is on the TODO list for the near future.)
-More details and experimental data can be found in the `C++ geometry manual<https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-Geometry.md>`_.
+More details and experimental data can be found in the `C++ geometry manual <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-Geometry.md>`_.
 
 
 Loading / saving
@@ -136,7 +136,7 @@ Many conversions (mesh -> convex polytope, implicit surface, occupancy grid, hei
 
 |Implicit surface conversion image|
 
-.. |Implicit surface conversion image| image::images/conversion_resolution.png
+.. |Implicit surface conversion image| image::_static/images/conversion_resolution.png
 
 If in doubt, you should visualize the result (in Python, you can simply run ``from klampt import vis; vis.debug(geom)``).
 

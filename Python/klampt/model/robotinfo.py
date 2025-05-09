@@ -206,34 +206,64 @@ class RobotInfo:
         #apply calibration
         for (k,file) in self.calibrationFiles.items():
             if k == 'kinematics':
-                def docalib(fn):
-                    try:
-                        with open(fn,'r') as f:
-                            jsonobj = json.load(f)
-                    except IOError:
-                        return False
-                    for k,items in jsonobj.items():
-                        link = self.robotModel.link(k) 
-                        if link.index < 0:
-                            raise ValueError("Calibration file refers to invalid link {}".format(k))
-                        for key,value in items.items():
-                            if key == 'axis':
-                                link.setAxis(value)
-                            elif key == 'Tparent':
-                                link.setParentTransform(value)
-                            else:
-                                raise KeyError("Invalid calibration item {}".format(key))
-                    return True
-                if not self._tryload(file,docalib):
-                    raise IOError("Unable to load kinematics calibration from file "+file)
+                self.configureKinematics(file)
             else:
-                s = self.robotModel.sensor(k)
+                try:
+                    s = self.robotModel.sensor(k)
+                except KeyError:
+                    warnings.warn("Calibration item {} doesn't refer to a sensor or kinematics".format(k))
+                    continue
                 if s.getName():
                     self.configureSensor(s)
                 else:
                     warnings.warn("Calibration item {} doesn't refer to a sensor or kinematics".format(k))
         return self.robotModel
     
+    def configureKinematics(self, file : str):
+        """Loads a json calibration file from the given file name and
+        configures the kinematic model."""
+        def docalib(fn):
+            try:
+                with open(fn,'r') as f:
+                    jsonobj = json.load(f)
+            except IOError:
+                return False
+            if jsonobj.get('type',None) != 'KinematicCalibration':
+                print("Warning, kinematic calibration file does not have 'type':'KinematicCalibration' tag")
+            for k,items in jsonobj.items():
+                link = self.robotModel.link(k) 
+                if link.index < 0:
+                    raise ValueError("Calibration file refers to invalid link {}".format(k))
+                for key,value in items.items():
+                    if key == 'axis':
+                        link.setAxis(value)
+                    elif key == 'Tparent':
+                        link.setParentTransform(*value)
+                    else:
+                        raise KeyError("Invalid calibration item {}".format(key))
+            return True
+        if not self._tryload(file,docalib):
+            raise IOError("Unable to load kinematics calibration from file "+file)
+    
+    def saveKinematicCalibration(self, file : str, update_calibration_attr = True):
+        """Saves the kinematic calibration to a file"""
+        if self.robotModel is None:
+            raise RuntimeError("No robot model available")
+        jsonobj = {'type':'KinematicCalibration'}
+        for l in self.robotModel.links:
+            jsonobj[l.name] = {'axis':l.getAxis(),'Tparent':l.getParentTransform()}
+        if file.endswith('yaml'):
+            import yaml
+            with open(file,'w') as f:
+                yaml.dump(jsonobj,f)
+        else:
+            if not file.endswith('json'):
+                warnings.warn("Calibration file should be .json or .yaml, using json")
+            with open(file,'w') as f:
+                json.dump(jsonobj,f)
+        if update_calibration_attr:
+            self.calibrationFiles['kinematics'] = file
+
     def configureSensor(self,sensor : Union[int,str,SensorModel]) -> SensorModel:
         """Configures a sensor with a calibration, if present.
 
@@ -273,6 +303,34 @@ class RobotInfo:
                     cast_value = str(value)
                 sensor.setSetting(k,cast_value)
         return sensor
+
+    def saveSensorCalibration(self,sensor : Union[int,str,SensorModel],file : str, update_calibration_attr = True):
+        """Configures a sensor with a calibration, if present.
+
+        The calibration file can be a JSON, YAML, or numpy file.  If the sensor
+        is a camera, the calibration file can be an intrinsics calibration.
+        """
+        if not isinstance(sensor,SensorModel):
+            return self.saveSensorCalibration(self.klamptModel().sensor(sensor),file,update_calibration_attr)
+        jsonobj = {'type':'SensorCalibration'}
+        for s in sensor.settings():
+            val = sensor.getSetting(s)
+            #parse the string
+            if ' ' in val:
+                import klampt.io.loader
+                jsonobj[s] = klampt.io.loader.read('Config',val)
+        if file.endswith('yaml'):
+            import yaml
+            with open(file,'w') as f:
+                yaml.dump(jsonobj,f)
+        else:
+            if not file.endswith('json'):
+                warnings.warn("Calibration file should be .json or .yaml, using json")
+            with open(file,'w') as f:
+                json.dump(jsonobj,f)
+        if update_calibration_attr:
+            self.calibrationFiles[sensor.name] = file
+
 
     def controller(self) -> RobotInterfaceBase:
         """Returns a Robot Interface Layer object configured for use on the
@@ -521,8 +579,15 @@ class RobotInfo:
         """Loads the info from a JSON file. f is a file name or file object."""
         from ..io import loader
         if isinstance(f,str):
-            with open(f,'r') as file:
-                jsonobj = json.load(file)
+            if f.endswith('.yaml'):
+                import yaml
+                with open(f,'r') as file:
+                    jsonobj = yaml.load(file,Loader=yaml.SafeLoader)
+            else:
+                if not f.endswith('.json'):
+                    warnings.warn("RobotInfo file should be .json or .yaml, using json")
+                with open(f,'r') as file:
+                    jsonobj = json.load(file)
         else:
             jsonobj = json.load(f)
         self.endEffectors = dict()
@@ -572,8 +637,15 @@ class RobotInfo:
         if len(grippers) > 0:
             jsonobj['grippers'] = grippers
         if isinstance(f,str):
-            with open(f,'w') as file:
-                json.dump(jsonobj,file)
+            if f.endswith('.yaml'):
+                import yaml
+                with open(f,'w') as file:
+                    yaml.dump(jsonobj,file)
+            else:
+                if not f.endswith('.json'):
+                    warnings.warn("RobotInfo file should be .json or .yaml, using json")
+                with open(f,'w') as file:
+                    json.dump(jsonobj,file)
         else:
             json.dump(jsonobj,f)
 

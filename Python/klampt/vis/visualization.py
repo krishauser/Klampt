@@ -2339,6 +2339,9 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
         if pointColor is None:
             pointColor = (color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
         #R3 trajectory
+        if color[3] < 1.0:
+            GL.glEnable(GL.GL_BLEND)
+            GL.glBlendFunc(GL.GL_SRC_ALPHA,GL.GL_ONE_MINUS_SRC_ALPHA)
         GL.glDisable(GL.GL_LIGHTING)
         GL.glColor4f(*color)
         if len(traj) == 1:
@@ -2360,6 +2363,8 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
             for p in traj:
                 GL.glVertex3fv(p)
             GL.glEnd()
+        if color[3] < 1.0:
+            GL.glDisable(GL.GL_BLEND)
     elif isinstance(traj,SE3Trajectory):
         pointTraj = []
         for m in traj.milestones:
@@ -3092,7 +3097,7 @@ class VisAppearance:
                         def drawRaw():
                             gldraw.xform_widget(se3.identity(),self.attributes["length"],self.attributes["width"])
                         t1 = se3.mul(link.getTransform(),(so3.identity(),lp))
-                        t2 = (R,wp) if dest==None else se3.mul(dest.getTransform(),(R,wp))
+                        t2 = (R,wp) if dest is None else se3.mul(dest.getTransform(),(R,wp))
                         self.displayCache[0].draw(drawRaw,transform=t1)
                         self.displayCache[1].draw(drawRaw,transform=t2)
                         vlen = d*0.1
@@ -4017,7 +4022,7 @@ class VisualizationScene:
     def _setAttribute(self,item,attr,value):
         """Internal use only"""
         item.attributes[attr] = value
-        if value==None:
+        if value is None:
             del item.attributes[attr]
         if attr=='color':
             item.useDefaultAppearance = False

@@ -8,8 +8,7 @@ Common "gotchas"
    output! To guard against losing configuration, *think of the robot's
    configuration as a temporary variable.* If you need to keep the
    configuration between computations, just store it before the
-   computations, and restore it afterwards. The standard pattern (in
-   Python) is:
+   computations, and restore it afterwards. The standard Klampt idiom is:
 
    .. code:: python
 
@@ -17,22 +16,52 @@ Common "gotchas"
        #... do stuff ...
        robot.setConfig(q)
 
+   Also, the IK functions use the current configuration as the starting
+   point for the solve and also the output configuration.  So if you want to
+   use the IK functions to compute a new configuration, you will do:
+
+   .. code:: python
+
+       #set up IK objective...
+       obj = ik.objective(...)
+       #set guess
+       robot.setConfig(q_guess)
+       res = ik.solve(...)
+       if res:
+          print("Solution configuration is",robot.getConfig())
+
 -  The current configuration of a robot model does not have an effect on
    a real or simulated robot. To drive the actual robot, you must use
-   the interface in its Robot Controller. To work with the current
-   configuration of a real or simulated robot, the configuration must be
-   read from the Robot Controller.
+   the Robot Interface Layer controller (a subclass of :class:`~klampt.control.robotinterface.RobotInterfaceBase`).
+   To work with the current configuration of
+   a real or simulated robot, the configuration must be read from the
+   :class:`~klampt.control.robotinterface.RobotInterfaceBase`.
+
+   For historical reasons, the configuration of a :class:`~klampt.robotsim.RobotModel` is not
+   identical to the configuration of a :class:`~klampt.control.robotinterface.RobotInterfaceBase`. 
+   So, to convert to a model, you will use the Klampt idiom:
+
+   .. code:: python
+
+      model.setConfig(model.configFromDrivers(interface.sensedPosition()))
+      #... do something to set the model config to a target, like IK 
+      interface.moveToPosition(model.configToDrivers(model.getConfig()))
 
 -  A robot model does not necessarily correspond to a real robot. Its
-   kinematics, geometry, and limits need to be calibrated from the
+   kinematics, geometry, limits, and sensors need to be calibrated from the
    specifications of the real robot.
+   
+   To facilitate consistency enforcement with calibration specs, we are
+   developing the :class:`~klampt.model.robotinfo.RobotInfo` object that will set up
+   a robot model to correspond with given calibrations.  However, the interface
+   is still somewhat in flux.
 
 -  When performing multithreading, such as in the Python vis module,
    crashes can occur if locking is not performed properly to prevent
    simultaneous access to World Models.
 
 -  Data can inadvertently "leak" from simulation to planning if a shared
-   World Model is used, since the simulation will update the model for
+   :class:`~klampt.robotsim.WorldModel`` is used, since the simulation will update the model for
    visualization. An easy way to get around such conflicts is simply to
    copy the world into separate planning and simulation worlds. (This is
    fast, since none of the geometry is actually copied.) The standard
@@ -97,29 +126,29 @@ The Klamp't Python API contains several submodules that are not discussed in
 detail in the manual.  You may wish to look these over.
 
 
--  `cartesian\_trajectory <klampt.model.cartesian_trajectory.html>`__: reliable
+-  :mod:`~klampt.model.cartesian_trajectory`: reliable
    methods for converting Cartesian space trajectories to joint space
    trajectories.
--  `config <klampt.model.config.html>`__: treats the configuration of
+-  :mod:`~klampt.model.config`: treats the configuration of
    multiple objects as a single flat configuration vector.
--  `coordinates <klampt.model.coordinates.html>`__: a coordinate manager,
+-  :mod:`~klampt.model.coordinates`: a coordinate manager,
    similar to the ROS ``tf`` module.
--  `create <klampt.model.create.html>`__: helpers to create robots, geometric
+-  :mod:`~klampt.model.create`: helpers to create robots, geometric
    primitives, and piles of objects.
--  `access <klampt.model.access.html>`__: provides a more Pythonic way to access
+-  :mod:`~klampt.model.access`: provides a more Pythonic way to access
    items in a world.
--  `subrobot <klampt.model.subrobot.html>`__: defines :class:`~klampt.model.subrobot.SubRobotModel`,
+-  :mod:`~klampt.model.subrobot`: defines :class:`~klampt.model.subrobot.SubRobotModel`,
    a class that is ``RobotModel``-like but only modifies selected degrees of
    freedom (e.g., an arm, a leg).
--  `types <klampt.model.types.html>`__: retrieves the type string for various
+-  :mod:`~klampt.model.types`: retrieves the type string for various
    Klamp't objects.
--  `cspaceutils <klampt.plan.cspaceutils.html>`__: contains helpers for
+-  :mod:`~klampt.plan.cspaceutils`: contains helpers for
    constructing composite CSpaces and slices of CSpaces.
--  `settle <klampt.sim.html#module-klampt.sim.settle>`__: a convenience
+-  :mod:`~klampt.sim.settle`: a convenience
    function to let objects fall under gravity and extract their
    equilibrium configurations.
--  `simlog <klampt.sim.html#module-klampt.sim.simlog>`__: simulation logging classes (used in SimpleSimulator)
--  `simulation <klampt.sim.html#module-klampt.sim.simulation>`__: a more full-featured simulation class than standard
+-  :mod:`~klampt.sim.simlog`: simulation logging classes (used in SimpleSimulator)
+-  :mod:`~klampt.sim.simulation`: a more full-featured simulation class than standard
    Simulation. Defines sensor and actuator emulators, sub-step force
    appliers, etc.
 

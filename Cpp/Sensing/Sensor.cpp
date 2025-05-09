@@ -283,7 +283,7 @@ void RobotSensors::SaveSettings(TiXmlElement* node)
   node->SetValue("sensors");
   for(size_t i=0;i<sensors.size();i++) {
     TiXmlElement c(sensors[i]->Type());
-    node->SetAttribute("name",sensors[i]->name.c_str());
+    c.SetAttribute("name",sensors[i]->name.c_str());
     PropertyMap settings = sensors[i]->Settings();
     settings.Save(&c);
     node->InsertEndChild(c);

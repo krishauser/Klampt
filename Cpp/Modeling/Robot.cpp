@@ -721,7 +721,7 @@ bool RobotModel::LoadRob(const char* fn) {
           if(buffer.peek() == '\"') {
             string value;
             SafeInputString(buffer,value);
-            properties[stemp] = value;
+            properties[stemp] = TranslateEscapes(value);
           }
           else
             properties[stemp] = TranslateEscapes(buffer.str());

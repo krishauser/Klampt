@@ -69522,6 +69522,43 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_set_log_level(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_log_level" "', argument " "1"" of type '" "char const *""'");
+  }
+  arg1 = reinterpret_cast< char * >(buf1);
+  {
+    try {
+      set_log_level((char const *)arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_destroy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   
@@ -73239,12 +73276,21 @@ static PyMethodDef SwigMethods[] = {
 		"interpretation of param depends on the type of conversion, with 0 being a\n"
 		"reasonable default.  \n"
 		"\n"
-		"Available conversions are:  \n"
+		"Interpretations of the parameter are given as follows:  \n"
 		"\n"
+		"*   GeometricPrimitive -> anything. param determines the desired resolution,\n"
+		"    with default constructing a 20x20x20 grid.  \n"
+		"*   ConvexHull -> TriangleMesh. param ignored.  \n"
+		"*   ConvexHull -> PointCloud. param is the desired dispersion of the points.\n"
+		"    Equivalent to ConvexHull -> TriangleMesh -> PointCloud  \n"
+		"*   ConvexHull -> ImplicitSurface. param is the grid resolution, by default\n"
+		"    max(bmax-bmin)/20.  \n"
+		"*   ConvexHull -> OccupancyGrid. param is the grid resolution, by default\n"
+		"    max(bmax-bmin)/20.  \n"
 		"*   TriangleMesh -> PointCloud. param is the desired dispersion of the points,\n"
 		"    by default set to the average triangle diameter. At least all of the mesh's\n"
 		"    vertices will be returned.  \n"
-		"*   TriangleMesh -> ImplicitSurface. Converted using the fast marching method\n"
+		"*   TriangleMesh -> ImplicitSurface. Converted using the fast marching method,\n"
 		"    with good results only if the mesh is watertight. param is the grid\n"
 		"    resolution, by default set to the average triangle diameter.  \n"
 		"*   TriangleMesh -> OccupancyGrid. Converted using rasterization. param is the\n"
@@ -73252,26 +73298,40 @@ static PyMethodDef SwigMethods[] = {
 		"*   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.\n"
 		"    Otherwise, uses convex decomposition with the HACD library.  \n"
 		"*   TriangleMesh -> Heightmap. Converted using rasterization. param is the grid\n"
-		"    resolution, by default set to max mesh dimension / 256.  \n"
+		"    resolution, by default set to max(bmax-bmin) / 256.  \n"
 		"*   PointCloud -> TriangleMesh. Available if the point cloud is structured.\n"
 		"    param is the threshold for splitting triangles by depth discontinuity. param\n"
 		"    is by default infinity.  \n"
 		"*   PointCloud -> OccupancyGrid. param is the grid resolution, by default some\n"
 		"    reasonable number.  \n"
 		"*   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  \n"
-		"*   PointCloud -> Heightmap. param is the grid resolution, by default set to max\n"
-		"    point cloud dimension / 256.  \n"
-		"*   GeometricPrimitive -> anything. param determines the desired resolution.  \n"
+		"*   PointCloud -> Heightmap. param is the grid resolution, by default set to\n"
+		"    max(bmax-bmin) / 256.  \n"
+		"*   ImplicitSurface -> ConvexHull. Equivalent to ImplicitSurface -> TriangleMesh\n"
+		"    -> ConvexHull.  \n"
 		"*   ImplicitSurface -> TriangleMesh. param determines the level set for the\n"
 		"    marching cubes algorithm.  \n"
 		"*   ImplicitSurface -> PointCloud. param determines the level set.  \n"
-		"*   ImplicitSurface -> Heightmap.  \n"
+		"*   ImplicitSurface -> OccupancyGrid. param ignored, result matches this\n"
+		"    resolution.  \n"
+		"*   ImplicitSurface -> Heightmap. param ignored, result matches this resolution.  \n"
+		"*   OccupancyGrid -> ConvexHull. Equivalent to OccupancyGrid -> TriangleMesh ->\n"
+		"    ConvexHull.  \n"
 		"*   OccupancyGrid -> TriangleMesh. Creates a mesh around each block.  \n"
-		"*   OccupancyGrid -> PointCloud. Outputs a point for each block.  \n"
-		"*   OccupancyGrid -> Heightmap.  \n"
-		"*   ConvexHull -> TriangleMesh.  \n"
-		"*   ConvexHull -> PointCloud. param is the desired dispersion of the points.\n"
-		"    Equivalent to ConvexHull -> TriangleMesh -> PointCloud  \n"
+		"*   OccupancyGrid -> PointCloud. Outputs a point at the center of each block.  \n"
+		"*   OccupancyGrid -> Heightmap. param ignored, result matches this resolution.  \n"
+		"*   Heightmap -> ConvexHull. Equivalent to Heightmap -> TriangleMesh ->\n"
+		"    ConvexHull.  \n"
+		"*   Heightmap -> TriangleMesh. param ignored, result matches this resolution.  \n"
+		"*   Heightmap -> PointCloud. param ignored, result matches this resolution.  \n"
+		"*   Heightmap -> ImplicitSurface. param is the resolution in the z direction, by\n"
+		"    default set to heightmap range / 128.  \n"
+		"*   Heightmap -> OccupancyGrid. param is the resolution in the z direction, by\n"
+		"    default set to heightmap range / 128.  \n"
+		"\n"
+		"Available conversions are listed in the `geometry manual\n"
+		"<https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-\n"
+		"Geometry.md>`__ .  \n"
 		"\n"
 		""},
 	 { "Geometry3D_contains_point", _wrap_Geometry3D_contains_point, METH_VARARGS, "\n"
@@ -78000,6 +78060,7 @@ static PyMethodDef SwigMethods[] = {
 		"sampling-based motion planners.  \n"
 		"\n"
 		""},
+	 { "set_log_level", _wrap_set_log_level, METH_O, "set_log_level(char const * level)"},
 	 { "destroy", _wrap_destroy, METH_NOARGS, "\n"
 		"destroy()\n"
 		"\n"

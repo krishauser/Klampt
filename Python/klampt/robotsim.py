@@ -3149,6 +3149,10 @@ class Geometry3D(object):
     :meth:`convert` method. This can also be used to remesh TriangleMesh,
     PointCloud, ImplicitSurface, OccupancyGrid, and Heightmap objects.  
 
+    For more information, please consult the `geometry manual
+    <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
+    Geometry.md>`__ .  
+
     C++ includes: geometry.h
 
     """
@@ -3164,7 +3168,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.Geometry3D` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.PointCloud` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive`, optional): 
+            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.OccupancyGrid` or :obj:`Heightmap` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -3537,12 +3541,21 @@ class Geometry3D(object):
             type (str)
             param (float, optional): default value 0
 
-        Available conversions are:  
+        Interpretations of the parameter are given as follows:  
 
+        *   GeometricPrimitive -> anything. param determines the desired resolution,
+            with default constructing a 20x20x20 grid.  
+        *   ConvexHull -> TriangleMesh. param ignored.  
+        *   ConvexHull -> PointCloud. param is the desired dispersion of the points.
+            Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
+        *   ConvexHull -> ImplicitSurface. param is the grid resolution, by default
+            max(bmax-bmin)/20.  
+        *   ConvexHull -> OccupancyGrid. param is the grid resolution, by default
+            max(bmax-bmin)/20.  
         *   TriangleMesh -> PointCloud. param is the desired dispersion of the points,
             by default set to the average triangle diameter. At least all of the mesh's
             vertices will be returned.  
-        *   TriangleMesh -> ImplicitSurface. Converted using the fast marching method
+        *   TriangleMesh -> ImplicitSurface. Converted using the fast marching method,
             with good results only if the mesh is watertight. param is the grid
             resolution, by default set to the average triangle diameter.  
         *   TriangleMesh -> OccupancyGrid. Converted using rasterization. param is the
@@ -3550,26 +3563,40 @@ class Geometry3D(object):
         *   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
             Otherwise, uses convex decomposition with the HACD library.  
         *   TriangleMesh -> Heightmap. Converted using rasterization. param is the grid
-            resolution, by default set to max mesh dimension / 256.  
+            resolution, by default set to max(bmax-bmin) / 256.  
         *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
             param is the threshold for splitting triangles by depth discontinuity. param
             is by default infinity.  
         *   PointCloud -> OccupancyGrid. param is the grid resolution, by default some
             reasonable number.  
         *   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  
-        *   PointCloud -> Heightmap. param is the grid resolution, by default set to max
-            point cloud dimension / 256.  
-        *   GeometricPrimitive -> anything. param determines the desired resolution.  
+        *   PointCloud -> Heightmap. param is the grid resolution, by default set to
+            max(bmax-bmin) / 256.  
+        *   ImplicitSurface -> ConvexHull. Equivalent to ImplicitSurface -> TriangleMesh
+            -> ConvexHull.  
         *   ImplicitSurface -> TriangleMesh. param determines the level set for the
             marching cubes algorithm.  
         *   ImplicitSurface -> PointCloud. param determines the level set.  
-        *   ImplicitSurface -> Heightmap.  
+        *   ImplicitSurface -> OccupancyGrid. param ignored, result matches this
+            resolution.  
+        *   ImplicitSurface -> Heightmap. param ignored, result matches this resolution.  
+        *   OccupancyGrid -> ConvexHull. Equivalent to OccupancyGrid -> TriangleMesh ->
+            ConvexHull.  
         *   OccupancyGrid -> TriangleMesh. Creates a mesh around each block.  
-        *   OccupancyGrid -> PointCloud. Outputs a point for each block.  
-        *   OccupancyGrid -> Heightmap.  
-        *   ConvexHull -> TriangleMesh.  
-        *   ConvexHull -> PointCloud. param is the desired dispersion of the points.
-            Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
+        *   OccupancyGrid -> PointCloud. Outputs a point at the center of each block.  
+        *   OccupancyGrid -> Heightmap. param ignored, result matches this resolution.  
+        *   Heightmap -> ConvexHull. Equivalent to Heightmap -> TriangleMesh ->
+            ConvexHull.  
+        *   Heightmap -> TriangleMesh. param ignored, result matches this resolution.  
+        *   Heightmap -> PointCloud. param ignored, result matches this resolution.  
+        *   Heightmap -> ImplicitSurface. param is the resolution in the z direction, by
+            default set to heightmap range / 128.  
+        *   Heightmap -> OccupancyGrid. param is the resolution in the z direction, by
+            default set to heightmap range / 128.  
+
+        Available conversions are listed in the `geometry manual
+        <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
+        Geometry.md>`__ .  
 
         Returns:
             Geometry3D:
@@ -7103,7 +7130,7 @@ class SensorModel(object):
 
 
         Args:
-            link (:class:`~klampt.RobotModelLink` or int): 
+            link (int or :class:`~klampt.RobotModelLink`): 
         """
         return _robotsim.SensorModel__setLink(self, *args)
 
@@ -7733,7 +7760,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -7887,7 +7914,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -10179,6 +10206,10 @@ def set_random_seed(seed: int) -> None:
     """
     return _robotsim.set_random_seed(seed)
 
+def set_log_level(level: str) -> None:
+    r"""set_log_level(char const * level)"""
+    return _robotsim.set_log_level(level)
+
 def destroy() -> None:
     r"""
     destroys internal data structures  
@@ -10190,15 +10221,17 @@ def subscribe_to_stream(*args) -> bool:
     r"""
     Subscribes a Geometry3D to a stream.  
 
-    Only ROS point clouds (PointCloud2) are supported for now. Note that you 
-    can also call ``Geometry3D.loadFile("ros://[ROS_TOPIC]")`` or
-    ``Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")`` to accomplish the 
-    same thing.  
 
-    TODO: It has not yet been determined whether this interferes with Rospy, 
-    i.e., klampt.io.ros.  
+    Only ROS point clouds (PointCloud2) are supported for now. Note that you can
+    also call `Geometry3D.loadFile("ros://[ROS_TOPIC]")` or
+    `Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")` to accomplish the same
+    thing.  
+
+    TODO: It has not yet been determined whether this interferes with Rospy, i.e.,
+    klampt.io.ros.  
 
     Args:  
+
         g (Geometry3D): the geometry that will be updated
         protocol (str): only "ros" accepted for now.
         name (str): the name of the stream, i.e., ROS topic.
@@ -10207,6 +10240,7 @@ def subscribe_to_stream(*args) -> bool:
             automatically.  
 
     Returns:  
+
         bool: True if successful.
     """
     return _robotsim.subscribe_to_stream(*args)
@@ -10370,9 +10404,11 @@ def com_equilibrium(*args) -> object:
 
         contacts (list of 7-float lists or tuples): the list of contacts, each
             specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+
             - (x,y,z): the contact position
             - (nx,ny,nz): the contact normal
             - k: the coefficient of friction (>= 0)
+
         contactPositions (list of 3-float lists or tuples): the list of contact
             point positions.
         frictionCones (list of lists): Each item of this list specifies linear

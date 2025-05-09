@@ -13,12 +13,7 @@ except ImportError:
 
 src_folder = "klampt/src"
 root_py_folder = "klampt"
-if sys.version_info[0] == 2:
-    #python2 version has drifted from current Python3 version... maintain separate packages list for compatibility
-    root_py_folder = "python2_version/klampt"
-    klampt_packages = ['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends']
-else:
-    klampt_packages = ['klampt','klampt.apps', 'klampt.control', 'klampt.control.io', 'klampt.control.blocks', 'klampt.io', 'klampt.math', 'klampt.math.autodiff', 'klampt.model', 'klampt.model.create', 'klampt.plan','klampt.plan.kinetrajopt', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends']
+klampt_packages = ['klampt','klampt.apps', 'klampt.control', 'klampt.control.io', 'klampt.control.blocks', 'klampt.io', 'klampt.math', 'klampt.math.autodiff', 'klampt.model', 'klampt.model.create', 'klampt.plan','klampt.plan.kinetrajopt', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends']
 
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
@@ -34,7 +29,7 @@ if sys.platform == 'win32':
     for fn in extra_shared_libraries:
         shutil.copy(os.path.join("""${KLAMPT_DEPENDENCY_LIB_DIR}""",fn),os.path.join(root_py_folder,fn))
 else:
-    extra_compile_args = ['-std=c++11']
+    extra_compile_args = ['-std=c++17']
     
 #Parse libraries
 if sys.platform == 'win32':

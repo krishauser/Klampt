@@ -93,12 +93,20 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-Note: If you have a `pip` installed Klampt from version 0.10.0, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
+Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
-**Latest (master)**
--   None
+**master** (5/6/2025)
+-   Fixed sensor saving / loading within robot files.
+-   Fixed crashing with Group geometry rendering after the geometry is transformed.
+-   Collada (DAE) files are now loaded without Assimp flipping the Y-Z axes. 
+-   Fixed OpenGL warnings for specular highlights out of OpenGL's range.
 
-**0.10.0** (1/20/2024)
+**0.10.1** (4/20/2025)
+-   C++ API: Can use `KrisLibrary::setLogLevel()` function to control logging verbosity, with or without use of LOG4CXX library.
+-   Python API: Added `klampt.set_log_level()` function to control logging verbosity, with or without use of LOG4CXX library.
+-   Pip install version `0.10.1.post1` tags a specific version of Assimp to avoid Assimp's recent mesh import bug.
+
+**0.10.0** (1/20/2025)
 -   New geometry types `OccupancyGrid` and `Heightmap`.  The `VolumeGrid` data structure is deprecated but aliases to `ImplicitSurface`.  `Heightmap` can represent orthographic heightmaps (e.g., elevation maps) as well as depth maps coming from RGB-D cameras. Many more [proximity queries](blob/master/Cpp/docs/Manual-Geometry.md) are implemented / accelerated.
 -   Viewport data structure now accepts non-square pixels and non-centered focal points, making it compatible with calibrated camera intrinsics.  API breaking change; to resize viewports and keep the FOV and relative center, use `Viewport.resize(w,h)`.
 -   C++ API: Breaking changes to KrisLibrary Geometry API, now reflected in KrisLibrary `0.2` and later.  Older builds of Klampt will need to pull KrisLibrary branch `0.1`. 

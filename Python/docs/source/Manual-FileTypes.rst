@@ -24,6 +24,27 @@ Klamp't also supports the following standard file types:
 -  Triangle mesh files (.off, and with many other types with Assimp)
 -  Point cloud data files (.pcd)
 
+Also, many objects can be saved to / loaded from JSON format (.json).  This includes:
+
+-  Rigid transforms
+-  Configurations
+-  Configuration sequences
+-  Linear paths
+-  Hermite paths
+-  SO3, SE3 paths
+-  Holds
+-  Contacts
+-  Stances
+-  Grasps
+-  IK objectives
+-  Geometric primitives
+-  Convex polytopes
+-  Triangle meshes
+-  Point clouds
+-  Heightmaps
+-  Implicit surfaces
+-  Occupancy grids
+
 Primitive data file format
 --------------------------
 
@@ -528,3 +549,9 @@ Where the path is given by M points in time corresponding to M
 milestones, each of which is a ``Config`` of length N. Each row consists
 of a time and a milestone. It is assumed that t[k+1] >= t[k] for all k,
 and typically it is assumed that t1=0.
+
+
+Calibration file formats
+------------------------
+
+Sensor calibration files are stored in JSON format (.json). TODO: document me.
