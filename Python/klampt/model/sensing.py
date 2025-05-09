@@ -39,6 +39,15 @@ from a camera.
 :func:`projection_map_texture` maps a texture from a camera into an OpenGL
 appearance.
 
+Sensorium: a cross-embodiment interface to sensors
+====================================================
+
+The :class:`Sensorium` class provides a universal interface to a robot's sensor
+suite that enables task-focused queries about sensors rather than identifying
+sensors by name.  This lets algorithms be more flexible in choosing which
+images/lidar scans to use, and allows for more sophisticated sensor fusion
+algorithms. 
+
 """
 
 from ..robotsim import *
@@ -48,7 +57,8 @@ from ..vis.glviewport import GLViewport
 from ..model.typing import RigidTransform,Vector3
 from ..model.collide import bb_create,bb_intersect
 from . import coordinates
-from typing import Union,Tuple,List,Any,Optional,Literal
+from .robotinfo import RobotInfo
+from typing import Union,Tuple,List,Any,Optional,Literal,Callable
 import math
 import sys
 from ..math import vectorops,so3,se3
@@ -921,8 +931,10 @@ def camera_project(camera : SensorModel, pt : Vector3,clip=True) -> Vector3:
     return camera_to_viewport(camera).project(pt,clip)
 
 
-def visible(camera : Union[SensorModel,GLViewport], object, full=True) -> bool:
-    """Tests whether the given object is visible in a SensorModel or a
+def visible(camera : Union[SensorModel,GLViewport], object,
+            full : bool=True,
+            require_depth : bool=False) -> bool:
+    """Tests whether the given object is visible in a camera SensorModel or a
     GLViewport. 
 
     If you are doing this multiple times, it's marginally faster to first 
@@ -936,17 +948,27 @@ def visible(camera : Union[SensorModel,GLViewport], object, full=True) -> bool:
         full (bool, optional): if True, the entire object must be in the
             viewing frustum for it to be considered visible.  If False, any
             part of the object can be in the viewing frustum.
+        require_depth (bool, optional): if True, the object must be in the
+            depth range of the camera for it to be considered visible.  If
+            False, the object can be outside the depth range but still in
+            the viewing frustum.
     """
+    if hasattr(object,'geometry'):
+        return visible(camera,object.geometry(),full,require_depth)
     if isinstance(camera,SensorModel):
         camera = camera_to_viewport(camera)
-    if hasattr(object,'geometry'):
-        return visible(camera,object.geometry(),full)
     if hasattr(object,'__iter__'):
         if not hasattr(object[0],'__iter__'):
             #vector
             if len(object) != 3:
                 raise ValueError("Object must be a 3-vector")
-            return camera.project(object) != None
+            local = camera.project(object)
+            if local is None:
+                return False
+            if require_depth:
+                if local[2] < camera.n or local[2] > camera.f:
+                    return False
+            return True
         elif hasattr(object[1],'__iter__'):
             if len(object[0]) != 3 or len(object[1]) != 3:
                 raise ValueError("Object must be a bounding box")
@@ -956,8 +978,13 @@ def visible(camera : Union[SensorModel,GLViewport], object, full=True) -> bool:
                 center = vectorops.interpolate(bmin,bmax,0.5)
                 cproj = camera.project(center)
                 if cproj is not None:
-                    return True
-                if all(a <= v <= b for (a,b,v) in zip(bmin,bmax,camera.getTransform()[1])):
+                    if require_depth:
+                        if cproj[2] >= camera.n and cproj[2] <= camera.f:
+                            return True
+                    else:
+                        return True
+                #origin in bbox
+                if not require_depth and all(a <= v <= b for (a,b,v) in zip(bmin,bmax,camera.getTransform()[1])):
                     return True
 
             points = [camera.project(bmin,full),camera.project(bmax,full)]
@@ -977,12 +1004,12 @@ def visible(camera : Union[SensorModel,GLViewport], object, full=True) -> bool:
                 return False
             if full:
                 return True
-            if min(p[2] for p in points) > camera.f:
-                return False
-            if max(p[2] for p in points) < camera.n:
-                return False
-            points = [p for p in points if p[2] > 0]
-            for p in points:
+            if require_depth:
+                valid_points = [p for p in points if p[2] >= camera.n and p[2] <= camera.f]
+            else:
+                valid_points = [p for p in points if p[2] > 0]
+            #check if any points are in the viewport
+            for p in valid_points:
                 if 0 <= p[0] <= camera.w and 0 <= p[1] <= camera.h:
                     return True
             #TODO: intersection of projected polygon
@@ -992,11 +1019,13 @@ def visible(camera : Union[SensorModel,GLViewport], object, full=True) -> bool:
             if len(object[0]) != 3:
                 raise ValueError("Object must be a sphere")
             c,r = object
+            n = camera.n if require_depth else 0
+            f = camera.f if require_depth else float('inf')
             if full:
                 cproj = camera.project(c,True)
                 if cproj is None: return False
                 rproj = camera.w/cproj[2]*r
-                if cproj[2] - r < camera.n or cproj[2] + r > camera.f: return False
+                if cproj[2] - r < n or cproj[2] + r > f: return False
                 return 0 <= cproj[0] - rproj and cproj[0] + rproj <= camera.w and 0 <= cproj[1] - rproj and cproj[1] + rproj <= camera.h
             else:
                 cproj = camera.project(c,False)
@@ -1006,23 +1035,34 @@ def visible(camera : Union[SensorModel,GLViewport], object, full=True) -> bool:
                         return True
                     return False
                 if 0 <= cproj[0] <= camera.w and 0 <= cproj[1] <= camera.h:
-                    if cproj[2] + r > camera.n and cproj[2] - r < camera.f:
+                    if cproj[2] + r > n and cproj[2] - r < f:
                         return True
                     return False
                 rproj = camera.w/cproj[2]*r
                 xclosest = max(min(cproj[0],camera.w),0)
                 yclosest = max(min(cproj[1],camera.h),0)
-                zclosest = max(min(cproj[2],camera.f),camera.n)
+                zclosest = max(min(cproj[2],f),n)
                 return vectorops.distance((xclosest,yclosest),cproj[0:2]) <= rproj
     if not isinstance(object,Geometry3D):
         raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
-    return visible(camera,object.getBB(),full)
+    return visible(camera,object.getBB(),full,require_depth)
 
 
 def occluded(origin : Vector3, point : Vector3, occluders : Union[WorldModel,List], tol=1e-3) -> bool:
     """Returns whether the ray from origin to point is occluded by any of the
     objects in occluders.
+
+    Args:
+        origin (Vector3): the ray source
+        point (Vector3): the ray destination
+        occluders (WorldModel or list of Geometry3D, RigidObjectModel,
+            RobotLinkModel, or TerrainModel): the objects to test
+        tol (float, optional): the tolerance for occlusion.  If the ray is
+            within tol of the occluder, it is considered occluded. 
     
+    Returns:
+        True if the ray is occluded by any occluder, False otherwise.
+        
     .. versionadded:: 0.9.2
     """
     if not occluders:
@@ -1168,7 +1208,7 @@ def laser_to_points(sensor : SensorModel, frame : Literal['world','link','sensor
             local frame with the laser at the origin ('sensor').
         scan (list of float, optional): the results from
             sensor.getMeasurements(). Otherwise, sensor.getMeasurements()
-            is called
+            is called.
     
     Returns:
         PointCloud: the point cloud.  Given in world coordinates if robot!=None
@@ -1250,3 +1290,414 @@ def projection_map_texture(vp : Union[SensorModel,GLViewport],
         texgen[3,0:3] = vectorops.mul(zdir,scale)
         texgen[3,3] = -scale*vectorops.dot(zdir,T[1])
     app.setTexgen(texgen,True)
+
+
+class Sensorium:
+    """A class that allows for dynamic queries about the sensors on a robot,
+    without referring to specific sensor names.  EXPERIMENTAL
+
+    If you have a particular preference for a sensor type, you can set 
+    the preference order in self.preferences['cameras'], self.preferences['lasers'],
+    and self.preferences['forceTorques'].  The first sensor in the list
+    will be the preferred sensor.  You can also use the convenience functions
+    preferCamerasByX() to set the preference order for cameras.
+
+    This also handles FilteredSensor types, which are sensors that
+    filter another sensor's data.  The filtered sensor is considered an instance
+    of the type of sensor it filters.
+    """
+    def __init__(self, robot: Union[RobotModel,RobotInfo]):
+        self.robot_model = robot if isinstance(robot,RobotModel) else robot.klamptModel()
+        self.robot_info = robot if isinstance(robot,RobotInfo) else None
+        self.sensors = robot.sensorsDict  # type: Dict[str,SensorModel]
+        self.preferences = {}  # type : Dict[str,List[str]]
+        self.disabled_list = []  # type : List[str]
+    
+    def copy(self) -> 'Sensorium':
+        """Returns a copy of this sensorium.  The copy will have the same
+        sensors, preferences, and disabled list as this sensorium, and you
+        can rearrange preferences and enable/disable sensors on the new
+        object without affecting this sensorium (and vice versa).
+        """
+        import copy
+        new = Sensorium(self.robot_model)
+        new.robot_info = self.robot_info
+        new.sensors = self.sensors.copy()
+        new.preferences = copy.deepcopy(self.preferences)
+        new.disabled_list = self.disabled_list.copy()
+        return new
+
+    def disable(self, sensor_name : str):
+        """Disables selection of the given sensor in future queries.
+        This is useful for debugging or when the sensor is not available.
+        """
+        if sensor_name in self.sensors:
+            self.disabled_list.append(sensor_name)
+            del self.sensors[sensor_name]
+    
+    def enable(self, sensor_name : str):
+        """Enables selection of the given sensor for future queries.
+        This is useful for debugging or when the sensor is available again.
+        """
+        if sensor_name in self.disabled_list:
+            self.disabled_list.remove(sensor_name)
+            self.sensors[sensor_name] = self.robot_model.sensor(sensor_name)
+        elif sensor_name in self.sensors:
+            pass
+        else:
+            raise ValueError(f"Sensor {sensor_name} is not a valid sensor name.")
+
+    def byCondition(self, condition : Callable) -> Dict[str,SensorModel]:
+        """Returns a dictionary of sensors that satisfy the given condition."""
+        res = {}
+        for s in self.sensors.values():
+            if not s.getEnabled():
+                continue
+            if s.type == 'FilteredSensor':
+                #check if the filtered sensor is enabled
+                base_sensor = self.sensors[s.getSetting('sensor')]
+                if not base_sensor.getEnabled():
+                    continue
+                if condition(base_sensor):
+                    res[s.name] = s
+            elif condition(s):
+                res[s.name] = s
+        return res
+
+    def byType(self, type : str) -> Dict[str,SensorModel]:
+        return self.byCondition(lambda s: s.type == type)
+    
+    def byLink(self, link : int) -> Dict[str,SensorModel]:
+        return self.byCondition(lambda s: s.link == link)
+
+    def byPart(self, part : str) -> Dict[str,SensorModel]:
+        if self.robot_info is None:
+            raise ValueError("RobotInfo not set, cannot use byPart")
+        if part not in self.robot_info.parts:
+            raise ValueError(f"Part {part} not found in robot info parts")
+        indices = self.robot_info.parts[part]
+        if len(indices) == 0:
+            raise ValueError(f"Part {part} has no indices")
+        indices = [(i if isinstance(i,int) else self.robot_model.link(i).index) for i in indices]
+        indices = set(indices)
+        return self.byCondition(lambda s: s.link in indices)
+
+    def cameras(self, require_rgb : bool = False, require_depth : bool = False) -> Dict[str,SensorModel]:
+        cams = self.byType('CameraSensor')
+        if require_rgb:
+            cams = {name:cam for name,cam in cams.items() if int(cam.getSetting('rgb'))}
+        if require_depth:
+            cams = {name:cam for name,cam in cams.items() if int(cam.getSetting('depth'))}
+        return cams
+    
+    def lasers(self) -> Dict[str,SensorModel]:
+        return self.byType('LaserRangeSensor')
+
+    def driverTorques(self) -> Dict[str,SensorModel]:
+        return self.byType('DriverTorqueSensor')
+
+    def contacts(self) -> Dict[str,SensorModel]:
+        return self.byType('ContactSensor')
+
+    def forceTorques(self) -> Dict[str,SensorModel]:
+        return self.byType('ForceTorqueSensor')
+
+    def accelerometers(self) -> Dict[str,SensorModel]:
+        return self.byType('Accelerometer')
+    
+    def gyros(self) -> Dict[str,SensorModel]:
+        return self.byType('GyroSensors')
+    
+    def imus(self) -> Dict[str,SensorModel]:
+        return self.byType('IMUSensor')
+
+    def inertial(self) -> Dict[str,SensorModel]:
+        return self.accelerometers() | self.gyros() | self.imus()
+
+    def preferByTask(self, task : str, type : str = 'cameras'):
+        """Sets the preference for a sensor type by extracting the task
+        preferences from the robot info.  The task must be one of the tasks
+        in robot_info.preferences, and the type must be one of 'cameras',
+        'lasers', or 'forceTorques'. 
+        """
+        if self.robot_info is None:
+            raise ValueError("RobotInfo not set, cannot use preferByTask")
+        if task not in self.robot_info.preferences:
+            raise ValueError(f"Task {task} not found in robot info preferences")
+        prefs = self.robot_info.preferences[task]
+        if len(prefs) == 0:
+            raise ValueError(f"Task {task} has no preferences")
+        sensors = self.robot_model.sensorsDict
+        for name in prefs:
+            if name not in sensors:
+                raise ValueError(f"Preferred sensor {name} is not in the robot model")
+        self.preferences[type] = prefs
+
+    def preferCamerasByResolution(self):
+        """Sets the preference for cameras to be by resolution.  All cameras
+        will be listed in preferences['cameras'] in order of decreasing
+        resolution (this reproduces the default behavior).
+        """
+        self.preferences['cameras'] = []
+        cameras = self.cameras()
+        sorted_cameras = sorted(cameras.items(), key=lambda item: float(item[1].getSetting('xres')) * float(item[1].getSetting('yres')), reverse=True)
+        self.preferences['cameras'] = [name for name, _ in sorted_cameras]
+
+    def preferCamerasByFOV(self, largest=True):
+        """Sets the preference for cameras to be by largest / smallest field of view.
+        All cameras will be listed in preferences['cameras'] in order of decreasing /
+        increasing field of view.
+        """
+        self.preferences['cameras'] = []
+        cameras = self.cameras()
+        sorted_cameras = sorted(cameras.items(), key=lambda item: float(item[1].getSetting('xfov')) * float(item[1].getSetting('yfov')), reverse=largest)
+        self.preferences['cameras'] = [name for name, _ in sorted_cameras]
+
+    def preferCamerasByFrameRate(self):
+        """Sets the preference for cameras to be by frame rate.  All cameras
+        will be listed in preferences['cameras'] in order of decreasing
+        frame rate.
+
+        Note that cameras whose "rate" parameters are 0 (default) will be assumed
+        to be running at very fast FPS.
+        """
+        self.preferences['cameras'] = []
+        cameras = self.cameras()
+        cameras_and_rates = []
+        for name, camera in cameras.items():
+            rate = float(camera.getSetting('rate'))
+            if rate <= 0:
+                rate = 10000
+            cameras_and_rates.append((name, camera, rate))
+        sorted_cameras = sorted(cameras_and_rates, key=lambda item: item[2], reverse=True)
+        self.preferences['cameras'] = [name for (name, _, rate) in sorted_cameras]
+
+    def preferCamerasByDepth(self):
+        """Sets the preference for cameras to be by depth range.  All
+        cameras will be listed in preferences['cameras'] in order of decreasing
+        depth, with non-depth cameras not included in the preference list.
+        """
+        self.preferences['cameras'] = []
+        cameras = self.cameras(require_depth=True)
+        sorted_cameras = sorted(cameras.items(), key=lambda item: float(item[1].getSetting('zmax')), reverse=True)
+        self.preferences['cameras'] = [name for name, _ in sorted_cameras]
+
+    def bestCamera(self, require_rgb : bool = False, require_depth : bool = False) -> Optional[SensorModel]:
+        """Returns the preferred camera, either the one listed first in
+        preferences['cameras'], or the one with the best resolution. 
+        
+        If no cameras are available, None is returned.
+
+        Args:
+            require_rgb (bool, optional): if True, only cameras with RGB
+                capability are returned.
+            require_depth (bool, optional): if True, only cameras with depth
+                capability are returned.
+        """
+        cameras = self.cameras(require_rgb=require_rgb, require_depth=require_depth)
+        if not cameras:
+            return None
+        preferred_cameras = self.preferences.get('cameras', [])
+        for cam in preferred_cameras:
+            if cam in cameras:
+                return cameras[cam]
+        best = max(cameras.values(), key=lambda c: float(c.getSetting('xres')) * float(*c.getSetting('yres')))
+        return best
+    
+    def bestLaser(self) -> Optional[SensorModel]:
+        """Returns the preferred laser, either the one listed first in
+        preferences['lasers'], or the one with the best resolution. 
+        
+        If no lasers are available, None is returned.
+        """
+        lasers = self.lasers()
+        if not lasers:
+            return None
+        preferred_laser_name = self.preferences.get('lasers', [None])[0]
+        if preferred_laser_name and preferred_laser_name in lasers:
+            return lasers[preferred_laser_name]
+        best = max(lasers.values(), key=lambda c: float(c.getSetting('xres')) * float(c.getSetting('yres')))
+        return best
+    
+    def sensorForDepth(self, point : Vector3) -> Optional[SensorModel]:
+        """Returns the sensor that can perform the most accurate depth
+        estimation for the given point.  This is determined by the distance,
+        the sensor's FOV and depth range, and the sensor's estimated errors.
+        
+        Args:
+            point (3-vector): the point to check for visibility.
+        
+        Returns:
+            A sensor with the best depth estimation capability, or None if
+            no sensors are available.
+        """
+        best_sensor = None
+        best_variance = float('inf')
+        for sensor in self.sensors.values():
+            if sensor.type in ['CameraSensor','LaserRangeSensor']:
+                local_point = so3.apply(so3.inv(sensor.getTransform()[0]),point)
+                if sensor.type == 'CameraSensor':
+                    fov = float(sensor.getSetting('xfov')) * float(sensor.getSetting('yfov'))
+                    depth_range = float(sensor.getSetting('zmax')) - float(sensor.getSetting('zmin'))
+                    local_point = so3.apply(so3.inv(sensor.getTransform()[0]),point)
+                    if local_point[2] < float(sensor.getSetting('zmin')) or local_point[2] > float(sensor.getSetting('zmax')):
+                        #out of range
+                        continue
+                    pixel = camera_to_viewport(sensor).project(point,clip=True)
+                    if pixel is None:
+                        #out of frame
+                        continue
+                    z_error = float(sensor.getSetting('zvarianceLinear'))*local_point[2] + float(sensor.getSetting('zvarianceConstant'))
+                    if z_error < best_variance:
+                        best_variance = z_error
+                        best_sensor = sensor
+                else:
+                    distance = vectorops.norm(local_point)
+                    if distance < float(sensor.getSetting('depthMinimum')) or distance > float(sensor.getSetting('depthMaximum')):
+                        #out of range
+                        continue
+                    xSweepMagnitude = float(sensor.getSetting('xSweepMagnitude'))
+                    ySweepMagnitude = float(sensor.getSetting('ySweepMagnitude'))
+                    xangle = math.atan2(local_point[2], local_point[0])
+                    yangle = math.atan2(local_point[2], local_point[1])
+                    if abs(xangle) > xSweepMagnitude or abs(yangle) > ySweepMagnitude:
+                        #out of range
+                        continue
+                    z_error = float(sensor.getSetting('depthVarianceLinear'))*distance + float(sensor.getSetting('depthVarianceConstant'))
+                    if z_error < best_variance:
+                        best_variance = z_error
+                        best_sensor = sensor
+        return best_sensor
+
+    def camerasInDirection(self, direction : Vector3, require_rgb : bool = False, require_depth : bool = False) -> List[SensorModel]:
+        """Returns a list of cameras that are looking in the given direction.
+        
+        Args:
+            direction (3-vector): the direction to check for visibility.
+            require_rgb (bool, optional): if True, only cameras with RGB
+                capability are returned.
+            require_depth (bool, optional): if True, only cameras with depth
+                capability are returned.
+        
+        Returns:
+            A list of cameras that are looking in the given direction.
+        """
+        cameras = self.cameras()
+        if not cameras:
+            return []
+        visible_cameras = []
+        for camera in cameras.values():
+            if so3.apply(so3.inv(camera.getTransform()[0]),direction)[2] > 0:  #z forward
+                visible_cameras.append(camera)
+        return visible_cameras
+
+    def camerasThatObserve(self, object : Union[Geometry3D,Vector3], full : bool = False,
+                           require_rgb : bool = False, require_depth : bool = False) -> List[SensorModel]:
+        """Returns a list of cameras that observe the given object.
+        
+        Args:
+            object (Geometry3D or 3-vector): the object to check for visibility.
+            full (bool, optional): if True, the entire object must be in the
+                viewing frustum for it to be considered visible.  If False, any
+                part of the object can be in the viewing frustum.
+            require_rgb (bool, optional): if True, only cameras with RGB
+                capability are returned.
+            require_depth (bool, optional): if True, only cameras with depth
+                capability are returned.
+        
+        Returns:
+            A list of cameras that observe the object.
+        """
+        cameras = self.cameras(require_rgb=require_rgb, require_depth=require_depth)
+        if not cameras:
+            return []
+        visible_cameras = []
+        for camera in cameras.values():
+            if visible(camera, object, full, require_depth):
+                visible_cameras.append(camera)
+        return visible_cameras
+
+    def bestCameraForDirection(self, direction : Vector3,
+                               require_rgb : bool = False, require_depth : bool = False) -> Optional[SensorModel]:
+        """Returns the best camera that is looking in the given direction.
+        The camera returned is the one whose forward direction is closest
+        to the given direction.
+        
+        If no cameras are available, None is returned.
+        
+        Args:
+            direction (3-vector): the direction to check for visibility.
+            require_rgb (bool, optional): if True, only cameras with RGB
+                capability are returned.
+            require_depth (bool, optional): if True, only cameras with depth
+                capability are returned.
+        
+        Returns:
+            A camera that observes the object, or None if no cameras are
+            available.
+        """
+        cameras = self.cameras(require_rgb=require_rgb, require_depth=require_depth)
+        if not cameras:
+            return None
+        best_camera = None
+        best_angle = 0
+        for camera in cameras.values():
+            camera_dir = so3.apply(camera.getTransform()[0],[0,0,1])
+            angle = vectorops.dot(camera_dir, direction)
+            if angle > best_angle:
+                best_angle = angle
+                best_camera = camera
+        return best_camera
+
+    def bestCameraThatObserves(self, object : Union[Geometry3D,Vector3],
+                               require_rgb : bool = False, require_depth : bool = False) -> Optional[SensorModel]:
+        """Returns the best camera that observes the given object.  The camera
+        returned is the one that sees the most of the object.  If multiple cameras
+        see the same amount of the object, the one with the largest resolution 
+        is returned.
+        
+        If no cameras are available, None is returned.
+        
+        Args:
+            object (Geometry3D or 3-vector): the object to check for visibility.
+            require_rgb (bool, optional): if True, only cameras with RGB 
+                capability are returned.
+            require_depth (bool, optional): if True, only cameras with depth
+                capability are returned.
+        
+        Returns:
+            A SensorModel that observes the object, or None if no cameras are
+            available.
+        """
+        cameras = self.camerasThatObserve(object, require_rgb=require_rgb, require_depth=require_depth)
+        if not cameras:
+            return None
+        if isinstance(object,Geometry3D):
+            bb = object.getBB()
+            center = vectorops.interpolate(bb[0],bb[1],0.5)
+            size = vectorops.norm(vectorops.sub(bb[1],bb[0]))
+        else:
+            center = object
+            size = 0
+        best_camera = None
+        best_visible_fraction = 0
+        best_distance = float('inf')
+        #look at how much of the object is in the camera's FOV, and how far
+        #the viewing direction is from the center of the object
+        for camera in cameras:
+            if size == 0:
+                frac = 1.0 if visible(camera,center,True,require_depth) else 0.0
+            else:
+                frac = visible_fraction(camera, object, 20, self_occlusion=False)
+            vp = camera_to_viewport(camera)
+            center_pixel = vp.project(center,False)
+            if frac > best_visible_fraction:
+                best_visible_fraction = frac
+                best_camera = camera
+                best_distance = vectorops.distance(center_pixel, (vp.cx, vp.cy))
+            elif frac == best_visible_fraction:
+                dist = vectorops.distance(center_pixel, (vp.cx, vp.cy))
+                if dist < best_distance:
+                    best_camera = camera
+                    best_distance = dist
+        return best_camera
