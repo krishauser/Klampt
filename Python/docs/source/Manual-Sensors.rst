@@ -166,7 +166,7 @@ Settings are:
 -  ``qvariance`` (list of floats): variance of each reading, in radians
 
 `C++ API
-documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classJointPositionSensor.html>`__.
+documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1JointPositionSensor.html>`__.
 
 ``JointVelocitySensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -181,7 +181,7 @@ Settings are:
 -  ``qvariance`` (list of floats): variance of each reading, in rad/s.
 
 `C++ API
-documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classJointVelocitySensor.html>`__.
+documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1JointVelocitySensor.html>`__.
 
 ``CameraSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -227,52 +227,47 @@ Settings are:
    :func:`SensorModel.getTransform` to easily set and get this value.
 
 `C++ API
-documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classCameraSensor.html>`__.
+documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1CameraSensor.html>`__.
 
 ``LaserRangeSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classLaserRangeSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1LaserRangeSensor.html>`__ for attributes.
 
 ``DriverTorqueSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classDriverTorqueSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1DriverTorqueSensor.html>`__ for attributes.
 
 ``ContactSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classContactSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1ContactSensor.html>`__ for attributes.
 
 ``ForceTorqueSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classForceTorqueSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1ForceTorqueSensor.html>`__ for attributes.
 
 ``Accelerometer``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classAccelerometer.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1Accelerometer.html>`__ for attributes.
 
 ``TiltSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classTiltSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1TiltSensor.html>`__ for attributes.
 
 ``GyroSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classGyroSensor.html>`__ for attributes.
-
-``IMUSensor``
-~~~~~~~~~~~~~~~~~~~~~~~
-
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classIMUSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1IMUSensor.html>`__ for attributes.
 
 ``FilteredSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classFilteredSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1FilteredSensor.html>`__ for attributes.
 
 
 
