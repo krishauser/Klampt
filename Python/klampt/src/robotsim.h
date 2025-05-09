@@ -576,7 +576,7 @@ class Simulator
    * Instability correction kicks in whenever the kinetic energy K(t) of an 
    * object exceeds min(c0*m + c1*K(t-dt),cmax).  m is the object's mass.
    * 
-   * See `Klampt/Simulation/ODESimulator.h <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
+   * See `Klampt/Simulation/ODESimulator.h <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1ODESimulator.html>`_
    * for detailed descriptions of these parameters.
    * 
    * Returns:

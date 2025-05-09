@@ -9,7 +9,7 @@ This folder contains the [Jupyter notebook](http://jupyter.org) extension for [K
 To make any use of this extension, you will need to install:
 
 - [Jupyter notebook](http://jupyter.org) 
-- Klamp't 0.8.x Python API: try `pip install klampt`, or follow the [installation instructions here](http://motion.pratt.duke.edu/klampt/pyklampt_docs/Manual-Installation.html).
+- Klamp't 0.8.x+ Python API: try `pip install klampt`, or follow the [installation instructions here](http://motion.cs.illinois.edu/software/klampt/latest/pyklampt_docs/Manual-Installation/).
 
 ### Linux / OSX
 

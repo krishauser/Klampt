@@ -78024,7 +78024,7 @@ static PyMethodDef SwigMethods[] = {
 		"exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  \n"
 		"\n"
 		"See `Klampt/Simulation/ODESimulator.h\n"
-		"<http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_\n"
+		"<http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1ODESimulator.html>`_\n"
 		"for detailed descriptions of these parameters.  \n"
 		"\n"
 		"Returns:  \n"
