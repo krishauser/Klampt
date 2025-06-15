@@ -100,6 +100,7 @@ Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the 
 -   Fixed crashing with Group geometry rendering after the geometry is transformed.
 -   Collada (DAE) files are now loaded without Assimp flipping the Y-Z axes. 
 -   Fixed OpenGL warnings for specular highlights out of OpenGL's range.
+-   Fixed error in geometry conversion to ImplicitSurface type after collision data initialized.
 -   Python API: OpenGL interface now supports non-integer screen-device scales.
 
 **0.10.1** (4/20/2025)
