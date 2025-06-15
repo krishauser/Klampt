@@ -30,10 +30,16 @@ from .typing import Vector,Vector3,RigidTransform
 from typing import Optional,Union,Sequence,List,Tuple,Dict,Any,TextIO
 
 class RobotInfo:
-    """Stores common semantic properties for a robot.
+    """Stores common semantic properties for a robot.  Universal algorithms
+    should use this structure to get information about the robot, rather
+    than hardcoding robot-specific information.
 
     Attributes:
         name (str): a string identifying this robot by name.
+        version (str, optional): a version string for this robot. 
+        serial (str, optional): a serial number for this robot.
+        description (str, optional): a human-readable description of the robot
+            giving further details.
         modelFile (str, optional): a file pointing to the Klamp't model (.urdf 
             or .rob.)
         baseType (str): specifies whether the robot has a mobile or floating
@@ -91,6 +97,12 @@ class RobotInfo:
         resourceDir (str, optional): the directory containing resources for
             this robot.
         filePaths (list of str): a list of paths where files will be searched.
+        preferences (dict of str -> list[str]): a dictionary of preferences
+            mapping tasks to either parts, grippers, or sensors.  The
+            interpretation of the tasks is up to the user, but you can, for
+            example, indicate that the left arm and left gripper are preferred
+            for grasping with the entry
+            ``preferences["grasping"] = ["left_arm","left_gripper"]``.
         robotModel (RobotModel): a cached robot model, loaded upon calling
             :func:`klamptModel`.  If a robot is loaded externally (e.g., via
             :class:`~klampt.WorldModel`) you may set this member to avoid re-
@@ -128,6 +140,9 @@ class RobotInfo:
                 parts=None,endEffectors=None,grippers=None,
                 properties=None):
         self.name = name                # type: str
+        self.version = None             # type: Optional[str]
+        self.serial = None              # type: Optional[str]
+        self.description = None         # type: Optional[str]
         self.modelFile = modelFile      # type: str
         self.baseType = baseType        # type: str
         self.controllerFile = None      # type: Optional[str]
@@ -163,6 +178,7 @@ class RobotInfo:
         self.grippers = grippers          # type: Dict[str,GripperInfo]
         self.properties = properties      # type: Dict[str,Any]
         self.filePaths = []               # type: List[str]
+        self.preferences = {}             # type: Dict[str,List[str]]
         self.robotModel = None            # type: RobotModel
         self.load = self._instance_load
         self._driverIndices = None
@@ -577,7 +593,7 @@ class RobotInfo:
         self.endEffectors = dict()
         self.grippers = dict()
         REQUIRED = ['name','modelFile']
-        OPTIONAL = ['parts','baseType','endEffectors','grippers','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','resourceDir','filePaths']
+        OPTIONAL = ['version','serial','description','parts','baseType','endEffectors','grippers','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','resourceDir','filePaths','preferences']
         for attr in REQUIRED+OPTIONAL:
             if attr not in jsonobj:
                 if attr in OPTIONAL: #optional
@@ -587,8 +603,9 @@ class RobotInfo:
             setattr(self,attr,jsonobj[attr])
         ees = dict()
         for (k,v) in self.endEffectors.items():
-            obj = None if v['ikObjective'] is None else loader.fromJson(v['ikObjective'],'IKObjective')
+            obj = None if v['ikObjective'] is None else loader.from_json(v['ikObjective'],'IKObjective')
             ees[k] = EndEffectorInfo(v['link'],v['activeLinks'],obj)
+            ees[k].gripper = v.get('gripper',None)
         self.endEffectors = ees
         grippers = dict()
         for (k,v) in self.grippers.items():
@@ -601,13 +618,17 @@ class RobotInfo:
         """Saves the info to a JSON file. f is a file object."""
         from ..io import loader
         jsonobj = dict()
-        for attr in ['name','modelFile','parts','baseType','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','resourceDir','filePaths']:
-            jsonobj[attr] = getattr(self,attr)
+        for attr in ['name','version','serial','description','modelFile','baseType','controllerFile','simulatorFile','resourceDir','filePaths']:
+            val = getattr(self,attr)
+            if val is not None:
+                jsonobj[attr] = val
+        for attr in ['calibrationFiles','preferences','controllerArgs','parts','properties']:
+            val = getattr(self,attr)
+            if len(val) > 0:
+                jsonobj[attr] = val
         ees = dict()
         for k,v in self.endEffectors.items():
-            obj = None if v.ikObjective is None else loader.toJson(v.ikObjective)
-            gripper = None if v.gripperInfo is None else v.gripperInfo.toJson()
-            ees[k] = {'link':v.link,'activeLinks':v.activeLinks,'ikObjective':obj,'gripperInfo':gripper}
+            ees[k] = v.toJson()
         if len(ees) > 0:
             jsonobj['endEffectors'] = ees
         grippers = dict()
@@ -647,13 +668,56 @@ class EndEffectorInfo:
         activeLinks (list of int or str): the links that are driven by
             cartesian commands to this end effector.
         ikObjective (IKObjective, optional): the template IK objective giving
-            the tool center point and objective type. If None, this will be
-            left unspecified.
+            the tool center point and objective type. The target position and
+            rotation are ignored.  If None, the TCP will be left unspecified
+            and a 6+-link constraint will be assumed to be a fixed transform
+            objective.
+        gripper (str, optional): if provided, the name of the gripper attached
+            to this end effector.  This may be used for grasp planning and
+            other tasks.
     """
     def __init__(self,link,activeLinks,ikObjective=None):
         self.link = link                 # type: Union[int,str]
         self.activeLinks = activeLinks   # type: List[Union[int,str]]
         self.ikObjective = ikObjective   # type: Optional[IKObjective]
+        self.gripper = None              # type: Optional[str]
+    
+    def setTCP(self, tcp: Vector3):
+        """Sets the tool center point of this end effector to the given
+        coordinates in the link's local frame.
+        """
+        if self.ikObjective is None:
+            self.ikObjective = IKObjective()
+            self.ikObjective.setFixedPoint(self.link,tcp,[0,0,0])
+            self.ikObjective.setFixedRotConstraint(so3.identity())
+        else:
+            self.ikObjective.setFixedPosConstraint(tcp,[0,0,0])
+        
+    def getTCP(self) -> Vector3:
+        """Returns the tool center point of this end effector in the link's
+        local frame.
+        """
+        if self.ikObjective is None:
+            return [0,0,0]
+        return self.ikObjective.getPosition()[0]
+
+    def toJson(self) -> Dict[str,Any]:
+        from ..io import loader
+        obj = None if self.ikObjective is None else loader.to_json(self.ikObjective)
+        return {'link':self.link,'activeLinks':self.activeLinks,'ikObjective':obj,'gripper':self.gripper}
+
+    def fromJson(self,jsonobj: Dict[str,Any]) -> None:
+        from ..io import loader
+        self.link = jsonobj['link']
+        self.activeLinks = jsonobj['activeLinks']
+        if 'ikObjective' in jsonobj:
+            obj = jsonobj['ikObjective']
+            if obj is not None:
+                self.ikObjective = loader.from_json(obj,'IKObjective')
+            else:
+                self.ikObjective = None
+        if 'gripper' in jsonobj:
+            self.gripper = jsonobj['gripper']
 
 
 class GripperInfo:

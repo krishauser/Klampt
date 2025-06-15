@@ -16,6 +16,10 @@ class RobotModel;
 /** @ingroup Sensing
  * @brief Simulates a laser range sensor, either sweeping or stationary.  Can
  * both simulate both 1D sweeping and 2D sweeping.
+ * 
+ * The local frame is defined so that z points in the forward direction of the
+ * sensor, x points to the left of the sensor, and y points up.  The sensor is
+ * assumed to be mounted on a link of the robot.
  *
  * Default configuration sets up a 1D triangular scan along x direction with 180 degree
  * field of view and instantaneous measurement.  
@@ -26,16 +30,22 @@ class RobotModel;
  * Currently intensity information is not provided.
  *
  * Configurable settings:
- * - link
- * - Tsensor
- * - measurementCount
- * - depthResolution
- * - depthMinimum,depthMaximum
- * - depthVarianceLinear,depthVarianceConstant
- * - xSweepMagnitude, xSweepPeriod, xSweepPhase
- * - xSweepType
- * - ySweepMagnitude, ySweepPeriod, ySweepPhase
- * - ySweepType
+ * - link (int): the index of the link on which this sensor lies, or -1 for a world-mounted sensor
+ * - Tsensor (RigidTransform): the transform of the sensor in the link's local frame
+ * - measurementCount (int): the number of measurements per cycle
+ * - depthResolution (float): the resolution of the depth measurement
+ * - depthMinimum,depthMaximum (float): the minimum and maximum depth
+ * - depthVarianceLinear,depthVarianceConstant (float): added noise to the depth measurements
+ * - xSweepMagnitude, xSweepPeriod, xSweepPhase (float): defines the pattern in which
+ *     the sensor sweeps in the x (horizontal direction).  Magnitude is in radians,
+ *     period and phase are in seconds.
+ * - xSweepType (int): the type of sweep pattern.  0 indicates a sinusoidal pattern,
+ *     1 indicates a triangular pattern, and 2 indicates a sawtooth pattern.
+ * - ySweepMagnitude, ySweepPeriod, ySweepPhase (float): defines the pattern in which
+ *     the sensor sweeps in the y (vertical direction).  Magnitude is in radians,
+ *     period and phase are in seconds.
+ * - ySweepType (int): the type of sweep pattern.  0 indicates a sinusoidal pattern,
+ *     1 indicates a triangular pattern, and 2 indicates a sawtooth pattern.
  */
 class LaserRangeSensor : public SensorBase
 {

@@ -111,7 +111,7 @@ class GLViewport(Viewport):
         self.update_viewport()
         pimg = Viewport.project(self,pt)
         if clip:
-            if pimg[0] < 0 or pimg[0] >= self.w or pimg[1] < 0 or pimg[1] >= self.h:
+            if pimg[0] < 0 or pimg[0] >= self.w or pimg[1] < 0 or pimg[1] >= self.h or pimg[2] < 0:
                 return None
         return pimg
 

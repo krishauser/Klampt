@@ -1,27 +1,30 @@
 # Klamp't Manual: Control
 
-* [Controllers](#controllers)
-+ [Default motion queue controller](#default-motion-queue-controller)
-  - [API summary](#api-summary)
-+ [Custom controllers](#custom-controllers)
-  - [API summary](#api-summary-1)
-* [Actuators](#actuators)
-+ [API summary](#api-summary-2)
-* [Sensors](#sensors)
-+ [Sensor measurements and attributes](#sensor-measurements-and-attributes)
-  - [`JointVelocitySensor`](#-jointvelocitysensor-)
-  - [`CameraSensor`](#-camerasensor-)
-  - [`LaserRangeSensor`](#-laserrangesensor-)
-  - [`DriverTorqueSensor`](#-drivertorquesensor-)
-  - [`ContactSensor`](#-contactsensor-)
-  - [`ForceTorqueSensor`](#-forcetorquesensor-)
-  - [`Accelerometer`](#-accelerometer-)
-  - [`TiltSensor`](#-tiltsensor-)
-  - [`GyroSensor`](#-gyrosensor-)
-  - [`IMUSensor`](#-imusensor-)
-  - [`FilteredSensor`](#-filteredsensor-)
-* [State estimation](#state-estimation)
-+ [Using state estimators](#using-state-estimators)
+- [Klamp't Manual: Control](#klampt-manual-control)
+  - [Controllers](#controllers)
+    - [Default motion queue controller](#default-motion-queue-controller)
+      - [API summary](#api-summary)
+    - [Custom controllers](#custom-controllers)
+      - [API summary](#api-summary-1)
+  - [Actuators](#actuators)
+    - [API summary](#api-summary-2)
+  - [Sensors](#sensors)
+    - [Sensor measurements and attributes](#sensor-measurements-and-attributes)
+      - [Common attributes](#common-attributes)
+      - [`JointPositionSensor`](#jointpositionsensor)
+      - [`JointVelocitySensor`](#jointvelocitysensor)
+      - [`CameraSensor`](#camerasensor)
+      - [`LaserRangeSensor`](#laserrangesensor)
+      - [`DriverTorqueSensor`](#drivertorquesensor)
+      - [`ContactSensor`](#contactsensor)
+      - [`ForceTorqueSensor`](#forcetorquesensor)
+      - [`Accelerometer`](#accelerometer)
+      - [`TiltSensor`](#tiltsensor)
+      - [`GyroSensor`](#gyrosensor)
+      - [`IMUSensor`](#imusensor)
+      - [`FilteredSensor`](#filteredsensor)
+  - [State estimation](#state-estimation)
+    - [Using state estimators](#using-state-estimators)
 
 Controllers provide the &quot;glue&quot; between the physical robot's actuators, sensors, and planners. They are very similar to planners in that they generate controls for the robot, but the main difference is that a controller is expected to work online and synchronously within a fixed, small time budget. As a result, they can only perform relatively light computations.
 
@@ -120,7 +123,14 @@ Sensor settings may also be dynamically configured via an XML tag of the form `<
 
 Formal documentation is not yet complete for most sensors.  For the most part, the attributes of a sensor match the members corresponding C++ class.  Please see the C++ class attributes and comments for the most complete information.
 
-####`JointPositionSensor`
+#### Common attributes
+
+Common settings in all sensor types include:
+
+- `enabled` (bool): 1 to indicate that the sensor is enabled, 0 otherwise.
+- `rate` (float): the rate at which the sensor runs, in Hz. 0 means the sensor is run "as fast as possible", i.e., at the controller time step.
+
+#### `JointPositionSensor`
 
 Settings are:
 
@@ -128,7 +138,7 @@ Settings are:
 - `qresolution` (float list): resolution of each reading, in radians. E.g. "0.01 ... 0.01" indicates that each reading will be rounded to the nearest 0.01 radian
 - `qvariance` (float list): variance of each reading, in radians
 
-[C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classJointPositionSensor.html).
+[C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1JointPositionSensor.html).
 
 #### `JointVelocitySensor`
 
@@ -138,7 +148,7 @@ Settings are:
 - `qresolution` (float list): resolution of each reading, in rad/s. E.g. "0.1 ... 0.1" indicates that each reading will be rounded to the nearest 0.1 rad/s
 - `qvariance` (float list): variance of each reading, in rad/s.
 
-[C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classJointVelocitySensor.html).
+[C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1JointVelocitySensor.html).
 
 #### `CameraSensor`
 
@@ -155,43 +165,43 @@ Settings are:
 - `cx`, `cy` (float): the focal point of the sensor, in pixels.
 - `zmin`, `zmax` (float): minimum and maximum range of the depth sensor.
 
-[C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classCameraSensor.html).
+[C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1CameraSensor.html).
 
 #### `LaserRangeSensor`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classLaserRangeSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1LaserRangeSensor.html) for attributes.
 
 #### `DriverTorqueSensor`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classDriverTorqueSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1DriverTorqueSensor.html) for attributes.
 
 #### `ContactSensor`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classContactSensorSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1ContactSensorSensor.html) for attributes.
 
 #### `ForceTorqueSensor`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classForceTorqueSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1ForceTorqueSensor.html) for attributes.
 
 #### `Accelerometer`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classAccelerometer.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1Accelerometer.html) for attributes.
 
 #### `TiltSensor`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classTiltSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1TiltSensor.html) for attributes.
 
 #### `GyroSensor`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classGyroSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1GyroSensor.html) for attributes.
 
 #### `IMUSensor`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classIMUSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1IMUSensor.html) for attributes.
 
 #### `FilteredSensor`
 
-See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classFilteredSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1FilteredSensor.html) for attributes.
 
 
 ## State estimation
