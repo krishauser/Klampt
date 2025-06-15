@@ -164,13 +164,13 @@ class GLProgram:
         # Viewport
         view = self.view
         ydevice = (self.window.height - view.y - view.h)
-        GL.glViewport(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
+        GL.glViewport(int(view.x*view.screenDeviceScale),int(ydevice*view.screenDeviceScale),int(view.w*view.screenDeviceScale),int(view.h*view.screenDeviceScale))
         
         # Initialize
         GL.glClearColor(*self.clearColor)
-        GL.glScissor(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
-        GL.glEnable(GL.GL_SCISSOR_TEST);
-        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        GL.glScissor(int(view.x*view.screenDeviceScale),int(ydevice*view.screenDeviceScale),int(view.w*view.screenDeviceScale),int(view.h*view.screenDeviceScale))
+        GL.glEnable(GL.GL_SCISSOR_TEST)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glEnable(GL.GL_LIGHTING)
         GL.glEnable(GL.GL_NORMALIZE)
@@ -181,7 +181,7 @@ class GLProgram:
         """
         GL.glMatrixMode(GL.GL_PROJECTION)
         GL.glLoadIdentity()
-        GL.glOrtho(0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale,0,-1,1);
+        GL.glOrtho(0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale,0,-1,1)
         GL.glMatrixMode(GL.GL_MODELVIEW)
         GL.glLoadIdentity()
        

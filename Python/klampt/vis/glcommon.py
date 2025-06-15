@@ -205,7 +205,7 @@ class GLMultiViewportProgram(GLProgram):
     def displayfunc(self):
         anyTrue = False
         GL.glClearColor(0,0,0,0)
-        GL.glScissor(0,0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale)
+        GL.glScissor(0,0,int(self.view.w*self.view.screenDeviceScale),int(self.view.h*self.view.screenDeviceScale))
         GL.glEnable(GL.GL_SCISSOR_TEST)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         for p in self.views:

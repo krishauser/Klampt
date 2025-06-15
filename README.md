@@ -95,11 +95,12 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
-**master** (5/6/2025)
+**master** (6/10/2025)
 -   Fixed sensor saving / loading within robot files.
 -   Fixed crashing with Group geometry rendering after the geometry is transformed.
 -   Collada (DAE) files are now loaded without Assimp flipping the Y-Z axes. 
 -   Fixed OpenGL warnings for specular highlights out of OpenGL's range.
+-   Python API: OpenGL interface now supports non-integer screen-device scales.
 
 **0.10.1** (4/20/2025)
 -   C++ API: Can use `KrisLibrary::setLogLevel()` function to control logging verbosity, with or without use of LOG4CXX library.

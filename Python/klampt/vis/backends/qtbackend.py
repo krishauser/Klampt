@@ -219,7 +219,9 @@ class QtGLWindow(QOpenGLWidget):
         if hasattr(self,'devicePixelRatio'):
             program.view.screenDeviceScale = self.devicePixelRatio()
             if int(program.view.screenDeviceScale) != program.view.screenDeviceScale:
-                raise ValueError("Screen-device scale is not integer, no idea how this will work...")
+                import warnings
+                warnings.warn("QtGLWindow: screen-device scale is not integer, no idea how this will work...")
+                program.view.screenDeviceScale = program.view.screenDeviceScale
             else:
                 program.view.screenDeviceScale = int(program.view.screenDeviceScale)
         else:
@@ -363,6 +365,7 @@ class QtGLWindow(QOpenGLWidget):
         if want_depth:
             self.makeCurrent()
             x,y,w,h = self.program.view.x*self.program.view.screenDeviceScale,self.program.view.y*self.program.view.screenDeviceScale,self.program.view.w*self.program.view.screenDeviceScale,self.program.view.h*self.program.view.screenDeviceScale
+            x,y,w,h = int(x),int(y),int(w),int(h)
             n,f = self.program.view.n,self.program.view.f
             try:
                 depthdata = glReadPixels( x, y, w, h, GL_DEPTH_COMPONENT, GL_FLOAT)
