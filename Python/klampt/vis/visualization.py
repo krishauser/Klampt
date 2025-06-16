@@ -3267,9 +3267,9 @@ class VisAppearance:
                 try:
                     itypes = objectToVisType(item,world)
                 except Exception as e:
-                    import traceback
-                    traceback.print_exc()
-                    warnings.warn("Unsupported object type {} of type {}".format(item,item.__class__.__name__))
+                    # import traceback
+                    # traceback.print_exc()
+                    warnings.warn("klampt.vis: Unsupported object {} of type {}, value {}".format(self.name,item.__class__.__name__,item))
                     return
             if itypes is None:
                 warnings.warn("Unable to convert item {} to drawable".format(str(item)))
@@ -4187,6 +4187,8 @@ class VisualizationScene:
             transparent = v.transparent()
             if transparent is not False:
                 draw_order = v.attributes.get('draw_order',None)
+                if draw_order is None:
+                    draw_order = -10000
                 if draw_order not in delayed:
                     delayed[draw_order] = []
                 delayed[draw_order].append(k)
