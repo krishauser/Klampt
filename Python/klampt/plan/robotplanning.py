@@ -239,8 +239,10 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
     except RuntimeError:
         #one of the endpoints is infeasible, print it out
         if space.cspace==None: space.setup()
-        sfailures = space.cspace.feasibilityFailures(plan.space.project(q0))
-        gfailures = space.cspace.feasibilityFailures(plan.space.project(target))
+        q0_raw = q0 if not hasattr(plan.space,'project') else plan.space.project(q0)
+        target_raw = target if not hasattr(plan.space,'project') else plan.space.project(target)
+        sfailures = space.cspace.feasibilityFailures(q0_raw)
+        gfailures = space.cspace.feasibilityFailures(target_raw)
         if sfailures:
             warnings.warn("Start configuration fails {}".format(sfailures))
             if 'self collision' in sfailures:
