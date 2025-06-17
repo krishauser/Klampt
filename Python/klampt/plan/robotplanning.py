@@ -378,7 +378,8 @@ def plan_to_cartesian_objective(world : WorldModel, robot : RobotModel, iktarget
     Args:
         world (WorldModel): same as plan_to_config
         iktargets (list of :class:`IKObjective`): a list of IKObjective
-            instances (see the ik module)
+            instances (see the ik module) that should be satisfied at the end
+            of the motion.
         iktolerance (float): a tolerance to which the ik objectives must be
             satisfied
 
