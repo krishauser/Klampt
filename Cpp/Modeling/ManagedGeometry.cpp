@@ -488,6 +488,12 @@ const ManagedGeometry& ManagedGeometry::operator = (const ManagedGeometry& rhs)
 void ManagedGeometry::DrawGL()
 {
   if(!geometry) return;
+  if(geometry->Empty() || geometry->NumElements()==0) {
+    fprintf(stderr,"ManagedGeometry::DrawGL: Warning, called on empty geometry");
+    if(IsCached()) fprintf(stderr," (%s)",cacheKey.c_str());
+    fprintf(stderr,"\n");
+    return;
+  }
   Assert(appearance->geom != NULL);
   //Assert(appearance->geom == geometry.get());
   if(appearance->geom == NULL) {
