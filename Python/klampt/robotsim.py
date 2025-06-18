@@ -3096,8 +3096,9 @@ class Geometry3D(object):
     Use the constructor, the :meth:`set`, or the set[TYPE]() methods to completely
     change the geometry's data.  
 
-    Note: if you want to set a world item's geometry to be equal to a standalone
-    geometry, use the set(rhs) function rather than the assignment (=) operator.  
+    Note: if you want to set a world item's geometry to have the same contents as a
+    standalone geometry, use the set(rhs) function rather than the assignment (=)
+    operator. `object.geometry() = rhs` does not work.  
 
     Modifiers include:  
 
@@ -3128,7 +3129,15 @@ class Geometry3D(object):
 
     For most geometry types (TriangleMesh, PointCloud, ConvexHull), the first time
     you perform a query, some collision detection data structures will be
-    initialized. This preprocessing step can take some time for complex geometries.  
+    initialized. This preprocessing step can take some time for complex geometries.
+    If you want to do this at a specific time, you can call :meth:`refreshCollider`
+    to initialize the data structures.  
+
+    Note: Modifying the underlying geometry data (such as `getPointCloud().points =
+    X`) will NOT update existing collision checking data structures associated with
+    this geometry. If you had prior data and the collision checking data structures
+    were initialized, you will need to call :meth:`refreshCollider` to update them
+    after modification.  
 
     **Collision margins**  
 
@@ -3168,7 +3177,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.OccupancyGrid` or :obj:`Heightmap` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D`, optional): 
+            arg2 (:class:`~klampt.ImplicitSurface` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -3216,10 +3225,19 @@ class Geometry3D(object):
 
     def empty(self) -> bool:
         r"""
-        Returns True if this has no contents (not the same as numElements()==0)  
+        Returns True if this has not been set to a type (not the same as
+        numElements()==0)  
 
         """
         return _robotsim.Geometry3D_empty(self)
+
+    def refreshCollider(self) -> None:
+        r"""
+        Initializes / refreshes the collision data structures for the current geometry
+        content.  
+
+        """
+        return _robotsim.Geometry3D_refreshCollider(self)
 
     def getTriangleMesh(self) ->  "TriangleMesh":
         r"""
@@ -7130,7 +7148,7 @@ class SensorModel(object):
 
 
         Args:
-            link (int or :class:`~klampt.RobotModelLink`): 
+            link (:class:`~klampt.RobotModelLink` or int): 
         """
         return _robotsim.SensorModel__setLink(self, *args)
 
@@ -7760,7 +7778,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -7914,7 +7932,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 

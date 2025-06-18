@@ -30003,6 +30003,40 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_refreshCollider(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_refreshCollider" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      (arg1)->refreshCollider();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_getTriangleMesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -73020,7 +73054,16 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_empty(Geometry3D self) -> bool\n"
 		"\n"
 		"\n"
-		"Returns True if this has no contents (not the same as numElements()==0)  \n"
+		"Returns True if this has not been set to a type (not the same as\n"
+		"numElements()==0)  \n"
+		"\n"
+		""},
+	 { "Geometry3D_refreshCollider", _wrap_Geometry3D_refreshCollider, METH_O, "\n"
+		"Geometry3D_refreshCollider(Geometry3D self)\n"
+		"\n"
+		"\n"
+		"Initializes / refreshes the collision data structures for the current geometry\n"
+		"content.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_O, "\n"

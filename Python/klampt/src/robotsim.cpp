@@ -1061,6 +1061,18 @@ Geometry3D Geometry3D::copy()
   return res;
 }
 
+void Geometry3D::refreshCollider()
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(geom == NULL) {
+    throw PyException("Geometry3D::refreshCollider: geometry is NULL");
+  }
+  if(geom->Empty()) {
+    return; //nothing to do
+  }
+  geom->ReinitCollisionData();
+}
+
 void Geometry3D::set(const Geometry3D& g)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
@@ -1085,6 +1097,7 @@ void Geometry3D::set(const Geometry3D& g)
   //geom->ClearCollisionData();
   if(mgeom) {
     //update the display list / cache
+    printf("Geometry3D::set(): Updating managed geometry %d in world %d\n",id,world);
     mgeom->OnGeometryChange();
     mgeom->RemoveFromCache();
   }

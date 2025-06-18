@@ -1016,8 +1016,9 @@ because that could be computationally expensive.
 Use the constructor, the :meth:`set`, or the set[TYPE]() methods to completely
 change the geometry's data.  
 
-Note: if you want to set a world item's geometry to be equal to a standalone
-geometry, use the set(rhs) function rather than the assignment (=) operator.  
+Note: if you want to set a world item's geometry to have the same contents as a
+standalone geometry, use the set(rhs) function rather than the assignment (=)
+operator. `object.geometry() = rhs` does not work.  
 
 Modifiers include:  
 
@@ -1048,7 +1049,15 @@ Modifiers include:
 
 For most geometry types (TriangleMesh, PointCloud, ConvexHull), the first time
 you perform a query, some collision detection data structures will be
-initialized. This preprocessing step can take some time for complex geometries.  
+initialized. This preprocessing step can take some time for complex geometries.
+If you want to do this at a specific time, you can call :meth:`refreshCollider`
+to initialize the data structures.  
+
+Note: Modifying the underlying geometry data (such as `getPointCloud().points =
+X`) will NOT update existing collision checking data structures associated with
+this geometry. If you had prior data and the collision checking data structures
+were initialized, you will need to call :meth:`refreshCollider` to update them
+after modification.  
 
 **Collision margins**  
 
@@ -1134,7 +1143,14 @@ PointCloud, ImplicitSurface, OccupancyGrid, Heightmap, or Group.
 
 %feature("docstring") Geometry3D::empty "
 
-Returns True if this has no contents (not the same as numElements()==0)  
+Returns True if this has not been set to a type (not the same as
+numElements()==0)  
+";
+
+%feature("docstring") Geometry3D::refreshCollider "
+
+Initializes / refreshes the collision data structures for the current geometry
+content.  
 ";
 
 %feature("docstring") Geometry3D::getTriangleMesh "
@@ -5300,7 +5316,7 @@ Instability correction kicks in whenever the kinetic energy K(t) of an object
 exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  
 
 See `Klampt/Simulation/ODESimulator.h
-<http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
+<http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classKlampt_1_1ODESimulator.html>`_
 for detailed descriptions of these parameters.  
 
 Returns:  

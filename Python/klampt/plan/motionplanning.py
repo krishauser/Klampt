@@ -400,7 +400,7 @@ def set_plan_setting(*args) -> None:
 
     Args:
         setting (str): 
-        value (str or float): 
+        value (float or str): 
 
     Valid numeric values are:  
 

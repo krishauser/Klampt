@@ -722,10 +722,10 @@ public:
  *
  * Use the constructor, the :meth:`set`, or the set[TYPE]() methods to
  * completely change the geometry's data.
- *
- * Note: if you want to set a world item's geometry to be equal to a standalone
- * geometry, use the set(rhs) function rather than the assignment (=)
- * operator.
+ * 
+ * Note: if you want to set a world item's geometry to have the same contents as
+ * a standalone geometry, use the set(rhs) function rather than the assignment (=)
+ * operator.  ``object.geometry() = rhs`` does not work.
  *
  * Modifiers include:
  * 
@@ -758,8 +758,15 @@ public:
  * For most geometry types (TriangleMesh, PointCloud, ConvexHull), the
  * first time you perform a query, some collision detection data structures
  * will be initialized.  This preprocessing step can take some time for complex
- * geometries.
- *
+ * geometries.  If you want to do this at a specific time, you can call
+ * :meth:`refreshCollider` to initialize the data structures.
+ * 
+ * Note: Modifying the underlying geometry data (such as ``getPointCloud().points = X``)
+ * will NOT update existing collision checking data structures associated with this
+ * geometry.  If you had prior data and the collision checking data structures
+ * were initialized, you will need to call :meth:`refreshCollider` to update
+ * them after modification.  
+ * 
  * **Collision margins**
  * 
  * Each object also has a "collision margin" which may virtually fatten the
@@ -808,8 +815,11 @@ class Geometry3D
   ///Returns the type of geometry: GeometricPrimitive, ConvexHull, TriangleMesh,
   ///PointCloud, ImplicitSurface, OccupancyGrid, Heightmap, or Group
   std::string type();
-  ///Returns True if this has no contents (not the same as numElements()==0)
+  ///Returns True if this has not been set to a type (not the same as numElements()==0)
   bool empty();
+  ///Initializes / refreshes the collision data structures for the current
+  ///geometry content.
+  void refreshCollider();
   ///Returns a TriangleMesh if this geometry is of type TriangleMesh
   TriangleMesh getTriangleMesh();
   ///Returns a PointCloud if this geometry is of type PointCloud
@@ -852,7 +862,7 @@ class Geometry3D
   ///The element will be in local coordinates.
   Geometry3D getElement(int element);
   ///Sets an element of the Geometry3D if it is a Group, TriangleMesh, or
-  /// PointCloud. The element will be in local coordinates.
+  ///PointCloud. The element will be in local coordinates.
   ///Raises an error if this is of any other type.  
   void setElement(int element,const Geometry3D& data);
   ///Returns the number of sub-elements in this geometry

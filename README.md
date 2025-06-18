@@ -95,13 +95,16 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
-**master** (6/10/2025)
+**master** (6/18/2025)
 -   Fixed sensor saving / loading within robot files.
 -   Fixed crashing with Group geometry rendering after the geometry is transformed.
+-   Fixed improper collision geometry when a geometry is updated.
 -   Collada (DAE) files are now loaded without Assimp flipping the Y-Z axes. 
 -   Fixed OpenGL warnings for specular highlights out of OpenGL's range.
 -   Fixed error in geometry conversion to ImplicitSurface type after collision data initialized.
 -   Python API: OpenGL interface now supports non-integer screen-device scales.
+-   Python API: Fixed improper collision geometry when a geometry is updated via `set()`. 
+-   Python API: Added `Geometry3D.refreshCollider()` method to update the collider when the underlying geometry data is updated.
 
 **0.10.1** (4/20/2025)
 -   C++ API: Can use `KrisLibrary::setLogLevel()` function to control logging verbosity, with or without use of LOG4CXX library.
