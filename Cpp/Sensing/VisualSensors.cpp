@@ -695,8 +695,8 @@ bool CameraSensor::SetSetting(const string& name,const string& str)
   SET_SENSOR_SETTING(cx);
   SET_SENSOR_SETTING(yres);
   SET_SENSOR_SETTING(yfov);
-  SET_SENSOR_SETTING(fx);
-  SET_SENSOR_SETTING(cx);
+  SET_SENSOR_SETTING(fy);
+  SET_SENSOR_SETTING(cy);
   SET_SENSOR_SETTING(zresolution);
   SET_SENSOR_SETTING(zmin);
   SET_SENSOR_SETTING(zmax);
