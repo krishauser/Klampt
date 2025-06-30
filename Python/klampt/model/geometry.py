@@ -1,21 +1,21 @@
 """Utility functions for operating on  geometry.  See the
-:class:`~klampt.Geometry3D` documentation for the core geometry class. 
+:class:`~Geometry3D` documentation for the core geometry class. 
 
 .. versionadded:: 0.8.6
 
-[functions moved here from :mod:`klampt.model.sensing`]
+[functions moved here from :mod:`model.sensing`]
 
 Working with geometric primitives
 =================================
 
 :func:`box` and :func:`sphere` are aliases for the functions in
-:mod:`klampt.model.create.primitives`.
+:mod:`model.create.primitives`.
 
 Working with point clouds
 =========================
 
 :func:`point_cloud_normals` estimates normals from a normal-free
-:class:`~klampt.PointCloud`.
+:class:`~PointCloud`.
 
 The :func:`fit_plane`, :func:`fit_plane3`, and :class:`PlaneFitter` class help
 with plane estimation.
@@ -28,6 +28,15 @@ solve for point cloud alignment.
 
 :func:`point_cloud_colors` and :func:`point_cloud_set_colors` sets / gets 
 colors from a PointCloud.
+
+Working with heightmaps
+========================
+
+:func:`upper_heightmap` and :func:`lower_heightmap` create a heightmap
+from the top down or bottom up, respectively, of a :class:`~Geometry3D` object
+that matches the array of an existing heightmap.
+
+:func:`heightmap_normals` computes normals for a heightmap.
 
 Other utilities
 ===============
@@ -47,9 +56,12 @@ code.
 :func:`sample_surface` samples points on the surface of a Geometry3D.
 .. versionadded:: 0.9.2
 
+:func:`convert` converts all geometries in a world, robot, etc to another
+type.
+
 """
 
-from ..robotsim import Geometry3D,PointCloud,TriangleMesh
+from ..robotsim import WorldModel,RobotModel,RigidObjectModel,RobotModelLink,TerrainModel,Geometry3D,PointCloud,Heightmap,TriangleMesh
 import math
 from .create import primitives
 from ..math import vectorops,so3,se3
@@ -62,10 +74,10 @@ _tried_scipy_import = False
 sp = None
 
 box = primitives.box
-"""Alias for :func:`klampt.model.create.primitives.box`"""
+"""Alias for :func:`model.create.primitives.box`"""
 
 sphere = primitives.sphere
-"""Alias for :func:`klampt.model.create.primitives.sphere`"""
+"""Alias for :func:`model.create.primitives.sphere`"""
 
 def _try_scipy_import():
     global _has_scipy,_tried_scipy_import
@@ -79,7 +91,7 @@ def _try_scipy_import():
         #sys.modules['scipy'] = scipy
     except ImportError:
         import warnings
-        warnings.warn("klampt.model.geometry.py: scipy not available.",ImportWarning)
+        warnings.warn("model.geometry.py: scipy not available.",ImportWarning)
         _has_scipy = False
     return _has_scipy
 
@@ -365,7 +377,7 @@ def align_points_rotation(apts,bpts) -> Rotation:
     or a PointCloud.
 
     Returns:
-        Rotation: the klampt.so3 element that minimizes the sum of
+        Rotation: the so3 element that minimizes the sum of
         squared errors ||R*ai-bi||^2.
     """
     if isinstance(apts, PointCloud):
@@ -412,7 +424,7 @@ def align_points(apts,bpts) -> RigidTransform:
     or a PointCloud.
 
     Returns:
-        RigidTransform: the klampt.se3 element that minimizes the sum of
+        RigidTransform: the se3 element that minimizes the sum of
         squared errors ||T*ai-bi||^2.
     """
     if isinstance(apts, PointCloud):
@@ -797,7 +809,7 @@ def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:
 def vertex_normals(trimesh : Union[TriangleMesh,Geometry3D], area_weighted=True) -> np.ndarray:
     """
     Returns a list or numpy array of (outward) vertex normals for a
-    triangle mesh.
+    triangle mesh.  The result is in the local frame of the mesh.
     
     Args:
         trimesh (TriangleMesh or Geometry3D)
@@ -827,7 +839,7 @@ def merge(*items) -> Geometry3D:
         be convertable to TriangleMesh, and the result will be of TriangleMesh
         type.
     """
-    from klampt.io import numpy_convert
+    from io import numpy_convert
 
     xforms = []
     tri_meshes = []
@@ -1001,4 +1013,135 @@ def sample_surface(geom : Geometry3D,
     if len(items)==1:
         return items[0]
     return np.hstack(items)
-        
+
+
+def upper_heightmap(geom : Geometry3D, like : Heightmap, mask_value = -np.inf) -> Geometry3D:
+    """Gets the upper heightmap of a geometry, aligned to the grid of an
+    existing heightmap.
+    
+    Cells that do not contain any proejcted geometry get `mask_value` as their
+    heights."""
+    res = like.copy()
+    res.heights[:,:] = mask_value
+    resgeom = Geometry3D(res)
+    resgeom.merge(geom)
+    return resgeom
+
+
+def lower_heightmap(geom : Geometry3D, like : Heightmap, mask_value = -np.inf) -> Geometry3D:
+    """Gets the lower heightmap of a geometry, aligned to the grid of an
+    existing heightmap.
+    
+    Cells that do not contain any proejcted geometry get `mask_value` as their
+    heights."""
+    res = like.copy()
+    res.heights[:,:] = mask_value
+    vp = res.viewport
+    #flip the viewport z direction
+    vpPose = vp.getPose()
+    vp.setPose(so3.mul(vpPose[0],so3.rotation((0,1,0),-np.pi)),vpPose[1])
+    res.viewport = vp
+    resgeom = Geometry3D(res)
+    resgeom.merge(geom)
+    #flip x-dim and values of heights
+    res.heights = np.flip(res.heights, axis=0)
+    mask = np.isfinite(res.heights) & (res.heights != mask_value)
+    res.heights[mask] = -res.heights[mask]
+    #flip viewport back
+    res.viewport = like.viewport
+    return resgeom
+
+def heightmap_normals(hm : Union[Heightmap,Geometry3D]) -> np.ndarray:
+    """Returns the normals of a heightmap, either from a Heightmap object or
+    from a Geometry3D object that has a Heightmap representation.
+    
+    Args:
+        hm (Heightmap or Geometry3D): the heightmap
+
+    Returns:
+        np.ndarray: An M x N x 3 matrix of outward normals in the heightmap's
+        local frame, but transformed by any rotation in hm.pose.  If a heightmap
+        cell is non-finite, its normal is set to (0,0,0).
+    """
+    if isinstance(hm,Geometry3D):
+        assert hm.type() == 'Heightmap',"Must provide a Heightmap to heightmap_normals"
+        hm = hm.getHeightmap()
+    assert isinstance(hm,Heightmap),"Must provide a Heightmap to heightmap_normals"
+    valid = np.isfinite(hm.heights)
+    #forward / reverse differences at borders, centered differences in the middle
+    dx = np.empty(hm.heights.shape)
+    dx[0,:] = hm.heights[1,:]-hm.heights[0,:]
+    dx[1:-1,:] = (hm.heights[2:,:] - hm.heights[:-2,:])*0.5
+    dx[-1,:] = hm.heights[-1,:]-hm.heights[-2,:]
+    dy = np.empty(hm.heights.shape)
+    dy[:,0] = hm.heights[:,1]-hm.heights[:,0]
+    dy[:,1:-1] = (hm.heights[:,2:] - hm.heights[:,:-2])*0.5
+    dy[:,-1] = hm.heights[:,-1]-hm.heights[:,-2]
+    if not np.all(valid):
+        #switch to forward/backward differences at validity borders
+        valid_left = np.zeros(hm.heights.shape,dtype=bool)
+        valid_right = np.zeros(hm.heights.shape,dtype=bool)
+        valid_up = np.zeros(hm.heights.shape,dtype=bool)
+        valid_down = np.zeros(hm.heights.shape,dtype=bool)
+        valid_left[1:,:] = valid[:-1,:]
+        valid_right[:-1,:] = valid[1:,:]
+        valid_up[:,1:] = valid[:,:-1]
+        valid_down[:,:-1] = valid[:,1:]
+        dx[~valid_left & ~valid_right] = 0.0
+        dy[~valid_up & ~valid_down] = 0.0
+        right_diffs = np.concatenate((hm.heights[1:,:]-hm.heights[:-1,:],np.zeros((1,hm.heights.shape[1]))),axis=0)
+        down_diffs = np.concatenate((hm.heights[:,1:]-hm.heights[:,:-1],np.zeros((hm.heights.shape[0],1))),axis=1)
+        dx[~valid_left & valid_right] = right_diffs[~valid_left & valid_right]
+        dx[valid_left & ~valid_right] = right_diffs[np.roll(valid_left & ~valid_right,-1,axis=0)]
+        dy[~valid_up & valid_down] = down_diffs[~valid_up & valid_down]
+        dy[valid_up & ~valid_down] = down_diffs[np.roll(valid_up & ~valid_down,-1,axis=1)]
+    if hm.isOrthographic():
+        xres,yres = hm.getResolution()
+        dx *= (1.0/xres)
+        dy *= (1.0/yres)
+        normals = np.empty((hm.heights.shape[0],hm.heights.shape[1],3))
+        normals[:,:,0] = -dx
+        normals[:,:,1] = dy
+        normals[:,:,2] = 1.0
+        norms = np.linalg.norm(normals,axis=2)
+        normals[~valid] = 0.0
+        normals[valid] /= norms[valid][:,np.newaxis]
+        R,t = hm.viewport.getPose()
+        if R != so3.identity():
+            normals = np.dot(normals,so3.ndarray(R).T)
+        return normals
+    else:
+        raise NotImplementedError("Heightmap normals only implemented for orthographic heightmaps, not perspective heightmaps")
+
+
+def convert(obj : Union[WorldModel,RobotModel,RigidObjectModel,RobotModelLink,TerrainModel,Geometry3D],
+            type : str, param :float = 0):
+    """Converts an object or collection's geometry to another type. 
+    The object is modified in-place.
+    
+    You can also convert to a bounding box by setting type='aabb'
+    """
+    if isinstance(obj,WorldModel):
+        for r in obj.robots:
+            convert(r,type,param)
+        for o in obj.rigidObjects:
+            convert(o,type,param)
+        for t in obj.terrains:
+            convert(o,type,param)
+    elif isinstance(obj,RobotModel):
+        for l in obj.links:
+            convert(l,type,param)
+    elif hasattr(obj,'geometry'):
+        convert(obj.geometry(),type,param)
+    elif isinstance(obj,Geometry3D):
+        if obj.empty(): return
+        if type == 'aabb':
+            from klampt import GeometricPrimitive
+            obj.setCurrentTransform(*se3.identity())
+            BB = obj.getBBTight()
+            BBgeom = GeometricPrimitive()
+            BBgeom.setAABB(BB[0],BB[1])
+            obj.setGeometricPrimitive(BBgeom)
+        else:
+            obj2 = obj.convert(type,param)
+            obj.set(obj2)
