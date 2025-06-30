@@ -3189,6 +3189,7 @@ class Geometry3D(object):
         __init__(Geometry3D self, ImplicitSurface arg2) -> Geometry3D
         __init__(Geometry3D self, OccupancyGrid arg2) -> Geometry3D
         __init__(Geometry3D self, Heightmap arg2) -> Geometry3D
+        __init__(Geometry3D self, char const * fn) -> Geometry3D
 
 
         """

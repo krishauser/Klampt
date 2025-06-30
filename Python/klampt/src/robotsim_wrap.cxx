@@ -29659,6 +29659,42 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_9(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  Geometry3D *result = 0 ;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Geometry3D" "', argument " "1"" of type '" "char const *""'");
+  }
+  arg1 = reinterpret_cast< char * >(buf1);
+  {
+    try {
+      result = (Geometry3D *)new Geometry3D((char const *)arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Geometry3D, SWIG_POINTER_NEW |  0 );
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
@@ -29734,6 +29770,14 @@ SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *self, PyObject *args) {
       return _wrap_new_Geometry3D__SWIG_8(self, argc, argv);
     }
   }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Geometry3D__SWIG_9(self, argc, argv);
+    }
+  }
   
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_Geometry3D'.\n"
@@ -29746,7 +29790,8 @@ fail:
     "    Geometry3D::Geometry3D(PointCloud const &)\n"
     "    Geometry3D::Geometry3D(ImplicitSurface const &)\n"
     "    Geometry3D::Geometry3D(OccupancyGrid const &)\n"
-    "    Geometry3D::Geometry3D(Heightmap const &)\n");
+    "    Geometry3D::Geometry3D(Heightmap const &)\n"
+    "    Geometry3D::Geometry3D(char const *)\n");
   return 0;
 }
 
@@ -73005,7 +73050,8 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D(PointCloud arg1)\n"
 		"Geometry3D(ImplicitSurface arg1)\n"
 		"Geometry3D(OccupancyGrid arg1)\n"
-		"new_Geometry3D(Heightmap arg1) -> Geometry3D\n"
+		"Geometry3D(Heightmap arg1)\n"
+		"new_Geometry3D(char const * fn) -> Geometry3D\n"
 		"\n"
 		"\n"
 		""},

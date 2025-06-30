@@ -3175,9 +3175,12 @@ class Geometry3D(object):
 
         __init__ (arg2): :class:`~klampt.Geometry3D`
 
+        __init__ (fn): :class:`~klampt.Geometry3D`
+
 
         Args:
-            arg2 (:class:`~klampt.ImplicitSurface` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive`, optional): 
+            arg2 (:class:`~klampt.OccupancyGrid` or :class:`~klampt.Geometry3D` or :class:`~klampt.ConvexHull` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.ImplicitSurface`, optional): 
+            fn (str, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -7778,7 +7781,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -7932,7 +7935,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -8782,7 +8785,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 

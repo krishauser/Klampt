@@ -102,8 +102,12 @@ Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the 
 -   Collada (DAE) files are now loaded without Assimp flipping the Y-Z axes. 
 -   Fixed OpenGL warnings for specular highlights out of OpenGL's range.
 -   Fixed error in geometry conversion to ImplicitSurface type after collision data initialized.
+-   Fixed error in fy / cy properties of cameras not being read properly.
+-   Python API: Added cost function queries for `MotionPlan` objects.
+-   Python API: New constructor for `Geometry3D` objects from file name.
 -   Python API: OpenGL interface now supports non-integer screen-device scales.
 -   Python API: Fixed improper collision geometry when a geometry is updated via `set()`. 
+-   Python API: Fixed heightmap / viewport pose orientation flip on `getPose()`.
 -   Python API: Added `Geometry3D.refreshCollider()` method to update the collider when the underlying geometry data is updated.
 
 **0.10.1** (4/20/2025)

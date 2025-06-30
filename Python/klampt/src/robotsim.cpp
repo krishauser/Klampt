@@ -423,6 +423,8 @@ Viewport SetCameraViewport(const Camera::Viewport& viewport)
   pose.get(&vp.xform[0]);
   if(viewport.ori == Camera::CameraConventions::OpenCV)
     vp.ori = "opencv";
+  else
+    vp.ori = "opengl";  //default
   return vp;
 }
 
@@ -1024,6 +1026,17 @@ Geometry3D::Geometry3D(const Heightmap& rhs)
 {
   geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
   setHeightmap(rhs);
+}
+
+Geometry3D::Geometry3D(const char* fn)
+:world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
+  if(!loadFile(fn)) {
+    stringstream ss;
+    ss << "Error loading geometry file " << fn;
+    throw PyException(ss.str());
+  }
 }
 
 

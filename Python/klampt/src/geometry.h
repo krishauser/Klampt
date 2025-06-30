@@ -802,6 +802,7 @@ class Geometry3D
   Geometry3D(const ImplicitSurface&);
   Geometry3D(const OccupancyGrid&);
   Geometry3D(const Heightmap&);
+  Geometry3D(const char* fn);
   ~Geometry3D();
   const Geometry3D& operator = (const Geometry3D& rhs);
   ///Creates a standalone geometry from this geometry
