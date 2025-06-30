@@ -26563,6 +26563,195 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Heightmap_getVertex(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double temp4[3] ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!SWIG_Python_UnpackTuple(args, "Heightmap_getVertex", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_getVertex" "', argument " "1"" of type '" "Heightmap const *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Heightmap_getVertex" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Heightmap_getVertex" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      ((Heightmap const *)arg1)->getVertex(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg4,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_getSize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[2] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_getSize" "', argument " "1"" of type '" "Heightmap const *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    try {
+      ((Heightmap const *)arg1)->getSize(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,2);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Heightmap_getResolution(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Heightmap *arg1 = (Heightmap *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[2] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Heightmap, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Heightmap_getResolution" "', argument " "1"" of type '" "Heightmap const *""'"); 
+  }
+  arg1 = reinterpret_cast< Heightmap * >(argp1);
+  {
+    try {
+      ((Heightmap const *)arg1)->getResolution(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,2);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Heightmap_shift(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Heightmap *arg1 = (Heightmap *) 0 ;
@@ -72809,6 +72998,32 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Gets the height of a vertex (note, indices are x and y units, which is reversed\n"
 		"from image convention)  \n"
+		"\n"
+		""},
+	 { "Heightmap_getVertex", _wrap_Heightmap_getVertex, METH_VARARGS, "\n"
+		"Heightmap_getVertex(Heightmap self, int i, int j)\n"
+		"\n"
+		"\n"
+		"Gets the coordinates of a vertex (note, indices are x and y units, which is\n"
+		"reversed from image convention)  \n"
+		"\n"
+		""},
+	 { "Heightmap_getSize", _wrap_Heightmap_getSize, METH_O, "\n"
+		"Heightmap_getSize(Heightmap self)\n"
+		"\n"
+		"\n"
+		"Returns the width/height of the heightmap in real coordinates. (only directly\n"
+		"interpretable in orthographic mode; in perspective mode the returned value is\n"
+		"the horizontal / vertical FOV in radians.)  \n"
+		"\n"
+		""},
+	 { "Heightmap_getResolution", _wrap_Heightmap_getResolution, METH_O, "\n"
+		"Heightmap_getResolution(Heightmap self)\n"
+		"\n"
+		"\n"
+		"Returns the width/height of each cell of the heightmap in real coordinates.\n"
+		"(only directly interpretable in orthographic mode; in perspective mode the\n"
+		"returned value is the resolution at 1 unit depth.)  \n"
 		"\n"
 		""},
 	 { "Heightmap_shift", _wrap_Heightmap_shift, METH_VARARGS, "\n"

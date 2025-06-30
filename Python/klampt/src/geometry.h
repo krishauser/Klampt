@@ -525,6 +525,16 @@ public:
   void set(int i,int j,double value);
   ///Gets the height of a vertex (note, indices are x and y units, which is reversed from image convention)
   double get(int i,int j);
+  ///Gets the coordinates of a vertex (note, indices are x and y units, which is reversed from image convention)
+  void getVertex(int i,int j,double out[3]) const;
+  ///Returns the width/height of the heightmap in real coordinates.
+  ///(only directly interpretable in orthographic mode; in perspective mode the
+  ///returned value is the horizontal / vertical FOV in radians.)
+  void getSize(double out[2]) const;
+  ///Returns the width/height of each cell of the heightmap in real coordinates.
+  ///(only directly interpretable in orthographic mode; in perspective mode the
+  ///returned value is the resolution at 1 unit depth.)  
+  void getResolution(double out[2]) const;
   /// Shifts the height uniformly 
   void shift(double dh);
   /// Scales the height uniformly 

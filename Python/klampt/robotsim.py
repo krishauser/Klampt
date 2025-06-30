@@ -2586,6 +2586,35 @@ class Heightmap(object):
         """
         return _robotsim.Heightmap_get(self, i, j)
 
+    def getVertex(self, i: int, j: int) -> None:
+        r"""
+        Gets the coordinates of a vertex (note, indices are x and y units, which is
+        reversed from image convention)  
+
+        Args:
+            i (int)
+            j (int)
+        """
+        return _robotsim.Heightmap_getVertex(self, i, j)
+
+    def getSize(self) -> None:
+        r"""
+        Returns the width/height of the heightmap in real coordinates. (only directly
+        interpretable in orthographic mode; in perspective mode the returned value is
+        the horizontal / vertical FOV in radians.)  
+
+        """
+        return _robotsim.Heightmap_getSize(self)
+
+    def getResolution(self) -> None:
+        r"""
+        Returns the width/height of each cell of the heightmap in real coordinates.
+        (only directly interpretable in orthographic mode; in perspective mode the
+        returned value is the resolution at 1 unit depth.)  
+
+        """
+        return _robotsim.Heightmap_getResolution(self)
+
     def shift(self, dh: float) -> None:
         r"""
         Shifts the height uniformly.  
@@ -3179,7 +3208,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.OccupancyGrid` or :class:`~klampt.Geometry3D` or :class:`~klampt.ConvexHull` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.ImplicitSurface`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D` or :class:`~klampt.ConvexHull` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.ImplicitSurface` or :obj:`Heightmap` or :class:`~klampt.TriangleMesh`, optional): 
             fn (str, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
@@ -8785,7 +8814,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 

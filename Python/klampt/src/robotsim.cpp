@@ -3711,6 +3711,24 @@ double Heightmap::get(int i,int j)
   return hm.heights(i,j);
 }
 
+void Heightmap::getVertex(int i,int j,double out[3]) const
+{
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.GetVertex(i,j).get(out);
+}
+
+void Heightmap::getSize(double out[2]) const
+{
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.GetSize().get(out);
+}
+
+void Heightmap::getResolution(double out[2]) const
+{
+  GET_GEOMDATA_DATA(this, Heightmap, hm);
+  hm.GetCellSize().get(out);
+}
+
 void Heightmap::shift(double dh)
 {
   GET_GEOMDATA_DATA(this, Heightmap, hm);

@@ -2572,6 +2572,41 @@ class Heightmap(object):
         """
         return _robotsim.Heightmap_get(self, i, j)
 
+    def getVertex(self, i: "int", j: "int") -> "void":
+        r"""
+        getVertex(Heightmap self, int i, int j)
+
+
+        Gets the coordinates of a vertex (note, indices are x and y units, which is
+        reversed from image convention)  
+
+        """
+        return _robotsim.Heightmap_getVertex(self, i, j)
+
+    def getSize(self) -> "void":
+        r"""
+        getSize(Heightmap self)
+
+
+        Returns the width/height of the heightmap in real coordinates. (only directly
+        interpretable in orthographic mode; in perspective mode the returned value is
+        the horizontal / vertical FOV in radians.)  
+
+        """
+        return _robotsim.Heightmap_getSize(self)
+
+    def getResolution(self) -> "void":
+        r"""
+        getResolution(Heightmap self)
+
+
+        Returns the width/height of each cell of the heightmap in real coordinates.
+        (only directly interpretable in orthographic mode; in perspective mode the
+        returned value is the resolution at 1 unit depth.)  
+
+        """
+        return _robotsim.Heightmap_getResolution(self)
+
     def shift(self, dh: "double") -> "void":
         r"""
         shift(Heightmap self, double dh)
