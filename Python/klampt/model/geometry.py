@@ -1021,9 +1021,9 @@ def upper_heightmap(geom : Geometry3D, like : Heightmap, mask_value = -np.inf) -
     
     Cells that do not contain any proejcted geometry get `mask_value` as their
     heights."""
-    res = like.copy()
+    resgeom = Geometry3D(like)
+    res = resgeom.getHeightmap()
     res.heights[:,:] = mask_value
-    resgeom = Geometry3D(res)
     resgeom.merge(geom)
     return resgeom
 
@@ -1034,14 +1034,14 @@ def lower_heightmap(geom : Geometry3D, like : Heightmap, mask_value = -np.inf) -
     
     Cells that do not contain any proejcted geometry get `mask_value` as their
     heights."""
-    res = like.copy()
+    resgeom = Geometry3D(like)
+    res = resgeom.getHeightmap()
     res.heights[:,:] = mask_value
     vp = res.viewport
     #flip the viewport z direction
     vpPose = vp.getPose()
     vp.setPose(so3.mul(vpPose[0],so3.rotation((0,1,0),-np.pi)),vpPose[1])
     res.viewport = vp
-    resgeom = Geometry3D(res)
     resgeom.merge(geom)
     #flip x-dim and values of heights
     res.heights = np.flip(res.heights, axis=0)
@@ -1069,14 +1069,15 @@ def heightmap_normals(hm : Union[Heightmap,Geometry3D]) -> np.ndarray:
     assert isinstance(hm,Heightmap),"Must provide a Heightmap to heightmap_normals"
     valid = np.isfinite(hm.heights)
     #forward / reverse differences at borders, centered differences in the middle
-    dx = np.empty(hm.heights.shape)
-    dx[0,:] = hm.heights[1,:]-hm.heights[0,:]
-    dx[1:-1,:] = (hm.heights[2:,:] - hm.heights[:-2,:])*0.5
-    dx[-1,:] = hm.heights[-1,:]-hm.heights[-2,:]
-    dy = np.empty(hm.heights.shape)
-    dy[:,0] = hm.heights[:,1]-hm.heights[:,0]
-    dy[:,1:-1] = (hm.heights[:,2:] - hm.heights[:,:-2])*0.5
-    dy[:,-1] = hm.heights[:,-1]-hm.heights[:,-2]
+    with np.errstate(invalid='ignore'):
+        dx = np.empty(hm.heights.shape)
+        dx[0,:] = hm.heights[1,:]-hm.heights[0,:]
+        dx[1:-1,:] = (hm.heights[2:,:] - hm.heights[:-2,:])*0.5
+        dx[-1,:] = hm.heights[-1,:]-hm.heights[-2,:]
+        dy = np.empty(hm.heights.shape)
+        dy[:,0] = hm.heights[:,1]-hm.heights[:,0]
+        dy[:,1:-1] = (hm.heights[:,2:] - hm.heights[:,:-2])*0.5
+        dy[:,-1] = hm.heights[:,-1]-hm.heights[:,-2]
     if not np.all(valid):
         #switch to forward/backward differences at validity borders
         valid_left = np.zeros(hm.heights.shape,dtype=bool)
@@ -1089,8 +1090,9 @@ def heightmap_normals(hm : Union[Heightmap,Geometry3D]) -> np.ndarray:
         valid_down[:,:-1] = valid[:,1:]
         dx[~valid_left & ~valid_right] = 0.0
         dy[~valid_up & ~valid_down] = 0.0
-        right_diffs = np.concatenate((hm.heights[1:,:]-hm.heights[:-1,:],np.zeros((1,hm.heights.shape[1]))),axis=0)
-        down_diffs = np.concatenate((hm.heights[:,1:]-hm.heights[:,:-1],np.zeros((hm.heights.shape[0],1))),axis=1)
+        with np.errstate(invalid='ignore'):
+            right_diffs = np.concatenate((hm.heights[1:,:]-hm.heights[:-1,:],np.zeros((1,hm.heights.shape[1]))),axis=0)
+            down_diffs = np.concatenate((hm.heights[:,1:]-hm.heights[:,:-1],np.zeros((hm.heights.shape[0],1))),axis=1)
         dx[~valid_left & valid_right] = right_diffs[~valid_left & valid_right]
         dx[valid_left & ~valid_right] = right_diffs[np.roll(valid_left & ~valid_right,-1,axis=0)]
         dy[~valid_up & valid_down] = down_diffs[~valid_up & valid_down]
