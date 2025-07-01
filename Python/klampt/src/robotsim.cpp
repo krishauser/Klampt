@@ -728,7 +728,11 @@ void GetHeightmap(const Heightmap& hm, Meshing::Heightmap& khm)
   } \
   Class Class::copy() const \
   { \
-    Class res(*this); \
+    Class res; \
+    res.isStandalone = true; \
+    const shared_ptr<AnyCollisionGeometry3D>& data = *reinterpret_cast<const shared_ptr<AnyCollisionGeometry3D>*>(dataPtr); \
+    shared_ptr<AnyCollisionGeometry3D>& gdata = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.dataPtr); \
+    *gdata = *data; \
     return res; \
   } \
   void Class::operator = (const Class& rhs) { \
