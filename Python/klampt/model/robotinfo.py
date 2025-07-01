@@ -293,8 +293,13 @@ class RobotInfo:
                     sensing.intrinsics_to_camera(calib,sensor,'numpy')
                     return sensor
                 elif 'fx' in calib:
+                    assert 'fy' in calib and 'cx' in calib and 'cy' in calib, \
+                        "Camera intrinsics calibration must have fx, fy, cx, cy"
                     sensing.intrinsics_to_camera(calib,sensor,'json')
-                    return sensor
+                    del calib['fx']
+                    del calib['fy']
+                    del calib['cx']
+                    del calib['cy']
             for k,value in calib.items():
                 if hasattr(value,'__iter__'):
                     import klampt.io.loader
