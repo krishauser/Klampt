@@ -104,8 +104,9 @@ Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the 
 -   Fixed error in geometry conversion to ImplicitSurface type after collision data initialized.
 -   Fixed error in fy / cy properties of cameras not being read properly.
 -   Python API: Added cost function queries for `MotionPlan` objects.
--   Python API: New constructor for `Geometry3D` objects from file name.
 -   Python API: OpenGL interface now supports non-integer screen-device scales.
+-   Python API: New constructor for `Geometry3D` objects from file name. 
+-   Python API: `[GEOM_DATA].copy()` now works as expected.
 -   Python API: Fixed improper collision geometry when a geometry is updated via `set()`. 
 -   Python API: Fixed heightmap / viewport pose orientation flip on `getPose()`.
 -   Python API: Added `Geometry3D.refreshCollider()` method to update the collider when the underlying geometry data is updated.
