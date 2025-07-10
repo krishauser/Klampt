@@ -1320,7 +1320,7 @@ bool RobotModel::LoadRob(const char* fn) {
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
       if(mountLinkIndices[i] == -2) { //determine mount link dynamically
         int linkIndex = LinkIndex(mountLinks[i].c_str());
-        if(linkIndex < 0) {
+        if(linkIndex < 0 && mountLinks[i] != "-1") {
           LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
           return false;
         }
@@ -3336,7 +3336,7 @@ bool RobotModel::LoadURDF(const char* fn)
     }
     else {
       int linkIndex = LinkIndex(mountLinks[i].c_str());
-      if(linkIndex < 0) {
+      if(linkIndex < 0 && mountLinks[i] != "-1") {
         LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
         return false;
       }
