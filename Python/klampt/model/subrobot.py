@@ -6,6 +6,7 @@ Many, but not all, ``klampt`` module functions accept SubRobotModel in
 the place of RobotModel.
 """
 
+from __future__ import annotations
 from ..robotsim import *
 from .collide import self_collision_iter
 import warnings
@@ -419,7 +420,7 @@ class SubRobotModelLink:
     RobotModelLink. Correctly implements jacobians and indices with respect
     to the sub-robot.
     """
-    def __init__(self,link,robot):
+    def __init__(self,link : RobotModelLink, robot : SubRobotModel):
         self._link = link
         self._robot = robot
         self.robotIndex = link.robotIndex
@@ -446,24 +447,31 @@ class SubRobotModelLink:
         self.getPointVelocity = link.getPointVelocity
         self.drawLocalGL = link.drawLocalGL
         self.drawWorldGL = link.drawWorldGL
-    def robot(self):
+    def robot(self) -> SubRobotModel:
         return self._robot
-    def getIndex(self):
+    def getIndex(self) -> int:
         return self._robot.fromfull(self._link.getIndex())
-    def getParent(self):
+    def getParent(self) -> int:
         p = self._robot.fromfull(self._link.getParent())
         if p == None: return -1
         return p
-    def parent(self):
+    def parent(self) -> SubRobotModelLink:
         p = self.getParent()
         return self._robot.link(p)
-    def setParent(self,p):
+    def setParent(self,p : int):
         self._link.setParent(self._robot.tofull(p))
-    def getJacobian(self,p):
+    def getJacobian(self,p : Vector3) -> np.ndarray:
+        """Returns the full Jacobian of this link's rotation and position
+        with respect to the sub-robot's configuration, evaluated at the point p in the link's local frame."""
         return self._link.getJacobianCols(p,self._robot._links)
-    def getPositionJacobian(self,p):
+    def getPositionJacobian(self,p : Vector3) -> np.ndarray:
+        """Returns the position Jacobian of this link with respect to the
+        sub-robot's configuration, evaluated at the point p in the link's
+        local frame."""
         return self._link.getPositionJacobianCols(p,self._robot._links)
-    def getOrientationJacobian(self):
+    def getOrientationJacobian(self) -> np.ndarray:
+        """Returns the orientation Jacobian of this link with respect to the
+        sub-robot's configuration."""
         return self._link.getOrientationJacobianCols(self._robot._links)
 
 
@@ -471,7 +479,7 @@ class SubRobotModelDriver:
     """A helper that lets you treat drivers of a subrobot just like a normal
     RobotModelDriver.
     """
-    def __init__(self,driver,robot):
+    def __init__(self, driver : RobotModelDriver, robot : SubRobotModel):
         self._driver = driver
         self._robot = robot
         self.getName = driver.getName
@@ -482,13 +490,13 @@ class SubRobotModelDriver:
         self.setVelocity = driver.setVelocity
         self.getVelocity = driver.getVelocity
     
-    def robot(self):
+    def robot(self) -> SubRobotModel:
         return self._robot
   
-    def getAffectedLink(self):
+    def getAffectedLink(self) -> int:
         origLink = self._driver.getAffectedLink()
         return self._robot._inv_links[origLink]
 
-    def getAffectedLinks(self):
+    def getAffectedLinks(self) -> List[int]:
         origLinks = self._driver.getAffectedLinks()
         return [self._robot._inv_links[origLink] for origLink in origLinks]
