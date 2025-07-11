@@ -751,19 +751,3 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
         raise ValueError("Invalid value for argument 'editor', must be either 'visual' or 'console'")
 
 
-
-def _deprecated_func(oldName,newName):
-    import sys
-    mod = sys.modules[__name__]
-    f = getattr(mod,newName)
-    def depf(*args,**kwargs):
-        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
-        return f(*args,**kwargs)
-    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
-    setattr(mod,oldName,depf)
-
-_deprecated_func("getDirectory","get_directory")
-_deprecated_func("setDirectory","set_directory")
-_deprecated_func("knownExtensions","known_extensions")
-_deprecated_func("knownTypes","known_types")
-_deprecated_func("visualEditTypes","visual_edit_types")
