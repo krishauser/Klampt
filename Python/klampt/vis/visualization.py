@@ -2740,7 +2740,10 @@ class VisAppearance:
             anyTransp = False
             anyOpaque = False
             for n,app in self.subAppearances.items():
-                if app.transparent():
+                t = app.transparent()
+                if t is None:
+                    anyTransp = anyOpaque = True
+                elif t:
                     anyTransp = True
                 else:
                     anyOpaque = True
@@ -2857,10 +2860,10 @@ class VisAppearance:
         if len(self.subAppearances)!=0:
             for n,app in self.subAppearances.items():
                 if draw_transparent is True:
-                    if not app.transparent():
+                    if app.transparent() == False:
                         continue
                 elif draw_transparent is False:
-                    if app.transparent():
+                    if app.transparent() == True:
                         continue
                 app.widget = self.widget
                 app.drawGL(world,viewport,draw_transparent)
