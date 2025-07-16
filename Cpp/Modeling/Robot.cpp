@@ -2568,18 +2568,19 @@ bool RobotModel::LoadURDF(const char* fn)
   string localfile = MakeURLLocal(fn);
   if(localfile.empty()) return false;
   string path = GetFilePath(fn);
-
-  //Get content from the Willow Garage parser
-  std::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(localfile);
-  if(!parser) {
-    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"RobotModel::LoadURDF: error parsing XML");
+  TiXmlDocument xml_doc;
+  bool loaded=xml_doc.LoadFile(fn);
+  if(!loaded) {
+    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Strange, unable to re-open URDF robot file "<<fn);
+  }
+  TiXmlElement *robot_xml = xml_doc.FirstChildElement("robot");
+  if(!robot_xml) {
+    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Unable to find <robot> element in URDF file "<<fn);
     return false;
   }
-  std::shared_ptr<urdf::Link> root_link = parser->root_link_;
-  if (!root_link) {
-    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"RobotModel::LoadURDF: Root link is NULL");
-    return false;
-  }
+  TiXmlElement *klampt_xml = NULL;
+  if(robot_xml)
+    klampt_xml = robot_xml->FirstChildElement("klampt");
 
   //parse Klamp't extras
   //format:
@@ -2627,15 +2628,6 @@ bool RobotModel::LoadURDF(const char* fn)
   vector<string> mountFiles;
   vector<RigidTransform> mountT;
   vector<string> mountNames;
-  TiXmlDocument xml_doc;
-  bool loaded=xml_doc.LoadFile(fn);
-  if(!loaded) {
-    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Strange, unable to re-open URDF robot file "<<fn);
-  }
-  TiXmlElement *robot_xml = xml_doc.FirstChildElement("robot");
-  TiXmlElement *klampt_xml = NULL;
-  if(robot_xml)
-    klampt_xml = robot_xml->FirstChildElement("klampt");
   if(klampt_xml) {
     int use_vis_geom,flip_yz;
     if(klampt_xml->QueryValueAttribute("use_vis_geom",&use_vis_geom)==TIXML_SUCCESS) {
@@ -2817,515 +2809,531 @@ bool RobotModel::LoadURDF(const char* fn)
 
     e = klampt_xml->FirstChildElement("mount");
     while(e != NULL) {
-      if(e->Attribute("link")!=NULL) {
-        string link = e->Attribute("link");
-        string prefix = "";
-        if(e->Attribute("file")==NULL) {
-          LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/mount does not contain a 'file' attribute");
+      if(e->Attribute("file")==NULL) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/mount does not contain a 'file' attribute");
+        return false;
+      
+      }
+      string file=e->Attribute("file");
+      string link = "-1";
+      if(e->Attribute("link")) {
+        link = e->Attribute("link");
+      }
+      string prefix = "";
+      RigidTransform T;
+      T.setIdentity();
+      if(e->Attribute("transform")) {
+        stringstream ss(e->Attribute("transform"));
+        ss>>T;
+        if(!ss) {
+          LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/mount has an invalid 'transform' attribute");
           return false;
         }
-        string file=e->Attribute("file");
-        RigidTransform T;
-        T.setIdentity();
-        if(e->Attribute("transform")) {
-          stringstream ss(e->Attribute("transform"));
-          ss>>T;
-          if(!ss) {
-            LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/mount has an invalid 'transform' attribute");
-            return false;
-          }
-        }
-        if(e->Attribute("prefix")) {
-          prefix = e->Attribute("prefix");
-        }
-        if(e->Attribute("as")) {
-          prefix = e->Attribute("as");
-        }
-        mountLinks.push_back(link);
-        mountFiles.push_back(file);
-        mountT.push_back(T);
-        mountNames.push_back(prefix);
       }
-      else {
-        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/mount does not contain a 'link' attribute'");
-        return false;
+      if(e->Attribute("prefix")) {
+        prefix = e->Attribute("prefix");
       }
+      if(e->Attribute("as")) {
+        prefix = e->Attribute("as");
+      }
+      mountLinks.push_back(link);
+      mountFiles.push_back(file);
+      mountT.push_back(T);
+      mountNames.push_back(prefix);
       e = e->NextSiblingElement("mount");
     }
   }
 
-  //fixed-base robots have the root link "world", floating-base robots
-  //do not.
-  bool floating = (root_link->name != worldFrame);
-  int links_size, joints_size;
-  if(floating) {
-    //links_size: URDF 36, ROB 41 with 5 extra DOFS for base
-    links_size = (int)parser->links_.size() + 5;
-    //joints_size: URDF 35, ROB 36 with 1 extra for base
-    joints_size = (int)parser->joints_.size() + 1;
-    //drivers_size: should be joints_size - 1 in ROB file
-
-    if (joints_size != links_size - 5) {
-      LOG4CXX_ERROR(GET_LOGGER(URDFParser), "joint size:" << joints_size << " and link size:" << links_size
-     << " do not match for floating-base robot!" );
-      for(auto i=parser->links_.begin();i!=parser->links_.end();i++)
-        if(!i->second->parent_joint) {
-          LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->name <<" is a root");
-        }
-      for(auto i=parser->joints_.begin();i!=parser->joints_.end();i++) {
-        if(parser->links_.count(i->second->child_link_name) == 0) {
-          LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF joint "<<i->first<<" child link "<<i->second->child_link_name <<" does not exist");
-        }
-        else {
-          auto c = parser->links_[i->second->child_link_name];
-          if(c->parent_joint != i->second)
-            LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->child_link_name <<" has multiple parents?");
-        }
-      }
-      return false;
-    }
-
-    if(freezeRootLink)
-      joints_size += 5;
-  }
-  else {
-    links_size = (int)parser->links_.size() - 1;
-    joints_size = (int)parser->joints_.size();
-    if(joints_size != links_size) {
-      LOG4CXX_ERROR(GET_LOGGER(URDFParser), "joint size:" << joints_size << " and link size:" << links_size
-     << " do not match for fixed-base robot!" );
-      for(auto i=parser->links_.begin();i!=parser->links_.end();i++)
-        if(!i->second->parent_joint) {
-          LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->name <<" is a root");
-        }
-      for(auto i=parser->joints_.begin();i!=parser->joints_.end();i++) {
-        if(parser->links_.count(i->second->child_link_name) == 0) {
-          LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF joint "<<i->first<<" child link "<<i->second->child_link_name <<" does not exist");
-        }
-        else {
-          auto c = parser->links_[i->second->child_link_name];
-          if(c->parent_joint != i->second)
-            LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->child_link_name <<" has multiple parents?");
-        }
-      }
+  //Get content from the Willow Garage parser
+  std::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(localfile);
+  if(!parser) {
+    if(!klampt_xml) {
+      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"RobotModel::LoadURDF: error parsing XML");
       return false;
     }
   }
-
-  LOG4CXX_INFO(GET_LOGGER(URDFParser), "Link size: " << links_size << "");
-  LOG4CXX_INFO(GET_LOGGER(URDFParser), "Joint size: " << joints_size << "");
-
-  //Feed the information from parser to required vectors in ROB format
-  //The following vectors have the same dimension of the links vector
-  Initialize(links_size);
-
-  this->links.resize(links_size);
-  this->parents.resize(links_size);
-  this->linkNames.resize(links_size);
-  this->geometry.resize(links_size);
-  this->geomManagers.resize(links_size);
-  this->geomFiles.resize(links_size);
-  this->q.resize(links_size);
-  this->q.setZero();
-  this->qMin.resize(links_size);
-  this->qMax.resize(links_size);
-  this->accMax.resize(links_size);
-  this->torqueMax.resize(links_size);
-  this->powerMax.resize(links_size); //TODO
-  this->velMax.resize(links_size);
-  this->velMin.resize(links_size);
-
-  //The following vectors have different dimensions
-  this->joints.resize(joints_size);
-
-
-  //floating base, the first 6 degrees
-  if(floating) {
-    for (int i = 0; i < 6; i++) {
-      this->parents[i] = i - 1;
-      stringstream ss;
-      ss << i;
-      string tmp;
-      ss >> tmp;
-      this->linkNames[i] = "base" + tmp;
-      
-      this->accMax[i] = Inf;
-      this->qMax[i] = Inf;
-      this->qMin[i] = -Inf;
-      this->velMax[i] = Inf;
-      this->velMin[i] = -Inf;
-      this->torqueMax[i] = 0;
-      this->powerMax[i] = Inf;
-    }
-    for (int i = 0; i < 3; i++)
-      this->links[i].type = RobotLink3D::Prismatic;
-    for (int i = 3; i < 6; i++)
-      this->links[i].type = RobotLink3D::Revolute;
-
-    //w: axis for the link movement in link's local frame
-    this->links[0].w.set(1, 0, 0);
-    this->links[1].w.set(0, 1, 0);
-    this->links[2].w.set(0, 0, 1);
-    this->links[3].w.set(0, 0, 1);
-    this->links[4].w.set(0, 1, 0);
-    this->links[5].w.set(1, 0, 0);
-    for (int i = 0; i < 5; i++) {
-      this->links[i].com.setZero();
-      this->links[i].mass = 0;
-      this->links[i].inertia.setZero();
-      this->links[i].T0_Parent.setIdentity();
-    }
-
-    //floating base joint
-    if(!freezeRootLink) {
-      this->joints[0].type = RobotModelJoint::Floating;
-      this->joints[0].linkIndex = 5;
-      this->joints[0].baseIndex = -1;
-    }
-    else {
-      //freezeRootLink = true, so freeze all those links
-      for(int i=0;i<6;i++) {
-        this->joints[i].type =  RobotModelJoint::Weld;
-        this->joints[i].linkIndex = i;
-        this->joints[i].baseIndex = -1;
-      }
-    }
-  }
   else {
-    //fixed base
-    this->joints[0].type =  RobotModelJoint::Weld;
-    this->joints[0].linkIndex = 0;
-    this->joints[0].baseIndex = -1;
-  }
-
-  URDFLinkNode rootLinkNode(root_link, 0, -1);
-  vector<URDFLinkNode> linkNodes;
-  URDFConverter::DFSLinkTree(rootLinkNode, linkNodes);
-
-  vector<std::shared_ptr<urdf::Joint> > urdfJoints;
-  for (std::map<std::string, std::shared_ptr<urdf::Joint> >::iterator it =
-      parser->joints_.begin(); it != parser->joints_.end(); ++it) {
-    std::shared_ptr<urdf::Joint> joint = it->second;
-    urdfJoints.push_back(joint);
-  }
-  URDFConverter::setJointforNodes(urdfJoints, linkNodes);
-  URDFConverter::processTParentTransformations(linkNodes);
-
-  vector<int> affineJointParents(links_size,-1);
-  vector<double> affineJointOffsets(links_size,0);
-  vector<double> affineJointScales(links_size,1);  
-  size_t start = (floating ? 0 : 1);
-  for (size_t i = start; i < linkNodes.size(); i++) {
-    URDFLinkNode* linkNode = &linkNodes[i];
-    int link_index = linkNode->index;
-    int parent_index = linkNode->index_parent;
-    if(floating) {
-      link_index += 5;
-      parent_index += 5;
+    std::shared_ptr<urdf::Link> root_link = parser->root_link_;
+    if (!root_link) {
+      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"RobotModel::LoadURDF: Root link is NULL");
+      return false;
     }
-    else {
-      link_index -= 1;
-      parent_index -= 1;
-    }
-
-    this->linkNames[link_index] = linkNode->link->name; 
-    this->parents[link_index] = parent_index;
-
-    this->links[link_index].type = RobotLink3D::Revolute; //Check correctness
-    this->links[link_index].T0_Parent.setIdentity();
-    if (i > 0)
-      this->links[link_index].w.set(linkNode->axis);
-    if(this->links[link_index].w.norm() < 0.1){
-      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Axis error: "<<linkNames[link_index]<<";"<<this->links[link_index].w);
-    }
-
-    //If have inertia specified, then, use the specified inertia
-    if(virtualLinks.count(linkNode->link->name)!=0) {
-        //assume its a virtual link
-        this->links[link_index].com = Vector3(0, 0, 0);
-        this->links[link_index].mass = 0;
-        this->links[link_index].inertia.setZero();
-    }
-    else {
-      if (linkNode->link->inertial) {
-        this->links[link_index].com = linkNode->T_link_to_inertia.t;
-        this->links[link_index].mass = linkNode->link->inertial->mass; //done
-        Matrix3 ori_inertia = URDFConverter::convertInertial(
-                   *linkNode->link->inertial);
-        this->links[link_index].inertia.mul(
-              linkNode->T_link_to_inertia_inverse.R, ori_inertia * transpose(linkNode->T_link_to_inertia_inverse.R));
-      }
-    //Otherwise, set it to default value
-      else {
-      this->links[link_index].com = Vector3(0, 0, 0);
-      this->links[link_index].mass = default_mass;
-      this->links[link_index].inertia = default_inertia;
-      }
-    }
-
-    //At first, set them to be default Inf value; it will be modified in later steps.
-    this->accMax[link_index] = Inf;
-    this->qMax[link_index] = Inf;
-    this->qMin[link_index] = -Inf;
-    this->velMax[link_index] = Inf;
-    this->velMin[link_index] = -Inf;
-    this->torqueMax[link_index] = Inf;
-    this->powerMax[link_index] = Inf;
-    if(link_index == 5 && floating) {
-      this->torqueMax[link_index] = 0;
-      this->powerMax[link_index] = 0;
-    }
-    //set joint
-    urdf::Joint* joint = linkNode->joint;
-    if (joint) {
-      int joint_index = link_index;
-      if(floating) {
-        if(!freezeRootLink) joint_index -= 5;
-      }
-      this->joints[joint_index].type = URDFConverter::jointType_URDF2ROB(
-          joint->type); //done. finish function
-      if (joint->type == urdf::Joint::PRISMATIC){
-        this->links[link_index].type = RobotLink3D::Prismatic;
-      }
-      this->joints[joint_index].linkIndex = link_index; //done
-
-      this->links[link_index].T0_Parent.set(linkNode->T_parent);
-
-      if (joint->limits) {
-        this->qMax[link_index] = joint->limits->upper;
-        this->qMin[link_index] = joint->limits->lower;
-        this->velMax[link_index] = joint->limits->velocity;
-        this->velMin[link_index] = -joint->limits->velocity;
-        this->torqueMax[link_index] = joint->limits->effort; //TODO: in URDF, no explicit value specified, effort has unit n*m,
-      }
-      if(customAccMax.count(linkNode->link->name) != 0)
-        this->accMax[link_index] = customAccMax[linkNode->link->name];
-      else
-        this->accMax[link_index] = default_acc_max;
-      if(this->joints[joint_index].type == RobotModelJoint::Spin) {
-          this->qMax[link_index] = Inf;
-          this->qMin[link_index] = -Inf;
-      }
-      if(this->joints[joint_index].type == RobotModelJoint::Weld){
-        qMin[link_index] = 0;
-        qMax[link_index] = 0;
-        velMin[link_index] = 0;
-        velMax[link_index] = 0;
-        accMax[link_index] = 0;
-        //torque max will be infinite...
-        //torqueMax[link_index] = 0;
-      }
-      //parse mimic joints
-      if(joint->mimic) {
-        if(parser->joints_.count(joint->mimic->joint_name)) {
-          auto joint_parent = parser->joints_[joint->mimic->joint_name];
-          affineJointParents[link_index] = LinkIndex(joint_parent->child_link_name.c_str());
-          if(affineJointParents[link_index] < 0)
-            LOG4CXX_WARN(GET_LOGGER(URDFParser), "Couldn't load mimic joint "<<joint->name);
-          affineJointScales[link_index] = joint->mimic->multiplier;
-          affineJointOffsets[link_index] = joint->mimic->offset;
-        }
-        else {
-          LOG4CXX_WARN(GET_LOGGER(URDFParser), "Couldn't load mimic joint "<<joint->name);
-        }
-      }
-      if (this->joints[joint_index].type == RobotModelJoint::Normal
-          || this->joints[joint_index].type == RobotModelJoint::Spin) {
-        int linkI = this->joints[joint_index].linkIndex;
-        RobotModelDriver driver;
-        driverNames.push_back(linkNames[linkI]);
-        driver.type = RobotModelDriver::Normal;
-        driver.linkIndices.push_back(linkI);
-        driver.qmin = qMin(linkI);
-        driver.qmax = qMax(linkI);
-        driver.vmin = velMin(linkI);
-        driver.vmax = velMax(linkI);
-        driver.tmin = -torqueMax(linkI);
-        driver.tmax = torqueMax(linkI);
-        driver.amin = -accMax(linkI);
-        driver.amax = accMax(linkI);
-        driver.servoP = 100;
-        driver.servoI = 0;
-        driver.servoD = 10;
-        driver.dryFriction = 0;
-        driver.viscousFriction = 0;
-        if (joint->dynamics) {
-          driver.dryFriction = joint->dynamics->friction;
-          driver.viscousFriction = joint->dynamics->damping;
-        }
-        if(kP.count(linkNode->link->name) != 0)
-          driver.servoP = kP[linkNode->link->name];
-        if(kD.count(linkNode->link->name) != 0)
-          driver.servoD = kD[linkNode->link->name];
-        if(kI.count(linkNode->link->name) != 0)
-          driver.servoI = kI[linkNode->link->name];
-        if(dryFriction.count(linkNode->link->name) != 0)
-          driver.dryFriction = dryFriction[linkNode->link->name];
-        if(viscousFriction.count(linkNode->link->name) != 0)
-          driver.viscousFriction = viscousFriction[linkNode->link->name];
-        drivers.push_back(driver);
-      }
-    }
-  }
-  //compress the affine joints into single drivers
-  for(size_t i=0;i<affineJointParents.size();i++) {
-    if(affineJointParents[i] >= 0) {
-      int p=affineJointParents[i];
-      if(affineJointParents[p] >= 0) {
-        affineJointParents[i] = affineJointParents[p];
-        affineJointOffsets[i] += affineJointScales[i]*affineJointOffsets[p];
-        affineJointScales[i] *= affineJointScales[p];
-      }
-    }
-  }
-  //delete normal drivers
-  map<int,int> linkToDriver;
-  size_t i=0;
-  while(i<drivers.size()) {
-    linkToDriver[drivers[i].linkIndices[0]] = i;
-    if(affineJointParents[drivers[i].linkIndices[0]] >= 0) { 
-      drivers.erase(drivers.begin()+i);
-      driverNames.erase(driverNames.begin()+i);
-    }
-    else
-      i++;
-  }
-  //now convert parents to affine drivers
-  for(size_t i=0;i<affineJointParents.size();i++) {
-    if(affineJointParents[i] >= 0) {
-      Assert(linkToDriver.count(affineJointParents[i]) > 0);
-      int d=linkToDriver[affineJointParents[i]];
-      drivers[d].type = RobotModelDriver::Affine;
-      if(drivers[d].affScaling.empty()) {
-        drivers[d].affScaling.push_back(1);
-        drivers[d].affOffset.push_back(0);
-      }
-      drivers[d].linkIndices.push_back(i);
-      drivers[d].affScaling.push_back(affineJointScales[i]);
-      drivers[d].affOffset.push_back(affineJointOffsets[i]);
-    }
-  }
-  //setup affine driver limits
-  for(size_t i=0;i<drivers.size();i++) {
-    if(drivers[i].type == RobotModelDriver::Affine) {  //set acceleration limits from robot's acceleration limits
-      drivers[i].qmin = -Inf;
-      drivers[i].qmax = Inf;
-      drivers[i].vmin = -Inf;
-      drivers[i].vmax = Inf;
-      drivers[i].amin = -Inf;
-      drivers[i].amax = Inf;
-      drivers[i].tmin = -Inf;
-      drivers[i].tmax = Inf;
-      for(size_t j=0;j<drivers[i].linkIndices.size();j++) {
-        Real s = drivers[i].affScaling[j];
-        if(s > 0) {
-          drivers[i].qmin = Max(drivers[i].qmin,qMin[drivers[i].linkIndices[j]]/s);
-          drivers[i].qmax = Min(drivers[i].qmax,qMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].vmin = Max(drivers[i].vmin,-velMin[drivers[i].linkIndices[j]]/s);
-          drivers[i].vmax = Min(drivers[i].vmax,velMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].amin = Max(drivers[i].amin,-accMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].amax = Min(drivers[i].amax,accMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].tmin = Max(drivers[i].tmin,-torqueMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].tmax = Min(drivers[i].tmax,torqueMax[drivers[i].linkIndices[j]]/s);
-        }
-        else if(s < 0) {
-          drivers[i].qmin = Max(drivers[i].qmin,qMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].qmax = Min(drivers[i].qmax,qMin[drivers[i].linkIndices[j]]/s);
-          drivers[i].vmin = Max(drivers[i].vmin,velMin[drivers[i].linkIndices[j]]/s);
-          drivers[i].vmax = Min(drivers[i].vmax,-velMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].amin = Max(drivers[i].amin,accMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].amax = Min(drivers[i].amax,-accMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].tmin = Max(drivers[i].tmin,torqueMax[drivers[i].linkIndices[j]]/s);
-          drivers[i].tmax = Min(drivers[i].tmax,-torqueMax[drivers[i].linkIndices[j]]/s);
-        }
-      }
-    }
-  }
-
-  //double check links are specified properly
-  for(auto kpi: kP) {
-    if(LinkIndex(kpi.first.c_str()) < 0)
-      LOG4CXX_WARN(GET_LOGGER(URDFParser),"Invalid <klampt><link> element named "<<kpi.first);
-  }
   
-  UpdateFrames();
-  for (size_t i = start; i < linkNodes.size(); i++) {
-    URDFLinkNode* linkNode = &linkNodes[i];
-    int link_index = linkNode->index;
-    if(floating) link_index += 5;
-    else link_index -= 1;
+    //fixed-base robots have the root link "world", floating-base robots
+    //do not.
+    bool floating = (root_link->name != worldFrame);
+    int links_size, joints_size;
+    if(floating) {
+      //links_size: URDF 36, ROB 41 with 5 extra DOFS for base
+      links_size = (int)parser->links_.size() + 5;
+      //joints_size: URDF 35, ROB 36 with 1 extra for base
+      joints_size = (int)parser->joints_.size() + 1;
+      //drivers_size: should be joints_size - 1 in ROB file
 
-    //geometry
-    if (!linkNode->geomName.empty() && !RobotModel::disableGeometryLoading) {
-      string fn;
-      geomFiles[link_index] = linkNode->geomName;
-      fn = ResolveFileReference(path,linkNode->geomName);
-      if(FileUtils::Exists(fn.c_str())) {
-        if (!LoadGeometry(link_index, fn.c_str())) {
-          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName << " for link " << link_index << "");
-          //LOG4CXX_INFO
-          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
-          //return false;
+      if (joints_size != links_size - 5) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser), "joint size:" << joints_size << " and link size:" << links_size
+      << " do not match for floating-base robot!" );
+        for(auto i=parser->links_.begin();i!=parser->links_.end();i++)
+          if(!i->second->parent_joint) {
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->name <<" is a root");
+          }
+        for(auto i=parser->joints_.begin();i!=parser->joints_.end();i++) {
+          if(parser->links_.count(i->second->child_link_name) == 0) {
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF joint "<<i->first<<" child link "<<i->second->child_link_name <<" does not exist");
+          }
+          else {
+            auto c = parser->links_[i->second->child_link_name];
+            if(c->parent_joint != i->second)
+              LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->child_link_name <<" has multiple parents?");
+          }
         }
+        return false;
       }
-      else if(FileUtils::Exists(geomFiles[link_index].c_str())) {
-        if (!LoadGeometry(link_index, geomFiles[link_index].c_str())) {
-          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName  << " for link " << link_index << "");
-          //TEMP
-          LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
-          //return false;
+
+      if(freezeRootLink)
+        joints_size += 5;
+    }
+    else {
+      links_size = (int)parser->links_.size() - 1;
+      joints_size = (int)parser->joints_.size();
+      if(joints_size != links_size) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser), "joint size:" << joints_size << " and link size:" << links_size
+      << " do not match for fixed-base robot!" );
+        for(auto i=parser->links_.begin();i!=parser->links_.end();i++)
+          if(!i->second->parent_joint) {
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->name <<" is a root");
+          }
+        for(auto i=parser->joints_.begin();i!=parser->joints_.end();i++) {
+          if(parser->links_.count(i->second->child_link_name) == 0) {
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF joint "<<i->first<<" child link "<<i->second->child_link_name <<" does not exist");
+          }
+          else {
+            auto c = parser->links_[i->second->child_link_name];
+            if(c->parent_joint != i->second)
+              LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->child_link_name <<" has multiple parents?");
+          }
         }
+        return false;
+      }
+    }
+  
+    LOG4CXX_INFO(GET_LOGGER(URDFParser), "Link size: " << links_size << "");
+    LOG4CXX_INFO(GET_LOGGER(URDFParser), "Joint size: " << joints_size << "");
+
+    //Feed the information from parser to required vectors in ROB format
+    //The following vectors have the same dimension of the links vector
+    Initialize(links_size);
+
+    this->links.resize(links_size);
+    this->parents.resize(links_size);
+    this->linkNames.resize(links_size);
+    this->geometry.resize(links_size);
+    this->geomManagers.resize(links_size);
+    this->geomFiles.resize(links_size);
+    this->q.resize(links_size);
+    if(links_size > 0)
+      this->q.setZero();
+    this->qMin.resize(links_size);
+    this->qMax.resize(links_size);
+    this->accMax.resize(links_size);
+    this->torqueMax.resize(links_size);
+    this->powerMax.resize(links_size); //TODO
+    this->velMax.resize(links_size);
+    this->velMin.resize(links_size);
+
+    //The following vectors have different dimensions
+    this->joints.resize(joints_size);
+
+
+    //floating base, the first 6 degrees
+    if(floating) {
+      for (int i = 0; i < 6; i++) {
+        this->parents[i] = i - 1;
+        stringstream ss;
+        ss << i;
+        string tmp;
+        ss >> tmp;
+        this->linkNames[i] = "base" + tmp;
+        
+        this->accMax[i] = Inf;
+        this->qMax[i] = Inf;
+        this->qMin[i] = -Inf;
+        this->velMax[i] = Inf;
+        this->velMin[i] = -Inf;
+        this->torqueMax[i] = 0;
+        this->powerMax[i] = Inf;
+      }
+      for (int i = 0; i < 3; i++)
+        this->links[i].type = RobotLink3D::Prismatic;
+      for (int i = 3; i < 6; i++)
+        this->links[i].type = RobotLink3D::Revolute;
+
+      //w: axis for the link movement in link's local frame
+      this->links[0].w.set(1, 0, 0);
+      this->links[1].w.set(0, 1, 0);
+      this->links[2].w.set(0, 0, 1);
+      this->links[3].w.set(0, 0, 1);
+      this->links[4].w.set(0, 1, 0);
+      this->links[5].w.set(1, 0, 0);
+      for (int i = 0; i < 5; i++) {
+        this->links[i].com.setZero();
+        this->links[i].mass = 0;
+        this->links[i].inertia.setZero();
+        this->links[i].T0_Parent.setIdentity();
+      }
+
+      //floating base joint
+      if(!freezeRootLink) {
+        this->joints[0].type = RobotModelJoint::Floating;
+        this->joints[0].linkIndex = 5;
+        this->joints[0].baseIndex = -1;
       }
       else {
-        localfile = MakeURLLocal(fn);
-        if(localfile == fn) {
-          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Could not load geometry " << linkNode->geomName <<", in relative or absolute paths");
-          //TEMP
-          LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
-          //return false;
+        //freezeRootLink = true, so freeze all those links
+        for(int i=0;i<6;i++) {
+          this->joints[i].type =  RobotModelJoint::Weld;
+          this->joints[i].linkIndex = i;
+          this->joints[i].baseIndex = -1;
         }
+      }
+    }
+    else {
+      //fixed base
+      if(joints_size > 0) {
+        this->joints[0].type =  RobotModelJoint::Weld;
+        this->joints[0].linkIndex = 0;
+        this->joints[0].baseIndex = -1;
+      }
+    }
+
+    URDFLinkNode rootLinkNode(root_link, 0, -1);
+    vector<URDFLinkNode> linkNodes;
+    URDFConverter::DFSLinkTree(rootLinkNode, linkNodes);
+
+    vector<std::shared_ptr<urdf::Joint> > urdfJoints;
+    for (std::map<std::string, std::shared_ptr<urdf::Joint> >::iterator it =
+        parser->joints_.begin(); it != parser->joints_.end(); ++it) {
+      std::shared_ptr<urdf::Joint> joint = it->second;
+      urdfJoints.push_back(joint);
+    }
+    URDFConverter::setJointforNodes(urdfJoints, linkNodes);
+    URDFConverter::processTParentTransformations(linkNodes);
+
+    vector<int> affineJointParents(links_size,-1);
+    vector<double> affineJointOffsets(links_size,0);
+    vector<double> affineJointScales(links_size,1);  
+    size_t start = (floating ? 0 : 1);
+    for (size_t i = start; i < linkNodes.size(); i++) {
+      URDFLinkNode* linkNode = &linkNodes[i];
+      int link_index = linkNode->index;
+      int parent_index = linkNode->index_parent;
+      if(floating) {
+        link_index += 5;
+        parent_index += 5;
+      }
+      else {
+        link_index -= 1;
+        parent_index -= 1;
+      }
+
+      this->linkNames[link_index] = linkNode->link->name; 
+      this->parents[link_index] = parent_index;
+
+      this->links[link_index].type = RobotLink3D::Revolute; //Check correctness
+      this->links[link_index].T0_Parent.setIdentity();
+      if (i > 0)
+        this->links[link_index].w.set(linkNode->axis);
+      if(this->links[link_index].w.norm() < 0.1){
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Axis error: "<<linkNames[link_index]<<";"<<this->links[link_index].w);
+      }
+
+      //If have inertia specified, then, use the specified inertia
+      if(virtualLinks.count(linkNode->link->name)!=0) {
+          //assume its a virtual link
+          this->links[link_index].com = Vector3(0, 0, 0);
+          this->links[link_index].mass = 0;
+          this->links[link_index].inertia.setZero();
+      }
+      else {
+        if (linkNode->link->inertial) {
+          this->links[link_index].com = linkNode->T_link_to_inertia.t;
+          this->links[link_index].mass = linkNode->link->inertial->mass; //done
+          Matrix3 ori_inertia = URDFConverter::convertInertial(
+                    *linkNode->link->inertial);
+          this->links[link_index].inertia.mul(
+                linkNode->T_link_to_inertia_inverse.R, ori_inertia * transpose(linkNode->T_link_to_inertia_inverse.R));
+        }
+      //Otherwise, set it to default value
         else {
-          //try loiading from url
-          if(!LoadGeometry(link_index,fn.c_str())) {
-            LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName << " for link " << link_index << "");
-            //TEMP
-            LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+        this->links[link_index].com = Vector3(0, 0, 0);
+        this->links[link_index].mass = default_mass;
+        this->links[link_index].inertia = default_inertia;
+        }
+      }
+
+      //At first, set them to be default Inf value; it will be modified in later steps.
+      this->accMax[link_index] = Inf;
+      this->qMax[link_index] = Inf;
+      this->qMin[link_index] = -Inf;
+      this->velMax[link_index] = Inf;
+      this->velMin[link_index] = -Inf;
+      this->torqueMax[link_index] = Inf;
+      this->powerMax[link_index] = Inf;
+      if(link_index == 5 && floating) {
+        this->torqueMax[link_index] = 0;
+        this->powerMax[link_index] = 0;
+      }
+      //set joint
+      urdf::Joint* joint = linkNode->joint;
+      if (joint) {
+        int joint_index = link_index;
+        if(floating) {
+          if(!freezeRootLink) joint_index -= 5;
+        }
+        this->joints[joint_index].type = URDFConverter::jointType_URDF2ROB(
+            joint->type); //done. finish function
+        if (joint->type == urdf::Joint::PRISMATIC){
+          this->links[link_index].type = RobotLink3D::Prismatic;
+        }
+        this->joints[joint_index].linkIndex = link_index; //done
+
+        this->links[link_index].T0_Parent.set(linkNode->T_parent);
+
+        if (joint->limits) {
+          this->qMax[link_index] = joint->limits->upper;
+          this->qMin[link_index] = joint->limits->lower;
+          this->velMax[link_index] = joint->limits->velocity;
+          this->velMin[link_index] = -joint->limits->velocity;
+          this->torqueMax[link_index] = joint->limits->effort; //TODO: in URDF, no explicit value specified, effort has unit n*m,
+        }
+        if(customAccMax.count(linkNode->link->name) != 0)
+          this->accMax[link_index] = customAccMax[linkNode->link->name];
+        else
+          this->accMax[link_index] = default_acc_max;
+        if(this->joints[joint_index].type == RobotModelJoint::Spin) {
+            this->qMax[link_index] = Inf;
+            this->qMin[link_index] = -Inf;
+        }
+        if(this->joints[joint_index].type == RobotModelJoint::Weld){
+          qMin[link_index] = 0;
+          qMax[link_index] = 0;
+          velMin[link_index] = 0;
+          velMax[link_index] = 0;
+          accMax[link_index] = 0;
+          //torque max will be infinite...
+          //torqueMax[link_index] = 0;
+        }
+        //parse mimic joints
+        if(joint->mimic) {
+          if(parser->joints_.count(joint->mimic->joint_name)) {
+            auto joint_parent = parser->joints_[joint->mimic->joint_name];
+            affineJointParents[link_index] = LinkIndex(joint_parent->child_link_name.c_str());
+            if(affineJointParents[link_index] < 0)
+              LOG4CXX_WARN(GET_LOGGER(URDFParser), "Couldn't load mimic joint "<<joint->name);
+            affineJointScales[link_index] = joint->mimic->multiplier;
+            affineJointOffsets[link_index] = joint->mimic->offset;
+          }
+          else {
+            LOG4CXX_WARN(GET_LOGGER(URDFParser), "Couldn't load mimic joint "<<joint->name);
+          }
+        }
+        if (this->joints[joint_index].type == RobotModelJoint::Normal
+            || this->joints[joint_index].type == RobotModelJoint::Spin) {
+          int linkI = this->joints[joint_index].linkIndex;
+          RobotModelDriver driver;
+          driverNames.push_back(linkNames[linkI]);
+          driver.type = RobotModelDriver::Normal;
+          driver.linkIndices.push_back(linkI);
+          driver.qmin = qMin(linkI);
+          driver.qmax = qMax(linkI);
+          driver.vmin = velMin(linkI);
+          driver.vmax = velMax(linkI);
+          driver.tmin = -torqueMax(linkI);
+          driver.tmax = torqueMax(linkI);
+          driver.amin = -accMax(linkI);
+          driver.amax = accMax(linkI);
+          driver.servoP = 100;
+          driver.servoI = 0;
+          driver.servoD = 10;
+          driver.dryFriction = 0;
+          driver.viscousFriction = 0;
+          if (joint->dynamics) {
+            driver.dryFriction = joint->dynamics->friction;
+            driver.viscousFriction = joint->dynamics->damping;
+          }
+          if(kP.count(linkNode->link->name) != 0)
+            driver.servoP = kP[linkNode->link->name];
+          if(kD.count(linkNode->link->name) != 0)
+            driver.servoD = kD[linkNode->link->name];
+          if(kI.count(linkNode->link->name) != 0)
+            driver.servoI = kI[linkNode->link->name];
+          if(dryFriction.count(linkNode->link->name) != 0)
+            driver.dryFriction = dryFriction[linkNode->link->name];
+          if(viscousFriction.count(linkNode->link->name) != 0)
+            driver.viscousFriction = viscousFriction[linkNode->link->name];
+          drivers.push_back(driver);
+        }
+      }
+    }
+    //compress the affine joints into single drivers
+    for(size_t i=0;i<affineJointParents.size();i++) {
+      if(affineJointParents[i] >= 0) {
+        int p=affineJointParents[i];
+        if(affineJointParents[p] >= 0) {
+          affineJointParents[i] = affineJointParents[p];
+          affineJointOffsets[i] += affineJointScales[i]*affineJointOffsets[p];
+          affineJointScales[i] *= affineJointScales[p];
+        }
+      }
+    }
+    //delete normal drivers
+    map<int,int> linkToDriver;
+    size_t i=0;
+    while(i<drivers.size()) {
+      linkToDriver[drivers[i].linkIndices[0]] = i;
+      if(affineJointParents[drivers[i].linkIndices[0]] >= 0) { 
+        drivers.erase(drivers.begin()+i);
+        driverNames.erase(driverNames.begin()+i);
+      }
+      else
+        i++;
+    }
+    //now convert parents to affine drivers
+    for(size_t i=0;i<affineJointParents.size();i++) {
+      if(affineJointParents[i] >= 0) {
+        Assert(linkToDriver.count(affineJointParents[i]) > 0);
+        int d=linkToDriver[affineJointParents[i]];
+        drivers[d].type = RobotModelDriver::Affine;
+        if(drivers[d].affScaling.empty()) {
+          drivers[d].affScaling.push_back(1);
+          drivers[d].affOffset.push_back(0);
+        }
+        drivers[d].linkIndices.push_back(i);
+        drivers[d].affScaling.push_back(affineJointScales[i]);
+        drivers[d].affOffset.push_back(affineJointOffsets[i]);
+      }
+    }
+    //setup affine driver limits
+    for(size_t i=0;i<drivers.size();i++) {
+      if(drivers[i].type == RobotModelDriver::Affine) {  //set acceleration limits from robot's acceleration limits
+        drivers[i].qmin = -Inf;
+        drivers[i].qmax = Inf;
+        drivers[i].vmin = -Inf;
+        drivers[i].vmax = Inf;
+        drivers[i].amin = -Inf;
+        drivers[i].amax = Inf;
+        drivers[i].tmin = -Inf;
+        drivers[i].tmax = Inf;
+        for(size_t j=0;j<drivers[i].linkIndices.size();j++) {
+          Real s = drivers[i].affScaling[j];
+          if(s > 0) {
+            drivers[i].qmin = Max(drivers[i].qmin,qMin[drivers[i].linkIndices[j]]/s);
+            drivers[i].qmax = Min(drivers[i].qmax,qMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].vmin = Max(drivers[i].vmin,-velMin[drivers[i].linkIndices[j]]/s);
+            drivers[i].vmax = Min(drivers[i].vmax,velMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].amin = Max(drivers[i].amin,-accMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].amax = Min(drivers[i].amax,accMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].tmin = Max(drivers[i].tmin,-torqueMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].tmax = Min(drivers[i].tmax,torqueMax[drivers[i].linkIndices[j]]/s);
+          }
+          else if(s < 0) {
+            drivers[i].qmin = Max(drivers[i].qmin,qMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].qmax = Min(drivers[i].qmax,qMin[drivers[i].linkIndices[j]]/s);
+            drivers[i].vmin = Max(drivers[i].vmin,velMin[drivers[i].linkIndices[j]]/s);
+            drivers[i].vmax = Min(drivers[i].vmax,-velMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].amin = Max(drivers[i].amin,accMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].amax = Min(drivers[i].amax,-accMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].tmin = Max(drivers[i].tmin,torqueMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].tmax = Min(drivers[i].tmax,-torqueMax[drivers[i].linkIndices[j]]/s);
           }
         }
       }
     }
-    if(!linkNode->geomData.Empty()) {
-      if(link_index >= (int)geomManagers.size())
-        geomManagers.resize(geometry.size());
-      //*geomManagers[link_index] = geom;
-      //TEMP: convert primitives to mesh?
-      Geometry::AnyGeometry3D meshGeom;
-      linkNode->geomData.Convert(Geometry::AnyGeometry3D::Type::TriangleMesh,meshGeom,0.01);
-      geomManagers[link_index].CreateEmpty();
-      *geomManagers[link_index] = meshGeom;
-      //make the default appearance be grey
-      SetDefaultAppearance(geomManagers[link_index].Appearance());
-      geometry[link_index] = geomManagers[link_index];
-    }
-    if(this->geometry[link_index]) {
-      //LOG4CXX_INFO(GET_LOGGER(URDFParser),"Geometry "<<geomFiles[link_index]<<" has "<<this->geometry[link_index]->NumElements()<<" triangles");
 
-      //set up color
-      if(linkNode->link->visual && linkNode->link->visual->material) {
-        urdf::Color c=linkNode->link->visual->material->color;
-        this->geomManagers[link_index].SetUniqueAppearance();
-        this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
-        this->geomManagers[link_index].Appearance()->vertexColors.clear();
-        this->geomManagers[link_index].Appearance()->faceColors.clear();
+    //double check links are specified properly
+    for(auto kpi: kP) {
+      if(LinkIndex(kpi.first.c_str()) < 0)
+        LOG4CXX_WARN(GET_LOGGER(URDFParser),"Invalid <klampt><link> element named "<<kpi.first);
+    }
+    
+    UpdateFrames();
+    for (size_t i = start; i < linkNodes.size(); i++) {
+      URDFLinkNode* linkNode = &linkNodes[i];
+      int link_index = linkNode->index;
+      if(floating) link_index += 5;
+      else link_index -= 1;
+
+      //geometry
+      if (!linkNode->geomName.empty() && !RobotModel::disableGeometryLoading) {
+        string fn;
+        geomFiles[link_index] = linkNode->geomName;
+        fn = ResolveFileReference(path,linkNode->geomName);
+        if(FileUtils::Exists(fn.c_str())) {
+          if (!LoadGeometry(link_index, fn.c_str())) {
+            LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName << " for link " << link_index << "");
+            //LOG4CXX_INFO
+            LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+            //return false;
+          }
+        }
+        else if(FileUtils::Exists(geomFiles[link_index].c_str())) {
+          if (!LoadGeometry(link_index, geomFiles[link_index].c_str())) {
+            LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName  << " for link " << link_index << "");
+            //TEMP
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+            //return false;
+          }
+        }
+        else {
+          localfile = MakeURLLocal(fn);
+          if(localfile == fn) {
+            LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Could not load geometry " << linkNode->geomName <<", in relative or absolute paths");
+            //TEMP
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+            //return false;
+          }
+          else {
+            //try loiading from url
+            if(!LoadGeometry(link_index,fn.c_str())) {
+              LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName << " for link " << link_index << "");
+              //TEMP
+              LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+            }
+          }
+        }
       }
-      Matrix4 ident; ident.setIdentity();
-      if(!linkNode->geomScale.isEqual(ident)) {
-        this->geomManagers[link_index].TransformGeometry(linkNode->geomScale);
-        this->geometry[link_index] = this->geomManagers[link_index];
+      if(!linkNode->geomData.Empty()) {
+        if(link_index >= (int)geomManagers.size())
+          geomManagers.resize(geometry.size());
+        //*geomManagers[link_index] = geom;
+        //TEMP: convert primitives to mesh?
+        Geometry::AnyGeometry3D meshGeom;
+        linkNode->geomData.Convert(Geometry::AnyGeometry3D::Type::TriangleMesh,meshGeom,0.01);
+        geomManagers[link_index].CreateEmpty();
+        *geomManagers[link_index] = meshGeom;
+        //make the default appearance be grey
+        SetDefaultAppearance(geomManagers[link_index].Appearance());
+        geometry[link_index] = geomManagers[link_index];
+      }
+      if(this->geometry[link_index]) {
+        //LOG4CXX_INFO(GET_LOGGER(URDFParser),"Geometry "<<geomFiles[link_index]<<" has "<<this->geometry[link_index]->NumElements()<<" triangles");
+
+        //set up color
+        if(linkNode->link->visual && linkNode->link->visual->material) {
+          urdf::Color c=linkNode->link->visual->material->color;
+          this->geomManagers[link_index].SetUniqueAppearance();
+          this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
+          this->geomManagers[link_index].Appearance()->vertexColors.clear();
+          this->geomManagers[link_index].Appearance()->faceColors.clear();
+        }
+        Matrix4 ident; ident.setIdentity();
+        if(!linkNode->geomScale.isEqual(ident)) {
+          this->geomManagers[link_index].TransformGeometry(linkNode->geomScale);
+          this->geometry[link_index] = this->geomManagers[link_index];
+        }
       }
     }
   }
-
 
   //first mount the geometries, they affect whether a link is included in self collision testing
   vector<int> mountLinkIndices(mountLinks.size());
@@ -3336,7 +3344,7 @@ bool RobotModel::LoadURDF(const char* fn)
     }
     else {
       int linkIndex = LinkIndex(mountLinks[i].c_str());
-      if(linkIndex < 0 && mountLinks[i] != "-1") {
+      if(linkIndex < 0) {
         LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
         return false;
       }
@@ -3355,8 +3363,8 @@ bool RobotModel::LoadURDF(const char* fn)
 
   this->UpdateConfig(q);
 
-  selfCollisions.resize(links_size, links_size, NULL);
-  envCollisions.resize(links_size, NULL);
+  selfCollisions.resize(links.size(), links.size(), NULL);
+  envCollisions.resize(links.size(), NULL);
 
   //Initialize self collisions -- pre subchain mounting
   CleanupSelfCollisions();
@@ -3402,7 +3410,7 @@ bool RobotModel::LoadURDF(const char* fn)
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
       int linkIndex = LinkIndex(mountLinks[i].c_str());
-      if(linkIndex < 0) {
+      if(linkIndex < 0 && mountLinks[i] != "-1") {
         LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
         return false;
       }
