@@ -38,6 +38,7 @@ from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rot
 #conversions from SWIG docstrings to RST docstrings
 to_python_types = {
     'char *':'str',
+    'char const *':'str',
     'char':'str',
     'std::string':'str',
     'double':'float',
@@ -53,7 +54,8 @@ to_python_types = {
     'double [3]': "list of 3 floats",
     'double const [9]': "list of 9 floats (so3 element)",
     'double [9]': "list of 9 floats (so3 element)",
-    'float const [4]':'list of 4 wfloats',
+    'float const [4]':'list of 4 floats',
+    'double const [4]':'list of 4 floats',
     'std::vector< unsigned char,std::allocator< unsigned char > > const':'bytes',
     'std::vector<(float,std::allocator<(float)>)>':'list of floats',
     'std::vector<(double,std::allocator<(double)>)>':'list of floats',
@@ -101,6 +103,7 @@ to_python_type_hints = {
     "std::map< std::string,std::string >::key_type" : 'str',
     "std::map< std::string,std::string >::mapped_type" : 'str',
     "std::vector< std::string,std::allocator< std::string > >" : "Sequence[str]",
+    'std::string const &':'str',
     'unsigned char *':'"np.ndarray"',
     'unsigned short *':'"np.ndarray"',
     'unsigned int *':'"np.ndarray"',
@@ -122,6 +125,7 @@ to_python_type_hints = {
     "double const [9]" : 'Rotation',
     "double const [3]" : 'Point',
     'float const [4]':'Sequence[float]',
+    'double const [4]':'Sequence[float]',
     "double [4]" : "Sequence[float]",
     "double [16]" : "Sequence[float]",
     "std::vector< double > &, std::vector< double > &, std::vector< double > &": "Tuple[Vector,Vector,Vector]",
