@@ -8,6 +8,8 @@
 /** @file geometry.h
  * @brief C++ bindings for geometry modeling. */
 
+ class Appearance;
+
 /** @brief A 3D indexed triangle mesh class.
  *
  * Attributes:
@@ -96,12 +98,12 @@ struct ConvexHull
   ///Copies the data of the argument into this.
   void set(const ConvexHull&);
 
-  ///Retrieves a view of the points.
+  ///Retrieves a view of the points. 
   ///
   ///Returns:
   ///
   ///    ndarray: an nx3 Numpy array. Setting elements of this array will
-  ///    change the points.
+  ///    immediately take effect.
   ///
   ///Return type: np.ndarray
   void getPoints(double** np_view2, int* m, int* n);
@@ -373,7 +375,8 @@ public:
   void shift(double dv);
   ///Scales the value uniformly 
   void scale(double cv);
-  ///Returns a 3D Numpy array view of the values
+  ///Returns a 3D Numpy array view of the values.  Changes to this 
+  ///array will immediately take effect.
   ///
   ///Return type: np.ndarray
   void getValues(double** np_view3, int* m, int* n, int* p);
@@ -441,7 +444,8 @@ public:
   void shift(double dv);
   ///Scales the value uniformly 
   void scale(double cv);
-  ///Returns a 3D Numpy array view of the values
+  ///Returns a 3D Numpy array view of the values.   Changes to this 
+  ///array will immediately take effect.
   ///
   ///Return type: np.ndarray
   void getValues(double** np_view3, int* m, int* n, int* p);
@@ -515,7 +519,10 @@ public:
   bool isPerspective() const;
   /// Returns true if the heightmaps is in orthographic (elevation map) mode
   bool isOrthographic() const { return !isPerspective(); }
-  /// Retrieves the viewport 
+  /// Retrieves the viewport, which defines how the heightmap data is mapped to
+  /// spatial coordinates.  Note that this is returned by value. If you change an
+  /// attribute of the viewport, you should call setViewport (or viewport=...) to
+  /// update the heightmap's viewport.
   Viewport getViewport() const;
   /// Sets the viewport
   void setViewport(const Viewport& viewport);
@@ -540,7 +547,8 @@ public:
   /// Scales the height uniformly 
   void scale(double c);
   ///Returns a 2D Numpy array view of the values.  Result has shape w x h and 
-  ///has float32 dtype.
+  ///has float32 dtype.  Modifications to the array are immediately reflected
+  ///in the heightmap
   ///
   ///Return type: np.ndarray
   void getHeights(float** np_view2, int* m, int* n);
@@ -586,7 +594,6 @@ public:
   int addProperty(const std::string& pname,double* np_array2,int m,int n);
   /// Retrieves the index associated with a property name 
   int propertyIndex(const std::string& pname) const;
-  /// Retrieves a property index
   /// Sets an individual pixel's property vector 
   void setProperty(int i,int j,double* np_array,int m);
   /// Retrieves an individual pixel's property vector 
@@ -911,6 +918,13 @@ class Geometry3D
   ///Translates/rotates/scales the geometry data.
   ///Permanently modifies the data and resets any collision data structures.
   void transform(const double R[9],const double t[3]);
+  ///Attaches appearance data to the geometry.  This is only supported by
+  ///triangle meshes.
+  void setAppearance(const Appearance& appearance);
+  ///Retrieves any appearance data attached to the geometry.
+  ///If no appearance data is attached, returns an empty Appearance. 
+  ///This is only supported by triangle meshes.
+  Appearance getAppearance() const;
   ///Sets a padding around the base geometry which affects the results of
   ///proximity queries
   void setCollisionMargin(double margin);

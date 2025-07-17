@@ -28,6 +28,8 @@ def to_trimesh(geom : Union[TriangleMesh,Geometry3D,WorldModel], appearance:Opti
     elif isinstance(geom,Geometry3D):
         if geom.type() != "TriangleMesh":
             raise ValueError("Can only convert TriangleMesh objects to Trimesh")
+        if appearance is None:
+            appearance = geom.getAppearance()
         return to_trimesh(geom.getTriangleMesh(), appearance)
     elif isinstance(geom,WorldModel):
         res = trimesh.Scene()
@@ -86,18 +88,24 @@ def _set_texture(a : Appearance, img):
         else:
             print("from_trimesh: Can't handle texture mode",mode)
 
-def from_trimesh(mesh : Union[trimesh.Trimesh,trimesh.Scene],flatten=False) -> Union[Tuple[TriangleMesh,Appearance],WorldModel]:
-    """Converts a Trimesh object to a Klampt TriangleMesh, or a Trimesh Scene
+def from_trimesh(mesh : Union[trimesh.Trimesh,trimesh.Scene],flatten=False) -> Union[Geometry3D,WorldModel]:
+    """Converts a Trimesh object to a Klampt Geometry3D, or a Trimesh Scene
     to a WorldModel. 
 
     Args:
         mesh (trimesh.Trimesh or trimesh.Scene): the input trimesh object or
             Scene.
-        flatten (bool): if True, flattens a scene into a TriangleMesh object.
+        flatten (bool): if True, flattens a scene into a group geometry.
 
     Returns:
-        TriangleMesh or WorldModel: the output Klampt TriangleMesh object or
+        Geometry3D or WorldModel: the output Klampt Geometry3D object or
         WorldModel scene.  Scenes include all geometries as rigidObjects.
+    
+    .. versionchanged::
+    
+        0.10.1: Now embeds appearance information into Geometry3D.  If flatten=True,
+        returns a Group geometry.
+
     """
     if isinstance(mesh,trimesh.Trimesh):
         m = TriangleMesh()
@@ -149,7 +157,9 @@ def from_trimesh(mesh : Union[trimesh.Trimesh,trimesh.Scene],flatten=False) -> U
             else:
                 print("from_trimesh: Can't handle material type",mesh.visual.material.__class__.__name__)
                 a = Appearance()
-        return m,a
+        g = Geometry3D(m)
+        g.setAppearance(a)
+        return g
     elif isinstance(mesh,trimesh.Scene):
         res = WorldModel()
         for node_name,transform_geom in mesh.graph.to_flattened().items():
@@ -159,12 +169,15 @@ def from_trimesh(mesh : Union[trimesh.Trimesh,trimesh.Scene],flatten=False) -> U
             if geometry_name is None:
                 continue
             geometry = mesh.geometry[geometry_name]
+            if not isinstance(geometry,trimesh.Trimesh):
+                print("from_trimesh: Warning, geometry",geometry_name,"is not a Trimesh object (got {} instead), skipping".format(geometry.__class__.__name__))
+                continue
 
             robj = res.makeRigidObject(node_name)
-            m,a = from_trimesh(geometry)
-            assert isinstance(m,TriangleMesh),"Hmm... geometry has type other than TriangleMesh? {}".format(geometry.__class__.__name__)
-            robj.geometry().set(Geometry3D(m))
-            robj.appearance().set(a)
+            g = from_trimesh(geometry)
+            assert g.type()=='TriangleMesh',"Hmm... geometry has type other than TriangleMesh? {}".format(g.type())
+            robj.geometry().set(g)
+            robj.appearance().set(g.getAppearance())
             robj.appearance().refresh()
             #print(node_name,transform)
             R,t = se3.from_ndarray(transform)
@@ -178,22 +191,22 @@ def from_trimesh(mesh : Union[trimesh.Trimesh,trimesh.Scene],flatten=False) -> U
             # robj.geometry().transform(so3.from_ndarray(np.diag(s)),[0,0,0])
             robj.setTransform(R,t)
         if flatten:
-            geoms = []
-            apps = []
+            if res.numRigidObjects()==1:
+                return res.rigidObject(0).geometry().copy()  #make standalone
+            grp = Geometry3D()
+            grp.setGroup()
             for i in range(res.numRigidObjects()):
-                geoms.append(res.rigidObject(i).geometry())
-                apps.append(res.rigidObject(i).appearance())
-            if len(geoms) == 1:
-                return geoms[0],apps[0]
-            from ..model import geometry
-            #merge geometries and apperances
-            print("from_trimesh: Warning: merging appearances is not perfect, textures are ignored")
-            merged_app = Appearance()
-            face_colors = []
-            for g,a in zip(geoms,apps):
-                c = a.getColor()
-                face_colors += [c]*g.numElements()
-            merged_app.setColors(Appearance.FACES,np.array(face_colors,dtype=np.float32))
-            return geometry.merge(*geoms),merged_app
+                grp.setElement(i,res.rigidObject(i).geometry())
+            return grp
         return res
-
+    else:
+        if hasattr(mesh,'scene'):
+            #some trimesh objects have a scene() method
+            scene = mesh.scene()
+            if isinstance(scene,trimesh.Scene):
+                return from_trimesh(scene,flatten=flatten)
+            else:
+                print("from_trimesh: Warning, scene() method returned type",scene.__class__.__name__)
+                print(dir(mesh))
+                input()
+        raise ValueError("Invalid input type {}, must be trimesh.Trimesh or trimesh.Scene".format(mesh.__class__.__name__))

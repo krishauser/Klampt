@@ -1005,10 +1005,8 @@ class TriangleMesh(object):
     isStandalone = property(_robotsim.TriangleMesh_isStandalone_get, _robotsim.TriangleMesh_isStandalone_set, doc=r"""isStandalone : bool""")
 
     vertices = property(getVertices, setVertices)
-    """The vertices of the mesh."""
 
     indices = property(getIndices, setIndices)
-    """The triangles of the mesh, given as indices into the vertices array."""
 
     def triangle(self, i) -> Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
         """
@@ -1018,7 +1016,7 @@ class TriangleMesh(object):
         v = self.vertices
         return (v[a],v[b],v[c])
 
-    def triangleNoormals(self) -> np.ndarray:
+    def triangleNormals(self) -> np.ndarray:
         """
         Computes outward triangle normals.
 
@@ -1134,7 +1132,7 @@ class ConvexHull(object):
         Returns:  
 
             ndarray: an nx3 Numpy array. Setting elements of this array will
-            change the points.
+            immediately take effect.
          Return type: np.ndarray  
 
         """
@@ -1183,7 +1181,6 @@ class ConvexHull(object):
     isStandalone = property(_robotsim.ConvexHull_isStandalone_get, _robotsim.ConvexHull_isStandalone_set, doc=r"""isStandalone : bool""")
 
     points = property(getPoints, setPoints)
-    """The points of the convex hull."""
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1619,10 +1616,8 @@ class PointCloud(object):
     isStandalone = property(_robotsim.PointCloud_isStandalone_get, _robotsim.PointCloud_isStandalone_set, doc=r"""isStandalone : bool""")
 
     points = property(getPoints, setPoints)
-    """The points of the point cloud."""
 
     properties = property(getProperties, setProperties)
-    """The properties of the point cloud."""
 
     def getPropertyNames(self) -> List[str]:
         """
@@ -1939,7 +1934,10 @@ class GeometricPrimitive(object):
     """The type of the geometric primitive."""
 
     properties = property(getProperties, setProperties)
-    """The properties of the geometric primitive.  Type dependent."""
+    """The properties of the geometric primitive.  Type dependent.  Retrieved
+    by value, so you will need to use setProperties (or properties=...) for
+    updates to take effect.
+    """
 
     def __reduce__(self):
         from klampt.io import loader
@@ -2098,7 +2096,8 @@ class ImplicitSurface(object):
         getValues(ImplicitSurface self)
 
 
-        Returns a 3D Numpy array view of the values.  
+        Returns a 3D Numpy array view of the values. Changes to this array will
+        immediately take effect.  
 
         Return type: np.ndarray  
 
@@ -2138,12 +2137,10 @@ class ImplicitSurface(object):
     isStandalone = property(_robotsim.ImplicitSurface_isStandalone_get, _robotsim.ImplicitSurface_isStandalone_set, doc=r"""isStandalone : bool""")
 
     bmin = property(getBmin, setBmin)
-    """The lower bound of the domain."""
 
     bmax = property(getBmax, setBmax)
-    """The upper bound of the domain."""
 
-    def setBounds(self, bounds):
+    def setBounds(self, bounds : Sequence[float]):
         """
         @deprecated
 
@@ -2154,7 +2151,7 @@ class ImplicitSurface(object):
         self.bmin = bounds[0:3]
         self.bmax = bounds[3:6]
 
-    def getBounds(self):
+    def getBounds(self) -> Sequence[float]:
         """
         @deprecated
 
@@ -2168,7 +2165,6 @@ class ImplicitSurface(object):
     """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
 
     values = property(getValues, setValues)
-    """The 3D array of values in the grid (numpy.ndarray)"""
 
     def __reduce__(self):
         from klampt.io import loader
@@ -2323,7 +2319,8 @@ class OccupancyGrid(object):
         getValues(OccupancyGrid self)
 
 
-        Returns a 3D Numpy array view of the values.  
+        Returns a 3D Numpy array view of the values. Changes to this array will
+        immediately take effect.  
 
         Return type: np.ndarray  
 
@@ -2363,12 +2360,9 @@ class OccupancyGrid(object):
     isStandalone = property(_robotsim.OccupancyGrid_isStandalone_get, _robotsim.OccupancyGrid_isStandalone_set, doc=r"""isStandalone : bool""")
 
     bmin = property(getBmin, setBmin)
-    """The lower bound of the domain."""
-
     bmax = property(getBmax, setBmax)
-    """The upper bound of the domain."""
 
-    def setBounds(self, bounds):
+    def setBounds(self, bounds : Sequence[float]):
         """
         @deprecated
 
@@ -2379,7 +2373,7 @@ class OccupancyGrid(object):
         self.bmin = bounds[0:3]
         self.bmax = bounds[3:6]
 
-    def getBounds(self):
+    def getBounds(self) -> Sequence[float]:
         """
         @deprecated
 
@@ -2393,7 +2387,6 @@ class OccupancyGrid(object):
     """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
 
     values = property(getValues, setValues)
-    """The 3D array of values in the grid (numpy.ndarray)"""
 
     def __reduce__(self):
         from klampt.io import loader
@@ -2533,7 +2526,10 @@ class Heightmap(object):
         getViewport(Heightmap self) -> Viewport
 
 
-        Retrieves the viewport.  
+        Retrieves the viewport, which defines how the heightmap data is mapped to
+        spatial coordinates. Note that this is returned by value. If you change an
+        attribute of the viewport, you should call setViewport (or viewport=...) to
+        update the heightmap's viewport.  
 
         """
         return _robotsim.Heightmap_getViewport(self)
@@ -2633,7 +2629,8 @@ class Heightmap(object):
 
 
         Returns a 2D Numpy array view of the values. Result has shape w x h and has
-        float32 dtype.  
+        float32 dtype. Modifications to the array are immediately reflected in the
+        heightmap.  
 
         Return type: np.ndarray  
 
@@ -2792,7 +2789,7 @@ class Heightmap(object):
         setProperty(Heightmap self, int i, int j, double * np_array)
 
 
-        Retrieves a property index Sets an individual pixel's property vector.  
+        Sets an individual pixel's property vector.  
 
         """
         return _robotsim.Heightmap_setProperty(self, i, j, np_array)
@@ -3593,6 +3590,29 @@ class Geometry3D(object):
 
         """
         return _robotsim.Geometry3D_transform(self, R, t)
+
+    def setAppearance(self, appearance: "Appearance") -> "void":
+        r"""
+        setAppearance(Geometry3D self, Appearance appearance)
+
+
+        Attaches appearance data to the geometry. This is only supported by triangle
+        meshes.  
+
+        """
+        return _robotsim.Geometry3D_setAppearance(self, appearance)
+
+    def getAppearance(self) -> "Appearance":
+        r"""
+        getAppearance(Geometry3D self) -> Appearance
+
+
+        Retrieves any appearance data attached to the geometry. If no appearance data is
+        attached, returns an empty Appearance. This is only supported by triangle
+        meshes.  
+
+        """
+        return _robotsim.Geometry3D_getAppearance(self)
 
     def setCollisionMargin(self, margin: "double") -> "void":
         r"""
@@ -5774,8 +5794,17 @@ class RobotModelLink(object):
         getMass(RobotModelLink self) -> Mass
 
 
-        Returns the inertial properties of the link. (Note that the Mass is given with
-        origin at the link frame, not about the COM.)  
+        Returns the inertial properties of the link.  
+
+        .. note::  
+
+            To change the mass properties, you should call ``m=link.getMass()``,
+            change the desired properties in m, and then ``link.setMass(m)``
+         .. note::  
+
+             The Mass object considers the inertia matrix origin as the link
+             frame, not about the COM.
+
 
         """
         return _robotsim.RobotModelLink_getMass(self)
@@ -7343,27 +7372,31 @@ class RobotModel(object):
     robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Klampt::RobotModel""")
     dirty_dynamics = property(_robotsim.RobotModel_dirty_dynamics_get, _robotsim.RobotModel_dirty_dynamics_set, doc=r"""dirty_dynamics : bool""")
 
-    def getLinks(self) -> Tuple[RobotModelLink]:
+    @property
+    def links(self) -> Sequence[RobotModelLink]:
         """
-        Returns a list of all links on the robot.
+        A tuple of all links on the robot.
         """
         return tuple(self.link(i) for i in range(self.numLinks()))
 
-    def getLinksDict(self) -> Dict[str,RobotModelLink]:
+    @property
+    def linksDict(self) -> Dict[str,RobotModelLink]:
         """
-        Returns a dictionary mapping link names to RobotModelLink instances.
+        A frozen dictionary mapping link names to RobotModelLink instances.
         """
         return types.MappingProxyType({l.name:l for l in self.getLinks()})
 
-    def getDrivers(self) -> Tuple[RobotModelDriver]:
+    @property
+    def drivers(self) -> Sequence[RobotModelDriver]:
         """
-        Returns a list of all drivers on the robot.
+        A tuple of all drivers on the robot.
         """
         return tuple(self.driver(i) for i in range(self.numDrivers()))
 
-    def getDriversDict(self) -> Dict[str,RobotModelDriver]:
+    @property
+    def driversDict(self) -> Dict[str,RobotModelDriver]:
         """
-        Returns a dictionary mapping driver names to RobotModelDriver instances.
+        A frozen dictionary mapping driver names to RobotModelDriver instances.
         """
         return types.MappingProxyType({d.name:d for d in self.getDrivers()})
 
@@ -7377,28 +7410,28 @@ class RobotModel(object):
             raise KeyError("Invalid sensor name: {}".format(index_or_name))
         return res
 
-    def getSensors(self) -> Tuple['SensorModel']:
+    @property
+    def sensors(self) -> Sequence['SensorModel']:
         """
-        Returns a list of all sensors on the robot.
+        A tuple of all sensors on the robot.
         """
         return tuple(self.sensor(i) for i in range(self.numSensors()))
 
-    def getSensorsDict(self) -> Dict[str,'SensorModel']:
+    @property
+    def sensorsDict(self) -> Dict[str,'SensorModel']:
         """
-        Returns a dictionary mapping sensor names to SensorModel instances.
+        A frozen dictionary mapping sensor names to SensorModel instances.
         """
         return types.MappingProxyType({s.name:s for s in self.getSensors()})
 
     name = property(getName, setName)
     id = property(getID)
     config = property(getConfig,setConfig)
-    velocity = property(getVelocity,setVelocity)    
-    links = property(getLinks)
-    linksDict = property(getLinksDict)
-    drivers = property(getDrivers)
-    driversDict = property(getDriversDict)
-    sensors = property(getSensors)
-    sensorsDict = property(getSensorsDict)
+    """The robot's configuration.  Retrieved by value, so you will need to use
+    setConfig (or config=...) for changes take effect."""
+    velocity = property(getVelocity,setVelocity)
+    """The robot's velocity.  Retrieved by value, so you will need to use
+    setVelocity (or velocity=...) for changes to take effect."""
 
     __swig_destroy__ = _robotsim.delete_RobotModel
 
@@ -7703,6 +7736,7 @@ class SensorModel(object):
             self._setLink(link)
 
     name = property(getName, setName)
+
     type = property(getType)
     """A string giving the sensor's type.  Read-only."""
 
@@ -8397,6 +8431,16 @@ class WorldModel(object):
         """
         return _robotsim.WorldModel_remove(self, *args)
 
+    def entityType(self, id: "int") -> "std::string":
+        r"""
+        entityType(WorldModel self, int id) -> std::string
+
+
+        Returns either 'robot', 'robotLink', 'rigidObject', or 'terrain'.  
+
+        """
+        return _robotsim.WorldModel_entityType(self, id)
+
     def getName(self, id: "int") -> "std::string":
         r"""
         getName(WorldModel self, int id) -> std::string
@@ -8406,6 +8450,16 @@ class WorldModel(object):
 
         """
         return _robotsim.WorldModel_getName(self, id)
+
+    def setName(self, id: "int", name: "char const *") -> "void":
+        r"""
+        setName(WorldModel self, int id, char const * name)
+
+
+        Sets the name for a given element ID.  
+
+        """
+        return _robotsim.WorldModel_setName(self, id, name)
 
     def geometry(self, id: "int") -> "Geometry3D":
         r"""
@@ -8467,48 +8521,89 @@ class WorldModel(object):
         return _robotsim.WorldModel_enableInitCollisions(self, enabled)
     index = property(_robotsim.WorldModel_index_get, _robotsim.WorldModel_index_set, doc=r"""index : int""")
 
-    def getRobots(self) -> Tuple[RobotModel]:
+    @property
+    def robots(self) -> Sequence[RobotModel]:
         """
-        Returns a list of all robots in the world.
+        A tuple of all robots in the world.
         """
         return tuple(self.robot(i) for i in range(self.numRobots()))
 
-    def getRobotsDict(self) -> Dict[str,RobotModel]:
+    @property
+    def robotsDict(self) -> Dict[str,RobotModel]:
         """
-        Returns a dictionary mapping robot names to RobotModel instances.
+        A frozen dictionary mapping robot names to RobotModel instances.
         """
         return types.MappingProxyType({r.name:r for r in self.getRobots()})
 
-    def getRigidObjects(self) -> Tuple[RigidObjectModel]:
+    @property
+    def rigidObjects(self) -> Sequence[RigidObjectModel]:
         """
-        Returns a list of all rigid objects in the world.
+        A tuple of all rigid objects in the world.
         """
         return tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
 
-    def getRigidObjectsDict(self) -> Dict[str,RigidObjectModel]:
+    @property
+    def rigidObjectsDict(self) -> Dict[str,RigidObjectModel]:
         """
-        Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+        A frozen dictionary mapping rigid object names to RigidObjectModel instances.
         """
         return types.MappingProxyType({r.name:r for r in self.getRigidObjects()})
 
-    def getTerrains(self) -> Tuple[TerrainModel]:
+    @property
+    def terrains(self) -> Sequence[TerrainModel]:
         """
-        Returns a list of all rigid objects in the world.
+        A tuple of all rigid objects in the world.
         """
         return tuple(self.terrain(i) for i in range(self.numTerrains()))
 
-    def getTerrainsDict(self) -> Dict[str,TerrainModel]:
+    @property
+    def terrainsDict(self) -> Dict[str,TerrainModel]:
         """
-        Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+        A frozen dictionary mapping terrain names to TerrainModel instances.
         """
         return types.MappingProxyType({r.name:r for r in self.getTerrains()})
 
-    robots = property(getRobots)
-    robotsDict = property(getRobotsDict)
-    rigidObjects = property(getRigidObjects)
-    rigidObjectsDict = property(getRigidObjectsDict)
-    terrains = property(getTerrains)
-    terrainsDict = property(getTerrainsDict)
+    def entity(self, id_or_name: Union[int,str]) -> Union[RobotModel,RobotModelLink,RigidObjectModel,TerrainModel]:
+        """
+        Retrieves the entity with the given ID or name.  Raises KeyError if it
+        does not exist.
+        """
+        if isinstance(id_or_name, int):
+            id = id_or_name
+            try:
+                t = self.entityType(id)
+            except Exception:
+                raise KeyError("No entity with ID {}".format(id))
+            n = self.getName(id_or_name)
+            if t == 'robot':
+                return self.robot(n)
+            elif t == 'robotLink':
+                for r in self.robots:
+                    l = r.link(n)
+                    if l.index >= 0:
+                        return l
+                raise RuntimeError("No link with name {} any robot?".format(n))
+            elif t == 'rigidObject':
+                return self.rigidObject(n)
+            elif t == 'terrain':
+                return self.terrain(n)
+            else:
+                raise KeyError("Entity with ID {} is of unknown type {}".format(id,t))
+        else:
+            assert isinstance(id_or_name, str),"entity must be provide an integer ID or string name"
+            for r in self.robots:
+                if r.name == id_or_name:
+                    return r
+                for l in r.links:
+                    if l.name == id_or_name:
+                        return l
+            for o in self.rigidObjects:
+                if o.name == id_or_name:
+                    return o
+            for t in self.terrains:
+                if t.name == id_or_name:
+                    return t
+            raise KeyError("No entity with name {}".format(id_or_name))
 
 
 # Register WorldModel in _robotsim:
@@ -9898,21 +9993,22 @@ class SimRobotController(object):
            raise KeyError("Invalid sensor name: {}".format(index_or_name))
        return res
 
-    def getSensors(self) -> Tuple[SensorModel]:
+    @property
+    def sensors(self) -> Sequence[SensorModel]:
         """
-        Returns a list of all sensors on the robot.
+        A tuple of all sensors on the robot.
         """
         return tuple(self.sensor(i) for i in range(self.numSensors()))
 
-    def getSensorsDict(self) -> Dict[str,SensorModel]:
+    @property
+    def sensorsDict(self) -> Dict[str,SensorModel]:
         """
-        Returns a dictionary mapping sensor names to SensorModel instances.
+        A frozen dictionary mapping sensor names to SensorModel instances.
         """
         return types.MappingProxyType({s.name:s for s in self.getSensors()})
 
     rate = property(getRate, setRate)
-    sensors = property(getSensors)
-    sensorsDict = property(getSensorsDict)
+    """The controller's update rate in Hz."""
 
 
 # Register SimRobotController in _robotsim:

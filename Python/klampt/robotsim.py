@@ -8,8 +8,6 @@
 Klamp't Core Python bindings 
 ------------------------------
 
-
-Args:
 """
 
 from sys import version_info as _swig_python_version_info
@@ -862,8 +860,6 @@ class TriangleMesh(object):
     A 3D indexed triangle mesh class.  
 
 
-    Args:
-
     Attributes:  
 
         vertices (numpy array):  an n x 3 array of vertices.
@@ -1002,28 +998,22 @@ class TriangleMesh(object):
     isStandalone = property(_robotsim.TriangleMesh_isStandalone_get, _robotsim.TriangleMesh_isStandalone_set, doc=r"""isStandalone : bool""")
 
     vertices = property(getVertices, setVertices)
-    """The vertices of the mesh."""
 
     indices = property(getIndices, setIndices)
-    """The triangles of the mesh, given as indices into the vertices array."""
 
     def triangle(self, i) ->  Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
         """
         Returns the i'th triangle of the mesh as a tuple of 3 3-tuples.
 
-
-        Args:
         """
         a,b,c = self.indices[i]
         v = self.vertices
         return (v[a],v[b],v[c])
 
-    def triangleNoormals(self) ->  np.ndarray:
+    def triangleNormals(self) ->  np.ndarray:
         """
         Computes outward triangle normals.
 
-
-        Args:
 
         Returns:
             An N x 3 matrix of triangle normals with N the number of triangles.
@@ -1085,8 +1075,6 @@ class ConvexHull(object):
     computed internally for some datatypes.  
 
 
-    Args:
-
     Attributes:  
 
         points (numpy array): an nx3 numpy array of points.
@@ -1139,7 +1127,7 @@ class ConvexHull(object):
         Returns:  
 
             ndarray: an nx3 Numpy array. Setting elements of this array will
-            change the points.
+            immediately take effect.
         """
         return _robotsim.ConvexHull_getPoints(self)
 
@@ -1183,7 +1171,6 @@ class ConvexHull(object):
     isStandalone = property(_robotsim.ConvexHull_isStandalone_get, _robotsim.ConvexHull_isStandalone_set, doc=r"""isStandalone : bool""")
 
     points = property(getPoints, setPoints)
-    """The points of the convex hull."""
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1198,8 +1185,6 @@ class PointCloud(object):
     r"""
     A 3D point cloud class.  
 
-
-    Args:
 
     Attributes:  
 
@@ -1512,7 +1497,7 @@ class PointCloud(object):
         intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_array2 (:obj:`2D Numpy array of floats`)
             depth_scale (float)
         """
@@ -1524,7 +1509,7 @@ class PointCloud(object):
         intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_depth2 (:obj:`float *`)
             depth_scale (float)
         """
@@ -1536,7 +1521,7 @@ class PointCloud(object):
         intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_depth2 (:obj:`unsigned short *`)
             depth_scale (float)
         """
@@ -1549,7 +1534,7 @@ class PointCloud(object):
         0xrrggbb order, size hxw, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_array2 (:obj:`unsigned int *`)
             np_depth2 (:obj:`double *`)
             depth_scale (float)
@@ -1563,7 +1548,7 @@ class PointCloud(object):
         0xrrggbb order, size hxw, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_array2 (:obj:`unsigned int *`)
             np_depth2 (:obj:`float *`)
             depth_scale (float)
@@ -1577,7 +1562,7 @@ class PointCloud(object):
         0xrrggbb order, size hxw, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_array2 (:obj:`unsigned int *`)
             np_depth2 (:obj:`unsigned short *`)
             depth_scale (float)
@@ -1591,7 +1576,7 @@ class PointCloud(object):
         0xrrggbb order, size hxw, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_array3 (:obj:`unsigned char *`)
             np_depth2 (:obj:`double *`)
             depth_scale (float)
@@ -1605,7 +1590,7 @@ class PointCloud(object):
         array, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_array3 (:obj:`unsigned char *`)
             np_depth2 (:obj:`float *`)
             depth_scale (float)
@@ -1619,7 +1604,7 @@ class PointCloud(object):
         array, top to bottom.  
 
         Args:
-            intrinsics (:obj:`double [4]`)
+            intrinsics (:obj:`list of 4 floats`)
             np_array3 (:obj:`unsigned char *`)
             np_depth2 (:obj:`unsigned short *`)
             depth_scale (float)
@@ -1629,17 +1614,13 @@ class PointCloud(object):
     isStandalone = property(_robotsim.PointCloud_isStandalone_get, _robotsim.PointCloud_isStandalone_set, doc=r"""isStandalone : bool""")
 
     points = property(getPoints, setPoints)
-    """The points of the point cloud."""
 
     properties = property(getProperties, setProperties)
-    """The properties of the point cloud."""
 
     def getPropertyNames(self) ->  List[str]:
         """
         Returns the names of the properties.
 
-
-        Args:
         """
         return [self.getPropertyName(i) for i in range(self.numProperties())]
 
@@ -1806,8 +1787,6 @@ class GeometricPrimitive(object):
     constructed manually in the Python API.  
 
 
-    Args:
-
     Attributes:  
 
         type (str): Can be "Point", "Sphere", "Segment", "Triangle",
@@ -1947,7 +1926,11 @@ class GeometricPrimitive(object):
     """The type of the geometric primitive."""
 
     properties = property(getProperties, setProperties)
-    """The properties of the geometric primitive.  Type dependent."""
+    """The properties of the geometric primitive.  Type dependent.  Retrieved
+    by value, so you will need to use setProperties (or properties=...) for
+    updates to take effect.
+
+    """
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1963,8 +1946,6 @@ class ImplicitSurface(object):
     An axis-aligned volumetric grid representing a signed distance transform with >
     0 indicating outside and < 0 indicating inside.  
 
-
-    Args:
 
     In general, values are associated with cells rather than vertices.  
 
@@ -2107,7 +2088,8 @@ class ImplicitSurface(object):
 
     def getValues(self) -> "np.ndarray":
         r"""
-        Returns a 3D Numpy array view of the values.  
+        Returns a 3D Numpy array view of the values. Changes to this array will
+        immediately take effect.  
 
         """
         return _robotsim.ImplicitSurface_getValues(self)
@@ -2140,17 +2122,13 @@ class ImplicitSurface(object):
     isStandalone = property(_robotsim.ImplicitSurface_isStandalone_get, _robotsim.ImplicitSurface_isStandalone_set, doc=r"""isStandalone : bool""")
 
     bmin = property(getBmin, setBmin)
-    """The lower bound of the domain."""
 
     bmax = property(getBmax, setBmax)
-    """The upper bound of the domain."""
 
-    def setBounds(self, bounds):
+    def setBounds(self, bounds :  Sequence[float]):
         """
         @deprecated
 
-
-        Args:
 
         Provided for backwards compatibility
         """
@@ -2159,12 +2137,10 @@ class ImplicitSurface(object):
         self.bmin = bounds[0:3]
         self.bmax = bounds[3:6]
 
-    def getBounds(self):
+    def getBounds(self) ->  Sequence[float]:
         """
         @deprecated
 
-
-        Args:
 
         Provided for backwards compatibility
         """
@@ -2176,7 +2152,6 @@ class ImplicitSurface(object):
     """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
 
     values = property(getValues, setValues)
-    """The 3D array of values in the grid (numpy.ndarray)"""
 
     def __reduce__(self):
         from klampt.io import loader
@@ -2192,8 +2167,6 @@ class OccupancyGrid(object):
     An occupancy grid with 1 indicating inside and 0 indicating outside. Can also be
     a fuzzy (probabilistic / density) grid.  
 
-
-    Args:
 
     In general, values are associated with cells rather than vertices.  
 
@@ -2332,7 +2305,8 @@ class OccupancyGrid(object):
 
     def getValues(self) -> "np.ndarray":
         r"""
-        Returns a 3D Numpy array view of the values.  
+        Returns a 3D Numpy array view of the values. Changes to this array will
+        immediately take effect.  
 
         """
         return _robotsim.OccupancyGrid_getValues(self)
@@ -2365,17 +2339,12 @@ class OccupancyGrid(object):
     isStandalone = property(_robotsim.OccupancyGrid_isStandalone_get, _robotsim.OccupancyGrid_isStandalone_set, doc=r"""isStandalone : bool""")
 
     bmin = property(getBmin, setBmin)
-    """The lower bound of the domain."""
-
     bmax = property(getBmax, setBmax)
-    """The upper bound of the domain."""
 
-    def setBounds(self, bounds):
+    def setBounds(self, bounds :  Sequence[float]):
         """
         @deprecated
 
-
-        Args:
 
         Provided for backwards compatibility
         """
@@ -2384,12 +2353,10 @@ class OccupancyGrid(object):
         self.bmin = bounds[0:3]
         self.bmax = bounds[3:6]
 
-    def getBounds(self):
+    def getBounds(self) ->  Sequence[float]:
         """
         @deprecated
 
-
-        Args:
 
         Provided for backwards compatibility
         """
@@ -2401,7 +2368,6 @@ class OccupancyGrid(object):
     """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
 
     values = property(getValues, setValues)
-    """The 3D array of values in the grid (numpy.ndarray)"""
 
     def __reduce__(self):
         from klampt.io import loader
@@ -2416,8 +2382,6 @@ class Heightmap(object):
     r"""
     A height (elevation) map or a depth map.  
 
-
-    Args:
 
     In elevation-map form (`viewport.perspective=false`), the values are the
     z-height of the terrain at each grid point. In depth-map form
@@ -2538,7 +2502,10 @@ class Heightmap(object):
 
     def getViewport(self) ->  "Viewport":
         r"""
-        Retrieves the viewport.  
+        Retrieves the viewport, which defines how the heightmap data is mapped to
+        spatial coordinates. Note that this is returned by value. If you change an
+        attribute of the viewport, you should call setViewport (or viewport=...) to
+        update the heightmap's viewport.  
 
 
         Returns:
@@ -2636,7 +2603,8 @@ class Heightmap(object):
     def getHeights(self) -> "np.ndarray":
         r"""
         Returns a 2D Numpy array view of the values. Result has shape w x h and has
-        float32 dtype.  
+        float32 dtype. Modifications to the array are immediately reflected in the
+        heightmap.  
 
         """
         return _robotsim.Heightmap_getHeights(self)
@@ -2680,7 +2648,7 @@ class Heightmap(object):
 
         Args:
             intensity (float, optional): 
-            rgba (:obj:`double [4]`, optional): 
+            rgba (:obj:`list of 4 floats`, optional): 
             i (int, optional): 
             j (int, optional): 
         """
@@ -2772,7 +2740,7 @@ class Heightmap(object):
 
     def setProperty(self, i: int, j: int, np_array: "np.ndarray") -> None:
         r"""
-        Retrieves a property index Sets an individual pixel's property vector.  
+        Sets an individual pixel's property vector.  
 
         Args:
             i (int)
@@ -2853,8 +2821,6 @@ class Heightmap(object):
         Result has float32 dtype.
 
 
-        Args:
-
         Returns:
             np.ndarray: the height values, of shape (h,w).
         """
@@ -2865,8 +2831,6 @@ class Heightmap(object):
         """
         Gets heights as a uint8 height image.  Handles image orientation.
 
-
-        Args:
 
         Returns:
             np.ndarray, float: the height values, of shape (h,w) and dtype
@@ -2880,8 +2844,6 @@ class Heightmap(object):
         """
         Gets heights as a uint16 height image.  Handles image orientation.
 
-
-        Args:
 
         Returns:
             np.ndarray, float: the height values, of shape (h,w) and dtype
@@ -2951,8 +2913,6 @@ class DistanceQuerySettings(object):
     Configures the _ext distance queries of :class:`~klampt.Geometry3D`.  
 
 
-    Args:
-
     The calculated result satisfies :math:`Dcalc \leq D(1+relErr) + absErr` unless
     :math:`D \geq upperBound`, in which case Dcalc=upperBound may be returned.  
 
@@ -2989,8 +2949,6 @@ class DistanceQueryResult(object):
     r"""
     The result from a "fancy" distance query of :class:`~klampt.Geometry3D`.  
 
-
-    Args:
 
     Attributes:  
 
@@ -3043,8 +3001,6 @@ class ContactQueryResult(object):
     contacts n is variable.  
 
 
-    Args:
-
     Attributes:  
 
         depths (list of n floats): penetration depths for each contact point.
@@ -3089,8 +3045,6 @@ class Geometry3D(object):
     r"""
     The three-D geometry container used throughout Klampt.  
 
-
-    Args:
 
     There are eight currently supported types of geometry:  
 
@@ -3208,7 +3162,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D` or :class:`~klampt.ConvexHull` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.ImplicitSurface` or :obj:`Heightmap` or :class:`~klampt.TriangleMesh`, optional): 
+            arg2 (:class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.ImplicitSurface` or :obj:`Heightmap` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.ConvexHull`, optional): 
             fn (str, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
@@ -3545,6 +3499,28 @@ class Geometry3D(object):
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.Geometry3D_transform(self, R, t)
+
+    def setAppearance(self, appearance:  "Appearance") -> None:
+        r"""
+        Attaches appearance data to the geometry. This is only supported by triangle
+        meshes.  
+
+        Args:
+            appearance (:class:`~klampt.Appearance`)
+        """
+        return _robotsim.Geometry3D_setAppearance(self, appearance)
+
+    def getAppearance(self) ->  "Appearance":
+        r"""
+        Retrieves any appearance data attached to the geometry. If no appearance data is
+        attached, returns an empty Appearance. This is only supported by triangle
+        meshes.  
+
+
+        Returns:
+            Appearance:
+        """
+        return _robotsim.Geometry3D_getAppearance(self)
 
     def setCollisionMargin(self, margin: float) -> None:
         r"""
@@ -4017,8 +3993,6 @@ class Appearance(object):
     calls are fast.  
 
 
-    Args:
-
     For more complex appearances, you will need to call your own OpenGL calls.  
 
     Appearances can be either references to appearances of objects in the world, or
@@ -4219,7 +4193,7 @@ class Appearance(object):
         works with both flat colors and per-vertex / per-face colors.  
 
         Args:
-            color (:obj:`list of 4 wfloats`)
+            color (:obj:`list of 4 floats`)
             strength (float)
         """
         return _robotsim.Appearance_setTintColor(self, color, strength)
@@ -4651,8 +4625,6 @@ _robotsim.Appearance_swigregister(Appearance)
 
 class Widget(object):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4736,8 +4708,6 @@ _robotsim.Widget_swigregister(Widget)
 
 class WidgetSet(Widget):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4776,8 +4746,6 @@ _robotsim.WidgetSet_swigregister(WidgetSet)
 
 class PointPoser(Widget):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4824,8 +4792,6 @@ _robotsim.PointPoser_swigregister(PointPoser)
 
 class TransformPoser(Widget):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4887,8 +4853,6 @@ _robotsim.TransformPoser_swigregister(TransformPoser)
 
 class ObjectPoser(Widget):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4920,8 +4884,6 @@ _robotsim.ObjectPoser_swigregister(ObjectPoser)
 
 class RobotPoser(Widget):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -4978,8 +4940,6 @@ _robotsim.RobotPoser_swigregister(RobotPoser)
 
 class AABBPoser(Widget):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -5017,8 +4977,6 @@ _robotsim.AABBPoser_swigregister(AABBPoser)
 
 class BoxPoser(Widget):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -5069,8 +5027,6 @@ _robotsim.BoxPoser_swigregister(BoxPoser)
 
 class SpherePoser(Widget):
     r"""
-
-    Args:
     """
 
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -5084,7 +5040,7 @@ class SpherePoser(Widget):
     def set(self, cr: Sequence[float]) -> None:
         r"""
         Args:
-            cr (:obj:`double [4]`)
+            cr (:obj:`list of 4 floats`)
         """
         return _robotsim.SpherePoser_set(self, cr)
 
@@ -5101,8 +5057,6 @@ class Viewport(object):
     r"""
     A class that represents an idealized pinhole camera.  
 
-
-    Args:
 
     Duplicates the functioning of KrisLibrary/Camera/Viewport.  
 
@@ -5251,8 +5205,6 @@ class Viewport(object):
         @deprecated
 
 
-        Args:
-
         Provided for backwards compatibility.
         """
         import warnings
@@ -5263,8 +5215,6 @@ class Viewport(object):
         """
         @deprecated
 
-
-        Args:
 
         Provided for backwards compatibility.
         """
@@ -5287,8 +5237,6 @@ class Mass(object):
     r"""
     Stores mass information for a rigid body or robot link.  
 
-
-    Args:
 
     .. note::  
 
@@ -5399,8 +5347,6 @@ class ContactParameters(object):
     could be used for contact mechanics in the future.  
 
 
-    Args:
-
     Attributes:  
 
         kFriction (float): The coefficient of (Coulomb) friction, in range
@@ -5436,8 +5382,6 @@ class RobotModelLink(object):
     r"""
     A reference to a link of a RobotModel.  
 
-
-    Args:
 
     The link stores many mostly-constant items (id, name, parent, geometry,
     appearance, mass, joint axes). There are two exceptions:  
@@ -5567,9 +5511,17 @@ class RobotModelLink(object):
 
     def getMass(self) ->  "Mass":
         r"""
-        Returns the inertial properties of the link. (Note that the Mass is given with
-        origin at the link frame, not about the COM.)  
+        Returns the inertial properties of the link.  
 
+
+        .. note::  
+
+            To change the mass properties, you should call ``m=link.getMass()``,
+            change the desired properties in m, and then ``link.setMass(m)``
+         .. note::  
+
+             The Mass object considers the inertia matrix origin as the link
+             frame, not about the COM.
 
         Returns:
             Mass:
@@ -6016,8 +5968,6 @@ class RobotModelDriver(object):
     A reference to a driver of a RobotModel.  
 
 
-    Args:
-
     A driver corresponds to one of the robot's actuators and encodes how its forces
     are transmitted to joints.  
 
@@ -6181,8 +6131,6 @@ class RobotModel(object):
     r"""
     A model of a dynamic and kinematic robot.  
 
-
-    Args:
 
     Stores both constant information, like the reference placement of the links,
     joint limits, velocity limits, etc, as well as a *current configuration* and
@@ -6921,39 +6869,35 @@ class RobotModel(object):
     robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Klampt::RobotModel""")
     dirty_dynamics = property(_robotsim.RobotModel_dirty_dynamics_get, _robotsim.RobotModel_dirty_dynamics_set, doc=r"""dirty_dynamics : bool""")
 
-    def getLinks(self) ->  Tuple[RobotModelLink]:
+    @property
+    def links(self) ->  Sequence[RobotModelLink]:
         """
-        Returns a list of all links on the robot.
+        A tuple of all links on the robot.
 
-
-        Args:
         """
         return tuple(self.link(i) for i in range(self.numLinks()))
 
-    def getLinksDict(self) ->  Dict[str,RobotModelLink]:
+    @property
+    def linksDict(self) ->  Dict[str,RobotModelLink]:
         """
-        Returns a dictionary mapping link names to RobotModelLink instances.
+        A frozen dictionary mapping link names to RobotModelLink instances.
 
-
-        Args:
         """
         return types.MappingProxyType({l.name:l for l in self.getLinks()})
 
-    def getDrivers(self) ->  Tuple[RobotModelDriver]:
+    @property
+    def drivers(self) ->  Sequence[RobotModelDriver]:
         """
-        Returns a list of all drivers on the robot.
+        A tuple of all drivers on the robot.
 
-
-        Args:
         """
         return tuple(self.driver(i) for i in range(self.numDrivers()))
 
-    def getDriversDict(self) ->  Dict[str,RobotModelDriver]:
+    @property
+    def driversDict(self) ->  Dict[str,RobotModelDriver]:
         """
-        Returns a dictionary mapping driver names to RobotModelDriver instances.
+        A frozen dictionary mapping driver names to RobotModelDriver instances.
 
-
-        Args:
         """
         return types.MappingProxyType({d.name:d for d in self.getDrivers()})
 
@@ -6962,42 +6906,37 @@ class RobotModel(object):
         Retrieves the sensor with the given index or name.  A KeyError is
         raised if it does not exist.
 
-
-        Args:
         """
         res = self._sensor(index_or_name)
         if len(res.type) == 0:
             raise KeyError("Invalid sensor name: {}".format(index_or_name))
         return res
 
-    def getSensors(self) ->  Tuple['SensorModel']:
+    @property
+    def sensors(self) ->  Sequence['SensorModel']:
         """
-        Returns a list of all sensors on the robot.
+        A tuple of all sensors on the robot.
 
-
-        Args:
         """
         return tuple(self.sensor(i) for i in range(self.numSensors()))
 
-    def getSensorsDict(self) ->  Dict[str,'SensorModel']:
+    @property
+    def sensorsDict(self) ->  Dict[str,'SensorModel']:
         """
-        Returns a dictionary mapping sensor names to SensorModel instances.
+        A frozen dictionary mapping sensor names to SensorModel instances.
 
-
-        Args:
         """
         return types.MappingProxyType({s.name:s for s in self.getSensors()})
 
     name = property(getName, setName)
     id = property(getID)
     config = property(getConfig,setConfig)
-    velocity = property(getVelocity,setVelocity)    
-    links = property(getLinks)
-    linksDict = property(getLinksDict)
-    drivers = property(getDrivers)
-    driversDict = property(getDriversDict)
-    sensors = property(getSensors)
-    sensorsDict = property(getSensorsDict)
+    """The robot's configuration.  Retrieved by value, so you will need to use
+    setConfig (or config=...) for changes take effect."""
+    velocity = property(getVelocity,setVelocity)
+
+    """The robot's velocity.  Retrieved by value, so you will need to use
+    setVelocity (or velocity=...) for changes to take effect."""
 
     __swig_destroy__ = _robotsim.delete_RobotModel
 
@@ -7008,8 +6947,6 @@ class SensorModel(object):
     r"""
     A sensor on a simulated robot.  
 
-
-    Args:
 
     Kinematic models of sensors are retrieved using :meth:`RobotModel.sensor` and
     can be created using :meth:`RobotModel.addSensor`.  
@@ -7180,7 +7117,7 @@ class SensorModel(object):
 
 
         Args:
-            link (:class:`~klampt.RobotModelLink` or int): 
+            link (int or :class:`~klampt.RobotModelLink`): 
         """
         return _robotsim.SensorModel__setLink(self, *args)
 
@@ -7265,8 +7202,6 @@ class SensorModel(object):
         Retrieves the link that this sensor is mounted on, or None for
         world-mounted sensors.
 
-
-        Args:
         """
         l = self._getLink()
         if l.index < 0:
@@ -7278,8 +7213,6 @@ class SensorModel(object):
         Sets the link that this sensor is mounted on, or None / -1 for
         world-mounted sensors.
 
-
-        Args:
         """
         if link is None:
             self._setLink(-1)
@@ -7289,6 +7222,7 @@ class SensorModel(object):
             self._setLink(link)
 
     name = property(getName, setName)
+
     type = property(getType)
     """A string giving the sensor's type.  Read-only."""
 
@@ -7307,8 +7241,6 @@ class RigidObjectModel(object):
     r"""
     A rigid movable object.  
 
-
-    Args:
 
     A rigid object has a name, geometry, appearance, mass, surface properties, and
     current transform / velocity.  
@@ -7512,8 +7444,6 @@ class TerrainModel(object):
     Static environment geometry.  
 
 
-    Args:
-
     C++ includes: robotmodel.h
 
     """
@@ -7628,8 +7558,6 @@ class WorldModel(object):
     The main world class, containing robots, rigid objects, and static environment
     geometry.  
 
-
-    Args:
 
     Attributes:  
 
@@ -7964,7 +7892,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
+            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7992,6 +7920,15 @@ class WorldModel(object):
         """
         return _robotsim.WorldModel_remove(self, *args)
 
+    def entityType(self, id: int) -> str:
+        r"""
+        Returns either 'robot', 'robotLink', 'rigidObject', or 'terrain'.  
+
+        Args:
+            id (int)
+        """
+        return _robotsim.WorldModel_entityType(self, id)
+
     def getName(self, id: int) -> str:
         r"""
         Retrieves the name for a given element ID.  
@@ -8000,6 +7937,16 @@ class WorldModel(object):
             id (int)
         """
         return _robotsim.WorldModel_getName(self, id)
+
+    def setName(self, id: int, name: str) -> None:
+        r"""
+        Sets the name for a given element ID.  
+
+        Args:
+            id (int)
+            name (str)
+        """
+        return _robotsim.WorldModel_setName(self, id, name)
 
     def geometry(self, id: int) ->  "Geometry3D":
         r"""
@@ -8060,66 +8007,96 @@ class WorldModel(object):
         return _robotsim.WorldModel_enableInitCollisions(self, enabled)
     index = property(_robotsim.WorldModel_index_get, _robotsim.WorldModel_index_set, doc=r"""index : int""")
 
-    def getRobots(self) ->  Tuple[RobotModel]:
+    @property
+    def robots(self) ->  Sequence[RobotModel]:
         """
-        Returns a list of all robots in the world.
+        A tuple of all robots in the world.
 
-
-        Args:
         """
         return tuple(self.robot(i) for i in range(self.numRobots()))
 
-    def getRobotsDict(self) ->  Dict[str,RobotModel]:
+    @property
+    def robotsDict(self) ->  Dict[str,RobotModel]:
         """
-        Returns a dictionary mapping robot names to RobotModel instances.
+        A frozen dictionary mapping robot names to RobotModel instances.
 
-
-        Args:
         """
         return types.MappingProxyType({r.name:r for r in self.getRobots()})
 
-    def getRigidObjects(self) ->  Tuple[RigidObjectModel]:
+    @property
+    def rigidObjects(self) ->  Sequence[RigidObjectModel]:
         """
-        Returns a list of all rigid objects in the world.
+        A tuple of all rigid objects in the world.
 
-
-        Args:
         """
         return tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
 
-    def getRigidObjectsDict(self) ->  Dict[str,RigidObjectModel]:
+    @property
+    def rigidObjectsDict(self) ->  Dict[str,RigidObjectModel]:
         """
-        Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+        A frozen dictionary mapping rigid object names to RigidObjectModel instances.
 
-
-        Args:
         """
         return types.MappingProxyType({r.name:r for r in self.getRigidObjects()})
 
-    def getTerrains(self) ->  Tuple[TerrainModel]:
+    @property
+    def terrains(self) ->  Sequence[TerrainModel]:
         """
-        Returns a list of all rigid objects in the world.
+        A tuple of all rigid objects in the world.
 
-
-        Args:
         """
         return tuple(self.terrain(i) for i in range(self.numTerrains()))
 
-    def getTerrainsDict(self) ->  Dict[str,TerrainModel]:
+    @property
+    def terrainsDict(self) ->  Dict[str,TerrainModel]:
         """
-        Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+        A frozen dictionary mapping terrain names to TerrainModel instances.
 
-
-        Args:
         """
         return types.MappingProxyType({r.name:r for r in self.getTerrains()})
 
-    robots = property(getRobots)
-    robotsDict = property(getRobotsDict)
-    rigidObjects = property(getRigidObjects)
-    rigidObjectsDict = property(getRigidObjectsDict)
-    terrains = property(getTerrains)
-    terrainsDict = property(getTerrainsDict)
+    def entity(self, id_or_name:  Union[int,str]) ->  Union[RobotModel,RobotModelLink,RigidObjectModel,TerrainModel]:
+        """
+        Retrieves the entity with the given ID or name.  Raises KeyError if it
+        does not exist.
+
+        """
+        if isinstance(id_or_name, int):
+            id = id_or_name
+            try:
+                t = self.entityType(id)
+            except Exception:
+                raise KeyError("No entity with ID {}".format(id))
+            n = self.getName(id_or_name)
+            if t == 'robot':
+                return self.robot(n)
+            elif t == 'robotLink':
+                for r in self.robots:
+                    l = r.link(n)
+                    if l.index >= 0:
+                        return l
+                raise RuntimeError("No link with name {} any robot?".format(n))
+            elif t == 'rigidObject':
+                return self.rigidObject(n)
+            elif t == 'terrain':
+                return self.terrain(n)
+            else:
+                raise KeyError("Entity with ID {} is of unknown type {}".format(id,t))
+        else:
+            assert isinstance(id_or_name, str),"entity must be provide an integer ID or string name"
+            for r in self.robots:
+                if r.name == id_or_name:
+                    return r
+                for l in r.links:
+                    if l.name == id_or_name:
+                        return l
+            for o in self.rigidObjects:
+                if o.name == id_or_name:
+                    return o
+            for t in self.terrains:
+                if t.name == id_or_name:
+                    return t
+            raise KeyError("No entity with name {}".format(id_or_name))
 
 
 # Register WorldModel in _robotsim:
@@ -8131,8 +8108,6 @@ class IKObjective(object):
     on a fixed position/orientation in the world frame, or a relative
     position/orientation to another frame.  
 
-
-    Args:
 
     The positionScale and orientationScale attributes scale the solver's residual
     vector. This affects whether the convergence tolerance is met, and also controls
@@ -8476,8 +8451,6 @@ class IKSolver(object):
     An inverse kinematics solver based on the Newton-Raphson technique.  
 
 
-    Args:
-
     Typical calling pattern is::  
 
         s = IKSolver(robot)
@@ -8779,8 +8752,6 @@ class GeneralizedIKObjective(object):
     objects.  
 
 
-    Args:
-
     The objects are chosen upon construction, so the following are valid:  
 
     *   GeneralizedIKObjective(a) is an objective for object a to be constrained
@@ -8870,8 +8841,6 @@ class GeneralizedIKSolver(object):
     IMPLEMENTED YET.  
 
 
-    Args:
-
     C++ includes: robotik.h
 
     """
@@ -8959,8 +8928,6 @@ class SimRobotController(object):
     r"""
     A controller for a simulated robot.  
 
-
-    Args:
 
     By default a SimRobotController has three possible modes:  
 
@@ -9380,35 +9347,30 @@ class SimRobotController(object):
        Retrieves the sensor with the given index or name.  A KeyError is
        raised if it does not exist.
 
-
-       Args:
        """
        res = self._sensor(index_or_name)
        if len(res.type) == 0:
            raise KeyError("Invalid sensor name: {}".format(index_or_name))
        return res
 
-    def getSensors(self) ->  Tuple[SensorModel]:
+    @property
+    def sensors(self) ->  Sequence[SensorModel]:
         """
-        Returns a list of all sensors on the robot.
+        A tuple of all sensors on the robot.
 
-
-        Args:
         """
         return tuple(self.sensor(i) for i in range(self.numSensors()))
 
-    def getSensorsDict(self) ->  Dict[str,SensorModel]:
+    @property
+    def sensorsDict(self) ->  Dict[str,SensorModel]:
         """
-        Returns a dictionary mapping sensor names to SensorModel instances.
+        A frozen dictionary mapping sensor names to SensorModel instances.
 
-
-        Args:
         """
         return types.MappingProxyType({s.name:s for s in self.getSensors()})
 
     rate = property(getRate, setRate)
-    sensors = property(getSensors)
-    sensorsDict = property(getSensorsDict)
+    """The controller's update rate in Hz."""
 
 
 # Register SimRobotController in _robotsim:
@@ -9419,8 +9381,6 @@ class SimBody(object):
     A reference to a rigid body inside a Simulator (either a RigidObjectModel,
     TerrainModel, or a link of a RobotModel).  
 
-
-    Args:
 
     Can use this class to directly apply forces to or control positions / velocities
     of objects in the simulation.  
@@ -9703,8 +9663,6 @@ class SimJoint(object):
     objects together, e.g., an object to a robot's gripper.  
 
 
-    Args:
-
     C++ includes: robotsim.h
 
     """
@@ -9815,8 +9773,6 @@ class Simulator(object):
     r"""
     A dynamics simulator for a WorldModel.  
 
-
-    Args:
 
     C++ includes: robotsim.h
 
@@ -10106,7 +10062,7 @@ class Simulator(object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             SimRobotController:

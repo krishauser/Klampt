@@ -31550,6 +31550,85 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_setAppearance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Appearance *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_setAppearance", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setAppearance" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Appearance,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setAppearance" "', argument " "2"" of type '" "Appearance const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setAppearance" "', argument " "2"" of type '" "Appearance const &""'"); 
+  }
+  arg2 = reinterpret_cast< Appearance * >(argp2);
+  {
+    try {
+      (arg1)->setAppearance((Appearance const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getAppearance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  Appearance result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getAppearance" "', argument " "1"" of type '" "Geometry3D const *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = ((Geometry3D const *)arg1)->getAppearance();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Appearance(static_cast< const Appearance& >(result))), SWIGTYPE_p_Appearance, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_setCollisionMargin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -56545,6 +56624,48 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_WorldModel_entityType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  WorldModel *arg1 = (WorldModel *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  std::string result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "WorldModel_entityType", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_entityType" "', argument " "1"" of type '" "WorldModel *""'"); 
+  }
+  arg1 = reinterpret_cast< WorldModel * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "WorldModel_entityType" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      result = (arg1)->entityType(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_WorldModel_getName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   WorldModel *arg1 = (WorldModel *) 0 ;
@@ -56583,6 +56704,58 @@ SWIGINTERN PyObject *_wrap_WorldModel_getName(PyObject *SWIGUNUSEDPARM(self), Py
   resultobj = SWIG_From_std_string(static_cast< std::string >(result));
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_WorldModel_setName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  WorldModel *arg1 = (WorldModel *) 0 ;
+  int arg2 ;
+  char *arg3 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "WorldModel_setName", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_setName" "', argument " "1"" of type '" "WorldModel *""'"); 
+  }
+  arg1 = reinterpret_cast< WorldModel * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "WorldModel_setName" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "WorldModel_setName" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      (arg1)->setName(arg2,(char const *)arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
   return NULL;
 }
 
@@ -72281,7 +72454,7 @@ static PyMethodDef SwigMethods[] = {
 		"Returns:  \n"
 		"\n"
 		"    ndarray: an nx3 Numpy array. Setting elements of this array will\n"
-		"    change the points.\n"
+		"    immediately take effect.\n"
 		" Return type: np.ndarray  \n"
 		"\n"
 		""},
@@ -72762,7 +72935,8 @@ static PyMethodDef SwigMethods[] = {
 		"ImplicitSurface_getValues(ImplicitSurface self)\n"
 		"\n"
 		"\n"
-		"Returns a 3D Numpy array view of the values.  \n"
+		"Returns a 3D Numpy array view of the values. Changes to this array will\n"
+		"immediately take effect.  \n"
 		"\n"
 		"Return type: np.ndarray  \n"
 		"\n"
@@ -72873,7 +73047,8 @@ static PyMethodDef SwigMethods[] = {
 		"OccupancyGrid_getValues(OccupancyGrid self)\n"
 		"\n"
 		"\n"
-		"Returns a 3D Numpy array view of the values.  \n"
+		"Returns a 3D Numpy array view of the values. Changes to this array will\n"
+		"immediately take effect.  \n"
 		"\n"
 		"Return type: np.ndarray  \n"
 		"\n"
@@ -72972,7 +73147,10 @@ static PyMethodDef SwigMethods[] = {
 		"Heightmap_getViewport(Heightmap self) -> Viewport\n"
 		"\n"
 		"\n"
-		"Retrieves the viewport.  \n"
+		"Retrieves the viewport, which defines how the heightmap data is mapped to\n"
+		"spatial coordinates. Note that this is returned by value. If you change an\n"
+		"attribute of the viewport, you should call setViewport (or viewport=...) to\n"
+		"update the heightmap's viewport.  \n"
 		"\n"
 		""},
 	 { "Heightmap_setViewport", _wrap_Heightmap_setViewport, METH_VARARGS, "\n"
@@ -73045,7 +73223,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns a 2D Numpy array view of the values. Result has shape w x h and has\n"
-		"float32 dtype.  \n"
+		"float32 dtype. Modifications to the array are immediately reflected in the\n"
+		"heightmap.  \n"
 		"\n"
 		"Return type: np.ndarray  \n"
 		"\n"
@@ -73162,7 +73341,7 @@ static PyMethodDef SwigMethods[] = {
 		"Heightmap_setProperty(Heightmap self, int i, int j, double * np_array)\n"
 		"\n"
 		"\n"
-		"Retrieves a property index Sets an individual pixel's property vector.  \n"
+		"Sets an individual pixel's property vector.  \n"
 		"\n"
 		""},
 	 { "Heightmap_getProperty", _wrap_Heightmap_getProperty, METH_VARARGS, "\n"
@@ -73534,6 +73713,23 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Translates/rotates/scales the geometry data. Permanently modifies the data and\n"
 		"resets any collision data structures.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_setAppearance", _wrap_Geometry3D_setAppearance, METH_VARARGS, "\n"
+		"Geometry3D_setAppearance(Geometry3D self, Appearance appearance)\n"
+		"\n"
+		"\n"
+		"Attaches appearance data to the geometry. This is only supported by triangle\n"
+		"meshes.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_getAppearance", _wrap_Geometry3D_getAppearance, METH_O, "\n"
+		"Geometry3D_getAppearance(Geometry3D self) -> Appearance\n"
+		"\n"
+		"\n"
+		"Retrieves any appearance data attached to the geometry. If no appearance data is\n"
+		"attached, returns an empty Appearance. This is only supported by triangle\n"
+		"meshes.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, "\n"
@@ -74936,8 +75132,17 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getMass(RobotModelLink self) -> Mass\n"
 		"\n"
 		"\n"
-		"Returns the inertial properties of the link. (Note that the Mass is given with\n"
-		"origin at the link frame, not about the COM.)  \n"
+		"Returns the inertial properties of the link.  \n"
+		"\n"
+		".. note::  \n"
+		"\n"
+		"    To change the mass properties, you should call ``m=link.getMass()``,\n"
+		"    change the desired properties in m, and then ``link.setMass(m)``\n"
+		" .. note::  \n"
+		"\n"
+		"     The Mass object considers the inertia matrix origin as the link\n"
+		"     frame, not about the COM.\n"
+		"\n"
 		"\n"
 		""},
 	 { "RobotModelLink_setMass", _wrap_RobotModelLink_setMass, METH_VARARGS, "\n"
@@ -76715,11 +76920,25 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		""},
+	 { "WorldModel_entityType", _wrap_WorldModel_entityType, METH_VARARGS, "\n"
+		"WorldModel_entityType(WorldModel self, int id) -> std::string\n"
+		"\n"
+		"\n"
+		"Returns either 'robot', 'robotLink', 'rigidObject', or 'terrain'.  \n"
+		"\n"
+		""},
 	 { "WorldModel_getName", _wrap_WorldModel_getName, METH_VARARGS, "\n"
 		"WorldModel_getName(WorldModel self, int id) -> std::string\n"
 		"\n"
 		"\n"
 		"Retrieves the name for a given element ID.  \n"
+		"\n"
+		""},
+	 { "WorldModel_setName", _wrap_WorldModel_setName, METH_VARARGS, "\n"
+		"WorldModel_setName(WorldModel self, int id, char const * name)\n"
+		"\n"
+		"\n"
+		"Sets the name for a given element ID.  \n"
 		"\n"
 		""},
 	 { "WorldModel_geometry", _wrap_WorldModel_geometry, METH_VARARGS, "\n"

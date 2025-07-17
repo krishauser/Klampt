@@ -61,7 +61,7 @@ type.
 
 """
 
-from ..robotsim import WorldModel,RobotModel,RigidObjectModel,RobotModelLink,TerrainModel,Geometry3D,PointCloud,Heightmap,TriangleMesh
+from ..robotsim import WorldModel,RobotModel,RigidObjectModel,RobotModelLink,TerrainModel,Geometry3D,PointCloud,Heightmap,TriangleMesh,Appearance
 import math
 from .create import primitives
 from ..math import vectorops,so3,se3
@@ -828,6 +828,9 @@ def vertex_normals(trimesh : Union[TriangleMesh,Geometry3D], area_weighted=True)
 
 def merge(*items) -> Geometry3D:
     """Merges one or more geometries into a single geometry.
+
+    If the geometries have different colors, vertex/face colors, or texture
+    maps, they are converted to vertex colors before merging.
     
     Args:
         items: Each arg must be a Geometry3D, TriangleMesh, PointCloud,
@@ -844,7 +847,8 @@ def merge(*items) -> Geometry3D:
     xforms = []
     tri_meshes = []
     point_clouds = []
-    for item in items:
+    appearances = []
+    for i,item in enumerate(items):
         if isinstance(item,TriangleMesh):
             xforms.append(se3.identity())
             tri_meshes.append(item)
@@ -854,18 +858,33 @@ def merge(*items) -> Geometry3D:
             point_clouds.append(item)
             continue
         geom = item
+        app = None
         if hasattr(item,'geometry') and callable(item.geometry):
             geom = item.geometry()
+            app = item.appearance() if hasattr(item,'appearance') and callable(item.appearance) else None
         if len(items) == 1:
             return geom
         if isinstance(geom,Geometry3D):
             xforms.append(geom.getCurrentTransform())
             if item.type() == 'TriangleMesh':
                 tri_meshes.append(geom.getTriangleMesh())
+                if app is None:
+                    app = geom.getAppearance()
+                appearances.append(app)
             elif item.type() == 'PointCloud':
                 point_clouds.append(geom.getPointCloud())
+            elif item.type() == 'Group':
+                g = merge(*[geom.getElement(i) for i in range(geom.numElements())])
+                tri_meshes.append(g.getTriangleMesh())
+                if app is None:
+                    app = g.getAppearance()
+                appearances.append(app)
             else:
-                tri_meshes.append(geom.convert('TriangleMesh'))
+                g = geom.convert('TriangleMesh')
+                tri_meshes.append(g.getTriangleMesh())
+                if app is None:
+                    app = g.getAppearance()
+                appearances.append(app)
         else:
             raise ValueError("Can't merge item of type "+str(type(item)))
     #print("Merging",len(point_clouds),"point clouds and",len(tri_meshes),"triangle meshes")
@@ -897,9 +916,149 @@ def merge(*items) -> Geometry3D:
         mesh = numpy_convert.from_numpy((verts,tris),'TriangleMesh')
         merged_geom = Geometry3D()
         merged_geom.setTriangleMesh(mesh)
+        
+        #merge appearances.  Check if there are any textures or vertex colors
+        has_appearance = False
+        has_vertex_coloration = False
+        has_face_coloration = False
+        for app in appearances:
+            if app.getTexture2D_format() != '' or len(app.getColors(Appearance.VERTICES)) > 1:
+                has_appearance = True
+                has_vertex_coloration = True
+            if len(app.getColors(Appearance.FACES)) > 1:
+                has_appearance = True
+                has_face_coloration = True
+            fcol = app.getColor()
+            if fcol != [0.5,0.5,0.5,1.0]:
+                has_appearance = True
+        if has_appearance and not has_face_coloration and not has_vertex_coloration:
+            #check whether all items have the same color; this looks better
+            for app in appearances:
+                fcol = app.getColor()
+                if fcol != appearances[0].getColor():
+                    has_face_coloration = True
+                    break
+        if has_appearance:
+            if has_vertex_coloration:
+                fcols = []
+                for app in appearances:
+                    fcols.append(app.getColor())
+                default_color = np.mean(fcols,axis=0) if len(fcols) > 0 else np.array([0.5,0.5,0.5,1.0])
+                vcols = []
+                for tm,app in zip(tri_meshes,appearances):
+                    if app.getColor() == [0.5,0.5,0.5,1.0]:  #default color
+                        vcols.append(np.full((tm.vertices.shape[0],4),default_color))
+                    else:
+                        vcols.append(vertex_colors(tm,app))
+                vcols = np.concatenate(vcols,axis=0).astype(np.float32)
+                app = Appearance()
+                app.setColors(Appearance.VERTICES,vcols)
+                merged_geom.setAppearance(app)
+            elif has_face_coloration:
+                fcols = []
+                for tm,app in zip(tri_meshes,appearances):
+                    fcol = app.getColors(Appearance.FACES)
+                    if len(fcol) == 1:
+                        fcol = fcol.repeat(tm.indices.shape[0],axis=0)
+                    fcols.append(fcol)
+                fcols = np.concatenate(fcols,axis=0).astype(np.float32)
+                app = Appearance()
+                app.setColors(Appearance.FACES,fcols)
+                merged_geom.setAppearance(app)
+            else:
+                merged_geom.setAppearance(appearances[0])
         return merged_geom
     else:
         return Geometry3D()
+
+
+def vertex_colors(geom : Geometry3D, app : Appearance = None) -> np.ndarray:
+    """Returns the vertex colors of a geometry as an N x 4 numpy array,
+    where N is the number of vertices. 
+    
+    The colors are in the range [0,1] and the channels are in the order (r,g,b,a).
+    
+    This will act smartly for other forms of coloration.  If the geometry
+    has a texture, it will extract the texture colors.  If it has face colors,
+    it will average the face colors at each vertex.  If the geometry is flat
+    shaded, the vertex colors will be uniform.
+
+    If the appearance is tinted, the tint will be applied to the vertex colors.
+    """
+    if isinstance(geom,Geometry3D):
+        gtype = geom.type()
+        if geom.type() == 'PointCloud':
+            return vertex_colors(geom.getPointCloud(),app)
+        elif geom.type() == 'TriangleMesh':
+            app = geom.getAppearance() if app is None else app
+            return vertex_colors(geom.getTriangleMesh(),app)
+        elif app is not None:
+            vcols = app.getColors(Appearance.VERTICES)
+            if len(vcols) <= 1:
+                raise ValueError("Geometry type {} not supported for vertex colors".format(geom.type()))
+        else:
+            raise ValueError("Geometry type {} not supported for vertex colors".format(geom.type()))
+    elif isinstance(geom,PointCloud):
+        gtype = 'PointCloud'
+        vcols = point_cloud_colors(geom,format=('r','g','b','a'))
+    elif isinstance(geom,TriangleMesh):
+        gtype = 'TriangleMesh'
+        if app is None:
+            return np.array([0.5,0.5,0.5,1.0],dtype=np.float32).reshape((1,4)).repeat(geom.vertices.shape[0],axis=0)
+        if app.getTexture2D_format():
+            texfmt = app.getTexture2D_format() 
+            tex = app.getTexture2D_channels()
+            texcoords = app.getTexcoords2D()
+            #lookup texture at each vertex
+            assert len(geom.vertices) == len(texcoords), \
+                "Geometry has {} vertices, but {} texture coordinates".format(len(geom.vertices),len(texcoords))
+            x = texcoords[:,0]* tex.shape[1]
+            y = (1-texcoords[:,1])* tex.shape[0]
+            x = np.clip(x,0,tex.shape[1]-1).astype(np.int32)
+            y = np.clip(y,0,tex.shape[0]-1).astype(np.int32)
+            vcols = np.array([tex[y[i],x[i],:] for i in range(len(geom.vertices))])
+            if texfmt == 'rgb8':
+                #add alpha channel
+                vcols = np.hstack((vcols/255.0,np.ones((len(vcols),1))).astype(np.float32))
+            else:
+                raise NotImplementedError("Any colors but rgb8 not implemented yet")
+        else:
+            vcols = app.getColors(Appearance.VERTICES)
+            fcols = app.getColors(Appearance.FACES)
+            if len(vcols) == 1:
+                if len(fcols) == 1:
+                    vcols = app.getColors(Appearance.FACES).repeat(geom.vertices.shape[0],axis=0)
+                else:
+                    #extrapolate face colors to vertices
+                    if len(fcols) != geom.indices.shape[0]:
+                        raise ValueError("Geometry has {} faces, but {} face colors".format(geom.indices.shape[0],len(fcols)))
+                    vcols = np.zeros((geom.vertices.shape[0],4),dtype=np.float32)
+                    vcounts = np.zeros(geom.vertices.shape[0],dtype=np.int32)
+                    for i,f in enumerate(geom.indices):
+                        vcols[f[0]] += fcols[i]
+                        vcols[f[1]] += fcols[i]
+                        vcols[f[2]] += fcols[i]
+                        vcounts[f[0]] += 1
+                        vcounts[f[1]] += 1 
+                        vcounts[f[2]] += 1
+                    vcols /= vcounts[:,np.newaxis]
+            else:
+                assert len(vcols) == geom.vertices.shape[0], \
+                    "Geometry has {} vertices, but {} vertex colors".format(geom.vertices.shape[0],len(vcols))
+                pass
+    elif app is not None:
+        vcols = app.getColors(Appearance.VERTICES)
+        if len(vcols) <= 1:
+            raise ValueError("Geometry type {} not supported for vertex colors".format(gtype))
+    else:
+        raise ValueError("Geometry type {} not supported for vertex colors".format(gtype))
+    if app is not None:
+        tintStrength = app.getTintStrength()
+        if tintStrength > 0:
+            tint = app.getTintColor()
+            vcols = vcols * tint + (1-tintStrength)
+    return vcols
+
 
 
 def sample_surface(geom : Geometry3D,

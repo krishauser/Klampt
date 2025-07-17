@@ -1114,7 +1114,7 @@ void Geometry3D::set(const Geometry3D& g)
   //geom->ClearCollisionData();
   if(mgeom) {
     //update the display list / cache
-    printf("Geometry3D::set(): Updating managed geometry %d in world %d\n",id,world);
+    //printf("Geometry3D::set(): Updating managed geometry %d in world %d\n",id,world);
     mgeom->OnGeometryChange();
     mgeom->RemoveFromCache();
   }
@@ -1528,6 +1528,34 @@ void Geometry3D::transform(const double R[9],const double t[3])
     //mgeom->OnGeometryChange();
     //mgeom->RemoveFromCache();
   }
+}
+
+void Geometry3D::setAppearance(const Appearance& appearance)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return;
+  if(geom->type != AnyGeometry3D::Type::TriangleMesh) {
+    throw PyException("Geometry3D is not TriangleMesh type, cannot set appearance");
+  }
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearance.appearancePtr);
+  if(!app) return;
+  auto tmesh_data = dynamic_cast<Geometry::Geometry3DTriangleMesh*>(geom->data.get());
+  if(tmesh_data->appearance) {
+    *tmesh_data->appearance = *app;
+  }
+  else {
+    tmesh_data->appearance = make_shared<GLDraw::GeometryAppearance>(*app);
+  }
+}
+
+Appearance Geometry3D::getAppearance() const
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  Appearance res;
+  if(!geom) return res;
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(res.appearancePtr);
+  app->Set(*geom);
+  return res;
 }
 
 void Geometry3D::setCollisionMargin(double margin)
@@ -4451,11 +4479,30 @@ void WorldModel::enableInitCollisions(bool enabled)
 }
 
 
+std::string WorldModel::entityType(int id)
+{
+  Klampt::WorldModel& world = *worlds[index]->world;
+  if(world.IsTerrain(id)>=0) return "terrain";
+  else if(world.IsRigidObject(id)>=0) return "rigidObject";
+  else if(world.IsRobotLink(id).first>=0) return "robotLink";
+  else if(world.IsRobot(id)>=0) return "robot";
+  else throw PyException("Invalid ID");
+}
+  
 std::string WorldModel::getName(int id)
 {
   Klampt::WorldModel& world = *worlds[index]->world;
   return world.GetName(id);
 }
+
+void WorldModel::setName(int id,const char* name)
+{
+  if(id < 0 || id >= (int)worlds[index]->world->NumIDs())
+    throw PyException("Invalid ID");
+  Klampt::WorldModel& world = *worlds[index]->world;
+  world.SetName(id,name);
+}
+
 
 Geometry3D WorldModel::geometry(int id)
 {
