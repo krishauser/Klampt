@@ -497,27 +497,31 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend RobotModel { 
 %pythoncode {
-     def getLinks(self) -> Tuple[RobotModelLink]:
+     @property
+     def links(self) -> Sequence[RobotModelLink]:
          """
-         Returns a list of all links on the robot.
+         A tuple of all links on the robot.
          """
          return tuple(self.link(i) for i in range(self.numLinks()))
 
-     def getLinksDict(self) -> Dict[str,RobotModelLink]:
+     @property
+     def linksDict(self) -> Dict[str,RobotModelLink]:
          """
-         Returns a dictionary mapping link names to RobotModelLink instances.
+         A frozen dictionary mapping link names to RobotModelLink instances.
          """
          return types.MappingProxyType({l.name:l for l in self.getLinks()})
 
-     def getDrivers(self) -> Tuple[RobotModelDriver]:
+     @property
+     def drivers(self) -> Sequence[RobotModelDriver]:
          """
-         Returns a list of all drivers on the robot.
+         A tuple of all drivers on the robot.
          """
          return tuple(self.driver(i) for i in range(self.numDrivers()))
      
-     def getDriversDict(self) -> Dict[str,RobotModelDriver]:
+     @property
+     def driversDict(self) -> Dict[str,RobotModelDriver]:
          """
-         Returns a dictionary mapping driver names to RobotModelDriver instances.
+         A frozen dictionary mapping driver names to RobotModelDriver instances.
          """
          return types.MappingProxyType({d.name:d for d in self.getDrivers()})
 
@@ -531,28 +535,28 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
              raise KeyError("Invalid sensor name: {}".format(index_or_name))
          return res
 
-     def getSensors(self) -> Tuple['SensorModel']:
+     @property
+     def sensors(self) -> Sequence['SensorModel']:
          """
-         Returns a list of all sensors on the robot.
+         A tuple of all sensors on the robot.
          """
          return tuple(self.sensor(i) for i in range(self.numSensors()))
 
-     def getSensorsDict(self) -> Dict[str,'SensorModel']:
+     @property
+     def sensorsDict(self) -> Dict[str,'SensorModel']:
          """
-         Returns a dictionary mapping sensor names to SensorModel instances.
+         A frozen dictionary mapping sensor names to SensorModel instances.
          """
          return types.MappingProxyType({s.name:s for s in self.getSensors()})
 
      name = property(getName, setName)
      id = property(getID)
      config = property(getConfig,setConfig)
-     velocity = property(getVelocity,setVelocity)    
-     links = property(getLinks)
-     linksDict = property(getLinksDict)
-     drivers = property(getDrivers)
-     driversDict = property(getDriversDict)
-     sensors = property(getSensors)
-     sensorsDict = property(getSensorsDict)
+     """The robot's configuration.  Retrieved by value, so you will need to use
+     setConfig (or config=...) for changes take effect."""
+     velocity = property(getVelocity,setVelocity)
+     """The robot's velocity.  Retrieved by value, so you will need to use
+     setVelocity (or velocity=...) for changes to take effect."""
 }
 }
 
@@ -597,6 +601,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
              self._setLink(link)
 
      name = property(getName, setName)
+
      type = property(getType)
      """A string giving the sensor's type.  Read-only."""
 
@@ -610,48 +615,89 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend WorldModel { 
 %pythoncode {
-     def getRobots(self) -> Tuple[RobotModel]:
+     @property
+     def robots(self) -> Sequence[RobotModel]:
          """
-         Returns a list of all robots in the world.
+         A tuple of all robots in the world.
          """
          return tuple(self.robot(i) for i in range(self.numRobots()))
 
-     def getRobotsDict(self) -> Dict[str,RobotModel]:
+     @property
+     def robotsDict(self) -> Dict[str,RobotModel]:
          """
-         Returns a dictionary mapping robot names to RobotModel instances.
+         A frozen dictionary mapping robot names to RobotModel instances.
          """
          return types.MappingProxyType({r.name:r for r in self.getRobots()})
 
-     def getRigidObjects(self) -> Tuple[RigidObjectModel]:
+     @property
+     def rigidObjects(self) -> Sequence[RigidObjectModel]:
          """
-         Returns a list of all rigid objects in the world.
+         A tuple of all rigid objects in the world.
          """
          return tuple(self.rigidObject(i) for i in range(self.numRigidObjects()))
      
-     def getRigidObjectsDict(self) -> Dict[str,RigidObjectModel]:
+     @property
+     def rigidObjectsDict(self) -> Dict[str,RigidObjectModel]:
          """
-         Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+         A frozen dictionary mapping rigid object names to RigidObjectModel instances.
          """
          return types.MappingProxyType({r.name:r for r in self.getRigidObjects()})
 
-     def getTerrains(self) -> Tuple[TerrainModel]:
+     @property
+     def terrains(self) -> Sequence[TerrainModel]:
          """
-         Returns a list of all rigid objects in the world.
+         A tuple of all rigid objects in the world.
          """
          return tuple(self.terrain(i) for i in range(self.numTerrains()))
      
-     def getTerrainsDict(self) -> Dict[str,TerrainModel]:
+     @property
+     def terrainsDict(self) -> Dict[str,TerrainModel]:
          """
-         Returns a dictionary mapping rigid object names to RigidObjectModel instances.
+         A frozen dictionary mapping terrain names to TerrainModel instances.
          """
          return types.MappingProxyType({r.name:r for r in self.getTerrains()})
 
-     robots = property(getRobots)
-     robotsDict = property(getRobotsDict)
-     rigidObjects = property(getRigidObjects)
-     rigidObjectsDict = property(getRigidObjectsDict)
-     terrains = property(getTerrains)
-     terrainsDict = property(getTerrainsDict)
+     def entity(self, id_or_name: Union[int,str]) -> Union[RobotModel,RobotModelLink,RigidObjectModel,TerrainModel]:
+         """
+         Retrieves the entity with the given ID or name.  Raises KeyError if it
+         does not exist.
+         """
+         if isinstance(id_or_name, int):
+             id = id_or_name
+             try:
+                 t = self.entityType(id)
+             except Exception:
+                 raise KeyError("No entity with ID {}".format(id))
+             n = self.getName(id_or_name)
+             if t == 'robot':
+                 return self.robot(n)
+             elif t == 'robotLink':
+                 for r in self.robots:
+                     l = r.link(n)
+                     if l.index >= 0:
+                         return l
+                 raise RuntimeError("No link with name {} any robot?".format(n))
+             elif t == 'rigidObject':
+                 return self.rigidObject(n)
+             elif t == 'terrain':
+                 return self.terrain(n)
+             else:
+                 raise KeyError("Entity with ID {} is of unknown type {}".format(id,t))
+         else:
+             assert isinstance(id_or_name, str),"entity must be provide an integer ID or string name"
+             for r in self.robots:
+                 if r.name == id_or_name:
+                     return r
+                 for l in r.links:
+                     if l.name == id_or_name:
+                         return l
+             for o in self.rigidObjects:
+                 if o.name == id_or_name:
+                     return o
+             for t in self.terrains:
+                 if t.name == id_or_name:
+                     return t
+             raise KeyError("No entity with name {}".format(id_or_name))
 }
 }
 
@@ -668,22 +714,23 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
             raise KeyError("Invalid sensor name: {}".format(index_or_name))
         return res
 
-     def getSensors(self) -> Tuple[SensorModel]:
+     @property
+     def sensors(self) -> Sequence[SensorModel]:
          """
-         Returns a list of all sensors on the robot.
+         A tuple of all sensors on the robot.
          """
          return tuple(self.sensor(i) for i in range(self.numSensors()))
 
-     def getSensorsDict(self) -> Dict[str,SensorModel]:
+     @property
+     def sensorsDict(self) -> Dict[str,SensorModel]:
          """
-         Returns a dictionary mapping sensor names to SensorModel instances.
+         A frozen dictionary mapping sensor names to SensorModel instances.
          """
          return types.MappingProxyType({s.name:s for s in self.getSensors()})
 
      rate = property(getRate, setRate)
-     sensors = property(getSensors)
-     sensorsDict = property(getSensorsDict)
-}
+     """The controller's update rate in Hz."""
+    }
 }
 
 
@@ -795,10 +842,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend TriangleMesh {
 %pythoncode {
     vertices = property(getVertices, setVertices)
-    """The vertices of the mesh."""
 
     indices = property(getIndices, setIndices)
-    """The triangles of the mesh, given as indices into the vertices array."""
 
     def triangle(self, i) -> Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
         """
@@ -808,7 +853,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         v = self.vertices
         return (v[a],v[b],v[c])
     
-    def triangleNoormals(self) -> np.ndarray:
+    def triangleNormals(self) -> np.ndarray:
         """
         Computes outward triangle normals.
         
@@ -865,10 +910,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend PointCloud {
 %pythoncode {
     points = property(getPoints, setPoints)
-    """The points of the point cloud."""
 
     properties = property(getProperties, setProperties)
-    """The properties of the point cloud."""
 
     def getPropertyNames(self) -> List[str]:
         """
@@ -1031,7 +1074,6 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend ConvexHull {
 %pythoncode {
     points = property(getPoints, setPoints)
-    """The points of the convex hull."""
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1046,7 +1088,10 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     """The type of the geometric primitive."""
 
     properties = property(getProperties, setProperties)
-    """The properties of the geometric primitive.  Type dependent."""
+    """The properties of the geometric primitive.  Type dependent.  Retrieved
+    by value, so you will need to use setProperties (or properties=...) for
+    updates to take effect.
+    """
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1058,12 +1103,10 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend ImplicitSurface { 
 %pythoncode {
     bmin = property(getBmin, setBmin)
-    """The lower bound of the domain."""
-
+    
     bmax = property(getBmax, setBmax)
-    """The upper bound of the domain."""
-
-    def setBounds(self, bounds):
+    
+    def setBounds(self, bounds : Sequence[float]):
         """
         @deprecated
         
@@ -1074,7 +1117,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         self.bmin = bounds[0:3]
         self.bmax = bounds[3:6]
     
-    def getBounds(self):
+    def getBounds(self) -> Sequence[float]:
         """
         @deprecated
         
@@ -1088,7 +1131,6 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
 
     values = property(getValues, setValues)
-    """The 3D array of values in the grid (numpy.ndarray)"""
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1100,12 +1142,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend OccupancyGrid { 
 %pythoncode {
     bmin = property(getBmin, setBmin)
-    """The lower bound of the domain."""
-
     bmax = property(getBmax, setBmax)
-    """The upper bound of the domain."""
 
-    def setBounds(self, bounds):
+    def setBounds(self, bounds : Sequence[float]):
         """
         @deprecated
         
@@ -1116,7 +1155,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         self.bmin = bounds[0:3]
         self.bmax = bounds[3:6]
     
-    def getBounds(self):
+    def getBounds(self) -> Sequence[float]:
         """
         @deprecated
         
@@ -1130,7 +1169,6 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     """Klampt 0.9 backwards compatibility accessor for the (bmin, bmax) pair."""
 
     values = property(getValues, setValues)
-    """The 3D array of values in the grid (numpy.ndarray)"""
 
     def __reduce__(self):
         from klampt.io import loader
