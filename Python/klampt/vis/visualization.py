@@ -608,7 +608,8 @@ from ..model.trajectory import *
 from ..model.multipath import MultiPath
 from ..model.contact import ContactPoint,Hold
 from ..model.collide import bb_empty,bb_create,bb_union
-from typing import Callable,Union,Sequence
+from ..model.typing import Configs
+from typing import Callable,Union,Sequence,Any,Union,Optional
 import warnings
 
 #Type for references to items in a visualization world
@@ -1237,7 +1238,7 @@ def dirty(item_name : str='all') -> None:
     """
     scene().dirty(item_name)
 
-def animate(name : ItemPath, animation, speed : float=1.0, endBehavior : str='loop') -> None:
+def animate(name : ItemPath, animation : Union[Trajectory,Configs], speed : float=1.0, endBehavior : str='loop') -> None:
     """Sends an animation to the named object.
     Works with points, so3 elements, se3 elements, rigid objects, or robots, and may work
     with other objects as well.
@@ -3673,17 +3674,17 @@ class VisualizationScene:
 
     """
     def __init__(self):
-        self.items = {}
-        self.labels = []
+        self.items = {}   # type: Dict[str,VisAppearance]
+        self.labels = []  # type: List[Tuple[str,Sequence[float],Sequence[float]]]
         self.t = 0
-        self.timeCallback = None
+        self.timeCallback = None   # type: Callable
         self.startTime = None
         self.animating = True
         self.currentAnimationTime = 0
         self.doRefresh = False
         self.cameraController = None
 
-    def getItem(self,item_name) -> VisAppearance:
+    def getItem(self, item_name : ItemPath) -> VisAppearance:
         """Returns an VisAppearance according to the given name or path"""
         if isinstance(item_name,(list,tuple)):
             components = item_name
@@ -3695,7 +3696,7 @@ class VisualizationScene:
         if item_name in self.items:
             return self.items[item_name]
 
-    def dirty(self,item_name='all'):
+    def dirty(self,item_name:str='all'):
         """Marks an item or everything as dirty, forcing a deep redraw."""
         global _globalLock
         with _globalLock:
@@ -3732,7 +3733,7 @@ class VisualizationScene:
             for n in del_items:
                 del self.items[n]
 
-    def listItems(self,root=None,indent=0):
+    def listItems(self, root : Optional[Union[ItemPath,VisAppearance]]=None, indent:int=0):
         """Prints out all items in the visualization world."""
         if root is None:
             for name,value in self.items.items():
@@ -3746,7 +3747,7 @@ class VisualizationScene:
             for n,v in root.subAppearances.items():
                 self.listItems(v,indent+2)
 
-    def getItemName(self,object):
+    def getItemName(self,object : Any) -> str:
         """Retrieves a str or tuple of strs giving the path to an object"""
         name = None
         if hasattr(object,'getName'):
@@ -3795,7 +3796,7 @@ class VisualizationScene:
                 warnings.warn("Couldnt find object {} under {}".format(name,k))
         return None
 
-    def add(self,name,item,keepAppearance=False,**kwargs):
+    def add(self, name : str, item : Any, keepAppearance=False,**kwargs):
         """Adds a named item to the visualization world.  If the item already
         exists, the appearance information will be reinitialized if keepAppearance=False
         (default) or be kept if keepAppearance=True."""
@@ -3824,10 +3825,10 @@ class VisualizationScene:
                 self._setAttribute(item,attr,value)
         #self.refresh()
 
-    def addText(self,name,text,**kwargs):
+    def addText(self,name:str, text:str, **kwargs):
         self.add(name,text,True,**kwargs)
 
-    def animate(self,name,animation,speed=1.0,endBehavior='loop'):
+    def animate(self,name:ItemPath, animation:Union[Configs,Trajectory], speed=1.0,endBehavior='loop'):
         global _globalLock
         with _globalLock:
             if hasattr(animation,'__iter__'):
@@ -3859,12 +3860,12 @@ class VisualizationScene:
         with _globalLock:
             self.animating = not paused
 
-    def stepAnimation(self,amount):
+    def stepAnimation(self, amount : float):
         global _globalLock
         with _globalLock:
             self.animationTime(self.currentAnimationTime + amount)
 
-    def animationTime(self,newtime=None):
+    def animationTime(self, newtime : Optional[float]=None) -> Optional[float]:
         global _globalLock
         if newtime is None:
             #query mode
@@ -3879,7 +3880,7 @@ class VisualizationScene:
                 v.updateAnimation(self.currentAnimationTime)
         return 
 
-    def remove(self,name):
+    def remove(self, name : ItemPath):
         global _globalLock
         with _globalLock:
             assert name in self.items,"Can only remove top level objects from visualization, try hide() instead"
@@ -3888,13 +3889,13 @@ class VisualizationScene:
             del self.items[name]
             self.doRefresh = True
 
-    def getItemConfig(self,name):
+    def getItemConfig(self, name : ItemPath) -> Config:
         global _globalLock
         with _globalLock:
             res = config.getConfig(self.getItem(name).item)
         return res
 
-    def setItemConfig(self,name,value):
+    def setItemConfig(self, name : ItemPath, value : Config):
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
@@ -3910,12 +3911,12 @@ class VisualizationScene:
             item.markChanged(config=True,appearance=False)
             self.doRefresh = True
 
-    def addLabel(self,text,point,color):
+    def addLabel(self, text : str, point : Sequence[float], color : Sequence[float]):
         global _globalLock
         with _globalLock:
             self.labels.append((text,point,color))
 
-    def hideLabel(self,name,hidden=True):
+    def hideLabel(self, ItemPath : str, hidden=True):
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
@@ -3923,13 +3924,13 @@ class VisualizationScene:
             item.markChanged(config=False,appearance=True)
             self.doRefresh = True
 
-    def hide(self,name,hidden=True):
+    def hide(self, name : ItemPath, hidden=True):
         global _globalLock
         with _globalLock:
             self.getItem(name).attributes['hidden'] = hidden
             self.doRefresh = True
 
-    def addPlotItem(self,plotname,itemname):
+    def addPlotItem(self, plotname : str, itemname : str):
         global _globalLock
         with _globalLock:
             plot = self.getItem(plotname)
@@ -3941,7 +3942,7 @@ class VisualizationScene:
             assert item is not None,(str(itemname)+" is not a valid item")
             plot.items.append(VisPlotItem(itemname,item))
 
-    def logPlot(self,plotname,itemname,value):
+    def logPlot(self, plotname : str, itemname : str, value : Union[float,Sequence[float]]):
         global _globalLock
         with _globalLock:
             customIndex = -1
@@ -3966,7 +3967,7 @@ class VisualizationScene:
             plot.items[customIndex].compressThreshold = compress
             plot.items[customIndex].customUpdate(itemname,t,value)
 
-    def logPlotEvent(self,plotname,eventname,color):
+    def logPlotEvent(self, plotname : str, eventname : str, color : Sequence[float]):
         global _globalLock
         with _globalLock:
             plot = self.getItem(plotname)
@@ -3981,7 +3982,7 @@ class VisualizationScene:
                 t = 0
             plot.item.addEvent(eventname,t,color)
 
-    def hidePlotItem(self,plotname,itemname,hidden=True):
+    def hidePlotItem(self, plotname : str, itemname : str, hidden=True):
         global _globalLock
         with _globalLock:
             plot = self.getItem(plotname)
@@ -4002,7 +4003,7 @@ class VisualizationScene:
             assert identified,("Invalid item "+str(itemname)+" specified in plot "+plotname)
             self.doRefresh = True
 
-    def savePlot(self,plotname,fn):
+    def savePlot(self, plotname : str, fn : str):
         global _globalLock
         with _globalLock:
             plot = self.getItem(plotname)
@@ -4013,7 +4014,7 @@ class VisualizationScene:
             else:
                 plot.endSave(fn)
 
-    def setAppearance(self,name,appearance):
+    def setAppearance(self, name : ItemPath, appearance : Appearance):
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
@@ -4038,7 +4039,7 @@ class VisualizationScene:
             item.attributes.setParent(_default_attributes(item.item,type=value))
         item.markChanged(config=False,appearance=True)
 
-    def setAttribute(self,name,attr,value):
+    def setAttribute(self, name : ItemPath, attr : str, value):
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
@@ -4047,21 +4048,21 @@ class VisualizationScene:
             self._setAttribute(item,attr,value)
             self.doRefresh = True
 
-    def getAttribute(self,name,attr):
+    def getAttribute(self, name : ItemPath, attr : str) -> Any:
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
             res = item.attributes[attr]
         return res
 
-    def getAttributes(self,name):
+    def getAttributes(self, name : ItemPath) -> Dict[str,Any]:
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
             res = item.getAttributes()
         return res
 
-    def revertAppearance(self,name):
+    def revertAppearance(self, name : ItemPath):
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
@@ -4071,7 +4072,7 @@ class VisualizationScene:
             item.markChanged(config=False,appearance=True)
             self.doRefresh = True
 
-    def setColor(self,name,r,g,b,a=1.0):
+    def setColor(self, name : ItemPath,r,g,b,a=1.0):
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
@@ -4079,7 +4080,7 @@ class VisualizationScene:
             item.markChanged(config=False,appearance=True)
             self.doRefresh = True
 
-    def setDrawFunc(self,name,func):
+    def setDrawFunc(self, name : ItemPath, func : Callable):
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
@@ -4097,7 +4098,7 @@ class VisualizationScene:
             import traceback
             traceback.print_exc()
 
-    def followCamera(self,target,translate,rotate,center):
+    def followCamera(self, target : ItemPath, translate : bool, rotate : bool, center : bool):
         if target is None:
             self.cameraController = None
             return
@@ -4129,7 +4130,7 @@ class VisualizationScene:
         else:
             raise ValueError("Invalid value for target, must either be str or a Trajectory")
 
-    def setTimeCallback(self,cb):
+    def setTimeCallback(self, cb : Callable):
         """Sets a callback in updateTime() to set the current time"""
         self.timeCallback = cb
 
@@ -4163,7 +4164,7 @@ class VisualizationScene:
             if vp is not None:
                 self.setViewport(vp)
 
-    def edit(self,name,doedit=True):
+    def edit(self, name : ItemPath, doedit=True):
         raise NotImplementedError("Editing not implemented by {}".format(self.__class__.__name__))
     
     def pick(self,click_callback,hover_callback,highlight_color,filter,tolerance):
@@ -4291,7 +4292,7 @@ class VisualizationScene:
         for i in self.items.values():
             i.clearDisplayLists()
 
-    def rayCast(self,x,y,filter=None,tolerance=0.01):
+    def rayCast(self, x : float, y :float, filter=None,tolerance=0.01):
         """Performs ray casting with the scene
 
         Args:
@@ -4326,7 +4327,7 @@ class VisualizationScene:
             doclick(name,item)
         return data[0]
 
-    def saveJsonConfig(self,fn=None):
+    def saveJsonConfig(self, fn:str=None):
         def dumpitem(v):
             if len(v.subAppearances) > 0:
                 items = []
@@ -4349,7 +4350,7 @@ class VisualizationScene:
             f.close()
             return out
                 
-    def loadJsonConfig(self,jsonobj_or_file):
+    def loadJsonConfig(self,jsonobj_or_file : Union[str,dict]):
         if isinstance(jsonobj_or_file,str):
             import json
             f = open(jsonobj_or_file,'r')
