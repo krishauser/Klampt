@@ -149,8 +149,18 @@ class RobotModelLink
   Geometry3D geometry();
   ///Returns a reference to the link's appearance
   Appearance appearance();
-  ///Returns the inertial properties of the link. (Note that the Mass is given with
-  ///origin at the link frame, not about the COM.)
+  ///Returns the inertial properties of the link. 
+  ///
+  ///.. note::
+  ///
+  ///    To change the mass properties, you should call ``m=link.getMass()``,
+  ///    change the desired properties in m, and then ``link.setMass(m)``
+  ///
+  ///.. note::
+  ///
+  ///     The Mass object considers the inertia matrix origin as the link
+  ///     frame, not about the COM.
+  ///
   Mass getMass();
   ///Sets the inertial proerties of the link. (Note that the Mass is given with origin
   ///at the link frame, not about the COM.)
@@ -1287,8 +1297,12 @@ class WorldModel
   ///    All other RobotModel, RigidObjectModel, or TerrainModel references
   ///    will be invalidated.
   void remove(const TerrainModel& terrain);
+  /// Returns either 'robot', 'robotLink', 'rigidObject', or 'terrain' 
+  std::string entityType(int id);
   ///Retrieves the name for a given element ID
   std::string getName(int id);
+  /// Sets the name for a given element ID. 
+  void setName(int id,const char* name);
   ///Retrieves a geometry for a given element ID
   Geometry3D geometry(int id);
   ///Retrieves an appearance for a given element ID
