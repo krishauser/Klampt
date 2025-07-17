@@ -839,7 +839,7 @@ def merge(*items) -> Geometry3D:
         be convertable to TriangleMesh, and the result will be of TriangleMesh
         type.
     """
-    from io import numpy_convert
+    from ..io import numpy_convert
 
     xforms = []
     tri_meshes = []
