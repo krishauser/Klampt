@@ -49,6 +49,7 @@ class WorldModel
   //integer id's for objects in the world
   int NumIDs() const;
   int GetID(const string& name,int link=-1) const;
+  void SetName(int id,const char* name);
   string GetName(int id) const;
   ///Returns the index of the terrain or -1 otherwise
   int IsTerrain(int id) const;

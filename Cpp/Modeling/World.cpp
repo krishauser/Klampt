@@ -81,6 +81,32 @@ string WorldModel::GetName(int id) const
   return "";
 }
 
+void WorldModel::SetName(int id, const char* name)
+{
+  Assert(name != NULL);
+  int i = IsRigidObject(id);
+  if(i >= 0) {
+    rigidObjects[i]->name = name;
+    return;
+  }
+  i = IsTerrain(id);
+  if(i >= 0) {
+    terrains[i]->name = name;
+    return;
+  }
+  i = IsRobot(id);
+  if(i >= 0) {
+    robots[i]->name = name;
+    return;
+  }
+  pair<int,int> j = IsRobotLink(id);
+  if(j.first >= 0) {
+    robots[j.first]->linkNames[j.second] = name;
+    return;
+  }
+  FatalError("WorldModel::SetName: Invalid ID %d",id);
+}
+
 int WorldModel::IsRobot(int id) const
 {
   if(id >= (int)(rigidObjects.size()+terrains.size())) {
