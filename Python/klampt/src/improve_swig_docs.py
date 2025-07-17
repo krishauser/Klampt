@@ -336,7 +336,7 @@ def print_signature(siglist,indent0,docstring):
                 print(indent0+fn,argstr+retstr)
                 print()
                 fndocstrings.append(argstr+retstr)
-        if print_args:
+        if print_args and len(aorders) > 0:
             print()
             #output the Args: section
             print(indent0+'Args:')
