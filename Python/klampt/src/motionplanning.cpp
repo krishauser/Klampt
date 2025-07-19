@@ -315,7 +315,7 @@ public:
 
         PyObject* result = PyObject_CallFunctionObjArgs(space->visibleTests[i],pya,pyb,NULL);
         if(!result) {
-            if(!PyErr_Occurred()) {
+          if(!PyErr_Occurred()) {
             throw PyException("Python visible method failed");
           }
           else {
@@ -1159,6 +1159,16 @@ PlannerInterface::PlannerInterface(const CSpaceInterface& cspace)
   spaceIndex = cspace.index;
 }
 
+PlannerInterface::PlannerInterface(const CSpaceInterface& cspace, const char* plan_settings)
+{
+  MotionPlannerFactory factory_temp = factory;
+  set_plan_json_string(plan_settings);
+  index = makeNewPlan(cspace.index,this);
+  spaceIndex = cspace.index;
+  factory = factory_temp;
+}
+
+
 PlannerInterface::~PlannerInterface()
 {
   this->destroy();
@@ -1170,6 +1180,13 @@ void PlannerInterface::destroy()
     destroyPlan(index);
     index = -1;
   }
+}
+
+bool PlannerInterface::isOptimizing()
+{
+  if(index < 0 || index >= (int)plans.size() || !plans[index].planner) 
+    throw PyException("Invalid plan index");
+  return plans[index].planner->IsOptimizing();
 }
 
 bool PlannerInterface::setEndpoints(PyObject* start,PyObject* goal)
@@ -1225,6 +1242,34 @@ bool PlannerInterface::setEndpointSet(PyObject* start,PyObject* goal,PyObject* g
   plans[index].goalSet.reset(new PyGoalSet(goal,goalSample));
   plans[index].planner.reset(factory.Create(s,qstart,plans[index].goalSet.get()));
   return true;
+}
+
+PyObject* PlannerInterface::getEndpoints()
+{
+  if(index < 0 || index >= (int)plans.size() || !plans[index].planner) 
+    throw PyException("Invalid plan index");
+  PyObject* start = NULL;
+  PyObject* goal = NULL;
+  Config qstart;
+  if(plans[index].planner->NumMilestones() > 0) {
+    plans[index].planner->GetMilestone(0,qstart);
+    start = PyListFromConfig(qstart);
+  }
+  if(plans[index].goalSet) {
+    if(plans[index].goalSet->sampler) {
+      Py_INCREF(plans[index].goalSet->goalTest);
+      Py_INCREF(plans[index].goalSet->sampler);
+      goal = Py_BuildValue("NN",plans[index].goalSet->goalTest,plans[index].goalSet->sampler);
+    }
+    else {
+      Py_INCREF(plans[index].goalSet->goalTest);
+      goal = plans[index].goalSet->goalTest;
+    }
+  }
+  if(!start) start = Py_NewRef(Py_None);
+  if(!goal) goal = Py_NewRef(Py_None);
+  //this steals the references
+  return Py_BuildValue("NN",start,goal);
 }
 
 int PlannerInterface::addMilestone(PyObject* milestone)
@@ -1302,6 +1347,81 @@ void PlannerInterface::setCostFunction(PyObject* edgeCost,PyObject* terminalCost
     terminalCost = NULL;
   plans[index].objective.reset(new PyObjectiveFunction(edgeCost,terminalCost));
   plans[index].planner->SetObjective(plans[index].objective);
+}
+
+PyObject* PlannerInterface::getEdgeCostFunction()
+{
+  if(index < 0 || index >= (int)plans.size() || !plans[index].planner) 
+  throw PyException("Invalid plan index");  
+  if(plans[index].objective->edgeCost == NULL)
+    Py_RETURN_NONE;
+  return Py_NewRef(plans[index].objective->edgeCost);
+}
+PyObject* PlannerInterface::getTerminalCostFunction()
+{
+  if(index < 0 || index >= (int)plans.size() || !plans[index].planner) 
+    throw PyException("Invalid plan index");  
+  if(plans[index].objective->terminalCost == NULL)
+    Py_RETURN_NONE;
+  return Py_NewRef(plans[index].objective->terminalCost);
+}
+
+double PlannerInterface::edgeCost(PyObject* a, PyObject* b)
+{
+  if(index < 0 || index >= (int)plans.size() || !plans[index].planner) 
+    throw PyException("Invalid plan index");  
+  if(plans[index].objective->edgeCost == NULL) {
+    Config va,vb;
+    if(!PyListToConfig(a,va)) {
+      throw PyException("Invalid configuration a (must be list)");
+    }
+    if(!PyListToConfig(b,vb)) {
+      throw PyException("Invalid configuration b (must be list)");
+    }
+    return spaces[spaceIndex].space->Distance(va,vb);
+  }
+  PyObject* result = PyObject_CallFunctionObjArgs(plans[index].objective->edgeCost,a,b);
+  if(!result) {
+    if(!PyErr_Occurred()) {
+      throw PyException("Python edgeCost method failed");
+    }
+    else {
+      throw PyPyErrorException();
+    }
+  }
+  if(!PyFloat_Check(result)) {
+    Py_DECREF(result);
+    throw PyException("Python edgeCost test didn't return float");
+  }
+  double res=PyFloat_AsDouble(result);
+  Py_DECREF(result);
+  return res;
+}
+
+double PlannerInterface::terminalCost(PyObject* q)
+{
+  if(index < 0 || index >= (int)plans.size() || !plans[index].planner) 
+    throw PyException("Invalid plan index");  
+  if(plans[index].objective->terminalCost == NULL) {
+    return 0;
+  }
+  PyObject* result = PyObject_CallFunctionObjArgs(plans[index].objective->edgeCost,q);
+  if(!result) {
+    if(!PyErr_Occurred()) {
+      throw PyException("Python terminalCost method failed");
+    }
+    else {
+      throw PyPyErrorException();
+    }
+  }
+  if(!PyFloat_Check(result)) {
+    Py_DECREF(result);
+    throw PyException("Python terminalCost test didn't return float");
+  }
+  double res=PyFloat_AsDouble(result);
+  Py_DECREF(result);
+  return res;
+
 }
 
 PyObject* PlannerInterface::getSolutionPath()

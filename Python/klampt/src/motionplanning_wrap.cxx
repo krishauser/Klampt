@@ -12131,16 +12131,14 @@ SWIGINTERN PyObject *CSpaceInterface_swiginit(PyObject *SWIGUNUSEDPARM(self), Py
   return SWIG_Python_InitShadowInstance(args);
 }
 
-SWIGINTERN PyObject *_wrap_new_PlannerInterface(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_PlannerInterface__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   CSpaceInterface *arg1 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  PyObject *swig_obj[1] ;
   PlannerInterface *result = 0 ;
   
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_CSpaceInterface,  0  | 0);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_PlannerInterface" "', argument " "1"" of type '" "CSpaceInterface const &""'"); 
@@ -12166,6 +12164,91 @@ SWIGINTERN PyObject *_wrap_new_PlannerInterface(PyObject *SWIGUNUSEDPARM(self), 
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_PlannerInterface__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  CSpaceInterface *arg1 = 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PlannerInterface *result = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_CSpaceInterface,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_PlannerInterface" "', argument " "1"" of type '" "CSpaceInterface const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_PlannerInterface" "', argument " "1"" of type '" "CSpaceInterface const &""'"); 
+  }
+  arg1 = reinterpret_cast< CSpaceInterface * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_PlannerInterface" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (PlannerInterface *)new PlannerInterface((CSpaceInterface const &)*arg1,(char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_PlannerInterface, SWIG_POINTER_NEW |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_PlannerInterface(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[3] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "new_PlannerInterface", 0, 2, argv))) SWIG_fail;
+  --argc;
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_CSpaceInterface, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_PlannerInterface__SWIG_0(self, argc, argv);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_CSpaceInterface, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_new_PlannerInterface__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_PlannerInterface'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    PlannerInterface::PlannerInterface(CSpaceInterface const &)\n"
+    "    PlannerInterface::PlannerInterface(CSpaceInterface const &,char const *)\n");
+  return 0;
 }
 
 
@@ -12231,6 +12314,41 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_destroy(PyObject *SWIGUNUSEDPARM(sel
     }
   }
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PlannerInterface_isOptimizing(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  bool result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_isOptimizing" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->isOptimizing();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
   return resultobj;
 fail:
   return NULL;
@@ -12402,6 +12520,41 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PlannerInterface_getEndpoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  PyObject *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_getEndpoints" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  {
+    try {
+      result = (PyObject *)(arg1)->getEndpoints();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PlannerInterface_setCostFunction__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   PlannerInterface *arg1 = (PlannerInterface *) 0 ;
@@ -12556,6 +12709,150 @@ fail:
     "    PlannerInterface::setCostFunction(PyObject *)\n"
     "    PlannerInterface::setCostFunction()\n");
   return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_PlannerInterface_edgeCost(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  PyObject *arg2 = (PyObject *) 0 ;
+  PyObject *arg3 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[3] ;
+  double result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PlannerInterface_edgeCost", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_edgeCost" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  arg2 = swig_obj[1];
+  arg3 = swig_obj[2];
+  {
+    try {
+      result = (double)(arg1)->edgeCost(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PlannerInterface_terminalCost(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  PyObject *arg2 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  double result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PlannerInterface_terminalCost", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_terminalCost" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  arg2 = swig_obj[1];
+  {
+    try {
+      result = (double)(arg1)->terminalCost(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PlannerInterface_getEdgeCostFunction(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  PyObject *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_getEdgeCostFunction" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  {
+    try {
+      result = (PyObject *)(arg1)->getEdgeCostFunction();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PlannerInterface_getTerminalCostFunction(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  PyObject *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_getTerminalCostFunction" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  {
+    try {
+      result = (PyObject *)(arg1)->getTerminalCostFunction();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
 }
 
 
@@ -14625,7 +14922,8 @@ static PyMethodDef SwigMethods[] = {
 		"set_plan_json_string(char const * string)\n"
 		"\n"
 		"\n"
-		"Loads planner values from a JSON string.  \n"
+		"Loads planner values from a JSON string. See :func:`set_plan_setting` for valid\n"
+		"settings.  \n"
 		"\n"
 		""},
 	 { "get_plan_json_string", _wrap_get_plan_json_string, METH_NOARGS, "\n"
@@ -14948,8 +15246,9 @@ static PyMethodDef SwigMethods[] = {
 	 { "CSpaceInterface_index_get", _wrap_CSpaceInterface_index_get, METH_O, "CSpaceInterface_index_get(CSpaceInterface self) -> int"},
 	 { "CSpaceInterface_swigregister", CSpaceInterface_swigregister, METH_O, NULL},
 	 { "CSpaceInterface_swiginit", CSpaceInterface_swiginit, METH_VARARGS, NULL},
-	 { "new_PlannerInterface", _wrap_new_PlannerInterface, METH_O, "\n"
-		"new_PlannerInterface(CSpaceInterface cspace) -> PlannerInterface\n"
+	 { "new_PlannerInterface", _wrap_new_PlannerInterface, METH_VARARGS, "\n"
+		"PlannerInterface(CSpaceInterface cspace)\n"
+		"new_PlannerInterface(CSpaceInterface cspace, char const * settings_json_string) -> PlannerInterface\n"
 		"\n"
 		"\n"
 		""},
@@ -14962,20 +15261,79 @@ static PyMethodDef SwigMethods[] = {
 		"PlannerInterface_destroy(PlannerInterface self)\n"
 		"\n"
 		"\n"
+		"Frees memory associated with this planner. Will be called automatically upon\n"
+		"termination, and a MotionPlan instance will call this automatically when it is\n"
+		"freed.  \n"
+		"\n"
+		""},
+	 { "PlannerInterface_isOptimizing", _wrap_PlannerInterface_isOptimizing, METH_O, "\n"
+		"PlannerInterface_isOptimizing(PlannerInterface self) -> bool\n"
+		"\n"
+		"\n"
+		"Returns true if a plan can be improved with more planning iterations.  \n"
+		"\n"
 		""},
 	 { "PlannerInterface_setEndpoints", _wrap_PlannerInterface_setEndpoints, METH_VARARGS, "\n"
 		"PlannerInterface_setEndpoints(PlannerInterface self, PyObject * start, PyObject * goal) -> bool\n"
 		"\n"
+		"\n"
+		"Sets the endpoints of the planner to a start / goal configuration pair.  \n"
 		"\n"
 		""},
 	 { "PlannerInterface_setEndpointSet", _wrap_PlannerInterface_setEndpointSet, METH_VARARGS, "\n"
 		"PlannerInterface_setEndpointSet(PlannerInterface self, PyObject * start, PyObject * goal, PyObject * goalSample=None) -> bool\n"
 		"\n"
 		"\n"
+		"Sets the endpoints of the planner to a start configuration and a goal set. goal\n"
+		"must be a callable `goal(config)` returning a bool. If goalSample != None, then\n"
+		"it must be a function `goalSample()` returning a configuration.  \n"
+		"\n"
+		""},
+	 { "PlannerInterface_getEndpoints", _wrap_PlannerInterface_getEndpoints, METH_O, "\n"
+		"PlannerInterface_getEndpoints(PlannerInterface self) -> PyObject *\n"
+		"\n"
+		"\n"
+		"Returns a tuple (start,goal), which may be (None,None) if no goal is set yet.\n"
+		"goal can be a configuration, a callable goal test, or a pair (goal test, goal\n"
+		"sampler)  \n"
+		"\n"
 		""},
 	 { "PlannerInterface_setCostFunction", _wrap_PlannerInterface_setCostFunction, METH_VARARGS, "\n"
 		"PlannerInterface_setCostFunction(PlannerInterface self, PyObject * edgeCost=None, PyObject * terminalCost=None)\n"
 		"\n"
+		"\n"
+		"Changes the cost function away from the standard path length cost. The edge cost\n"
+		"is `edgeCost(qa,qb)` and the terminal cost is `terminalCost(q)`. The total path\n"
+		"cost is `sum_{i=0,...,N-1} edgeCost(path[i],path[i+1]) + terminalCost[path[N]]`  \n"
+		"\n"
+		""},
+	 { "PlannerInterface_edgeCost", _wrap_PlannerInterface_edgeCost, METH_VARARGS, "\n"
+		"PlannerInterface_edgeCost(PlannerInterface self, PyObject * qa, PyObject * qb) -> double\n"
+		"\n"
+		"\n"
+		"Evaluates the edge cost. If no cost function is set, this is the distance\n"
+		"between the configurations.  \n"
+		"\n"
+		""},
+	 { "PlannerInterface_terminalCost", _wrap_PlannerInterface_terminalCost, METH_VARARGS, "\n"
+		"PlannerInterface_terminalCost(PlannerInterface self, PyObject * q) -> double\n"
+		"\n"
+		"\n"
+		"Evaluates the terminal cost. If no cost function is set, this is 0.  \n"
+		"\n"
+		""},
+	 { "PlannerInterface_getEdgeCostFunction", _wrap_PlannerInterface_getEdgeCostFunction, METH_O, "\n"
+		"PlannerInterface_getEdgeCostFunction(PlannerInterface self) -> PyObject *\n"
+		"\n"
+		"\n"
+		"Returns the edge cost function, if set. Returns None otherwise.  \n"
+		"\n"
+		""},
+	 { "PlannerInterface_getTerminalCostFunction", _wrap_PlannerInterface_getTerminalCostFunction, METH_O, "\n"
+		"PlannerInterface_getTerminalCostFunction(PlannerInterface self) -> PyObject *\n"
+		"\n"
+		"\n"
+		"Returns the terminal cost function, if set. Returns None otherwise.  \n"
 		"\n"
 		""},
 	 { "PlannerInterface_addMilestone", _wrap_PlannerInterface_addMilestone, METH_VARARGS, "\n"
@@ -15018,15 +15376,23 @@ static PyMethodDef SwigMethods[] = {
 		"PlannerInterface_getStats(PlannerInterface self) -> PyObject *\n"
 		"\n"
 		"\n"
+		"Returns a dictionary of statistics. Each key is a string.  \n"
+		"\n"
 		""},
 	 { "PlannerInterface_getRoadmap", _wrap_PlannerInterface_getRoadmap, METH_O, "\n"
 		"PlannerInterface_getRoadmap(PlannerInterface self) -> PyObject *\n"
 		"\n"
 		"\n"
+		"Retrieves a roadmap as a pair (V,E). V is a list of configurations (each\n"
+		"configuration is a Python list) and E is a list of edges (each edge is a pair\n"
+		"(i,j) indexing into V).  \n"
+		"\n"
 		""},
 	 { "PlannerInterface_dump", _wrap_PlannerInterface_dump, METH_VARARGS, "\n"
 		"PlannerInterface_dump(PlannerInterface self, char const * fn)\n"
 		"\n"
+		"\n"
+		"Saves the roadmap to a Trivial Graph Format (TGF) format file.  \n"
 		"\n"
 		""},
 	 { "PlannerInterface_index_set", _wrap_PlannerInterface_index_set, METH_VARARGS, "PlannerInterface_index_set(PlannerInterface self, int index)"},

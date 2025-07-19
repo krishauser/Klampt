@@ -12,7 +12,8 @@ typedef _object PyObject;
 /// method and sampling-based motion planners 
 void set_random_seed(int seed);
 
-/// Loads planner values from a JSON string
+/// Loads planner values from a JSON string.  See :func:`set_plan_setting` for
+/// valid settings.
 void set_plan_json_string(const char* string);
 /// Saves planner values to a JSON string
 std::string get_plan_json_string();
@@ -176,7 +177,10 @@ class CSpaceInterface
  * interface in cspace.py is somewhat easier to use.
  *
  * On construction, uses the planner type specified by setPlanType
- * and the settings currently specified by calls to setPlanSetting.
+ * and the settings currently specified by calls to setPlanSetting. 
+ * If a string is provided as the second argument, these are assumed
+ * to be a JSON-formatted string, equivalent to one passed to
+ * :func:`set_plan_json_string`.
  *
  * Point-to-point planning is enabled by sending two configurations to
  * the setEndpoints method.
@@ -199,31 +203,49 @@ class CSpaceInterface
  * addMilestone() returns the index of that milestone, which can be used
  * in later calls to getPath().
  *
- * In point-to-set mode, getSolutionPath will return the optimal path to 
- * any goal milestone.
+ * In point-to-set mode, getSolutionPath will return the optimal path from
+ * the start to any goal milestone.
  *
  * All planners work with the standard path-length objective function.
  * Some planners can work with other cost functions, and you can use
  * setCostFunction to set the edge / terminal costs. Usually, the results
  * will only be optimal on the computed graph, and the graph is not
  * specifically computed to optimize that cost.
- *
- * To get a roadmap (V,E), call getRoadmap().  V is a list of configurations
- * (each configuration is a Python list) and E is a list of edges (each edge is
- * a pair (i,j) indexing into V).
- * 
- * To dump the roadmap to disk, call dump(fn).  This saves to a
- * Trivial Graph Format (TGF) format.
  */
 class PlannerInterface
 {
  public:
   PlannerInterface(const CSpaceInterface& cspace);
+  PlannerInterface(const CSpaceInterface& cspace, const char* settings_json_string);
   ~PlannerInterface();
+  /// Frees memory associated with this planner. Will be called automatically
+  /// upon termination, and a MotionPlan instance will call this automatically
+  /// when it is freed. 
   void destroy();
+  /// Returns true if a plan can be improved with more planning iterations. 
+  bool isOptimizing();
+  /// Sets the endpoints of the planner to a start / goal configuration pair. 
   bool setEndpoints(PyObject* start,PyObject* goal);
+  /// Sets the endpoints of the planner to a start configuration and a goal set. 
+  /// goal must be a callable `goal(config)` returning a bool.  If goalSample != None,
+  /// then it must be a function `goalSample()` returning a configuration.
   bool setEndpointSet(PyObject* start,PyObject* goal,PyObject* goalSample=NULL);
+  /// Returns a tuple (start,goal), which may be (None,None) if no goal is set yet.
+  /// goal can be a configuration, a callable goal test, or a pair
+  /// (goal test, goal sampler) 
+  PyObject* getEndpoints();
+  /// Changes the cost function away from the standard path length cost.  The edge
+  /// cost is `edgeCost(qa,qb)` and the terminal cost is `terminalCost(q)`.  The
+  /// total path cost is `sum_{i=0,...,N-1} edgeCost(path[i],path[i+1]) + terminalCost[path[N]]` 
   void setCostFunction(PyObject* edgeCost=NULL,PyObject* terminalCost=NULL);
+  /// Evaluates the edge cost. If no cost function is set, this is the distance between the configurations. 
+  double edgeCost(PyObject* qa, PyObject* qb);
+  /// Evaluates the terminal cost. If no cost function is set, this is 0. 
+  double terminalCost(PyObject* q);
+  ///Returns the edge cost function, if set.  Returns None otherwise
+  PyObject* getEdgeCostFunction();
+  ///Returns the terminal cost function, if set.  Returns None otherwise
+  PyObject* getTerminalCostFunction();
   int addMilestone(PyObject* milestone);
   int getClosestMilestone(PyObject* config);
   PyObject* getMilestone(int);
@@ -232,8 +254,13 @@ class PlannerInterface
   PyObject* getPath(int milestone1,int milestone2);
   PyObject* getPath(int milestone1,const std::vector<int>& goalMilestones);
   double getData(const char* setting);
+  /// Returns a dictionary of statistics. Each key is a string. 
   PyObject* getStats();
+  ///Retrieves a roadmap as a pair (V,E).  V is a list of configurations
+  ///(each configuration is a Python list) and E is a list of edges (each edge is
+  ///a pair (i,j) indexing into V). 
   PyObject* getRoadmap();
+  /// Saves the roadmap to a Trivial Graph Format (TGF) format file.
   void dump(const char* fn);
 
   int index;
