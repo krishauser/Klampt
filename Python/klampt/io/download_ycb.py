@@ -30,22 +30,29 @@ def object_list() -> List[str]:
 
 def options() -> Dict[str,List[str]]:
     """Returns a list of available options for downloading YCB objects.
-    
-    'berkeley_rgbd' contains all of the depth maps and images from the Carmines.
-    'berkeley_rgb_highres' contains all of the high-res images from the Canon cameras.
-    'berkeley_processed' contains all of the segmented point clouds and textured meshes.
-    'google_16k' contains google meshes with 16k vertices.
-    'google_64k' contains google meshes with 64k vertices.
-    'google_512k' contains google meshes with 512k vertices.
+
+    Options for 'scan' include:    
+    - 'any' will download the first available scan type.
+    - 'berkeley_rgbd' contains all of the depth maps and images from the Carmines.
+    - 'berkeley_rgb_highres' contains all of the high-res images from the Canon cameras.
+    - 'berkeley_processed' contains all of the segmented point clouds and textured meshes.
+    - 'google_16k' contains google meshes with 16k vertices.
+    - 'google_64k' contains google meshes with 64k vertices.
+    - 'google_512k' contains google meshes with 512k vertices.
     
     See the website for more details.
     """
-    return {'scan':["berkeley_rgbd", "berkeley_rgb_highres", "berkeley_processed", "google_16k", "google_64k", "google_512k"],
+    return {'scan':["any", "berkeley_rgbd", "berkeley_rgb_highres", "berkeley_processed", "google_16k", "google_64k", "google_512k"],
             'model':['textured','nontextured']}
 
 
+def preferred_scans() -> List[str]:
+    """Returns the list of scans attempted when scan='any' is specified."""
+    return ['google_16k', 'google_64k', 'google_512k', 'berkeley_processed']
+
+
 def download(objects : Union[str,List[str]] = 'all',
-             scan : Union[str,List[str]] = 'google_16k',
+             scan : Union[str,List[str]] = 'any',
              model : str = None,
              output_directory = './ycb') -> List[str]:
     """
@@ -54,7 +61,8 @@ def download(objects : Union[str,List[str]] = 'all',
     Parameters:
     - objects: One or more object names to download, or 'all' for all objects.
         E.g., ["002_master_chef_can", "003_cracker_box"]
-    - scan: Scan option(s) to download.
+    - scan: Scan option(s) to download.  The first available scan will be downloaded
+        if 'any' is specified.
     - model: ignored. (All models for the given object are downloaded)
     - output_directory: Directory to save the downloaded files.
     
@@ -69,8 +77,13 @@ def download(objects : Union[str,List[str]] = 'all',
         objects = object_list()
     if isinstance(objects, str):
         objects = [objects]
-    if isinstance(options, str):
-        options = [options]
+    stop_on_first = False
+    if isinstance(scan, str):
+        if scan == 'any':
+            scan = preferred_scans()
+            stop_on_first = True
+        else:
+            scan = [scan]
 
     def report_hook(count, block_size, total_size):
         percent = float(count * block_size) / total_size
@@ -78,20 +91,30 @@ def download(objects : Union[str,List[str]] = 'all',
 
     files = []
     for obj in objects:
-        for file_type in options:
-            url = _tgz_url(obj, file_type)
+        for scan in scan:
+            url = _tgz_url(obj, scan)
             if not _check_url(url):
-                print(f"URL {url} does not exist, skipping {obj} {file_type}")
+                print(f"URL {url} does not exist, skipping {obj} {scan}")
                 continue
-            filename = os.path.join(output_directory, f"{obj}_{file_type}.tgz")
+            filename = os.path.join(output_directory, f"{obj}_{scan}.tgz")
             print(f"Downloading {url} to {filename}")
             urllib.request.urlretrieve(url, filename, report_hook)
 
+            result_folder = os.path.join(output_directory, f"{obj}/{scan}")
             with tarfile.open(filename, "r:gz") as tar:
                 tar.extractall(path=output_directory)
             os.remove(filename)  # Remove the .tgz file after extraction
-            result_folder = os.path.join(output_directory, f"{obj}/{file_type}")
+
+            if scan == 'berkeley_processed':
+                import shutil
+                os.makedirs(result_folder, exist_ok=True)
+                shutil.move(os.path.join(output_directory, f"{obj}/clouds"), result_folder)
+                shutil.move(os.path.join(output_directory, f"{obj}/tsdf"), result_folder)
+                shutil.move(os.path.join(output_directory, f"{obj}/poisson"), result_folder)
             files.append(result_folder)
+            
+            if stop_on_first:
+                break
     return files
 
 
@@ -111,19 +134,29 @@ def load(objects : Union[str,List[str]],
     all_options = options()
     models = []
     for obj in objects:
-        file_type = scan
-        if file_type == 'any':
+        folder = None
+        if scan == 'any':
             for opt in all_options['scan']:
-                if os.path.exists(os.path.join(download_directory, f"{obj}_{opt}")):
+                if os.path.exists(os.path.join(download_directory, f"{obj}/{opt}")):
                     file_type = opt
+                    folder = os.path.join(download_directory, f"{obj}/{opt}")
                     break
-            if file_type == 'any':
-                file_type = 'google_16k'  # Default to google_16k if no other option found
-        if not os.path.exists(os.path.join(download_directory, f"{obj}/{file_type}")):
-            print(f"Object {obj} with option {file_type} not found in {download_directory}, downloading...")
-            download(objects=[obj], options=[file_type], output_directory=download_directory)
+            if folder is None:
+                res = download(objects=[obj], scan=scan, output_directory=download_directory)
+                folder = res[0] if res else None
+        else:
+            folder = os.path.join(download_directory, f"{obj}/{scan}")
+            if not os.path.exists(folder):
+                print(f"Object {obj} with option {scan} not found in {download_directory}, downloading...")
+                res = download(objects=[obj], scan=scan, output_directory=download_directory)
+                folder = res[0] if res else None
+        if folder is None:
+            print(f"Object {obj} with option {scan} could not be downloaded, skipping...")
+            continue
+        if 'berkeley_processed' in folder:
+            #prefer the TSDF processed meshes
+            folder = os.path.join(folder, 'tsdf')
         #now load the object
-        folder = os.path.join(download_directory, f"{obj}/{file_type}")
         g = None
         for file in os.listdir(folder): 
             if model=='any' or file.startswith(model):
