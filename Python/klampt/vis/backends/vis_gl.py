@@ -1,10 +1,11 @@
 from __future__ import annotations
-from ..visualization import _globalLock,VisualizationScene
+from ..visualization import _globalLock,VisualizationScene,VisAppearance
 from .. import glcommon
 import weakref
 from collections import defaultdict
 from OpenGL.GL import *
 import warnings
+from typing import Optional, Callable
 
 class WindowInfo:
     """Mode can be hidden, shown, or dialog"""
@@ -50,12 +51,12 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         self.backgroundImageTexture = None
         self.backgroundImageDisplayList = None
         self.backgroundImageMode = 'stretch'
-        self.click_callback = None
-        self.hover_callback = None
-        self.click_filter = None
+        self.click_callback = None   # type: Optional[Callable]
+        self.hover_callback = None   # type: Optional[Callable]
+        self.click_filter = None     # type: Optional[Callable]
         self.hover_highlight_color = (1.0,1.0,0.0,0.5)
         self.click_tolerance = 0.01
-        self.hover_item = None
+        self.hover_item = None       # type: Optional[VisAppearance]
 
     def initialize(self):
         #keep or refresh display lists?
@@ -86,10 +87,10 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                     world=world.item
                 obj.make_editor(world)
                 if obj.editor:
-                    self.klamptwidgetmaster.add(obj.editor)
+                    self.add_widget(obj.editor)
             else:
                 if obj.editor:
-                    self.klamptwidgetmaster.remove(obj.editor)
+                    self.remove_widget(obj.editor)
                     obj.remove_editor()
             self.doRefresh = True
         return obj.editor if doedit else None
@@ -110,9 +111,9 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
             item.attributes['hidden'] = hidden
             if item.editor is not None:
                 if hidden:
-                    self.klamptwidgetmaster.remove(item.editor)
+                    self.add_widget(item.editor)
                 else:
-                    self.klamptwidgetmaster.add(item.editor)
+                    self.remove_widget(item.editor)
             self.doRefresh = True
         
     def remove(self,name):
@@ -120,7 +121,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         with _globalLock:
             item = self.getItem(name)
             if item.editor is not None:
-                self.klamptwidgetmaster.remove(item.editor)
+                self.remove_widget(item.editor)
         VisualizationScene.remove(self,name)
 
     def display(self):
@@ -334,7 +335,16 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 cb = self.click_callback
                 self.click_callback = None
                 self.hover_callback = None
-                (item,pt) = self.rayCast(x,y,self.click_filter,self.click_tolerance)
+                widget = self.highlighted_widget()
+                item = None
+                pt = None
+                if widget is not None:
+                    for item in self.items.values():
+                        if item.editor is not None and item.editor == widget:
+                            item = item
+                            break
+                if item is None:
+                    (item,pt) = self.rayCast(x,y,self.click_filter,self.click_tolerance)
                 if item is not None:
                     cb(item.name,item.item,pt)
                 else:
@@ -348,13 +358,24 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         _globalLock.acquire()
         glcommon.GLWidgetPlugin.motionfunc(self,x,y,dx,dy)
         if self.hover_callback is not None:
-            (item,pt) = self.rayCast(x,y,self.click_filter,self.click_tolerance)
+            widget = self.highlighted_widget()
+            item = None
+            pt = None
+            if widget is not None:
+                for item in self.items.values():
+                    if item.editor is not None and item.editor == widget:
+                        item = item
+                        break
+            if item is None:
+                (item,pt) = self.rayCast(x,y,self.click_filter,self.click_tolerance)
             if self.hover_item is not None:
                 if self.hover_item is not item:
                     self.hover_item.highlight(None)
             if item is not None:
                 self.hover_callback(item.name,item.item,pt)
                 item.highlight(self.hover_highlight_color)
+            elif self.hover_item is not None:
+                self.hover_callback(None,None,None)
             self.hover_item = item
         _globalLock.release()
     def eventfunc(self,type,args=""):

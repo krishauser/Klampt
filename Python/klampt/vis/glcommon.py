@@ -7,26 +7,43 @@ from . import glinit
 from OpenGL import GL
 from .glinterface import GLPluginInterface
 from .glprogram import GLProgram,GLPluginProgram
+from ..robotsim import WidgetSet, Widget
 import math
 import weakref
 import warnings
+from typing import Optional
 
 class GLWidgetPlugin(GLPluginInterface):
     """A GL plugin that sends user events to one or more Klamp't widgets.
     To use, add this to a GLPluginProgram and call addWidget to add widgets"""    
     def __init__(self):
-        from ..robotsim import WidgetSet
-
         GLPluginInterface.__init__(self)
         self.klamptwidgetbutton = 2
         self.klamptwidgetmaster = WidgetSet()
+        self.klamptwidgets = []   # type: list[Widget]
         self.klamptwidgetdragging = False
-    def addWidget(self,widget):
-        warnings.warn("addWidget will be deprecated in favor of add_widget in a future version of Klampt",DeprecationWarning)
-        self.add_widget(widget)
-    def add_widget(self,widget):
+    def add_widget(self,widget : Widget):
         self.klamptwidgetmaster.add(widget)
-    def widgetchangefunc(self,event):
+        self.klamptwidgets.append(widget)
+    def remove_widget(self,widget : Widget):
+        self.klamptwidgetmaster.remove(widget)
+        for i,w in enumerate(self.klamptwidgets):
+            if w.index == widget.index:
+                self.klamptwidgets = self.klamptwidgets[:i] + self.klamptwidgets[i+1:]
+                break
+    def highlighted_widget(self) -> Optional[Widget]:
+        """Returns the currently highlighted widget, or None if no widget is highlighted."""
+        for w in self.klamptwidgets:
+            if w.hasHighlight():
+                return w
+        return None
+    def focused_widget(self) -> Optional[Widget]:
+        """Returns the currently focused widget, or None if no widget is focused."""
+        for w in self.klamptwidgets:
+            if w.hasFocus():
+                return w
+        return None
+    def widgetchangefunc(self, event : str):
         """Called whenever a widget is clicked or dragged.
         event can be 'mousedown', 'mousedrag', 'mouseup'. 
         Subclasses can use this to respond to widget click events"""

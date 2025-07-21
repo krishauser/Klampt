@@ -1374,7 +1374,9 @@ def pick(click_callback : Callable, hover_callback : Callable=None,
             in world coordinates.  Set this to None to disable picking.
         hover_callback (callable): a function f(name,item,point) that receives 
             the name of the item, the item itself, and the point hovered over, 
-            in world coordinates.  Set this to None to disable picking.
+            in world coordinates.  It will also be called with (None,None,None)
+            when an object is de-highlighted.  Set the callback to None to
+            disable highlighting.
         highlight_color (tuple, optional): if given, hovered items will be
             colored with the given color.
         filter (callable, optional): a function f(name,item) that returns True
@@ -2643,6 +2645,8 @@ class VisAppearance:
                 self.subAppearances["ikConstraint"] = VisAppearance(item.ikConstraint,"ik")
             for n,c in enumerate(item.contacts):
                 self.subAppearances[("contact",n)] = VisAppearance(c,n)
+        if self.editor is not None:
+            print("vis.scene().setItem(): Warning: item {} has an editor, may have stale reference to item of type {}".format(self.name,type(item)))
         
     def markChanged(self,config=True,appearance=True):
         if appearance:
@@ -3548,9 +3552,32 @@ class VisAppearance:
             res = RobotPoser(item)
         elif isinstance(item,SubRobotModel):
             res = RobotPoser(item._robot)
-            res.setActiveDofs(item._links);
+            res.setActiveDofs(item._links)
         elif isinstance(item,RigidObjectModel):
             res = ObjectPoser(item)
+        elif isinstance(item,Geometry3D):
+            if item.type() == 'GeometricPrimitive':
+                prim = item.getGeometricPrimitive()
+                if prim.type == 'point':
+                    res = PointPoser()
+                    res.set(se3.apply(item.getCurrentTransform(),prim.properties[:3]))
+                elif prim.type == 'sphere':
+                    c = prim.properties[:3]
+                    r = prim.properties[3]
+                    res = SpherePoser()
+                    res.set(se3.apply(item.getCurrentTransform(),c)+[r])
+                elif prim.type == 'aabb':
+                    bmin = prim.properties[:3]
+                    bmax = prim.properties[3:6]
+                    res = AABBPoser()
+                    res.set(bmin,bmax)
+                    res.setFrame(*item.getCurrentTransform())
+                elif prim.type == 'box':
+                    t = prim.properties[0:3]
+                    R = prim.properties[3:12]
+                    dims = prim.properties[12:15]
+                    Rw,tw = se3.mul(item.getCurrentTransform(),(R,t))
+                    res.set(Rw,tw,dims)
         elif isinstance(item,(list,tuple)):
             #determine if it's a rotation, transform, or point
             itype = objectToVisType(item,world)
@@ -3604,6 +3631,25 @@ class VisAppearance:
                 self.editor.set(self.item.tofull(self.item.getConfig()))
             elif isinstance(self.item,RigidObjectModel):
                 self.editor.set(*self.item.getTransform())
+            elif isinstance(self.item,Geometry3D):
+                if self.item.type() == 'GeometricPrimitive':
+                    prim = self.item.getGeometricPrimitive()
+                    if prim.type == 'point':
+                        self.editor.set(se3.apply(self.item.getCurrentTransform(),prim.properties[:3]))
+                    elif prim.type == 'sphere':
+                        c = prim.properties[:3]
+                        r = prim.properties[3]
+                        self.editor.set(se3.apply(self.item.getCurrentTransform(),c)+[r])
+                    elif prim.type == 'aabb':
+                        bmin = prim.properties[:3]
+                        bmax = prim.properties[3:6]
+                        self.editor.set(bmin,bmax)
+                    elif prim.type == 'box':
+                        t = prim.properties[0:3]
+                        R = prim.properties[3:12]
+                        dims = prim.properties[12:15]
+                        Rw,tw = se3.mul(self.item.getCurrentTransform(),(R,t))
+                        self.editor.set(Rw,tw,dims)
             elif isinstance(self.item,(list,tuple)):
                 itype = objectToVisType(self.item,None)
                 if itype in ('Vector3','Matrix3'):
@@ -3631,6 +3677,26 @@ class VisAppearance:
                 self.item.setConfig(self.item.fromfull(self.editor.get()))
             elif isinstance(self.item,RigidObjectModel):
                 self.item.setTransform(*self.editor.get())
+            elif isinstance(self.item,Geometry3D):
+                if self.item.type() == 'GeometricPrimitive':
+                    prim = self.item.getGeometricPrimitive()
+                    if prim.type == 'point':
+                        prim.setPoint(se3.apply(se3.inv(self.item.getCurrentTransform()),self.editor.get()))
+                    elif prim.type == 'sphere':
+                        cr = self.editor.get()
+                        c = cr[:3]
+                        r = cr[3]
+                        prim.setSphere(se3.apply(se3.inv(self.item.getCurrentTransform()),c),r)
+                    elif prim.type == 'aabb':
+                        bmin,bmax = self.editor.get()
+                        prim.setAABB(bmin,bmax)
+                    elif prim.type == 'box':
+                        Tw = self.editor.getTransform()
+                        Rl,tl = se3.mul(se3.inv(self.frame),Tw)
+                        dims = self.editor.getDims()
+                        prim.setBox(tl,Rl,dims)
+                    self.item.setGeometricPrimitive(prim)
+                    self.appearance.refresh()
             elif isinstance(self.item,(tuple,list)):
                 def setList(a,b):
                     if isinstance(a,(list,tuple)) and isinstance(b,(list,tuple)):
@@ -3804,7 +3870,13 @@ class VisualizationScene:
         assert not isinstance(name,(list,tuple)),"Cannot add sub-path items"
         with _globalLock:
             if keepAppearance and name in self.items:
-                self.items[name].setItem(item)
+                visitem = self.items[name]
+                if visitem.editor is not None:  #may need to refresh the editor
+                    self.edit(name,False)
+                    visitem.setItem(item)
+                    self.edit(name,True)
+                else:
+                    visitem.setItem(item)
             else:
                 #need to erase prior item visualizer
                 if name in self.items:
@@ -3885,6 +3957,8 @@ class VisualizationScene:
         with _globalLock:
             assert name in self.items,"Can only remove top level objects from visualization, try hide() instead"
             item = self.getItem(name)
+            if item.editor is not None:  #remove the editor if it exists
+                self.edit(name,False)
             item.destroy()
             del self.items[name]
             self.doRefresh = True
@@ -3916,7 +3990,7 @@ class VisualizationScene:
         with _globalLock:
             self.labels.append((text,point,color))
 
-    def hideLabel(self, ItemPath : str, hidden=True):
+    def hideLabel(self, name : ItemPath, hidden=True):
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
