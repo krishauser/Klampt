@@ -17,15 +17,30 @@ To move an existing joint-space path by a cartesian offset, the
 :func:`cartesian_bump` is used. This is useful for adapting motion primitives
 to new sensor data.
 
-All the classes in this module use a unified representation of the workspace of
+All the functions in this module use a unified representation of the workspace of
 one or more :class:`IKObjective` constraints, which is retrieved by
-``config.getConfig(constraints)``.  For example, the workspace of a position-
+``config.get_config(constraints)``.  For example, the workspace of a position-
 only constraint is its 3D world-space target coordinates.  The workspace of a 
 fixed transform constraint is the 12D concatenation of the rotation matrix and
 translation vector.  See the :mod:`~klampt.model.config` module for details.
+
+As an example, to interpolate linearly to a target while keeping the end effector
+transform fixed, one can do the following::
+
+    from klampt.model.cartesian_trajectory import cartesian_interpolate_linear
+    from klampt.model import config,ik
+    from klampt.math import vectorops,so3,se3
+    robot.setConfig(startConfig)
+    src = ik.fixed_objective(robot.link('end_effector'))
+    tgt = (src[0],vectorops.add(src[1],[0.3,0,0]))  #move end effector +30cm in x
+    soln = cartesian_interpolate_linear(robot,config.get_config(src),config.get_config(tgt),src)
+    if soln is None:
+        print("No solution found")
+
 """
 
 from .trajectory import *
+from .subrobot import SubRobotModel,SubRobotModelLink
 from ..robotsim import IKObjective,IKSolver
 from . import ik
 from . import config
@@ -41,11 +56,11 @@ def set_cartesian_constraints(
         solver: IKSolver
     ) -> None:
     """For ``x`` a workspace parameter setting (obtained via
-    ``config.getConfig(constraints)``), a set of constraints, and a
+    ``config.get_config(constraints)``), a set of constraints, and a
     :class:`IKSolver` object, modifies the constraints and the solver so that
     the solver is setup to match the workspace parameter setting x.
     """
-    config.setConfig(constraints,x)
+    config.set_config(constraints,x)
     solver.clear()
     for c in constraints:
         solver.add(c)
@@ -56,35 +71,35 @@ def solve_cartesian(
         solver: IKSolver
     ) -> bool:
     """For ``x`` a workspace parameter setting (obtained via
-    ``config.getConfig(constraints)``), a set of constraints, and a IKSolver
+    ``config.get_config(constraints)``), a set of constraints, and a IKSolver
     object, returns True if the solver can find a solution, starting from the
     robot's current configuration). Returns True if successful.
     """
     set_cartesian_constraints(x,constraints,solver)
     return solver.solve()
 
-def _make_canonical(robot,constraints,startConfig,endConfig,solver):
+def _make_canonical(robot : RobotModel, constraints, startConfig, endConfig, solver):
     if not hasattr(constraints,'__iter__'):
         constraints = [constraints]
-    for c in constraints:
-        if isinstance(c,(int,str)):
-            newconstraints = []
-            for d in constraints:
-                if isinstance(d,(int,str)):
-                    newconstraints.append(ik.objective(robot.link(d),R=so3.identity(),t=[0,0,0]))
-                else:
-                    assert isinstance(d,IKObjective)
-                    newconstraints.append(d)
-            if solver:
-                newSolver = IKSolver(solver)
-                newSolver.clear()
-                for d in newconstraints:
-                    newSolver.add(d)
+    if any(isinstance(c,(int,str,RobotModelLink)) for c in constraints):
+        newconstraints = []
+        for d in constraints:
+            if isinstance(d,(int,str)):
+                newconstraints.append(ik.objective(robot.link(d),R=so3.identity(),t=[0,0,0]))
+            elif isinstance(d,RobotModelLink):
+                newconstraints.append(ik.objective(d,R=so3.identity(),t=[0,0,0]))
             else:
-                newSolver = None
-            constraints = newconstraints
-            solver = newSolver
-            break
+                assert isinstance(d,IKObjective)
+                newconstraints.append(d)
+        if solver:
+            newSolver = IKSolver(solver)
+            newSolver.clear()
+            for d in newconstraints:
+                newSolver.add(d)
+        else:
+            newSolver = None
+        constraints = newconstraints
+        solver = newSolver
     if solver is None:
         solver = ik.solver(constraints)
     if startConfig=='robot':
@@ -115,9 +130,9 @@ def cartesian_interpolate_linear(
     Args:
         robot: the RobotModel or SubRobotModel.
         a (list of floats): start point of the Cartesian trajectory.
-            Assumed derived from config.getConfig(constraints)
+            Assumed derived from `config.get_config(constraints)`
         b (list of floats): start point of the Cartesian trajectory.
-            Assumed derived from config.getConfig(constraints)
+            Assumed derived from `config.get_config(constraints)`
         constraints: one or more link indices, link names, or
             :class:`IKObjective` objects specifying the Cartesian task.
             Interpreted as follows:
@@ -300,9 +315,9 @@ def cartesian_interpolate_bisect(
     Args:
         robot (RobotModel or SubRobotModel): the robot.
         a (list of floats): start point of the Cartesian trajectory.
-            Assumed derived from config.getConfig(constraints)
+            Assumed derived from `config.get_config(constraints)`
         b (list of floats): start point of the Cartesian trajectory.
-            Assumed derived from config.getConfig(constraints)
+            Assumed derived from `config.get_config(constraints)`
         constraints: one or more link indices, link names, or
             :class:`IKObjective` objects specifying the Cartesian task space. 
             Interpreted as follows:
@@ -960,12 +975,12 @@ def cartesian_bump(
             for c,p in zip(constraints,bump_paths):
                 xform0 = robot.link(c.link()).getTransform()
                 c.matchDestination(*xform0)
-            xa = config.getConfig(constraints)
+            xa = config.get_config(constraints)
             robot.setConfig(qnext)
             for c,p in zip(constraints,bump_paths):
                 xform0 = robot.link(c.link()).getTransform()
                 c.matchDestination(*xform0)
-            xb = config.getConfig(constraints)
+            xb = config.get_config(constraints)
             #TODO: add joint limits into the solver?
             newseg = cartesian_interpolate_bisect(robot,xa,xb,constraints,
                 startConfig=q,endConfig=qnext,
@@ -1003,8 +1018,8 @@ def cartesian_bump(
     return res
 
 def cartesian_move_to(
-        robot:Union[RobotModel,SubRobotModel],
-        constraints: Union[int,str,IKObjective,Sequence[int],Sequence[str],Sequence[IKObjective]],
+        robot:Union[RobotModel,SubRobotModel,RobotModelLink,SubRobotModelLink],
+        constraints: Union[RigidTransform,IKObjective,Sequence[IKObjective]],
         delta: float = 1e-2,
         solver: Optional[IKSolver] = None,
         feasibilityTest: Optional[Callable[[Vector],bool]] = None,
@@ -1022,20 +1037,42 @@ def cartesian_move_to(
 
         path = cartesian_move_to(robot,goal)
 
+    E.g., to move an end effector to a target transform, use::
+
+        path = cartesian_move_to(link,(targetRot,targetTrans))
+
+    Or::
+        
+        path = cartesian_move_to(robot,ik.objective(link,R=targetRot,t=targetTrans))
+        
     Other arguments are equivalent to those in cartesian_interpolate_linear.
     """
+    if isinstance(robot, RobotModelLink):
+        assert hasattr(constraints,'__iter__') and len(constraints) == 2, \
+            "If robot is a RobotModelLink, constraints must be a single rigid transform"
+        assert len(constraints[0]) == 9 and len(constraints[1]) == 3, \
+            "If robot is a RobotModelLink, constraints must be a single rigid transform"
+        constraints = ik.objective(robot, R=constraints[0], t=constraints[1])
+        robot = robot.robot()
+    elif isinstance(robot, SubRobotModelLink):
+        assert hasattr(constraints,'__iter__') and len(constraints) == 2, \
+            "If robot is a SubRobotModelLink, constraints must be a single rigid transform"
+        assert len(constraints[0]) == 9 and len(constraints[1]) == 3, \
+            "If robot is a SubRobotModelLink, constraints must be a single rigid transform"
+        constraints = ik.objective(robot.robot()._robot, R=constraints[0], t=constraints[1])
+        robot = robot.robot()
     if not hasattr(constraints,'__iter__'):
         constraints = [constraints]
     for c in constraints:
         assert isinstance(c,IKObjective)
     #extract the task space coordinates of the constraints
-    taskEnd = config.getConfig(constraints)
+    taskEnd = config.get_config(constraints)
     #extract the task space coordinates of the current robot
     for c in constraints:
         xforml = robot.link(c.link()).getTransform()
         xformr = robot.link(c.destLink()).getTransform() if c.destLink() >= 0 else se3.identity()
         c.matchDestination(*se3.mul(se3.inv(xformr),xforml))
-    taskStart = config.getConfig(constraints)
+    taskStart = config.get_config(constraints)
     #just call the solver
     return cartesian_interpolate_linear(robot,taskStart,taskEnd,constraints,
         delta=delta,solver=solver,feasibilityTest=feasibilityTest,
