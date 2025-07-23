@@ -103,9 +103,9 @@ class ControllerGLPlugin(GLWidgetPlugin):
         self.toolCoordinatesPoser.set([0,0,0])
         self.cartesianGoalPoser = TransformPoser()
         self.cartesianGoalPoser.set(*se3.identity())
-        self.addWidget(self.robotPoser)
-        self.addWidget(self.toolCoordinatesPoser)
-        self.addWidget(self.cartesianGoalPoser)
+        self.add_widget(self.robotPoser)
+        self.add_widget(self.toolCoordinatesPoser)
+        self.add_widget(self.cartesianGoalPoser)
         self.klamptwidgetmaster.enable(self.toolCoordinatesPoser,False)
         self.klamptwidgetmaster.enable(self.cartesianGoalPoser,False)
         self.cartesianControlEnabled = False
