@@ -421,9 +421,13 @@ class GripperInfo:
                 base_xform = baseLink.getTransform()
             else:
                 if baseLink.getParent() >= 0:
-                    print("Warning, setting base link transform for an attached gripper base")
-                #robot.link(self.baseLink).setParent(-1)
-                baseLink.setParentTransform(*base_xform)
+                    #print("GripperInfo.addToVis(): Warning, setting base link transform for an attached gripper base")
+                    #robot.link(self.baseLink).setParent(-1)
+                    parent_xform = baseLink.getParentLink().getTransform()
+                    base_rel_xform = se3.mul(se3.inv(parent_xform),base_xform)
+                    baseLink.setParentTransform(*base_rel_xform)
+                else:
+                    baseLink.setParentTransform(*base_xform)
                 robot.setConfig(robot.getConfig())
             for l in self.fingerLinks:
                 assert l >= 0 and l < robot.numLinks()
