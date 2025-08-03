@@ -6,13 +6,14 @@
   constant time step.
 """
 
-from . import glinit
 from OpenGL import GL
 from .glviewport import GLViewport
+from .glinterface import GLPluginInterface
 from ..math import so3,se3,vectorops
 import math
 import time
 import warnings
+from typing import List,Callable
 
 class GLProgramAction:
     def __init__(self,hook,short_text,key,description=None):
@@ -49,7 +50,7 @@ class GLProgram:
         self.clearColor = [1.0,1.0,1.0,0.0]
         self.actions = []
 
-    def add_action(self,hook,short_text,key,description=None):
+    def add_action(self,hook:Callable,short_text,key,description=None):
         """Defines a new generic GUI action.  The action will be available in a menu in
         Qt or as keyboard commands in GLUT."""
         self.actions.append(GLProgramAction(hook,short_text,key,description))
@@ -62,7 +63,7 @@ class GLProgram:
         visualization.setWindowTitle(self.name)
         visualization.run(self)
 
-    def initialize(self):
+    def initialize(self) -> bool:
         """Called after the GL context is initialized, but before main loop.
         May be overridden.  Users should not call this directly!"""
         assert self.window != None
@@ -74,7 +75,7 @@ class GLProgram:
         """Call this to redraw the screen on the next event loop"""
         self.window.refresh()
 
-    def modifiers(self):
+    def modifiers(self) -> List[str]:
         """Retrieves a list of currently pressed keyboard modifiers.
         Values can be any combination of 'ctrl', 'shift', 'alt'.
         """
@@ -237,12 +238,12 @@ class GLNavigationProgram(GLProgram):
         self.dragging = False
         self.clearColor = [0.8,0.8,0.9,0]        
 
-    def get_view(self):
+    def get_view(self) -> GLViewport:
         """Returns a GLViewport describing the viewport, which could be saved to
         file."""
         return self.view
 
-    def set_view(self,v):
+    def set_view(self,v: GLViewport):
         """Sets the viewport to a tuple previously returned by get_view(),
         e.g. a prior view that was saved to file."""
         if v.h != self.view.h or v.w != self.view.w:
@@ -349,17 +350,17 @@ class GLPluginProgram(GLRealtimeProgram):
     set a hierarchy of plugins."""
     def __init__(self,name="GLPluginProgram"):
         GLRealtimeProgram.__init__(self,name)
-        self.plugins = []
+        self.plugins = []      # type: List[GLPluginInterface]
     def setPlugin(self,plugin):
         warnings.warn("setPlugin will be deprecated in favor of set_plugin in a future version of Klampt",DeprecationWarning)
         return self.set_plugin(plugin)
-    def pushPlugin(self,plugin):
+    def pushPlugin(self, plugin : GLPluginInterface):
         warnings.warn("pushPlugin will be deprecated in favor of push_plugin in a future version of Klampt",DeprecationWarning)
         return self.push_plugin(plugin)
     def popPlugin(self):
         warnings.warn("popPlugin will be deprecated in favor of pop_plugin in a future version of Klampt",DeprecationWarning)
         return self.pop_plugin()
-    def set_plugin(self,plugin):
+    def set_plugin(self,plugin : GLPluginInterface):
         #first, detatch existing plugins
         import copy
         for p in self.plugins:
@@ -369,11 +370,11 @@ class GLPluginProgram(GLRealtimeProgram):
         self.plugins = []
         if plugin:
             self.push_plugin(plugin)
-    def push_plugin(self,plugin):
+    def push_plugin(self,plugin: GLPluginInterface):
         self.plugins.append(plugin)
         plugin.window = self.window
         if self.window:
-            if self.window.initialized:
+            if self.window.initialized and len(plugin.actions) > 0: 
                 print("GLPluginProgram.pushPlugin called after window was initialized, some actions may not be available")
             plugin.view = self.view
             plugin.reshapefunc(self.view.w,self.view.h)
@@ -382,7 +383,7 @@ class GLPluginProgram(GLRealtimeProgram):
             self.view = plugin.view
         else:
             plugin.view = self.view
-    def pop_plugin(self):
+    def pop_plugin(self) -> GLPluginInterface:
         import copy
         if len(self.plugins)==0: return None
         res = self.plugins[-1]
@@ -392,11 +393,11 @@ class GLPluginProgram(GLRealtimeProgram):
         if self.window:
             self.refresh()
         return res
-    def set_view(self,v):
+    def set_view(self,v: GLViewport):
         GLRealtimeProgram.set_view(self,v)
         for p in self.plugins:
             p.view = self.view
-    def initialize(self):
+    def initialize(self) -> bool:
         #print "GLPluginProgram initialize:",len(self.plugins),"plugins"
         for plugin in self.plugins:
             plugin.window = self.window
