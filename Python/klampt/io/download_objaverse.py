@@ -105,6 +105,8 @@ def download(uids_or_queries : Union[str,List[str]],
         flattened: ignored
         scale : ignored
         output_directory: the directory to save the downloaded objects.
+    
+    Returns a list of file paths to the downloaded objects.
     """
     if output_directory is not None:
         set_temp_directory(output_directory)
@@ -122,7 +124,7 @@ def download(uids_or_queries : Union[str,List[str]],
                 item_ids = lvis[item]
             else:
                 print("Couldn't find exact match to {}, finding best fuzzy match".format(item))
-                match_item = _fuzzy_match(item, lvis.keys(), max_l_dist=3)
+                match_item = _fuzzy_match(list(lvis.keys()), item, max_l_dist=3)
                 if match_item is None:
                     print("Failed to find a match to query", item)
                     continue
