@@ -119,13 +119,13 @@ class RobotInfo:
     def load(fn: str) -> 'RobotInfo':
         """Loads / registers a RobotInfo from a JSON file previously saved to disk."""
         res = RobotInfo(None)
+        path,file = os.path.split(fn)
+        if path:
+            res.filePaths.append(path)
         res.load(fn)
         if res.modelFile is not None:  #make sure the model file is an absolute path
             if not res.modelFile.startswith('/') and not res.modelFile.startswith('http://')  and not res.modelFile.startswith('https://'):
                 res.modelFile = os.path.abspath(os.path.join(os.path.split(fn)[0],res.modelFile))
-        path,file = os.path.split(fn)
-        if path:
-            res.filePaths.append(path)
         RobotInfo.register(res)
         return res
 
@@ -218,8 +218,7 @@ class RobotInfo:
         configures the kinematic model."""
         def docalib(fn):
             try:
-                with open(fn,'r') as f:
-                    jsonobj = json.load(f)
+                jsonobj = _load_config(fn,'KinematicCalibration')
             except IOError:
                 return False
             if jsonobj.get('type',None) != 'KinematicCalibration':
@@ -575,18 +574,10 @@ class RobotInfo:
         resource.set(name, object, directory=resourceDir)
 
     def _instance_load(self, f : Union[str,TextIO]) -> None:
-        """Loads the info from a JSON file. f is a file name or file object."""
+        """Loads the info from a JSON or YAML file. f is a file name or file object."""
         from ..io import loader
         if isinstance(f,str):
-            if f.endswith('.yaml'):
-                import yaml
-                with open(f,'r') as file:
-                    jsonobj = yaml.load(file,Loader=yaml.SafeLoader)
-            else:
-                if not f.endswith('.json'):
-                    warnings.warn("RobotInfo file should be .json or .yaml, using json")
-                with open(f,'r') as file:
-                    jsonobj = json.load(file)
+            jsonobj = _load_config(f,'RobotInfo')
         else:
             jsonobj = json.load(f)
         self.endEffectors = dict()
@@ -600,6 +591,7 @@ class RobotInfo:
                 else:
                     raise IOError("Loaded JSON object doesn't contain '"+attr+"' key")
             setattr(self,attr,jsonobj[attr])
+        self.modelFile = _resolve_file(self.modelFile,self.filePaths)  #get absolute path of model file
         ees = dict()
         for (k,v) in self.endEffectors.items():
             obj = None if v['ikObjective'] is None else loader.from_json(v['ikObjective'],'IKObjective')
@@ -613,18 +605,24 @@ class RobotInfo:
                 #directive format?
                 if v.startswith('!'):
                     components = v.split()
-                    if components[0] == '!mount':
+                    if components[0] == '!mounted':
                         if len(components) != 3:
-                            raise ValueError("Invalid gripper directive %s, should be !mount <filename> <target>"%v)
+                            raise ValueError("Invalid gripper directive %s, should be !mounted <filename> <target>"%v)
                         fn = _resolve_file(components[1],self.filePaths)
                         target_link_or_ee = components[2]
-                        with open(fn,'r') as file:
-                            v = json.load(file)
+                        v = _load_config(fn,'GripperInfo')
                         gripper.fromJson(v)
                         target_ee = None
                         if target_link_or_ee in self.endEffectors:
                             target_ee = self.endEffectors[target_link_or_ee]
-                            target_link = target_ee.link
+                            #find a link that is mounted to this end effector
+                            target_link = -1
+                            for link in self.klamptModel().links:
+                                if link.getParent() == target_ee.link:
+                                    target_link = link.getIndex()
+                                    break
+                            if target_link < 0:
+                                raise ValueError("End effector %s has no links mounted to it, cannot mount gripper %s"%(target_link_or_ee,k))
                         else:
                             try:
                                 target_link = int(target_link_or_ee)
@@ -632,15 +630,15 @@ class RobotInfo:
                                 target_link = self.klamptModel().link(target_link_or_ee).getIndex()
                             if target_link < 0:
                                 raise ValueError("Invalid target link %s for gripper %s, must be a valid link index or name"%(target_link_or_ee,k))
-                        grippers[k] = GripperInfo.mounted(gripper, self.modelFile, target_link, k)
+                        print('Mounting gripper "%s" on link %s'%(k,target_link))
+                        grippers[k] = GripperInfo.mounted(gripper, self.modelFile, target_link , k)
                         if target_ee is not None:
                             target_ee.gripper = k
                     elif components[0] == '!include':
                         if len(components) != 2:
                             raise ValueError("Invalid gripper directive %s, should be !include <filename>"%v)
                         fn = _resolve_file(components[1],self.filePaths)
-                        with open(fn,'r') as file:
-                            v = json.load(file)
+                        v = _load_config(fn,'GripperInfo')
                         gripper.fromJson(v)
                         grippers[k] = gripper
                     else:
@@ -758,7 +756,17 @@ class EndEffectorInfo:
             self.gripper = jsonobj['gripper']
 
 
-
+def _load_config(fn : str, config_type : str) -> dict:
+    if fn.endswith('.yaml'):
+        import yaml
+        with open(fn,'r') as file:
+            jsonobj = yaml.load(file,Loader=yaml.SafeLoader)
+    else:
+        if not fn.endswith('.json'):
+            warnings.warn(config_type+" file should be .json or .yaml, trying json")
+        with open(fn,'r') as file:
+            jsonobj = json.load(file)
+    return jsonobj
 
 def _resolve_file(file,search_paths=[]):
     if '~' in file:
