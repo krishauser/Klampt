@@ -62,7 +62,7 @@ Heightmaps are stored in a custom JSON format. Heightmap images can be loaded fr
 
 (Converting from the type listed in column to type listed in row.)
 
-| From → / To ↓ | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap | 
+| To ↓ \ From → | Geometric primitive | Convex polytope | Triangle mesh | Point cloud | Implicit surface | Occupancy grid | Heightmap | 
 |-------|----|----|----|----|----|----|----|
 |**GP** |    | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 |**CP** | ✔️  |    | ✔️¹ | ✔️  | ✔️  | ✔️  | ✔️  |
@@ -88,7 +88,12 @@ Many conversions (mesh -> convex polytope, implicit surface, occupancy grid, hei
 
 If in doubt, you should visualize the result (in Python, you can simply run `from klampt import vis; vis.debug(geom)`).
 
-We perform computation speed tests to profile the performance of geometric operations.  The test set contains both simple and complex geometries and is tested on a machine with specs... TODO.  Simple test geometries are approximately spherical, have unit size, and have the following complexity: 
+Conversion from a group to a target type is only available when:
+1. There is a single object that can be converted to the target type.
+2. The target is triangle mesh or point cloud, and all objects can be converted to the target type.
+
+
+We perform computation speed tests to profile the performance of geometric operations.  The test set contains both simple and complex geometries and is tested on a machine with a 5.4 Ghz Intel i9 processor.  Simple test geometries are approximately spherical, have unit size, and have the following complexity: 
 - GP: sphere
 - CP: 8 vertices
 - TM: 624 triangles
