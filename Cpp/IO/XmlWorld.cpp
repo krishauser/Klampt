@@ -74,7 +74,7 @@ bool LoadObjectFile(T& obj,const string& path,const string& fn,const char* type)
   }
   if(obj.Load(sfn.c_str())) 
     return true;
-  LOG4CXX_ERROR(GET_LOGGER(XmlParser),type<<": error loading from file "<<sfn[0]);
+  LOG4CXX_ERROR(GET_LOGGER(XmlParser),type<<": error loading from file "<<sfn);
   return false;
 }
 
@@ -88,7 +88,7 @@ bool LoadObjectGeometryFile(T& obj,const string& path,const string& fn,const cha
   }
   if(obj.LoadGeometry(sfn.c_str())) 
     return true;
-  LOG4CXX_ERROR(GET_LOGGER(XmlParser),type<<": error loading from file "<<sfn[0]);
+  LOG4CXX_ERROR(GET_LOGGER(XmlParser),type<<": error loading from file "<<sfn);
   return false;
 }
 
@@ -808,20 +808,23 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
 {
   string filepath = GetFilePath(fn);
   string filename = GetFileName(fn);
-  string relpath ;  //path for saved items relative to fn
+  string assetpath_abs;  //absolute path for saved items
+  string assetpath_rel;  //path for saved items relative to fn
   if(itempath.length() == 0) {
     itempath = fn;
     StripExtension(itempath);
-    relpath = filename;
-    StripExtension(relpath);
-    relpath = filepath + relpath + "/";
+    assetpath_rel = filename;
+    StripExtension(assetpath_rel);
+    assetpath_abs = filepath + assetpath_rel + "/";
+    assetpath_rel = assetpath_rel + "/";
   }
   else {
     //need to find relpath
-    relpath = GetRelativeFilename(itempath,filepath);
+    assetpath_abs = itempath;
+    assetpath_rel = GetRelativeFilename(itempath,filepath);
   }
   LOG4CXX_INFO(GET_LOGGER(XmlParser),"World::Save(): Saving world item files to "<<itempath);
-  LOG4CXX_INFO(GET_LOGGER(XmlParser),"   Will save sub-file references under "<<relpath);
+  LOG4CXX_INFO(GET_LOGGER(XmlParser),"   Will save sub-file references under "<<assetpath_abs);
   if(!FileUtils::IsDirectory(itempath.c_str())) {
     if(!FileUtils::MakeDirectoryRecursive(itempath.c_str())) {
       LOG4CXX_ERROR(GET_LOGGER(XmlParser),"World::Save(): could not make directory "<<itempath<<" for world items");
@@ -889,13 +892,13 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
         //save the geometry to the item path too
         string geomdir = robotFileNames[i];
         StripExtension(geomdir);
-        if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
-          if(!FileUtils::MakeDirectory((relpath+geomdir).c_str())) {
-            LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<relpath+geomdir);
+        if(!FileUtils::IsDirectory((assetpath_abs+geomdir).c_str()))
+          if(!FileUtils::MakeDirectory((assetpath_abs+geomdir).c_str())) {
+            LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<assetpath_abs+geomdir);
           }
         world.robots[i]->geomFiles[j] = geomdir + "/" + FileUtils::SafeFileName(world.robots[i]->linkNames[j]) + DefaultFileExtension(*world.robots[i]->geomManagers[j]);
-        LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for link "<<world.robots[i]->linkNames[j]<<" to "<<relpath + world.robots[i]->geomFiles[j]);
-        world.robots[i]->geomManagers[j]->Save((relpath + world.robots[i]->geomFiles[j]).c_str());
+        LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for link "<<world.robots[i]->linkNames[j]<<" to "<<assetpath_abs + world.robots[i]->geomFiles[j]);
+        world.robots[i]->geomManagers[j]->Save((assetpath_abs + world.robots[i]->geomFiles[j]).c_str());
       }
     }
   }
@@ -912,13 +915,13 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
       //save the geometry to the item path too
       string geomdir = objectFileNames[i];
       StripExtension(geomdir);
-      if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
-        if(!FileUtils::MakeDirectory((relpath+geomdir).c_str())) {
-          LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<relpath+geomdir);
+      if(!FileUtils::IsDirectory((assetpath_abs+geomdir).c_str()))
+        if(!FileUtils::MakeDirectory((assetpath_abs+geomdir).c_str())) {
+          LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<assetpath_abs+geomdir);
         }
       world.rigidObjects[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.rigidObjects[i]->name) + DefaultFileExtension(*world.rigidObjects[i]->geometry);
-      LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for rigid object "<<world.rigidObjects[i]->name<<" to "<<relpath + world.rigidObjects[i]->geomFile);
-      world.rigidObjects[i]->geometry->Save((relpath + world.rigidObjects[i]->geomFile).c_str());
+      LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for rigid object "<<world.rigidObjects[i]->name<<" to "<<assetpath_rel + world.rigidObjects[i]->geomFile);
+      world.rigidObjects[i]->geometry->Save((assetpath_abs + world.rigidObjects[i]->geomFile).c_str());
     }
   }
   for(size_t i=0;i<world.terrains.size();i++) {
@@ -934,13 +937,13 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
       //save the geometry to the item path too
       string geomdir = terrainFileNames[i];
       StripExtension(geomdir);
-      if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
-        if(!FileUtils::MakeDirectory((relpath+geomdir).c_str())) {
-          LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<relpath+geomdir);
+      if(!FileUtils::IsDirectory((assetpath_abs+geomdir).c_str()))
+        if(!FileUtils::MakeDirectory((assetpath_abs+geomdir).c_str())) {
+          LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<assetpath_abs+geomdir);
         }
       world.terrains[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.terrains[i]->name) + DefaultFileExtension(*world.terrains[i]->geometry);
-      LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for terrain "<<world.terrains[i]->name<<" to "<<relpath + world.terrains[i]->geomFile);
-      world.terrains[i]->geometry->Save((relpath + world.terrains[i]->geomFile).c_str());
+      LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for terrain "<<world.terrains[i]->name<<" to "<<assetpath_abs + world.terrains[i]->geomFile);
+      world.terrains[i]->geometry->Save((assetpath_abs + world.terrains[i]->geomFile).c_str());
     }
   }
 
@@ -970,7 +973,7 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
   fprintf(out,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<world>\n");
   fprintf(out,"  <display background=\"%f %f %f %f\" />\n",world.background.rgba[0],world.background.rgba[1],world.background.rgba[2],world.background.rgba[3]);
   for(size_t i=0;i<world.robots.size();i++) {
-    fprintf(out,"  <robot name=\"%s\" file=\"%s\" >\n",world.robots[i]->name.c_str(),(relpath+robotFileNames[i]).c_str());
+    fprintf(out,"  <robot name=\"%s\" file=\"%s\" >\n",world.robots[i]->name.c_str(),(assetpath_rel+robotFileNames[i]).c_str());
     for(size_t j=0;j<world.robots[i]->links.size();j++) {
       if(!world.robots[i]->IsGeometryEmpty(j))
         WriteAppearance(world.robots[i]->geomManagers[j],out,4,world.robots[i]->linkNames[j].c_str());
@@ -978,7 +981,7 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
     fprintf(out,"  </robot>\n");
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
-    fprintf(out,"  <rigidObject name=\"%s\" file=\"%s\" ",world.rigidObjects[i]->name.c_str(),(relpath+objectFileNames[i]).c_str());
+    fprintf(out,"  <rigidObject name=\"%s\" file=\"%s\" ",world.rigidObjects[i]->name.c_str(),(assetpath_rel+objectFileNames[i]).c_str());
     if(world.rigidObjects[i]->geometry->margin != 0)
       fprintf(out,"margin=\"%f\" ",world.rigidObjects[i]->geometry->margin);
     fprintf(out,">\n");
@@ -986,7 +989,7 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
     fprintf(out,"  </rigidObject>\n");
   }
   for(size_t i=0;i<world.terrains.size();i++) {
-    fprintf(out,"  <terrain name=\"%s\" file=\"%s\" ",world.terrains[i]->name.c_str(),(relpath+terrainFileNames[i]).c_str());
+    fprintf(out,"  <terrain name=\"%s\" file=\"%s\" ",world.terrains[i]->name.c_str(),(assetpath_rel+terrainFileNames[i]).c_str());
     if(world.terrains[i]->geometry->margin != 0)
       fprintf(out,"margin=\"%f\" ",world.terrains[i]->geometry->margin);
     fprintf(out,">\n");
