@@ -796,6 +796,10 @@ const char* DefaultFileExtension(const Geometry::AnyCollisionGeometry3D& geom)
     return ".vol";
   else if(geom.type == Geometry::AnyGeometry3D::Type::OccupancyGrid)
     return ".vol";
+  else if(geom.type == Geometry::AnyGeometry3D::Type::Heightmap)
+    return ".json";
+  else if(geom.type == Geometry::AnyGeometry3D::Type::Group)
+    return ".group";
   else
     return ".unknown";
 }
