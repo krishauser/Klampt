@@ -117,15 +117,15 @@ def download(objects : Union[str,List[str]] = 'all',
                 break
     return files
 
-
-def load(objects : Union[str,List[str]],
+def load_files(objects : Union[str,List[str]],
          scan : str = 'any',
          model : str = 'textured',
-         download_directory = './ycb') -> Union[klampt.Geometry3D,List[klampt.Geometry3D]]:
-    """Loads one or more YCB objects into Klampt Geometry3D objects.
+         download_directory = './ycb') -> List[str]:
+    """Loads one or more YCB objects and returns a list of preferred
+    file names pointing directly to the "best" geometry files.
 
     If they have already been downloaded, they will be loaded from the local
-    filesystem.
+    filesystem.  If not, they will be downloaded to the specified directory.
     """
     if objects == 'all':
         objects = object_list()
@@ -162,14 +162,28 @@ def load(objects : Union[str,List[str]],
             if model=='any' or file.startswith(model):
                 if file.endswith('.dae') or file.endswith('.obj') or file.endswith('.stl') or file.endswith('.ply'):
                     filename = os.path.join(folder, file)
-                    print(f"Loading {filename}")
-                    g = klampt.Geometry3D(filename)
+                    g = filename
                     break
         if g is None:
             print(f"Could not find a valid geometry file for {obj} in {folder}")
             continue
         models.append(g)
+    return models
+
+
+def load(objects : Union[str,List[str]],
+         scan : str = 'any',
+         model : str = 'textured',
+         download_directory = './ycb') -> Union[klampt.Geometry3D,List[klampt.Geometry3D]]:
+    """Loads one or more YCB objects into Klampt Geometry3D objects.
+
+    If they have already been downloaded, they will be loaded from the local
+    filesystem.  If not, they will be downloaded to the specified directory.
+    """
+    files = load_files(objects, scan, model, download_directory)
+    models = [klampt.Geometry3D(f) for f in files]
     return models if len(models) > 1 else models[0] if models else None
+
 
 def _download_file(url, filename):
     u = urllib.request.urlopen(url)
