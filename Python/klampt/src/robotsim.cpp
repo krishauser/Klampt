@@ -8120,7 +8120,7 @@ void AABBPoser::setFrame(const double R[9],const double t[3])
   tw->T.R.set(R);
   tw->T.t.set(t);
   tw->transformWidget.T.R.set(R);
-  tw->transformWidget.T.t = 0.5*(tw->T*(tw->bb.bmin+tw->bb.bmax));
+  tw->transformWidget.T.t = tw->T*(0.5*(tw->bb.bmin+tw->bb.bmax));
 }
 
 void AABBPoser::set(const double bmin[3],const double bmax[3])
