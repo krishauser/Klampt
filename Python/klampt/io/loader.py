@@ -87,6 +87,8 @@ EXTENSION_TO_TYPES = {'.config':['Config'],
                    '.dxf':['Geometry3D','TriangleMesh'],
                    '.geom':['Geometry3D','GeometricPrimitive'],
                    '.pcd':['Geometry3D','PointCloud'],
+                   '.vol':['Geometry3D','ImplicitSurface','OccupancyGrid'],
+                   '.group':['Geometry3D','Group'],
                    '.vector3':['Vector3'],
                    '.matrix3':['Matrix3'],
                    '.ikgoal':['IKGoal'],
@@ -103,7 +105,7 @@ EXTENSION_TO_TYPES = {'.config':['Config'],
                    }
 """dict mapping file extensions to lists of compatible Klampt types."""
 
-UNSUPPORTED_JSON_TYPES = ['Geometry3D','TriangleMesh','PointCloud','GeometricPrimitive',
+UNSUPPORTED_JSON_TYPES = ['Geometry3D','GeometricPrimitive','Heightmap',
     'RobotModel','RigidObjectModel','TerrainModel','WorldModel']
 """List of Klampt types that cannot currently be exported to JSON"""
 
