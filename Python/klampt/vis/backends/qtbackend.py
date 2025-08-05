@@ -179,7 +179,10 @@ class QtGLWindow(QOpenGLWidget):
             col = QtGui.QColor()
             col.setRgbF(rgba[0], rgba[1], rgba[2], rgba[3])
             painter.setPen(col)
-            painter.setFont(QtGui.QFont("Helvetica", 8))
+            if font is None:
+                painter.setFont(QtGui.QFont("Helvetica", 8))
+            else:
+                painter.setFont(font)
             if PYQT_VERSION == 6:
                 painter.setRenderHints(QtGui.QPainter.RenderHint.Antialiasing | QtGui.QPainter.RenderHint.TextAntialiasing)
             else:
@@ -589,17 +592,22 @@ class QtGLWindow(QOpenGLWidget):
             else:
                 glColor4f(*color)
 
-        font = QtGui.QFont('Arial')
+        font = QtGui.QFont("Helvetica")
         #font.setPixelSize(size)
         font.setPointSize(size)
         glPixelStorei(GL_UNPACK_ALIGNMENT,4)   # Needed for correct font rendering?
         if len(point) == 2:
-            self.renderText(point[0],point[1],0,text,font)
+            self.renderText(point[0],point[1]-size,0,text,font)
         else:
             self.renderText(point[0],point[1],point[2],text,font)
 
     def points_to_pixels(self,pts):
         return pts*QtGui.QGuiApplication.primaryScreen().physicalDotsPerInch()/72
+
+    def line_spacing(self,pts):
+        res = QtGui.QFontMetrics(QtGui.QFont("Helvetica", pts)).lineSpacing()
+        return res*72/QtGui.QGuiApplication.primaryScreen().physicalDotsPerInch()
+
 
 class QtBackend:
     """

@@ -161,7 +161,7 @@ class GLUTWindow:
         elif size <= 21:
             font = GLUT_BITMAP_HELVETICA_12
         else:
-            font = GLUT_TIMES_NEW_ROMAN_24
+            font = GLUT_BITMAP_TIMES_ROMAN_24
         if color is None:
             glColor3f(0,0,0)
         elif len(color)==3:
@@ -177,6 +177,9 @@ class GLUTWindow:
 
     def points_to_pixels(self,pts):
         return pts
+
+    def line_spacing(self,pts):
+        return pts*15/10
 
     def get_screen(self, format, want_depth):
         glReadBuffer(GL_FRONT)

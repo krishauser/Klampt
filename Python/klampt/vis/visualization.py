@@ -14,7 +14,7 @@ Main features include:
 - Simple interface to modify the visualization
 - Simple interface to animate and render trajectories
 - Simple interface to edit certain Klamp't objects (configurations, points,
-  transforms)
+  transforms, boxes, spheres)
 - Simple interface to drawing text and text labels, and drawing plots
 - Multi-window, multi-viewport support
 - Automatic camera setup
@@ -1588,6 +1588,10 @@ def setAttribute(name : ItemPath, attr : str, value) -> None:
     - 'hidden': if True, the item will be hidden
     - 'draw_order': the order in which the item is drawn, if transparent (default
         None).  Lower numbers are drawn first.
+    - 'edit_transform': applicable to Geometry3D objects containing
+        GeometricPrimitive data.  If True, the geometry editor updates the
+        geometry's current transform to follow the edited center, and updates
+        the geometry data to have a center at the origin.
 
     """
     scene().setAttribute(name,attr,value)
@@ -3577,6 +3581,7 @@ class VisAppearance:
                     R = prim.properties[3:12]
                     dims = prim.properties[12:15]
                     Rw,tw = se3.mul(item.getCurrentTransform(),(R,t))
+                    res = BoxPoser()
                     res.set(Rw,tw,dims)
         elif isinstance(item,(list,tuple)):
             #determine if it's a rotation, transform, or point
@@ -3620,84 +3625,116 @@ class VisAppearance:
         item = self.item
         if item_to_editor:
             if isinstance(item,coordinates.Point):
-                self.editor.set(self.item.worldCoordinates())
+                self.editor.set(item.worldCoordinates())
             elif isinstance(item,coordinates.Direction):
-                self.editor.set(self.item.worldCoordinates())
+                self.editor.set(item.worldCoordinates())
             elif isinstance(item,coordinates.Frame):
-                self.editor.set(*self.item.worldCoordinates())
-            elif isinstance(self.item,RobotModel):
-                self.editor.set(self.item.getConfig())
-            elif isinstance(self.item,SubRobotModel):
-                self.editor.set(self.item.tofull(self.item.getConfig()))
-            elif isinstance(self.item,RigidObjectModel):
-                self.editor.set(*self.item.getTransform())
-            elif isinstance(self.item,Geometry3D):
-                if self.item.type() == 'GeometricPrimitive':
-                    prim = self.item.getGeometricPrimitive()
+                self.editor.set(*item.worldCoordinates())
+            elif isinstance(item,RobotModel):
+                self.editor.set(item.getConfig())
+            elif isinstance(item,SubRobotModel):
+                self.editor.set(item.tofull(item.getConfig()))
+            elif isinstance(item,RigidObjectModel):
+                self.editor.set(*item.getTransform())
+            elif isinstance(item,Geometry3D):
+                if item.type() == 'GeometricPrimitive':
+                    prim = item.getGeometricPrimitive()
                     if prim.type == 'point':
-                        self.editor.set(se3.apply(self.item.getCurrentTransform(),prim.properties[:3]))
+                        self.editor.set(se3.apply(item.getCurrentTransform(),prim.properties[:3]))
                     elif prim.type == 'sphere':
                         c = prim.properties[:3]
                         r = prim.properties[3]
-                        self.editor.set(se3.apply(self.item.getCurrentTransform(),c)+[r])
+                        self.editor.set(se3.apply(item.getCurrentTransform(),c)+[r])
                     elif prim.type == 'aabb':
                         bmin = prim.properties[:3]
                         bmax = prim.properties[3:6]
                         self.editor.set(bmin,bmax)
+                        self.editor.setFrame(*item.getCurrentTransform())
                     elif prim.type == 'box':
                         t = prim.properties[0:3]
                         R = prim.properties[3:12]
                         dims = prim.properties[12:15]
-                        Rw,tw = se3.mul(self.item.getCurrentTransform(),(R,t))
+                        Rw,tw = se3.mul(item.getCurrentTransform(),(R,t))
                         self.editor.set(Rw,tw,dims)
-            elif isinstance(self.item,(list,tuple)):
-                itype = objectToVisType(self.item,None)
+            elif isinstance(item,(list,tuple)):
+                itype = objectToVisType(item,None)
                 if itype in ('Vector3','Matrix3'):
-                    self.editor.set(self.item)
+                    self.editor.set(item)
                 elif itype == 'RigidTransform':
-                    self.editor.set(*self.item)
+                    self.editor.set(*item)
                 elif itype == 'Config':
-                    self.editor.set(self.item)
+                    self.editor.set(item)
             else:
                 raise RuntimeError("Uh... unsupported type with an editor?")
         else:
             if not self.editor.hasFocus():
                 return
             if isinstance(item,coordinates.Point):
-                self.item._localCoordinates = se3.apply(se3.inv(self.item._frame.worldCoordinates()),self.editor.get())
+                item._localCoordinates = se3.apply(se3.inv(item._frame.worldCoordinates()),self.editor.get())
             elif isinstance(item,coordinates.Direction):
-                self.item._localCoordinates = se3.apply(se3.inv(self.item._frame.worldCoordinates()),self.editor.get())
+                item._localCoordinates = se3.apply(se3.inv(item._frame.worldCoordinates()),self.editor.get())
             elif isinstance(item,coordinates.Frame):  
-                self.item._worldCoordinates = self.editor.get()
-                self.item._relativeCoordinates = se3.mul(se3.inv(self.item.parent().worldCoordinates()),self.editor.get())
+                item._worldCoordinates = self.editor.get()
+                item._relativeCoordinates = se3.mul(se3.inv(item.parent().worldCoordinates()),self.editor.get())
                 #TODO: updating downstream frames?
-            elif isinstance(self.item,RobotModel):
-                self.item.setConfig(self.editor.getConditioned(self.item.getConfig()))
-            elif isinstance(self.item,SubRobotModel):
-                self.item.setConfig(self.item.fromfull(self.editor.get()))
-            elif isinstance(self.item,RigidObjectModel):
-                self.item.setTransform(*self.editor.get())
-            elif isinstance(self.item,Geometry3D):
-                if self.item.type() == 'GeometricPrimitive':
-                    prim = self.item.getGeometricPrimitive()
-                    if prim.type == 'point':
-                        prim.setPoint(se3.apply(se3.inv(self.item.getCurrentTransform()),self.editor.get()))
-                    elif prim.type == 'sphere':
-                        cr = self.editor.get()
-                        c = cr[:3]
-                        r = cr[3]
-                        prim.setSphere(se3.apply(se3.inv(self.item.getCurrentTransform()),c),r)
-                    elif prim.type == 'aabb':
-                        bmin,bmax = self.editor.get()
-                        prim.setAABB(bmin,bmax)
-                    elif prim.type == 'box':
-                        Tw = self.editor.getTransform()
-                        Rl,tl = se3.mul(se3.inv(self.frame),Tw)
-                        dims = self.editor.getDims()
-                        prim.setBox(tl,Rl,dims)
-                    self.item.setGeometricPrimitive(prim)
+            elif isinstance(item,RobotModel):
+                item.setConfig(self.editor.getConditioned(item.getConfig()))
+            elif isinstance(item,SubRobotModel):
+                item.setConfig(item.fromfull(self.editor.get()))
+            elif isinstance(item,RigidObjectModel):
+                item.setTransform(*self.editor.get())
+            elif isinstance(item,Geometry3D):
+                if item.type() == 'GeometricPrimitive':
+                    prim = item.getGeometricPrimitive()
+                    #does it make sense to leave the current transform as is, or to center the transform at the primitive's center?
+                    #most users would expect the latter.
+                    MAINTAIN_TRANSFORM = not self.attributes.get('edit_transform',False)
+                    frame = item.getCurrentTransform()
+                    if MAINTAIN_TRANSFORM:
+                        if prim.type == 'point':
+                            prim.setPoint(se3.apply(se3.inv(frame),self.editor.get()))
+                        elif prim.type == 'sphere':
+                            cr = self.editor.get()
+                            c = cr[:3]
+                            r = cr[3]
+                            prim.setSphere(se3.apply(se3.inv(frame),c),r)
+                        elif prim.type == 'aabb':
+                            bmin,bmax = self.editor.get()
+                            prim.setAABB(bmin,bmax)
+                        elif prim.type == 'box':
+                            Tw = self.editor.getTransform()
+                            Rl,tl = se3.mul(se3.inv(frame),Tw)
+                            dims = self.editor.getDims()
+                            prim.setBox(tl,Rl,dims)
+                    else:
+                        if prim.type == 'point':
+                            p = self.editor.get()
+                            prim.setPoint([0,0,0])
+                            item.setCurrentTransform(frame[0],p)
+                        elif prim.type == 'sphere':
+                            cr = self.editor.get()
+                            c = cr[:3]
+                            r = cr[3]
+                            prim.setSphere([0,0,0],r)
+                            item.setCurrentTransform(frame[0],c)
+                        elif prim.type == 'aabb':
+                            bmin,bmax = self.editor.get()
+                            c = vectorops.mul(vectorops.add(bmin,bmax),0.5)
+                            c = se3.apply(frame,c)
+                            dims = vectorops.sub(bmax,bmin)
+                            bmin,bmax = vectorops.mul(dims,-0.5),vectorops.mul(dims,0.5)
+                            prim.setAABB(bmin,bmax)
+                            item.setCurrentTransform(frame[0],c)
+                            self.editor.set(bmin,bmax)
+                            self.editor.setFrame(*item.getCurrentTransform())
+                        elif prim.type == 'box':
+                            Tw = self.editor.getTransform()
+                            dims = self.editor.getDims()
+                            prim.setBox([0,0,0],so3.identity(),dims)
+                            item.setCurrentTransform(*Tw)
+                    item.setGeometricPrimitive(prim)
                     self.appearance.refresh()
-            elif isinstance(self.item,(tuple,list)):
+            elif isinstance(item,(tuple,list)):
                 def setList(a,b):
                     if isinstance(a,(list,tuple)) and isinstance(b,(list,tuple)):
                         if len(a) == len(b):
@@ -3710,7 +3747,7 @@ class VisAppearance:
                             return True
                     return False
                 v = self.editor.get()
-                if not setList(self.item,v):
+                if not setList(item,v):
                     self.item = v
             elif isinstance(self.item,tuple):
                 warnings.warn("Edited a tuple... maybe a point or an xform? can't actually edit")
@@ -4303,8 +4340,8 @@ class VisualizationScene:
                 self._renderGLLabelRaw(view,p,*list(zip(*items)))
 
     def renderScreenGL(self,view : Viewport,window):
-        cx = 20
-        cy = 20
+        cx = 10
+        cy = 10
         GL.glDisable(GL.GL_LIGHTING)
         GL.glDisable(GL.GL_DEPTH_TEST)
         for (k,v) in self.items.items():
@@ -4315,7 +4352,7 @@ class VisualizationScene:
                 w,h = v.attributes['size']
                 if pos is None:
                     v.item.renderGL(window,cx,cy,w,h,duration,vrange[0],vrange[1])
-                    cy += h+18
+                    cy += h+15
                 else:
                     x = pos[0]
                     y = pos[1]
@@ -4326,13 +4363,14 @@ class VisualizationScene:
                     v.item.renderGL(window,x,y,w,h,duration,vrange[0],vrange[1])
         for (k,v) in self.items.items():
             if isinstance(v.item,str) and not v.attributes['hidden']:
+                # draw text
                 pos = v.attributes['position']
                 col = v.attributes['color']
                 size = v.attributes['size']
                 if pos is None:
-                    #draw at console
+                    #draw as console
                     window.draw_text((self.window.points_to_pixels(cx),self.window.points_to_pixels(cy+size)),v.item,size,col)
-                    cy += (size*15)/10
+                    cy += self.window.line_spacing(size)
                 elif len(pos)==2:
                     x = pos[0]
                     y = pos[1]
@@ -4352,8 +4390,8 @@ class VisualizationScene:
 
             projpt = view.project(point,clip=False)
             if projpt[2] > view.clippingPlanes[0]:
-                d = float(self.window.points_to_pixels(12))/float(view.w)*projpt[2]*0.4
-                #d = float(12)/float(view.w)*projpt[2]*0.4
+                d = float(self.window.points_to_pixels(12))/float(view.w)*projpt[2]
+                #d = float(12)/float(view.w)*projpt[2]
                 point = vectorops.add(point,so3.apply(invCameraRot,(0,-d,0)))
 
             GL.glDisable(GL.GL_LIGHTING)
