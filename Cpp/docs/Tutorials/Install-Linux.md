@@ -7,7 +7,6 @@ Difficulty: easy
 Time: 10-30 minutes
 
 - [Prebuilt Python libraries](#prebuilt-python-libraries)
-- [Linux, from binaries](#linux-from-binaries)
 - [Linux, from source](#linux-from-source)
 
 ## Prebuilt Python libraries
@@ -16,25 +15,19 @@ For Python 3.5-3.12 on i686, x86_64, and arm64 machines, you should be able to s
 
 - `pip install klampt`
 
-To run a visualization, you will need PyOpenGL and PyQt5, as well as some example programs:
+To run a visualization, you will need PyOpenGL and PyQt5 (or PyQt6), as well as some example programs:
 - `pip install PyOpenGL`
 - `pip install PyQt5`
-- `git clone http://github.com/krishauser/Klampt-examples` (this is needed to run example programs)
-- `cd Klampt-examples/Python/demos`
-- `python gl_vis.py`
-
-If your system has both Python 2 and Python 3 installed, the Python 3 versions are preferable.  You may need to replace the commands above with `pip3` and `python3` instead.
-
-## Linux, from binaries
-
-Compiled binary packages are not available for Klampt 0.8.0+.
+- `git clone http://github.com/krishauser/Klampt-examples` (needed to run example programs)
+- `cd Klampt-examples/Python3/demos/control`
+- `python simulated_mirobot.py`
 
 
 ## Linux, from source (recommended)
 
 The following commands will install Klamp't onto your system from source.  This will ensure that you have the latest updates.
 
-1. Make sure you have CMake, GLPK, and Qt5 on your system. On systems with apt-get, the following command will do the trick:
+1. Make sure you have CMake, GLPK, and Qt5+ on your system. On systems with apt-get, the following command will do the trick:
 
     ```
     sudo apt-get install g++ cmake git libglpk-dev python3-dev libxmu-dev libxi-dev qtbase5-dev 
@@ -103,14 +96,14 @@ You're done!
 Now download the examples and try running the SimTest app
 ```
 git clone http://github.com/krishauser/Klampt-examples
-bin/SimTest Klampt-examples/data/athlete_fractal_1.xml
+bin/SimTest Klampt-examples/data/locomotion_worlds/athlete_fractal_1.xml
 ```
 
 Or run a simulation from the Python API:
 
 ```
-cd Klampt-examples/Python/demos
-python kbdrive.py ../../data/tx90roll.xml
+cd Klampt-examples/Python/demos/control
+python kbdrive.py ../../../data/tx90roll.xml
 ```
 
 Make sure to `pip install PyOpenGL` and `pip install PyQt5`.
