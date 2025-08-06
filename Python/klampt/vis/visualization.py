@@ -1562,32 +1562,34 @@ def setAttribute(name : ItemPath, attr : str, value) -> None:
 
     Accepted attributes are:
 
-    - 'robot': the index of the robot associated with this (default 0)
+    - 'robot': the index of the robot associated with this (default 0), a robot
+        name, or a RobotModel.
     - 'color': the item's color (r,g,b) or (r,g,b,a)
     - 'size': the size of the plot, text, point, ContactPoint, or IKObjective
     - 'length': the length of axes in RigidTransform, or normal in ContactPoint
     - 'width': the width of axes and trajectory curves
     - 'duration': the duration of a plot
-    - 'pointSize': for a trajectory, the size of points (default None, set to 0
-      to disable drawing points)
-    - 'pointColor': for a trajectory, the size of points (default None)
-    - 'endeffectors': for a RobotTrajectory, the list of end effectors to plot
-      (default the last link).
-    - 'maxConfigs': for a Configs resource, the maximum number of drawn
-      configurations (default 10)
+    - 'pointSize' or 'point_size': for a trajectory, the size of points
+        (default None, set to 0 to disable drawing points)
+    - 'pointColor' or 'point_color': for a trajectory, the color of points
+        (default None)
+    - 'endeffectors' or 'end_effectors': for a RobotTrajectory, the list of end
+        effectors to plot (default the last link).
+    - 'maxConfigs' or 'max_configs': for a Configs resource, the maximum number
+        of drawn configurations (default 10)
     - 'fancy': for RigidTransform objects, whether the axes are drawn with
       boxes or lines (default False)
     - 'type': for ambiguous items, like a 3-item list when the robot has 3
-      links, specifies the type to be used.  For example, 'Config' draws the
-      item as a robot configuration, while 'Vector3' or 'Point' draws it as a
-      point.
+        links, specifies the type to be used.  For example, 'Config' draws the
+        item as a robot configuration, while 'Vector3' or 'Point' draws it as a
+        point.
     - 'label': a replacement label (str)
     - 'appearance': for Geometry3D objects, an Appearance object specifying
-      the item's appearance.
+        the item's appearance.
     - 'hide_label': if True, the label will be hidden
     - 'hidden': if True, the item will be hidden
-    - 'draw_order': the order in which the item is drawn, if transparent (default
-        None).  Lower numbers are drawn first.
+    - 'draw_order': the order in which the item is drawn, if transparent
+        (default None).  Lower numbers are drawn first.
     - 'edit_transform': applicable to Geometry3D objects containing
         GeometricPrimitive data.  If True, the geometry editor updates the
         geometry's current transform to follow the edited center, and updates
@@ -2502,8 +2504,8 @@ class _CascadingDict:
 
 
 _default_str_attributes = {'color':[0,0,0,1], 'position':None, 'size':12 }
-_default_Trajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "pointSize":None, "pointColor":None }
-_default_RobotTrajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "pointSize":None, "pointColor":None , "endeffectors":[-1]}
+_default_Trajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "point_size":None, "point_color":None }
+_default_RobotTrajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "point_size":None, "point_color":None , "end_effectors":[-1]}
 _default_VisPlot_attributes = {'compress':_defaultCompressThreshold, 'duration':5., 'position':None, 'range':(None,None), 'size':(200,150), 'hide_label':True}
 _default_Point_attributes = { "size":5.0, "color":(0,0,0,1) }
 _default_Direction_attributes = { "length":0.15, "color":[0,1,1,1] }
@@ -2571,7 +2573,7 @@ def _default_attributes(item,type=None):
         elif itypes == 'Config':
             pass
         elif itypes == 'Configs':
-            res["maxConfigs"] = min(10,len(item))
+            res["max_configs"] = min(10,len(item))
         elif itypes == 'Vector3':
             return _default_Point_attributes
         elif itypes == 'RigidTransform':
@@ -2581,6 +2583,24 @@ def _default_attributes(item,type=None):
             res['hidden'] = True
             res['hide_label'] = True
     return res
+
+
+def _robot_attribute_to_robot(attr, world : Optional[WorldModel]) -> Optional[RobotModel]:
+    if isinstance(attr,RobotModel):
+        return attr
+    elif world is not None:
+        if isinstance(attr,int):
+            if attr==0 and world.numRobots() == 0:
+                #no robots, return None
+                return None
+            return world.robot(attr)
+        elif isinstance(attr,str):
+            return world.robot(attr)
+        else:
+            raise ValueError("Invalid robot attribute: {}".format(attr))
+    else:
+        return None
+
 
 
 class VisAppearance:
@@ -2930,10 +2950,10 @@ class VisAppearance:
                 def drawRaw():
                     width = self.attributes["width"]
                     color = self.attributes["color"]
-                    pointSize = self.attributes["pointSize"]
-                    pointColor = self.attributes["pointColor"]
+                    pointSize = self.attributes.get("pointSize",self.attributes["point_size"])# TEMP: deprecate later
+                    pointColor = self.attributes.get("pointColor",self.attributes["point_color"])  # TEMP: deprecate later
                     if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
-                        ees = self.attributes.get("endeffectors",[-1])
+                        ees = self.attributes.get("endeffectors",self.attributes.get("end_effectors",[-1])) #TEMP: deprecate later
                         drawRobotTrajectory(item,robot,ees,width,color,pointSize,pointColor) 
                     else:
                         drawTrajectory(item,width,color,pointSize,pointColor)
@@ -2946,7 +2966,7 @@ class VisAppearance:
             robot = (world.robot(self.attributes["robot"]) if world is not None and world.numRobots() > 0 else None)
             if robot is not None and item.numSections() > 0:
                 if len(item.sections[0].configs[0]) == robot.numLinks():
-                    ees = self.attributes.get("endeffectors",[-1])
+                    ees = self.attributes.get("endeffectors",self.attributes.get("end_effectors",[-1]))  #TEMP: deprecate later 
                     centroid = None
                     if len(ees) > 0:
                         for i,ee in enumerate(ees):
@@ -2955,8 +2975,8 @@ class VisAppearance:
                         centroid = vectorops.div(vectorops.add(*[robot.link(ee).getTransform()[1] for ee in ees]),len(ees))
                     width = self.attributes["width"]
                     color = self.attributes["color"]
-                    pointSize = self.attributes["pointSize"]
-                    pointColor = self.attributes["pointColor"]
+                    pointSize = self.attributes.get("pointSize",self.attributes["point_size"])# TEMP: deprecate later
+                    pointColor = self.attributes.get("pointColor",self.attributes["point_color"])  # TEMP: deprecate later
                     color2 = [1-c for c in color]
                     color2[3] = color[3]
                     def drawRaw():
@@ -3079,13 +3099,8 @@ class VisAppearance:
                 #need this to be built with a robot element.
                 #Otherwise, can't determine the correct transforms
                 robot = item.robot
-            elif world:
-                if world is not None and world.numRobots() > 0:
-                    robot = world.robot(self.attributes.get("robot",0))
-                else:
-                    robot = None
             else:
-                robot = None
+                robot = _robot_attribute_to_robot(self.attributes.get("robot",0),world)
             if robot is not None:
                 link = robot.link(item.link())
                 dest = robot.link(item.destLink()) if item.destLink()>=0 else None
@@ -3287,9 +3302,8 @@ class VisAppearance:
                 warnings.warn("Unable to convert item {} to drawable".format(str(item)))
                 return
             elif itypes == 'Config':
-                rindex = self.attributes.get("robot",0)
-                if world and rindex < world.numRobots():
-                    robot = world.robot(rindex)
+                robot = _robot_attribute_to_robot(self.attributes.get("robot",0),world)
+                if robot is not None:
                     if robot.numLinks() != len(item):
                         warnings.warn("Unable to draw Config %s, does not have the same # of DOFs as the robot: %d != %d"%(self.name,robot.numLinks(),len(item)))
                     else:
@@ -3303,58 +3317,55 @@ class VisAppearance:
 
                         oldconfig = robot.getConfig()
                         robot.setConfig(item)
+                        ee_location = robot.link(robot.numLinks()-1).getTransform()[1]
                         robot.drawGL()
                         robot.setConfig(oldconfig)
                         if not self.useDefaultAppearance:
                             for (i,app) in enumerate(oldAppearance):
                                 robot.link(i).appearance().set(app)
+                        
+                        if name is not None:
+                            self.drawText(name,ee_location)
                 else:
                     warnings.warn("Unable to draw Config items without a world or robot")
             elif itypes == 'Configs':
                 def drawAsTrajectory():
                     width = self.attributes.get("width",3.0)
                     color = self.attributes["color"]
-                    pointSize = self.attributes.get("pointSize",None)
-                    pointColor = self.attributes.get("pointColor",None)
+                    pointSize = self.attributes.get("pointSize",self.attributes["point_size"])# TEMP: deprecate later
+                    pointColor = self.attributes.get("pointColor",self.attributes["point_color"])  # TEMP: deprecate later
                     drawTrajectory(Trajectory(list(range(len(item))),item),width,color,pointSize,pointColor)
-                if len(item) == 0:
-                    pass
-                elif world and world.numRobots() >= 1:
-                    maxConfigs = self.attributes.get("maxConfigs",min(10,len(item)))
-                    robot = world.robot(self.attributes.get("robot",0))
-                    if robot.numLinks() != len(item[0]):
-                        if len(item[0]) in [2,3]: #interpret as a trajectory
-                            self.displayCache[0].draw(drawAsTrajectory)
-                            centroid = item[0] + [0]*(3-len(item[0]))
-                            if name is not None:
-                                self.drawText(name,centroid)
-                            return
-                        else:
-                            warnings.warn("Configs items aren't the right size for the robot")
-                    if not self.useDefaultAppearance:
-                        oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
-                        for i in range(robot.numLinks()):
-                          if self.customAppearance is not None:
-                            robot.link(i).appearance().set(self.customAppearance)
-                          elif "color" in self.attributes:
-                            robot.link(i).appearance().setColor(*self.attributes["color"])
+                if len(item) > 0:
+                    robot = _robot_attribute_to_robot(self.attributes.get("robot",0),world)
+                    if robot is not None and robot.numLinks() == len(item[0]):
+                        maxConfigs = self.attributes.get("maxConfigs",self.attributes.get("max_configs",min(10,len(item)))) # TEMP: deprecate later
+                        if not self.useDefaultAppearance:
+                            oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
+                            for i in range(robot.numLinks()):
+                                if self.customAppearance is not None:
+                                    robot.link(i).appearance().set(self.customAppearance)
+                                elif "color" in self.attributes:
+                                    robot.link(i).appearance().setColor(*self.attributes["color"])
 
-                    oldconfig = robot.getConfig()
-                    for i in range(maxConfigs):
-                        idx = int(i*len(item))//maxConfigs
-                        robot.setConfig(item[idx])
-                        robot.drawGL()
-                    robot.setConfig(oldconfig)
-                    if not self.useDefaultAppearance:
-                        for (i,app) in enumerate(oldAppearance):
-                            robot.link(i).appearance().set(app)
-                elif len(item[0]) in [2,3]: #interpret as a trajectory
-                    self.displayCache[0].draw(drawAsTrajectory)
-                    centroid = item[0] + [0]*(3-len(item[0]))
-                    if name is not None:
-                        self.drawText(name,centroid)
-                else:
-                    warnings.warn("Unable to draw Configs items without a world or robot")
+                        oldconfig = robot.getConfig()
+                        for i in range(maxConfigs):
+                            idx = int(i*len(item))//maxConfigs
+                            robot.setConfig(item[idx])
+                            robot.drawGL()
+                        robot.setConfig(oldconfig)
+
+                        if not self.useDefaultAppearance:
+                            for (i,app) in enumerate(oldAppearance):
+                                robot.link(i).appearance().set(app)
+                    elif len(item[0]) in [2,3]: #interpret as a trajectory
+                        self.displayCache[0].draw(drawAsTrajectory)
+                        centroid = item[0] + [0]*(3-len(item[0]))
+                        if name is not None:
+                            self.drawText(name,centroid)
+                    elif robot is not None and len(item[0]) != robot.numLinks():
+                        warnings.warn("Configs items aren't the right size for the robot")
+                    else:
+                        warnings.warn("Unable to draw Configs items without a world or robot")
             elif itypes == 'Vector3':
                 def drawRaw():
                     GL.glDisable(GL.GL_LIGHTING)
