@@ -18,12 +18,12 @@ For Mac OSX (Mavericks) 10.9 and above, and Python 2.7, or 3.5-3.12, you should 
 
 - `pip install klampt`
 
-To run a visualization, you will need PyOpenGL and PyQt5:
+To run a visualization, you will need PyOpenGL and PyQt5 (or PyQt6):
 - `pip install PyOpenGL`
 - `pip install PyQt5`
 - `git clone http://github.com/krishauser/Klampt-examples` (this is needed to run example programs)
-- `cd Klampt-examples/Python/demos`
-- `python gl_vis.py`
+- `cd Klampt-examples/Python3/demos/control`
+- `python simulated_mirobot.py`
 
 
 # Mac OSX, from source
@@ -118,10 +118,10 @@ To run a visualization, you will need PyOpenGL and PyQt5:
     /usr/local/bin/python
     ```
 
-3. In the terminal, install PyOpenGL with:
+3. In the terminal, install PyOpenGL and PyQt5 with:
 
     ```
-    pip install PyOpenGL
+    pip install PyOpenGL PyQt5
     ```
 
 4. Make and install the Klamp't Python bindings:
@@ -134,5 +134,5 @@ To run a visualization, you will need PyOpenGL and PyQt5:
 5. Test that the Python bindings work:
 
     ```
-    python Python/demos/kbdrive.py data/tx90roll.xml
+    python Python3/demos/control/kbdrive.py data/manipulation_worlds/tx90roll.xml
     ```

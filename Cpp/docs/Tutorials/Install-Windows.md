@@ -24,8 +24,8 @@ You're done! As a test, run "cmd" from the start menu,
 
 ```sh
 git clone http://github.com/krishauser/Klampt-examples
-cd Klampt-examples/Python/demos
-python gl_vis.py
+cd Klampt-examples/Python3/demos/vis
+python vis_template.py ../../../data/locomotion_worlds/athlete_plane.xml
 ```
 
 # Windows, from binaries (recommended)
@@ -38,6 +38,10 @@ To run apps and obtain the C++ include/static library files:
 
 
 # Windows, from source
+
+Difficulty: Hard
+
+Time: 2-8 hours
 
 Due to the complexities of dependency management on Windows, building from source is much more challenging and not recommended unless you have extensive experience building packages on Windows via CMake.  These instructions are also bound to go out of date occasionally.
 
