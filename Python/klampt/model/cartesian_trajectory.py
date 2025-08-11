@@ -207,11 +207,14 @@ def cartesian_interpolate_linear(
         tookstep = False
         tend = min(t+stepsize,1)
         x = config.interpolate(constraints,a,b,tend)
-        if endConfig is not None:
-            robot.setConfig(robot.interpolate(startConfig,endConfig,tend))
-            solver.setBiasConfig(robot.getConfig())
         q = res.milestones[-1]
-        solver.setJointLimits([max(vmin,v-delta) for v,vmin in zip(q,qmin0)],[min(vmax,v+delta) for v,vmax in zip(q,qmax0)])
+        qmin_step, qmax_step = [max(vmin,v-delta) for v,vmin in zip(q,qmin0)],[min(vmax,v+delta) for v,vmax in zip(q,qmax0)]
+        if endConfig is not None:
+            #get a bias configuration from the straight line path
+            qbias = robot.interpolate(startConfig,endConfig,tend)
+            solver.setBiasConfig(qbias)
+            robot.setConfig([max(a,min(q,b)) for (a,b,q) in zip(qmin_step,qmax_step,qbias)])  #use bias configuration, clamped to current bounds, as the starting point
+        solver.setJointLimits(qmin_step,qmax_step)
         #print "Trying step",tend-t,"time t=",tend
         if solve_cartesian(x,constraints,solver):
             #valid step, increasing step size
@@ -225,8 +228,10 @@ def cartesian_interpolate_linear(
                 tend = min(t+stepsize,1)
                 x = config.interpolate(constraints,a,b,tend)
                 if endConfig is not None:
-                    robot.setConfig(robot.interpolate(startConfig,endConfig,tend))
-                    solver.setBiasConfig(robot.getConfig())
+                    #get a bias configuration from the straight line path
+                    qbias = robot.interpolate(startConfig,endConfig,tend)
+                    solver.setBiasConfig(qbias)
+                    robot.setConfig([max(a,min(q,b)) for (a,b,q) in zip(qmin_step,qmax_step,qbias)])  #use bias configuration, clamped to current bounds, as the starting point
                 else:
                     robot.setConfig(q)
                 #print "Trying step",tend-t,"time t=",tend
@@ -1020,6 +1025,7 @@ def cartesian_bump(
 def cartesian_move_to(
         robot:Union[RobotModel,SubRobotModel,RobotModelLink,SubRobotModelLink],
         constraints: Union[RigidTransform,IKObjective,Sequence[IKObjective]],
+        endConfig: Optional[Vector] = None,
         delta: float = 1e-2,
         solver: Optional[IKSolver] = None,
         feasibilityTest: Optional[Callable[[Vector],bool]] = None,
@@ -1074,6 +1080,13 @@ def cartesian_move_to(
         c.matchDestination(*se3.mul(se3.inv(xformr),xforml))
     taskStart = config.get_config(constraints)
     #just call the solver
-    return cartesian_interpolate_linear(robot,taskStart,taskEnd,constraints,
-        delta=delta,solver=solver,feasibilityTest=feasibilityTest,
-        maximize=maximize)
+    if endConfig is not None and not maximize:
+        return cartesian_interpolate_bisect(robot,taskStart,taskEnd,constraints,
+            endConfig=endConfig,
+            delta=delta,solver=solver,feasibilityTest=feasibilityTest,
+            maximize=maximize)
+    else:
+        return cartesian_interpolate_linear(robot,taskStart,taskEnd,constraints,
+            endConfig=endConfig,
+            delta=delta,solver=solver,feasibilityTest=feasibilityTest,
+            maximize=maximize)
