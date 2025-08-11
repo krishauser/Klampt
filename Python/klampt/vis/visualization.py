@@ -2016,11 +2016,11 @@ class VisPlotItem:
         self.luminosity = []
         self.compressThreshold = _defaultCompressThreshold
         if linkitem is not None:
-            q = config.getConfig(linkitem.item)
+            q = config.get_config(linkitem.item)
             assert q is not None
             from collections import deque
             self.traces = [deque() for i in range(len(q))]
-            self.itemnames = config.getConfigNames(linkitem.item)
+            self.itemnames = config.get_config_names(linkitem.item)
 
     def customUpdate(self,item,t,v):
         for i,itemname in enumerate(self.itemnames):
@@ -2040,7 +2040,7 @@ class VisPlotItem:
     def update(self,t):
         if self.linkitem is None:
             return
-        q = config.getConfig(self.linkitem.item)
+        q = config.get_config(self.linkitem.item)
         assert len(self.traces) == len(q)
         for i,v in enumerate(q):
             self.updateTrace(i,t,v)
@@ -2619,7 +2619,7 @@ class VisAppearance:
         self.animationSpeed = 1.0
         self.attributes = _default_attributes(item,type)
         if self.attributes is None:
-            print("Couldn't determine type of item",name)
+            print("vis.add(): Couldn't determine type of item",name)
         if not isinstance(self.attributes,_CascadingDict):
             self.attributes = _CascadingDict(self.attributes)
         if 'hide_label' not in self.attributes:
@@ -2708,7 +2708,7 @@ class VisAppearance:
         else:
             u = self.animationSpeed*(t-self.animationStartTime)
             q = self.animation.eval(u,self.animationEndBehavior)
-            self.drawConfig = config.getConfig(q)
+            self.drawConfig = config.get_config(q)
             self.markChanged(config=True,appearance=False)
         for n,app in self.subAppearances.items():
             app.updateAnimation(t)
@@ -2731,10 +2731,10 @@ class VisAppearance:
         configuration  with self.drawConfig.  Used for animations"""
         if self.drawConfig: 
             try:
-                newDrawConfig = config.getConfig(self.item)
+                newDrawConfig = config.get_config(self.item)
                 if len(newDrawConfig) != len(self.drawConfig):
                     warnings.warn("Incorrect length of draw configuration? {} vs {}".format(len(self.drawConfig),len(newDrawConfig)))
-                config.setConfig(self.item,self.drawConfig)
+                config.set_config(self.item,self.drawConfig)
                 self.drawConfig = newDrawConfig
             except Exception as e:
                 warnings.warn("Exception thrown during animation update.  Probably have incorrect length of configuration")
@@ -2852,10 +2852,10 @@ class VisAppearance:
                     elif "color" in app.attributes:
                         app.item.appearance().setColor(*app.attributes["color"])
 
-                if isinstance(self.editor,RobotPoser) and isinstance(self.item,(list,tuple)) and world is not None:
+                if isinstance(self.editor,RobotPoser) and isinstance(self.item,(list,tuple)):
                     #KLUDGE: config editor; make sure that the robot in the world model is restored
-                    #use the 
-                    robot = world.robot(0)
+                    robot = _robot_attribute_to_robot(self.attributes.get("robot",0),world)
+                    assert robot is not None,"RobotPoser editor requires a robot"
                     oldconfig = robot.getConfig()
                     oldAppearances = []
                     if "color" in self.attributes:
@@ -2868,7 +2868,7 @@ class VisAppearance:
                 self.editor.drawGL(viewport)
 
                 if oldconfig is not None:
-                    world.robot(0).setConfig(oldconfig)
+                    robot.setConfig(oldconfig)
                     if len(oldAppearances) > 0:
                         for i in range(robot.numLinks()):
                             robot.link(i).appearance().set(oldAppearances[i])
@@ -3222,6 +3222,36 @@ class VisAppearance:
                         pass
                     if name is not None:
                         self.drawText(name,wp)
+            else:
+                #no robot instance
+                if item.numPosDims() == 3:
+                    while len(self.displayCache) < 1:
+                        self.displayCache.append(glcommon.CachedGLObject())
+                    lp,wp = item.getPosition()
+                    if item.numRotDims() == 3:
+                        def drawRaw():
+                            gldraw.xform_widget(se3.identity(),self.attributes["length"],self.attributes["width"])
+                        self.displayCache[0].draw(drawRaw,transform=(item.getRotation(),wp))
+                    elif item.numRotDims() > 0:
+                        #axis constraint
+                        ld,wd = item.getRotationAxis()
+                        def drawRawLine():
+                            GL.glDisable(GL.GL_LIGHTING)
+                            GL.glColor4f(*self.attributes["axis_color"])
+                            GL.glLineWidth(self.attributes["axis_width"])
+                            GL.glBegin(GL.GL_LINES)
+                            GL.glVertex3f(0,0,0)
+                            GL.glVertex3f(*vectorops.mul(wd,self.attributes["axis_length"]))
+                            GL.glEnd()
+                            GL.glLineWidth(1.0)
+                        self.displayCache[1].draw(drawRawLine,transform=(so3.identity(),wp),parameters=wd)
+                    else:
+                        pass
+                    if name is not None:
+                        self.drawText(name,wp)
+                else:
+                    #don't know how to draw planar, linear, or orientation-only IKObjectives
+                    pass
         elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Heightmap,ConvexHull,Geometry3D)):
             #this can be tricky if the mesh or point cloud has colors
             if 'appearance' in self.attributes:
@@ -3332,8 +3362,8 @@ class VisAppearance:
                 def drawAsTrajectory():
                     width = self.attributes.get("width",3.0)
                     color = self.attributes["color"]
-                    pointSize = self.attributes.get("pointSize",self.attributes["point_size"])# TEMP: deprecate later
-                    pointColor = self.attributes.get("pointColor",self.attributes["point_color"])  # TEMP: deprecate later
+                    pointSize = self.attributes.get("pointSize",self.attributes.get("point_size",None))# TEMP: deprecate later
+                    pointColor = self.attributes.get("pointColor",self.attributes.get("point_color",None))  # TEMP: deprecate later
                     drawTrajectory(Trajectory(list(range(len(item))),item),width,color,pointSize,pointColor)
                 if len(item) > 0:
                     robot = _robot_attribute_to_robot(self.attributes.get("robot",0),world)
@@ -3477,7 +3507,7 @@ class VisAppearance:
                 raise
         return (so3.identity(),self.getCenter())
     
-    def rayCast(self,source,direction,tolerance=0.01):
+    def rayCast(self,source,direction,tolerance=0.01,world=None) -> Optional[Vector3]:
         """Returns a point on the item intersected by the ray
         ``source + t*direction``, or None if it does not intersect.
 
@@ -3487,19 +3517,58 @@ class VisAppearance:
         geom = None
         if isinstance(self.item,Geometry3D):
             geom = self.item
+        elif hasattr(self,'geometry') and isinstance(self.geometry,Geometry3D):
+            geom = self.geometry
         elif hasattr(self.item,'geometry') and callable(self.item.geometry):
             geom = self.item.geometry()
+        if geom is not None:
+            margin = geom.getCollisionMargin()
+            if geom.type() == 'PointCloud':
+                geom.setCollisionMargin(tolerance)
+            elif geom.type() == 'GeometricPrimitive' and geom.getGeometricPrimitive().type in ['Point','Sphere','Segment','Line']:
+                geom.setCollisionMargin(tolerance)
+            (hit,pt) = geom.rayCast(source,direction)
+            geom.setCollisionMargin(margin)  #restore margin
+            return pt if hit else None
         #TODO: ray cast other items like points, transforms, trajectories
-        if geom is None:
-            return None
-        margin = geom.getCollisionMargin()
-        if geom.type() == 'PointCloud':
-            geom.setCollisionMargin(tolerance)
-        elif geom.type() == 'GeometricPrimitive' and geom.getGeometricPrimitive().type in ['Point','Segment','Line']:
-            geom.setCollisionMargin(tolerance)
-        (hit,pt) = geom.rayCast(source,direction)
-        geom.setCollisionMargin(margin)  #restore margin
-        return pt if hit else None
+        if isinstance(self.item, (list,tuple)):
+            try:
+                itypes = self.attributes['type']
+            except KeyError:
+                try:
+                    itypes = objectToVisType(self.item,world)
+                except Exception as e:
+                    # import traceback
+                    # traceback.print_exc()
+                    warnings.warn("klampt.vis: Unsupported object {} of type {}, value {}".format(self.name,self.item.__class__.__name__,self.item))
+                    return
+            if itypes is None:
+                warnings.warn("Unable to convert item {} to drawable".format(str(self.item)))
+                return
+            if itypes == 'Config':
+                robot = _robot_attribute_to_robot(self.attributes.get("robot",0),world)
+                if robot is not None:
+                    if robot.numLinks() == len(self.item):
+                        oldconfig = robot.getConfig()
+                        robot.setConfig(self.item)
+                        closestPt = None
+                        closestDist = float('inf')
+                        for i in range(robot.numLinks()):
+                            link = robot.link(i)
+                            margin = link.geometry().getCollisionMargin()
+                            link.geometry().setCollisionMargin(tolerance)
+                            (hit,pt) = link.geometry().rayCast(source,direction)
+                            link.geometry().setCollisionMargin(margin)
+                            if hit:
+                                dist = vectorops.distance(source,pt)
+                                if dist < closestDist:
+                                    closestDist = dist
+                                    closestPt = pt
+                        robot.setConfig(oldconfig)
+                        if closestDist <= tolerance:
+                            return closestPt
+
+        return None
 
     def getSubItem(self,path):
         if len(path) == 0: return self
@@ -3611,12 +3680,13 @@ class VisAppearance:
                 res.enableTranslation(True)
                 res.set(*item)
             elif itype == 'Config':
-                if world is not None and world.numRobots() > 0 and world.robot(0).numLinks() == len(item):
+                robot = _robot_attribute_to_robot(self.attributes.get("robot",0),world)
+                if robot is not None and robot.numLinks() == len(item):
                     #it's a valid configuration
-                    oldconfig = world.robot(0).getConfig()
-                    world.robot(0).setConfig(item)
-                    res = RobotPoser(world.robot(0))
-                    world.robot(0).setConfig(oldconfig)
+                    oldconfig = robot.getConfig()
+                    robot.setConfig(item)
+                    res = RobotPoser(robot)
+                    robot.setConfig(oldconfig)
                 else:
                     warnings.warn("VisAppearance.make_editor(): Editor for object of type {} cannot be associated with a robot".format(itype))
                     return
@@ -4014,7 +4084,7 @@ class VisualizationScene:
     def getItemConfig(self, name : ItemPath) -> Config:
         global _globalLock
         with _globalLock:
-            res = config.getConfig(self.getItem(name).item)
+            res = config.get_config(self.getItem(name).item)
         return res
 
     def setItemConfig(self, name : ItemPath, value : Config):
@@ -4027,7 +4097,7 @@ class VisualizationScene:
             elif isinstance(item.item,str):
                 item.item = value
             else:
-                config.setConfig(item.item,value)
+                config.set_config(item.item,value)
             if item.editor:
                 item.update_editor(item_to_editor = True)
             item.markChanged(config=True,appearance=False)
@@ -4431,16 +4501,17 @@ class VisualizationScene:
             :class:`VisAppearance` and pt the clicked point.  If nothing 
             intersects, then (None,None) is returned.
         """
+        world = self.items.get('world',None)
         (s,d) = self.view.click_ray(x,y)
         data = [(None,None),float('inf')]  #closest and closest distance
         def doclick(name,visappearance,data=data):
-            item = visappearance.item
+            item = visappearance.item   
             if filter is None or filter(name,item):
                 if len(visappearance.subAppearances) != 0:
                     for sname,app in visappearance.subAppearances.items():
                         doclick(sname,app)
                 else:
-                    pt = visappearance.rayCast(s,d,tolerance)
+                    pt = visappearance.rayCast(s,d,tolerance,world=world)
                     if pt is not None:
                         dist = vectorops.dot(vectorops.sub(pt,s),d)
                         if dist < data[1]:

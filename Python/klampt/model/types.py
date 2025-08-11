@@ -168,7 +168,7 @@ def make(type,object=None):
             return object.getConfig()
         else:
             from . import config
-            return config.getConfig(object)
+            return config.get_config(object)
     elif type == 'Configs':
         return [make('Config',object)]
     elif type == 'Trajectory':

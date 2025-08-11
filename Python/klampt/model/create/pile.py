@@ -221,7 +221,7 @@ def make_object_pile(world : WorldModel, container : Union[RigidObjectModel,Terr
         visworld = world.copy()
         vis.add("world",visworld)
         vis.addText("time","Time: 0",position=(20,20))
-        config.setConfig(visworld,config.getConfig(world))
+        config.set_config(visworld,config.get_config(world))
         vis.show()
     """
     for index in range(len(objects)):
@@ -283,7 +283,7 @@ def make_object_pile(world : WorldModel, container : Union[RigidObjectModel,Terr
         """
         if visualize:
             vis.lock()
-            config.setConfig(visworld,config.getConfig(world))
+            config.set_config(visworld,config.get_config(world))
             vis.unlock()
             time.sleep(0.1)
         """
@@ -313,7 +313,7 @@ def make_object_pile(world : WorldModel, container : Union[RigidObjectModel,Terr
         sim.simulate(0.01)
         if visualize:
             vis.lock()
-            config.setConfig(visworld,config.getConfig(world))
+            config.set_config(visworld,config.get_config(world))
             vis.unlock()
             time.sleep(0.01)
     maxT = 5.0
@@ -352,7 +352,7 @@ def make_object_pile(world : WorldModel, container : Union[RigidObjectModel,Terr
             vis.lock()
             vis.addText("time","Time: %.3f"%(t,),position=(20,20))
             vis.addText("velocities","Ang vel %.3f, vel %.3f"%(maxw,maxv),position=(20,35))
-            config.setConfig(visworld,config.getConfig(world))
+            config.set_config(visworld,config.get_config(world))
             vis.unlock()
             time.sleep(max(0.0,dt-(time.time()-t0)))
         t += dt

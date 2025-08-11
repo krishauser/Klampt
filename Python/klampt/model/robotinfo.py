@@ -485,7 +485,7 @@ class RobotInfo:
 
     def eeSolver(self, endEffector: str, target: Union[Vector,RigidTransform]) -> IKSolver:
         """Given a named end effector and a target point, transform, or set of
-        parameters from config.setConfig(ikgoal) / config.getConfig(ikgoal),
+        parameters from config.set_config(ikgoal) / config.get_config(ikgoal),
         returns the IKSolver for the end effector and  that target.
         """
         ee = self.endEffectors[endEffector]
@@ -494,7 +494,7 @@ class RobotInfo:
         robot = self.klamptModel()
         link = robot.link(ee.link)
         s = IKSolver(robot)
-        q = config.getConfig(target)
+        q = config.get_config(target)
         obj = ee.ikObjective
         if ee.ikObjective is None:
             if len(q) == 3:

@@ -16,7 +16,7 @@ from . import gldraw
 from . import visualization
 import time
 from ..math import vectorops,so3,se3
-from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,AABBPoser,BoxPoser,SpherePoser,WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Appearance,Geometry3D
+from ..robotsim import WidgetSet,GeometricPrimitive,RobotPoser,ObjectPoser,TransformPoser,PointPoser,AABBPoser,BoxPoser,SpherePoser,WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Appearance,Geometry3D
 from ..model.subrobot import SubRobotModel
 from ..model import trajectory
 from ..model import collide
@@ -92,7 +92,7 @@ class ConfigEditor(VisualEditorBase):
             self.robotposer.setActiveDofs(robot._links)
         else:
             self.robotposer = RobotPoser(robot)
-        self.addWidget(self.robotposer)
+        self.add_widget(self.robotposer)
     
     def instructions(self):
         return 'Right-click and drag on the robot links to pose the robot'
@@ -143,7 +143,7 @@ class ConfigsEditor(VisualEditorBase):
             self.robotposer.setActiveDofs(robot._links)
         else:
             self.robotposer = RobotPoser(robot)
-        self.addWidget(self.robotposer)
+        self.add_widget(self.robotposer)
     
     def instructions(self):
         return 'Right-click and drag on the robot links to pose the robot.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
@@ -351,7 +351,7 @@ class TrajectoryEditor(VisualEditorBase):
             self.milestone_to_poser(value.milestones[self.editingIndex])
         else:
             raise NotImplementedError("Can't edit trajectories except for robot trajectories, R^2, R^3, or SE(3) trajectories yet")
-        self.addWidget(self.milestoneposer)
+        self.add_widget(self.milestoneposer)
         self.update_anim_trajectory()
     
     def attach(self,object,relativePose=None):
@@ -1038,7 +1038,7 @@ class PointEditor(VisualEditorBase):
         self.pointposer = PointPoser()
         self.pointposer.set(se3.apply(self.frame,value))
         self.pointposer.setAxes(self.frame[0])
-        self.addWidget(self.pointposer)
+        self.add_widget(self.pointposer)
    
     def instructions(self):
         return 'Right-click and drag on the widget to pose the point'
@@ -1070,20 +1070,12 @@ class RigidTransformEditor(VisualEditorBase):
         self.xformposer.set(*se3.mul(self.frame,value))
         self.xformposer.enableRotation(True)
         self.xformposer.enableTranslation(True)
-        self.addWidget(self.xformposer)
+        self.add_widget(self.xformposer)
         self.attachedObjects = []
         self.attachedRelativePoses = []
         self.attachedAppearances = []
         self.rotationEnabled = True
         self.translationEnabled = True
-
-    def disableTranslation(self):
-        warnings.warn("disableTranslation will be deprecated in favor of disable_translation in a future version of Klampt",DeprecationWarning)
-        self.disable_translation()
-
-    def disableRotation(self):
-        warnings.warn("disableRotation will be deprecated in favor of disable_rotation in a future version of Klampt",DeprecationWarning)
-        self.disable_rotation()
 
     def disable_translation(self):
         """Turns off editing of translation."""
@@ -1170,7 +1162,7 @@ class AABBEditor(VisualEditorBase):
         self.aabbposer.set(value[0],value[1])
         if frame is not None:
             self.aabbposer.setFrame(frame[0],frame[1])
-        self.addWidget(self.aabbposer)
+        self.add_widget(self.aabbposer)
    
     def instructions(self):
         return 'Right-click and drag on the widget to set the box'
@@ -1197,7 +1189,7 @@ class SphereEditor(VisualEditorBase):
         self.frame = se3.identity() if frame is None else frame
         self.sphereposer = SpherePoser()
         self.sphereposer.set(se3.apply(frame,value[0])+[value[1]])
-        self.addWidget(self.sphereposer)
+        self.add_widget(self.sphereposer)
    
     def instructions(self):
         return 'Right-click and drag on the widget to set the sphere'
@@ -1222,7 +1214,7 @@ class GeometricPrimitiveEditor(VisualEditorBase):
     input and output are measured with respect to that frame.  However, the
     editing is done in world coordinates.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self,name : str, value : GeometricPrimitive, description : str, world : WorldModel,frame=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame is None else frame
         if value.type == 'point':
@@ -1236,7 +1228,7 @@ class GeometricPrimitiveEditor(VisualEditorBase):
         else:
             raise NotImplementedError("Can't edit GeometricPrimitive of type "+value.type+" yet")
         self.update_gui_from_value()
-        self.addWidget(self.poser)
+        self.add_widget(self.poser)
 
     def instructions(self):
         return 'Right-click and drag on the widget to edit the primitive'
@@ -1298,7 +1290,7 @@ class ObjectTransformEditor(VisualEditorBase):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.object = object
         self.objposer = ObjectPoser(object)
-        self.addWidget(self.objposer)
+        self.add_widget(self.objposer)
     
     def instructions(self):
         return 'Right-click and drag on the widget to pose the object'
@@ -1323,7 +1315,7 @@ class WorldEditor(VisualEditorBase):
         call :meth:`update_value_from_gui` after the editor has been run.
 
     """
-    def __init__(self,name,value,description):
+    def __init__(self,name : str, value : WorldModel, description : str):
         VisualEditorBase.__init__(self,name,value,description,value)
         world = value
         self.world = value
@@ -1437,7 +1429,6 @@ class SensorEditor(RigidTransformEditor):
         self.refresh()
     
     def display(self):
-        from ..model import sensing
         sensor = self.value
         self.value = sensor.getTransform()
         RigidTransformEditor.display(self)
@@ -1606,7 +1597,7 @@ def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
             self.splitter.setSizes([self.topBoxLayout.sizeHint().height(),self.layout.sizeHint().height()])
 
 
-        def setEditor(self,editorObject):
+        def setEditor(self, editorObject : VisualEditorBase):
             self.editorObject = editorObject
             self.setWindowTitle("Editing "+editorObject.name)
             if editorObject.description is None:
