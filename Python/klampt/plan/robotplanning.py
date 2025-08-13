@@ -1,9 +1,10 @@
 from .cspace import *
-from .cspaceutils import EmbeddedCSpace,AffineEmbeddedCSpace,EmbeddedMotionPlan
+from .cspaceutils import EmbeddedCSpace,AffineEmbeddedCSpace,EmbeddedKinematicPlanner
 from . import robotcspace
 from ..model import collide
-from ..robotsim import IKObjective,RobotModel,WorldModel
-from ..model.typing import Config,Vector,Vector3
+from ..robotsim import IKObjective,RobotModel,RobotModelLink,RigidObjectModel,WorldModel
+from ..model.typing import Config,Vector,Vector3,RigidTransform
+import time
 from typing import List,Union,Optional,Callable
 import warnings
 
@@ -26,7 +27,9 @@ def make_space(world : WorldModel, robot : RobotModel,
               equalityConstraints : List[Union[Callable,IKObjective]]=[],
               equalityTolerance : float = 1e-3,
               ignoreCollisions=[],
-              movingSubset : Optional[Union[str,List[int]]]=None):
+              movingSubset : Optional[Union[str,List[int]]]=None,
+              attachedObjects : Optional[List[Tuple[RigidObjectModel,RobotModelLink]]]=None,
+              attachedObjectRelTransforms : Optional[List[RigidTransform]]=None):
     """Creates a standard CSpace instance for the robot moving in the given world.
 
     Args:
@@ -56,12 +59,19 @@ def make_space(world : WorldModel, robot : RobotModel,
         movingSubset (optional): if None, 'all', or 'auto' (default), all
             joints will be allowed to move.  If this is a list, then only
             these joint indices will be allowed to move.
+        attachedObjects (list of (RigidObjectModel,RobotModelLink), optional): a
+            list of rigid objects and the links to which they are attached. 
+            This is used to model grasped objects.
+        attachedObjectRelTransforms (list of RigidTransform, optional): if
+            any objects are attached, the relative transform from the object to
+            the target link.  If not provided, the current transforms are used
+            to determine the relative transforms.
 
     Returns:
         CSpace: a C-space instance that describes the robot's feasible space.
-            This can be used for planning by creating a :class:`cspace.MotionPlan`
+            This can be used for planning by creating a :class:`cspace.KinematicPlanner`
             object.  Note that if an EmbeddedCSpace is returned, you should
-            create a EmbeddedMotionPlan for greater convenience.
+            create a EmbeddedKinematicPlanner for greater convenience.
     """
     subset = []
     if movingSubset == 'auto' or movingSubset == 'all' or movingSubset == None:
@@ -76,22 +86,35 @@ def make_space(world : WorldModel, robot : RobotModel,
         if not isinstance(c,IKObjective):
             implicitManifold.append(c)
     
-    if len(equalityConstraints)==0:
-        space = robotcspace.RobotCSpace(robot,collider)
+    if attachedObjects is not None and len(attachedObjects) > 0:
+        if len(equalityConstraints) > 0 or len(implicitManifold) > 0:
+            raise ValueError("Attached objects not supported with equality constraints")
+        if attachedObjectRelTransforms is not None:
+            if len(attachedObjects) != len(attachedObjectRelTransforms):
+                raise ValueError("attachedObjects and attachedObjectRelTransforms must have the same length")
+        space = robotcspace.RobotCSpaceWithObject(robot, collider)
+        for i,(obj,link) in enumerate(attachedObjects):
+            if attachedObjectRelTransforms is not None:
+                relT = attachedObjectRelTransforms[i]
+            else:
+                relT = None
+            space.attachObject(obj,link,relT)
     else:
-        if len(implicitManifold) > 0:
-            raise NotImplementedError("General inequality constraints")
+        if len(equalityConstraints)==0:
+            space = robotcspace.RobotCSpace(robot,collider)
         else:
-            space = robotcspace.ClosedLoopRobotCSpace(robot,equalityConstraints,collider)
-            space.tol = equalityTolerance
-            if subset is not None and len(subset) < robot.numLinks():
-              space.setIKActiveDofs(subset)
+            if len(implicitManifold) > 0:
+                raise NotImplementedError("General inequality constraints")
+            else:
+                space = robotcspace.ClosedLoopRobotCSpace(robot,equalityConstraints,collider)
+                space.tol = equalityTolerance
+                if subset is not None and len(subset) < robot.numLinks():
+                    space.setIKActiveDofs(subset)
     space.eps = edgeCheckResolution
 
     for c in extraConstraints:
         space.addConstraint(c)
 
-    #New in 0.8.6: configuration spaces with affine drivers
     has_affine = False
     for d in range(robot.numDrivers()):
         dr = robot.driver(d)
@@ -159,7 +182,7 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
                  movingSubset : Optional[Union[str,List[int]]] = 'auto',
                  verbose=True,
                  **planOptions):
-    """Creates a MotionPlan object that can be called to solve a standard motion
+    """Creates a KinematicPlanner object that can be called to solve a standard motion
     planning problem for a robot in a world.  The plan starts from the robot's
     current configuration and ends in a target configuration.
 
@@ -195,16 +218,16 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
             joints will be allowed to move.  If this is a list, then only these
             joint indices will be allowed to move.
         planOptions (keywords): keyword options that will be sent to the
-            planner.  See the documentation for MotionPlan.setOptions for more
+            planner.  See the documentation for KinematicPlanner.setOptions for more
             details.
     
     Returns: 
-        MotionPlan: a planner instance that can be called to get a
-        kinematically-feasible plan. (see :meth:`MotionPlan.planMore`)
+        KinematicPlanner: a planner instance that can be called to get a
+        kinematically-feasible plan. (see :meth:`KinematicPlanner.planMore`)
 
         The underlying configuration space (a RobotCSpace, ClosedLoopRobotCSpace, or
         EmbeddedRobotCSpace) can be retrieved using the "space" attribute of the
-        resulting MotionPlan object.
+        resulting KinematicPlanner object.
     """
     q0 = robot.getConfig()
     assert(len(q0)==len(target)),"target configuration must be of correct size for robot"
@@ -231,9 +254,9 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
                       movingSubset=subset)
     
     if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
-        plan = EmbeddedMotionPlan(space,q0,**planOptions)
+        plan = EmbeddedKinematicPlanner(space,q0,**planOptions)
     else:
-        plan = MotionPlan(space,**planOptions)
+        plan = KinematicPlanner(space,**planOptions)
     try:
         plan.setEndpoints(q0,target)
     except RuntimeError:
@@ -272,9 +295,9 @@ def plan_to_set(world : WorldModel, robot : RobotModel, target : Union[Callable,
               equalityTolerance : float = 1e-3,
               ignoreCollisions=[],
               movingSubset : Optional[Union[str,List[int]]] = None,
-              **planOptions):
+              **planOptions) -> KinematicPlanner:
     """
-    Creates a MotionPlan object that can be called to solve a standard motion
+    Creates a KinematicPlanner object that can be called to solve a standard motion
     planning problem for a robot in a world.  The plan starts from the robot's
     current configuration and ends in a target set.
 
@@ -315,15 +338,15 @@ def plan_to_set(world : WorldModel, robot : RobotModel, target : Union[Callable,
             will be allowed to move.  If this is a list, then only these joint
             indices will be allowed to move.
         planOptions (keywords): keyword options that will be sent to the planner.  See
-            the documentation for MotionPlan.setOptions for more details.
+            the documentation for KinematicPlanner.setOptions for more details.
     
     Returns: 
-        MotionPlan: a planner instance that can be called to get a
-        kinematically-feasible plan. (see :meth:`MotionPlan.planMore` )
+        KinematicPlanner: a planner instance that can be called to get a
+        kinematically-feasible plan. (see :meth:`KinematicPlanner.planMore` )
 
         The underlying configuration space (a RobotCSpace, ClosedLoopRobotCSpace, or
         EmbeddedRobotCSpace) can be retrieved using the "space" attribute of the
-        resulting MotionPlan object.
+        resulting KinematicPlanner object.
     """
     q0 = robot.getConfig()
     subset = []
@@ -341,9 +364,9 @@ def plan_to_set(world : WorldModel, robot : RobotModel, target : Union[Callable,
                       movingSubset=subset)
 
     if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
-        plan = EmbeddedMotionPlan(space,q0,**planOptions)
+        plan = EmbeddedKinematicPlanner(space,q0,**planOptions)
     else:
-        plan = MotionPlan(space,**planOptions)
+        plan = KinematicPlanner(space,**planOptions)
 
     #convert target to a (test,sample) pair if it's a cspace
     if isinstance(target,CSpace):
@@ -364,6 +387,7 @@ def plan_to_set(world : WorldModel, robot : RobotModel, target : Union[Callable,
         raise
     return plan
 
+
 def plan_to_cartesian_objective(world : WorldModel, robot : RobotModel, iktargets : List[IKObjective], iktolerance : float = 1e-3,
                              edgeCheckResolution : float = 1e-2,
                              extraConstraints : List[Callable]= [],
@@ -371,9 +395,10 @@ def plan_to_cartesian_objective(world : WorldModel, robot : RobotModel, iktarget
                              equalityTolerance : float = 1e-3,
                              ignoreCollisions=[],
                              movingSubset : Optional[Union[str,List[int]]] = None,
-                             **planOptions):
+                             **planOptions) -> KinematicPlanner:
     """
-    Plans a path to reach one or more IK targets.
+    Creates a KinematicPlanner object that will try to reach one or
+    more IK targets. 
 
     Args:
         world (WorldModel): same as plan_to_config
@@ -384,12 +409,12 @@ def plan_to_cartesian_objective(world : WorldModel, robot : RobotModel, iktarget
             satisfied
 
     Returns: 
-        MotionPlan: a planner instance that can be called to get a
-        kinematically-feasible plan. (see :meth:`MotionPlan.planMore` )
+        KinematicPlanner: a planner instance that can be called to get a
+        kinematically-feasible plan. (see :meth:`KinematicPlanner.planMore` )
 
         The underlying configuration space (a RobotCSpace, ClosedLoopRobotCSpace, or
         EmbeddedRobotCSpace) can be retrieved using the "space" attribute of the
-        resulting MotionPlan object.
+        resulting KinematicPlanner object.
     """
     #TODO: only subselect those links that are affected by the IK target
     goalset = robotcspace.ClosedLoopRobotCSpace(robot,iktargets,None)
@@ -403,136 +428,127 @@ def plan_to_cartesian_objective(world : WorldModel, robot : RobotModel, iktarget
                      movingSubset=movingSubset,
                      **planOptions)
 
-class _WizardGUI:
-    def __init__(self):
-        self.world = None
-        self.movingObject = None
-        self.cspace = None
-        self.plannerSettings = preferred_plan_options(None)
-        self.startConfig = None
-        self.goalConfig = None
-        self.goalIKTargets = None
-        self.goalSetTest = None
-        self.goalSetSampler = None
-        self.extraConstraints = []
-        self.equalityConstraints = []
-        self.movingSubset = None
 
-        #these are temporary objects
-        self.activeCSpace = None
-        self.planner = None
-        self.activeMovingSubset = None
-        self.currentRoadmap = None
-        self.currentSolution = None
+def run_plan(plan : KinematicPlanner,
+            maxIters : int = 100000,
+            maxTime : float = 10.0,
+            endpoints : Tuple = None,
+            maxItersToOptimize : int = None,
+            maxTimeToOptimize : float = None,
+            verbose : int=1,
+            checkFrequency:int = 10)  -> Union[None,List[Config]]:
+    """A default runner for a planner that works generally in a sane manner for 
+    most defaults. Allows debugging by setting verbose >= 1.
 
-        #visualization settings
-        self.draw_end_effectors = None
-        self.draw_infeasible = False
-        self.debug_plan_time = 30
-
-    def makePlanner(self,use_active_space=False):
-        if self.startConfig is None:
-            start = self.movingObject.getConfig()
-        else:
-            start = self.startConfig
-        if self.goalConfig is not None:
-            goal = self.goalConfig
-        elif self.goalIKTargets is not None:
-            goal = robotcspace.ClosedLoopRobotCSpace(self.movingObject,self.goalIKTargets,None)
-        elif self.goalSetSampler is not None:
-            goal = (self.goalSetTest,self.goalSetSampler)
-        elif self.goalSetTest is not None:
-            goal = self.goalSetTest
-        else:
-            #no goal, can't create the planner
-            return None
-        if use_active_space:
-            plan = MotionPlan(self.activeCSpace,**self.plannerSettings)
-        else:
-            plan = MotionPlan(self.cspace,**self.plannerSettings)
-        plan.setEndpoints(start,goal)
-        return plan
-
-
-
-def wizard(world_or_space_or_plan,moving_object=None,
-    draw_end_effectors=None,draw_infeasible=False,
-    debug_plan_time=30):
-    """Launches a "wizard" to help set up or debug a planner.  The wizard
-    will allow you to configure the planner, including the group of moving
-    joints, start and terminal sets, and collision detection settings. 
-
-    The return value is a configured MotionPlan object, ready to be launched.
-
-    The wizard will also allow you to get a Python string that sets up the
-    space and/or invokes the planner.
-
-    Arguments:
-        world_or_space_or_plan (WorldModel, CSpace, or MotionPlan): the
-            world containing the moving robot, or the currently configured
-            CSpace or MotionPlan.
-        moving_object (RobotModel or RigidObjectModel, optional): if
-            world_or_space_or_plan is a WorldModel, this is the moving object
-            for which you'd like to plan.  By default, robot 0 is moving.
-        draw_end_effectors (list, optional): if provided, initializes the
-            links to be drawn in the motion plan debugger.
-        draw_infeasible (bool, optional): initializes whether the motion plan
-            debugger will show infeasible configurations
-        debug_plan_time (float, optional): initializes the planning time in
-            the motion plan debugger.
+    Args:
+        plan (KinematicPlanner): a planner object at least partially configured.
+        maxIters (int): the maximum number of iterations to run.
+        maxTime (float): the maximum seconds to run.
+        maxItersToOptimize (int): the maximum number of iterations to run after
+            a first feasible path is found.
+        maxTimeToOptimize (float): the maximum seconds to run after a first
+            feasible path is found.
+        endpoints (None or pair): the endpoints of the plan, either Configs
+            or goal specifications. If None uses the endpoints configured in
+            plan.
+        verbose (int): whether to print information about the planning.
+        checkFrequency (int): checks termination criteria every checkFrequency
+            planner iterations.
 
     Returns:
-        MotionPlan: a properly configured MotionPlan object that can be called
-        to get a motion plan. (see :meth:`MotionPlan.planMore`).
+        path or None: if successful, returns a feasible path solving the 
+        terminal conditions specified in the plan or between the specified
+        endpoints.
     """
-    from klampt import WorldModel,RobotModel,RigidObjectModel
-    gui = _WizardGUI()
-    if isinstance(world_or_space_or_plan,WorldModel):
-        gui.world = world_or_space_or_plan
-        if moving_object is None:
-            if gui.world.numRobots() == 0:
-                if gui.world.numRigidObjects() == 0:
-                    raise ValueError("World has no robots or rigid objects")
-                moving_object = gui.world.rigidObject(0)
-            else:
-                moving_object = gui.world.robot(0)
-        if not isinstance(moving_object,(RobotModel,RigidObjectModel)):
-            raise TypeError("Invalid type of moving_object")
-        gui.cspace = make_space(gui.world,moving_object)
-    elif isinstance(world_or_space_or_plan,CSpace):
-        gui.cspace = world_or_space_or_plan
-    elif isinstance(world_or_space_or_plan,MotionPlan):
-        plan = world_or_space_or_plan
-        gui.cspace = world_or_space_or_plan.space
-    if isinstance(gui.cspace,EmbeddedCSpace):
-        gui.activeMovingSubset = gui.cspace.mapping
-    if plan is not None:
-        import json
-        gui.plannerSettings = json.loads(plan.planOptions)
-        start,goal = plan.planner.getEndpoints()
-        gui.startConfig = start
-        if hasattr(goal,'__iter__'):
-            if len(goal)==2 and callable(goal[0]):
-                gui.goalSetTest,gui.goalSetSampler = goal
-            else:
-                gui.endConfig = goal
-        else:
-            assert callable(goal)
-            gui.goalSetTest = goal
-        #TODO: parse IK targets
+    if maxItersToOptimize is None:
+        maxItersToOptimize = maxIters
+    if maxTimeToOptimize is None:
+        maxTimeToOptimize = maxTime
+    if endpoints is not None:
+        if len(endpoints) != 2:
+            raise ValueError("Need exactly two endpoints")
+        try:
+            plan.setEndpoints(*endpoints)
+        except RuntimeError:
+            #must be invalid configuration
+            if verbose:
+                if isinstance(endpoints[0],(list,tuple)) and isinstance(endpoints[0][0],(float,int)):
+                    print("run_plan: Start configuration fails:",plan.space.cspace.feasibilityFailures(endpoints[0]))
+                if isinstance(endpoints[1],(list,tuple)) and isinstance(endpoints[1][0],(float,int)):
+                    print("run_plan: Goal configuration fails:",plan.space.cspace.feasibilityFailures(endpoints[1]))
+            return None
+    
+    #this is helpful to slightly speed up collision queries
+    plan.space.cspace.enableAdaptiveQueries(True)
 
-def _deprecated_func(oldName,newName):
-    import sys
-    mod = sys.modules[__name__]
-    f = getattr(mod,newName)
-    def depf(*args,**kwargs):
-        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
-        return f(*args,**kwargs)
-    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
-    setattr(mod,oldName,depf)
+    t0 = time.time()
 
-_deprecated_func('preferredPlanOptions','preferred_plan_options')
-_deprecated_func('makeSpace','make_space')
-_deprecated_func('planToConfig','plan_to_config')
-_deprecated_func('planToSet','plan_to_set')
-_deprecated_func('planToCartesianObjective','plan_to_cartesian_objective')
+    #begin planning
+    numIters = 0
+    feasIters = None
+    feasTime = None
+    for round in range(maxIters//checkFrequency):
+        if verbose:
+            print("run_plan: {}/{} iterations".format(numIters,maxIters))
+        plan.planMore(min(maxIters-numIters,checkFrequency))
+        numIters += checkFrequency
+
+        if not plan.isOptimizing():  #break on first path found
+            path = plan.getPath()
+            if path is not None and len(path)>0:
+                break
+        elif feasIters is None:
+            path = plan.getPath()
+            if path is not None and len(path)>0:
+                feasIters = numIters
+                feasTime = time.time()
+                if len(path) == 2:
+                    #straight line path, so no need to optimize
+                    break
+                if verbose:
+                    print("  Found first feasible path with {} milestones, cost {} at time {}".format(len(path),plan.pathCost(path),feasTime))
+        else: #optimizing
+            if numIters - feasIters >= maxItersToOptimize or time.time()-feasTime > maxTimeToOptimize:
+                print("  Done optimizing after {} iterations, time {}".format(numIters-feasIters,time.time()-feasTime))
+                break
+        if time.time()-t0 > maxTime:
+            break
+    if verbose:
+        print("run_plan: planning took time {}s over {} iterations".format(time.time()-t0,numIters))
+        
+    #this code just gives some debugging information. it may get expensive
+    if verbose >= 2:
+        V,E = plan.getRoadmap()
+        print(len(V),"feasible milestones sampled,",len(E),"edges connected")
+    
+    if verbose >= 2:
+        print("run_plan: stats:")
+        print(plan.getStats())
+
+    path = plan.getPath()
+    if path is None or len(path)==0:
+        if verbose:
+            print("run_plan: Failed to find feasible path")
+            stats = plan.space.getStats()
+            limiting_constraint = min([(float(p),k) for k,p in stats.items() if k.endswith('probability')],key=lambda x: x[0],default=(1,'none'))
+            if limiting_constraint[0] < 1:
+                print("   Least likely constraint to be satisfied: {} at probability {}".format(limiting_constraint[1],limiting_constraint[0]))
+            else:
+                print("   All constraints satisfied with probability 1.0")
+    
+            print("run_plan: stats:")
+            print(plan.getStats())
+
+            #debug some sampled configurations
+            if verbose >= 2:
+                print("  CSpace stats:")
+                print(plan.space.getStats())
+            
+                print("Some sampled configurations:")
+                print(V[0:min(10,len(V))])
+        return None
+    else:
+        if verbose:
+            print("run_plan: path has {} milestones, length {}, cost {}".format(len(path), plan.pathLength(path), plan.pathCost(path)))
+
+    return path

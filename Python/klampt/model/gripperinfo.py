@@ -13,6 +13,7 @@ from klampt.model.subrobot import SubRobotModel
 import copy
 from klampt.math import vectorops,so3,se3
 import json
+import os
 from .typing import Vector,Vector3,RigidTransform
 from typing import Optional,Union,Sequence,List,Tuple,Dict,Any,TextIO
 
@@ -110,9 +111,13 @@ class GripperInfo:
     @staticmethod
     def load(fn: str) -> 'GripperInfo':
         """Loads / registers a GripperInfo from a JSON file previously saved to disk."""
-        res = GripperInfo(fn,-1)
+        path,basename = os.path.split(fn)
+        res = GripperInfo(os.path.splitext(basename)[0],-1)
         with open(fn,'r') as f:
             jsonobj = json.load(f)
+            if jsonobj.get('klamptModel',None) is not None:
+                if not jsonobj['klamptModel'].startswith('/'):
+                    jsonobj['klamptModel'] = os.path.normpath(os.path.join(path,jsonobj['klamptModel']))
             res.fromJson(jsonobj)
         GripperInfo.register(res)
         return res
@@ -157,7 +162,6 @@ class GripperInfo:
             GripperInfo.register(res)
         return res
         
-
     def __init__(self, name : str, baseLink : Union[int,str],
                 fingerLinks : List[int]=None, fingerDrivers : List[int]=None,
                 type : str=None, center : Vector3=None, primaryAxis : Vector3=None, secondaryAxis : Vector3=None,
@@ -296,6 +300,31 @@ class GripperInfo:
                 descendants[i] = True
         return [i for (i,d) in enumerate(descendants) if d]
 
+    def eachFingerLinks(self, robot : RobotModel) -> List[List[int]]:
+        """Returns a list of lists, where each sublist contains the
+        indices of the links that are part of each finger.
+
+        E.g., if the gripper is a parallel gripper, this will return a
+        list of two lists of links, one for each finger.
+        """
+        if self.fingerLinks is None or len(self.fingerLinks) == 0:
+            return []
+        #determine topology of fingerLinks
+        fingers = []
+        for i in self.fingerLinks:
+            p = robot.link(i).getParent()
+            finger_idx = -1
+            for idx,finger in enumerate(fingers):
+                if p in finger:
+                    finger_idx = idx
+                    break
+            if finger_idx == -1:
+                #new finger
+                fingers.append([i])
+            else:
+                fingers[finger_idx].append(i)
+        return fingers
+
     def getSubrobot(self, robot : RobotModel, all_descendants=True) -> SubRobotModel: 
         """Returns the SubRobotModel of the gripper given a RobotModel.
 
@@ -389,7 +418,7 @@ class GripperInfo:
         from klampt import vis
         vis.loop(lambda: self.addToVis())
 
-    def addToVis(self, robot : RobotModel=None, animate=True,base_xform=None) -> None:
+    def addToVis(self, robot : RobotModel=None, animate : bool=True, base_xform : Optional[RigidTransform]=None) -> None:
         """Adds the gripper to the klampt.vis scene.
         
         Args:

@@ -353,7 +353,8 @@ def set_random_seed(seed: int) -> None:
 
 def set_plan_json_string(string: str) -> None:
     r"""
-    Loads planner values from a JSON string.  
+    Loads planner values from a JSON string. See :func:`set_plan_setting` for valid
+    settings.  
 
     Args:
         string (str)
@@ -400,7 +401,7 @@ def set_plan_setting(*args) -> None:
 
     Args:
         setting (str): 
-        value (float or str): 
+        value (str or float): 
 
     Valid numeric values are:  
 
@@ -448,8 +449,6 @@ class CSpaceInterface(object):
     r"""
     A raw interface for a configuration space.  
 
-
-    Args:
 
     ..note::  
 
@@ -826,10 +825,10 @@ class PlannerInterface(object):
     in cspace.py is somewhat easier to use.  
 
 
-    Args:
-
     On construction, uses the planner type specified by setPlanType and the settings
-    currently specified by calls to setPlanSetting.  
+    currently specified by calls to setPlanSetting. If a string is provided as the
+    second argument, these are assumed to be a JSON-formatted string, equivalent to
+    one passed to :func:`set_plan_json_string`.  
 
     Point-to-point planning is enabled by sending two configurations to the
     setEndpoints method. This is mandatory for RRT and SBL-style planners. The start
@@ -850,21 +849,14 @@ class PlannerInterface(object):
     you may call addMilestone(q) to add a new milestone. addMilestone() returns the
     index of that milestone, which can be used in later calls to getPath().  
 
-    In point-to-set mode, getSolutionPath will return the optimal path to any goal
-    milestone.  
+    In point-to-set mode, getSolutionPath will return the optimal path from the
+    start to any goal milestone.  
 
     All planners work with the standard path-length objective function. Some
     planners can work with other cost functions, and you can use setCostFunction to
     set the edge / terminal costs. Usually, the results will only be optimal on the
     computed graph, and the graph is not specifically computed to optimize that
     cost.  
-
-    To get a roadmap (V,E), call getRoadmap(). V is a list of configurations (each
-    configuration is a Python list) and E is a list of edges (each edge is a pair
-    (i,j) indexing into V).  
-
-    To dump the roadmap to disk, call dump(fn). This saves to a Trivial Graph Format
-    (TGF) format.  
 
     C++ includes: motionplanning.h
 
@@ -873,21 +865,40 @@ class PlannerInterface(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
-    def __init__(self, cspace:  "CSpaceInterface"):
+    def __init__(self, *args):
         r"""
+        __init__ (cspace): :obj:`PlannerInterface`
+
+        __init__ (cspace,settings_json_string): :obj:`PlannerInterface`
+
+
         Args:
-            cspace (:class:`~klampt.CSpaceInterface`)
+            cspace (:class:`~klampt.CSpaceInterface`): 
+            settings_json_string (str, optional): 
         """
-        _motionplanning.PlannerInterface_swiginit(self, _motionplanning.new_PlannerInterface(cspace))
+        _motionplanning.PlannerInterface_swiginit(self, _motionplanning.new_PlannerInterface(*args))
     __swig_destroy__ = _motionplanning.delete_PlannerInterface
 
     def destroy(self) -> None:
         r"""
+        Frees memory associated with this planner. Will be called automatically upon
+        termination, and a MotionPlan instance will call this automatically when it is
+        freed.  
+
         """
         return _motionplanning.PlannerInterface_destroy(self)
 
+    def isOptimizing(self) -> bool:
+        r"""
+        Returns true if a plan can be improved with more planning iterations.  
+
+        """
+        return _motionplanning.PlannerInterface_isOptimizing(self)
+
     def setEndpoints(self, start: object, goal: object) -> bool:
         r"""
+        Sets the endpoints of the planner to a start / goal configuration pair.  
+
         Args:
             start (:obj:`object`)
             goal (:obj:`object`)
@@ -896,6 +907,10 @@ class PlannerInterface(object):
 
     def setEndpointSet(self, start: object, goal: object, goalSample: object=None) -> bool:
         r"""
+        Sets the endpoints of the planner to a start configuration and a goal set. goal
+        must be a callable `goal(config)` returning a bool. If goalSample != None, then
+        it must be a function `goalSample()` returning a configuration.  
+
         Args:
             start (:obj:`object`)
             goal (:obj:`object`)
@@ -903,13 +918,69 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_setEndpointSet(self, start, goal, goalSample)
 
+    def getEndpoints(self) -> object:
+        r"""
+        Returns a tuple (start,goal), which may be (None,None) if no goal is set yet.
+        goal can be a configuration, a callable goal test, or a pair (goal test, goal
+        sampler)  
+
+
+        Returns:
+            object:
+        """
+        return _motionplanning.PlannerInterface_getEndpoints(self)
+
     def setCostFunction(self, edgeCost: object=None, terminalCost: object=None) -> None:
         r"""
+        Changes the cost function away from the standard path length cost. The edge cost
+        is `edgeCost(qa,qb)` and the terminal cost is `terminalCost(q)`. The total path
+        cost is `sum_{i=0,...,N-1} edgeCost(path[i],path[i+1]) + terminalCost[path[N]]`  
+
         Args:
             edgeCost (:obj:`object`, optional): default value None
             terminalCost (:obj:`object`, optional): default value None
         """
         return _motionplanning.PlannerInterface_setCostFunction(self, edgeCost, terminalCost)
+
+    def edgeCost(self, qa: object, qb: object) -> float:
+        r"""
+        Evaluates the edge cost. If no cost function is set, this is the distance
+        between the configurations.  
+
+        Args:
+            qa (:obj:`object`)
+            qb (:obj:`object`)
+        """
+        return _motionplanning.PlannerInterface_edgeCost(self, qa, qb)
+
+    def terminalCost(self, q: object) -> float:
+        r"""
+        Evaluates the terminal cost. If no cost function is set, this is 0.  
+
+        Args:
+            q (:obj:`object`)
+        """
+        return _motionplanning.PlannerInterface_terminalCost(self, q)
+
+    def getEdgeCostFunction(self) -> object:
+        r"""
+        Returns the edge cost function, if set. Returns None otherwise.  
+
+
+        Returns:
+            object:
+        """
+        return _motionplanning.PlannerInterface_getEdgeCostFunction(self)
+
+    def getTerminalCostFunction(self) -> object:
+        r"""
+        Returns the terminal cost function, if set. Returns None otherwise.  
+
+
+        Returns:
+            object:
+        """
+        return _motionplanning.PlannerInterface_getTerminalCostFunction(self)
 
     def addMilestone(self, milestone: object) -> int:
         r"""
@@ -976,6 +1047,8 @@ class PlannerInterface(object):
 
     def getStats(self) -> object:
         r"""
+        Returns a dictionary of statistics. Each key is a string.  
+
 
         Returns:
             object:
@@ -984,6 +1057,10 @@ class PlannerInterface(object):
 
     def getRoadmap(self) -> object:
         r"""
+        Retrieves a roadmap as a pair (V,E). V is a list of configurations (each
+        configuration is a Python list) and E is a list of edges (each edge is a pair
+        (i,j) indexing into V).  
+
 
         Returns:
             object:
@@ -992,6 +1069,8 @@ class PlannerInterface(object):
 
     def dump(self, fn: str) -> None:
         r"""
+        Saves the roadmap to a Trivial Graph Format (TGF) format file.  
+
         Args:
             fn (str)
         """

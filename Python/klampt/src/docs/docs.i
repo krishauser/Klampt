@@ -509,7 +509,7 @@ Retrieves a view of the points.
 Returns:  
 
     ndarray: an nx3 Numpy array. Setting elements of this array will
-    change the points.
+    immediately take effect.
  Return type: np.ndarray  
 ";
 
@@ -1112,6 +1112,9 @@ C++ includes: geometry.h
 %feature("docstring") Geometry3D::Geometry3D "
 ";
 
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
 %feature("docstring") Geometry3D::~Geometry3D "
 ";
 
@@ -1311,6 +1314,19 @@ collision data structures.
 
 Translates/rotates/scales the geometry data. Permanently modifies the data and
 resets any collision data structures.  
+";
+
+%feature("docstring") Geometry3D::setAppearance "
+
+Attaches appearance data to the geometry. This is only supported by triangle
+meshes.  
+";
+
+%feature("docstring") Geometry3D::getAppearance "
+
+Retrieves any appearance data attached to the geometry. If no appearance data is
+attached, returns an empty Appearance. This is only supported by triangle
+meshes.  
 ";
 
 %feature("docstring") Geometry3D::setCollisionMargin "
@@ -1752,7 +1768,10 @@ Returns true if the heightmaps is in orthographic (elevation map) mode.
 
 %feature("docstring") Heightmap::getViewport "
 
-Retrieves the viewport.  
+Retrieves the viewport, which defines how the heightmap data is mapped to
+spatial coordinates. Note that this is returned by value. If you change an
+attribute of the viewport, you should call setViewport (or viewport=...) to
+update the heightmap's viewport.  
 ";
 
 %feature("docstring") Heightmap::setViewport "
@@ -1764,6 +1783,26 @@ Sets the viewport.
 
 Gets the height of a vertex (note, indices are x and y units, which is reversed
 from image convention)  
+";
+
+%feature("docstring") Heightmap::getVertex "
+
+Gets the coordinates of a vertex (note, indices are x and y units, which is
+reversed from image convention)  
+";
+
+%feature("docstring") Heightmap::getSize "
+
+Returns the width/height of the heightmap in real coordinates. (only directly
+interpretable in orthographic mode; in perspective mode the returned value is
+the horizontal / vertical FOV in radians.)  
+";
+
+%feature("docstring") Heightmap::getResolution "
+
+Returns the width/height of each cell of the heightmap in real coordinates.
+(only directly interpretable in orthographic mode; in perspective mode the
+returned value is the resolution at 1 unit depth.)  
 ";
 
 %feature("docstring") Heightmap::shift "
@@ -1779,7 +1818,8 @@ Scales the height uniformly.
 %feature("docstring") Heightmap::getHeights "
 
 Returns a 2D Numpy array view of the values. Result has shape w x h and has
-float32 dtype.  
+float32 dtype. Modifications to the array are immediately reflected in the
+heightmap.  
 
 Return type: np.ndarray  
 ";
@@ -1886,7 +1926,7 @@ Retrieves the index associated with a property name.
 
 %feature("docstring") Heightmap::setProperty "
 
-Retrieves a property index Sets an individual pixel's property vector.  
+Sets an individual pixel's property vector.  
 ";
 
 %feature("docstring") Heightmap::getProperty "
@@ -2444,7 +2484,8 @@ Scales the value uniformly.
 
 %feature("docstring") ImplicitSurface::getValues "
 
-Returns a 3D Numpy array view of the values.  
+Returns a 3D Numpy array view of the values. Changes to this array will
+immediately take effect.  
 
 Return type: np.ndarray  
 ";
@@ -2645,7 +2686,8 @@ Scales the value uniformly.
 
 %feature("docstring") OccupancyGrid::getValues "
 
-Returns a 3D Numpy array view of the values.  
+Returns a 3D Numpy array view of the values. Changes to this array will
+immediately take effect.  
 
 Return type: np.ndarray  
 ";
@@ -2674,7 +2716,9 @@ An interface for a kinematic motion planner. The :class:`MotionPlan` interface
 in cspace.py is somewhat easier to use.  
 
 On construction, uses the planner type specified by setPlanType and the settings
-currently specified by calls to setPlanSetting.  
+currently specified by calls to setPlanSetting. If a string is provided as the
+second argument, these are assumed to be a JSON-formatted string, equivalent to
+one passed to :func:`set_plan_json_string`.  
 
 Point-to-point planning is enabled by sending two configurations to the
 setEndpoints method. This is mandatory for RRT and SBL-style planners. The start
@@ -2695,8 +2739,8 @@ Some planners can be used multi-query mode (such as PRM). In multi-query mode,
 you may call addMilestone(q) to add a new milestone. addMilestone() returns the
 index of that milestone, which can be used in later calls to getPath().  
 
-In point-to-set mode, getSolutionPath will return the optimal path to any goal
-milestone.  
+In point-to-set mode, getSolutionPath will return the optimal path from the
+start to any goal milestone.  
 
 All planners work with the standard path-length objective function. Some
 planners can work with other cost functions, and you can use setCostFunction to
@@ -2704,14 +2748,10 @@ set the edge / terminal costs. Usually, the results will only be optimal on the
 computed graph, and the graph is not specifically computed to optimize that
 cost.  
 
-To get a roadmap (V,E), call getRoadmap(). V is a list of configurations (each
-configuration is a Python list) and E is a list of edges (each edge is a pair
-(i,j) indexing into V).  
-
-To dump the roadmap to disk, call dump(fn). This saves to a Trivial Graph Format
-(TGF) format.  
-
 C++ includes: motionplanning.h
+";
+
+%feature("docstring") PlannerInterface::PlannerInterface "
 ";
 
 %feature("docstring") PlannerInterface::PlannerInterface "
@@ -2721,15 +2761,62 @@ C++ includes: motionplanning.h
 ";
 
 %feature("docstring") PlannerInterface::destroy "
+
+Frees memory associated with this planner. Will be called automatically upon
+termination, and a MotionPlan instance will call this automatically when it is
+freed.  
+";
+
+%feature("docstring") PlannerInterface::isOptimizing "
+
+Returns true if a plan can be improved with more planning iterations.  
 ";
 
 %feature("docstring") PlannerInterface::setEndpoints "
+
+Sets the endpoints of the planner to a start / goal configuration pair.  
 ";
 
 %feature("docstring") PlannerInterface::setEndpointSet "
+
+Sets the endpoints of the planner to a start configuration and a goal set. goal
+must be a callable `goal(config)` returning a bool. If goalSample != None, then
+it must be a function `goalSample()` returning a configuration.  
+";
+
+%feature("docstring") PlannerInterface::getEndpoints "
+
+Returns a tuple (start,goal), which may be (None,None) if no goal is set yet.
+goal can be a configuration, a callable goal test, or a pair (goal test, goal
+sampler)  
 ";
 
 %feature("docstring") PlannerInterface::setCostFunction "
+
+Changes the cost function away from the standard path length cost. The edge cost
+is `edgeCost(qa,qb)` and the terminal cost is `terminalCost(q)`. The total path
+cost is `sum_{i=0,...,N-1} edgeCost(path[i],path[i+1]) + terminalCost[path[N]]`  
+";
+
+%feature("docstring") PlannerInterface::edgeCost "
+
+Evaluates the edge cost. If no cost function is set, this is the distance
+between the configurations.  
+";
+
+%feature("docstring") PlannerInterface::terminalCost "
+
+Evaluates the terminal cost. If no cost function is set, this is 0.  
+";
+
+%feature("docstring") PlannerInterface::getEdgeCostFunction "
+
+Returns the edge cost function, if set. Returns None otherwise.  
+";
+
+%feature("docstring") PlannerInterface::getTerminalCostFunction "
+
+Returns the terminal cost function, if set. Returns None otherwise.  
 ";
 
 %feature("docstring") PlannerInterface::addMilestone "
@@ -2757,12 +2844,20 @@ C++ includes: motionplanning.h
 ";
 
 %feature("docstring") PlannerInterface::getStats "
+
+Returns a dictionary of statistics. Each key is a string.  
 ";
 
 %feature("docstring") PlannerInterface::getRoadmap "
+
+Retrieves a roadmap as a pair (V,E). V is a list of configurations (each
+configuration is a Python list) and E is a list of edges (each edge is a pair
+(i,j) indexing into V).  
 ";
 
 %feature("docstring") PlannerInterface::dump "
+
+Saves the roadmap to a Trivial Graph Format (TGF) format file.  
 ";
 
 // File: structPointCloud.xml
@@ -3972,8 +4067,17 @@ Returns a reference to the link's appearance.
 
 %feature("docstring") RobotModelLink::getMass "
 
-Returns the inertial properties of the link. (Note that the Mass is given with
-origin at the link frame, not about the COM.)  
+Returns the inertial properties of the link.  
+
+.. note::  
+
+    To change the mass properties, you should call ``m=link.getMass()``,
+    change the desired properties in m, and then ``link.setMass(m)``
+ .. note::  
+
+     The Mass object considers the inertia matrix origin as the link
+     frame, not about the COM.
+  
 ";
 
 %feature("docstring") RobotModelLink::setMass "
@@ -5947,9 +6051,19 @@ IMPORTANT:
   
 ";
 
+%feature("docstring") WorldModel::entityType "
+
+Returns either 'robot', 'robotLink', 'rigidObject', or 'terrain'.  
+";
+
 %feature("docstring") WorldModel::getName "
 
 Retrieves the name for a given element ID.  
+";
+
+%feature("docstring") WorldModel::setName "
+
+Sets the name for a given element ID.  
 ";
 
 %feature("docstring") WorldModel::geometry "
@@ -6004,7 +6118,8 @@ sampling-based motion planners.
 
 %feature("docstring") set_plan_json_string "
 
-Loads planner values from a JSON string.  
+Loads planner values from a JSON string. See :func:`set_plan_setting` for valid
+settings.  
 ";
 
 %feature("docstring") get_plan_json_string "

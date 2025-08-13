@@ -184,7 +184,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 work may support Trajectory and other types.
             initialValue (optional): the configuration of the variable.  If it's a float, the type will be set to 
                 numeric, if it's a list it will be set to a vector, or if its a supported object, the type will
-                be set appropriately and config.getConfig(initialValue) will be used for its parameter setting.
+                be set appropriately and config.get_config(initialValue) will be used for its parameter setting.
             encoding (str, optional): only supported for Rotation and RigidTransform types, and defines how the
                 variable will be parameterized in optimization.  Can be:
 

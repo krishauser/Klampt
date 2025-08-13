@@ -1,6 +1,9 @@
 """This module provides convenient access to the motionplanning module
-functionality by defining the :class:`CSpace` and :class:`MotionPlan`
+functionality by defining the :class:`CSpace` and :class:`KinematicPlanner`
 classes.
+
+:class:`KinematicPlanner` is an alias for :class:`KinematicPlanner` for
+backwards-compatiblity.
 """
 
 from . import motionplanning
@@ -10,7 +13,7 @@ from ..model.typing import Config
 from typing import List, Tuple, Union, Optional, Callable
 
 class CSpace:
-    """Used alongside :class:`MotionPlan` to define a configuration space for
+    """Used alongside :class:`KinematicPlanner` to define a configuration space for
     motion planning.
 
     Attributes:
@@ -96,13 +99,13 @@ class CSpace:
     def close(self):
         """This method must be called to free the memory associated with the
         planner.  Alternatively, motionplanning.destroy() can be called to
-        free all previously constructed CSpace and MotionPlan objects."""
+        free all previously constructed CSpace and KinematicPlanner objects."""
         if self.cspace is not None:
             self.cspace.destroy()
             self.cspace = None
     
     def setup(self,reinit = False):
-        """Called internally by the MotionPlan class to set up planning
+        """Called internally by the KinematicPlanner class to set up planning
         hooks. 
 
         If reinit is not set to True, and the setup() method has been called before,
@@ -213,18 +216,18 @@ class CSpace:
         return self.cspace.getStats()
 
 
-class MotionPlan:
-    """A motion planner instantiated on a space.  Currently supports
+class KinematicPlanner:
+    """A motion planner instantiated on a CSpace.  Currently supports
     only kinematic, point-to-point, or point-to-set plans.
 
     Planner parameters must be set by calling the static
-    MotionPlan.setOptions(param1=value1,param2=value2,...) method BEFORE
-    calling the MotionPlan(space,type) constructor.
+    KinematicPlanner.setOptions(param1=value1,param2=value2,...) method BEFORE
+    calling the KinematicPlanner(space,type) constructor.
 
     If type is not specified in the constructor, the planning algorithm
     will be chosen by default.
     
-    Note that MotionPlan.close() or motionplanning.destroy() must be called
+    Note that KinematicPlanner.close() or motionplanning.destroy() must be called
     to free memory after you are done.
 
     Multi-query roadmaps are supported for the PRM and SBLPRT algorithms.
@@ -263,7 +266,7 @@ class MotionPlan:
         if type != None:
             motionplanning.set_plan_type(type)
         if len(options) > 0:
-            MotionPlan.setOptions(**options)
+            KinematicPlanner.setOptions(**options)
         self.space = space
         self.planOptions = motionplanning.get_plan_json_string()
         self.planner = motionplanning.PlannerInterface(space.cspace)
@@ -273,7 +276,7 @@ class MotionPlan:
     def close(self):
         """This method must be called to free the memory associated with the
         planner.  Alternatively, motionplanning.destroy() can be called to
-        free all previously constructed CSpace and MotionPlan objects."""
+        free all previously constructed CSpace and KinematicPlanner objects."""
         self.planner.destroy()
 
     @staticmethod
@@ -365,12 +368,22 @@ class MotionPlan:
         self.terminalCost = terminalCost
         self.planner.setCostFunction(edgeCost,terminalCost)
 
+    def getCostFunction(self) -> Tuple[Callable,Callable]:
+        """Retrieves the planner's edge cost and terminal cost functions."""
+        return self.planner.getEdgeCostFunction(), self.planner.getTerminalCostFunction()
+
+    def isOptimizing(self) -> bool:
+        """Returns whether the planner is an optimizing planner, i.e., will
+        continue to improve the path after the first feasible path is found.
+        """
+        return self.planner.isOptimizing()
+
     def addMilestone(self, x : Config):
-        """Manually adds a milestone at configuration x and returns its index"""
+        """Manually adds a milestone at configuration x and returns its index."""
         return self.planner.addMilestone(x)
 
     def getClosestMilestone(self, x: Config) -> int:
-        """Returns the index of the closest milestone to configuration x"""
+        """Returns the index of the closest milestone to configuration x."""
         return self.planner.getClosestMilestone(x)
     
     def planMore(self, iterations : int):
@@ -414,6 +427,12 @@ class MotionPlan:
         planner-dependent """
         return self.planner.getStats()
 
+    def pathLength(self,path : List[Config]) -> float:
+        """Helper function to calculate the C-space length of a path. 
+        """
+        if len(path) == 0: return 0.0
+        return sum(self.space.cspace.distance(a,b) for (a,b) in zip(path[:-1],path[1:]))
+    
     def pathCost(self,path : List[Config]) -> float:
         """Helper function to calculate the cost of a path.  If no cost
         function was previously set with setCostFunction, this is just the CSpace
@@ -425,6 +444,7 @@ class MotionPlan:
         else:
             c += sum(self.edgeCost(a,b) for (a,b) in zip(path[:-1],path[1:]))
         return c
+
 
 OPTIMIZING_PLANNERS = set(['fmm*','rrt*','prm*','lazyprm*','lazyrrg*'])
 """set: The set of natively optimizing planners. 
@@ -446,8 +466,8 @@ def configure_planner(space : CSpace, start : Config, goal : Union[Config,Tuple[
                       edgeCost : Optional[Callable]=None , terminalCost : Optional[Callable]=None, optimizing=True,
                       type='auto',stepsize=None,knn=10,
                       shortcut='auto',restart='auto',restartIters=1000,pointLocation='auto',
-                      **otherSettings) -> Tuple[MotionPlan,dict]:
-    """Automatically sets up a MotionPlan with reasonable options, double
+                      **otherSettings) -> Tuple[KinematicPlanner,dict]:
+    """Automatically sets up a KinematicPlanner with reasonable options, double
     checking if the options are compatible with the given inputs.
 
     Args:
@@ -455,11 +475,11 @@ def configure_planner(space : CSpace, start : Config, goal : Union[Config,Tuple[
         start (list of floats): the start configuration
         goal (list of floats or function or (function,function) tuple): the 
             goal configuration or condition.  See
-            :meth:`MotionPlan.setEndpoints`.
+            :meth:`KinematicPlanner.setEndpoints`.
         edgeCost (function, optional): the edge cost. See
-            :meth:`MotionPlan.setCostFunction`.
+            :meth:`KinematicPlanner.setCostFunction`.
         terminalCost (function, optional): the terminal cost. See
-            :meth:`MotionPlan.setCostFunction`.
+            :meth:`KinematicPlanner.setCostFunction`.
         optimizing (bool, optional): whether you expect to be planning past
             the first path found to obtain a better solution.
         type (str, optional): the planner type string.  If 'auto', the planner
@@ -476,11 +496,11 @@ def configure_planner(space : CSpace, start : Config, goal : Union[Config,Tuple[
         pointLocation (str, optional): what point location data structure to
             use.  By default, either 'kdtree' or 'balltree' are selected,
             depending on whether you space is assumed Cartesian or not.
-        otherSettings (keyword dict, optional): other MotionPlan keywords 
+        otherSettings (keyword dict, optional): other KinematicPlanner keywords 
             can be added to override any of the auto-determined settings.
 
     Returns:
-        (MotionPlan,dict): a pair giving the MotionPlan object that can be
+        (KinematicPlanner,dict): a pair giving the KinematicPlanner object that can be
         called to produce a plan, and a dictionary giving the relevant
         settings.
     """
@@ -582,8 +602,8 @@ def configure_planner(space : CSpace, start : Config, goal : Union[Config,Tuple[
         args['restartTermCond']=restartTermCond
     args.update(otherSettings)
 
-    MotionPlan.setOptions(**args)
-    planner = MotionPlan(space)
+    KinematicPlanner.setOptions(**args)
+    planner = KinematicPlanner(space)
 
     #do some checking of the terminal conditions
     if not space.isFeasible(start):
@@ -622,15 +642,18 @@ def configure_planner(space : CSpace, start : Config, goal : Union[Config,Tuple[
     return planner,args
 
 
+MotionPlan = KinematicPlanner
+"""Alias for backwards compatibility"""
+
 
 def _selfTest():
     c = CSpace()
     c.bound = [(-2,2),(-2,2)]
     c.feasible = lambda x: pow(x[0],2.0)+pow(x[1],2.0) > 1.0
     c.setup()
-    MotionPlan.setOptions(type="rrt")
+    KinematicPlanner.setOptions(type="rrt")
     print("Setup complete")
-    p = MotionPlan(c)
+    p = KinematicPlanner(c)
     print("Setting endpoints")
     p.setEndpoints([-1.5,0],[1.5,0])
     print("PlanMore")

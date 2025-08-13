@@ -4,7 +4,7 @@
 import math
 import time
 from ..math import vectorops
-from .cspace import CSpace,MotionPlan
+from .cspace import CSpace,KinematicPlanner
 import warnings
 import itertools
 import random
@@ -111,14 +111,14 @@ class EmbeddedCSpace(CSpace):
     
     .. note ::
 
-        A MotionPlan constructed on this object operates in the embedded space,
+        A KinematicPlanner constructed on this object operates in the embedded space,
         NOT the ambient space.  To push endpoints to the embedded space you 
         will need to call :meth:`EmbeddedCSpace.project`, and to pull a plan 
         back to the ambient space, use the :meth:`EmbeddedCSpace.liftPlan`
         method.
 
-        To make this more convenient, the :class:`SubsetMotionPlan` class is
-        provided for you.  :class:`EmbeddedMotionPlan` does the same thing.
+        To make this more convenient, the :class:`SubsetKinematicPlanner` class is
+        provided for you.  :class:`EmbeddedKinematicPlanner` does the same thing.
 
     .. note ::
 
@@ -209,13 +209,13 @@ class AffineEmbeddedCSpace(CSpace):
     
     .. note ::
 
-        A MotionPlan constructed on this object operates in the embedded space,
+        A KinematicPlanner constructed on this object operates in the embedded space,
         NOT the ambient space.  To push endpoints to the embedded space you 
         will need to call :meth:`AffineEmbeddedCSpace.project`, and to pull a
         plan back to the ambient space, use the
         :meth:`AffineEmbeddedCSpace.liftPlan` method.
 
-        To make this more convenient, the :class:`EmbeddedMotionPlan` class is
+        To make this more convenient, the :class:`EmbeddedKinematicPlanner` class is
         provided for you.
 
     .. note ::
@@ -420,13 +420,13 @@ class AffineEmbeddedCSpace(CSpace):
         return self.project(self.ambientspace.sample())
     
     
-class SubsetMotionPlan (MotionPlan):
+class SubsetKinematicPlanner (KinematicPlanner):
     """An adaptor that "lifts" a motion planner in an :class:`EmbeddedCSpace`
     to a higher dimensional ambient space.  Used for planning in subsets of
     robot DOFs.
     """
     def __init__(self,space,subset,q0,type=None,**options):
-        MotionPlan.__init__(self,space,type,**options)
+        KinematicPlanner.__init__(self,space,type,**options)
         self.subset = subset
         self.q0 = q0
         
@@ -469,26 +469,26 @@ class SubsetMotionPlan (MotionPlan):
             def goaltest(x,goal=goal):
                 return goal(self.lift(x))
             embgoal = goaltest
-        MotionPlan.setEndpoints(self,embstart,embgoal)
+        KinematicPlanner.setEndpoints(self,embstart,embgoal)
 
     def addMilestone(self,x):
         """Manually adds a milestone from the ambient space, and returns its index"""
-        return MotionPlan.addMilestone(self,self.project(x))
+        return KinematicPlanner.addMilestone(self,self.project(x))
 
     def getPath(self,milestone1=None,milestone2=None):
         """Lifts the motion planner's lower-dimensional path back to the ambient space"""
-        spath = MotionPlan.getPath(self,milestone1,milestone2)
+        spath = KinematicPlanner.getPath(self,milestone1,milestone2)
         if spath == None: return None
         return [self.lift(q) for q in spath]
 
     def getRoadmap(self):
         """Lifts the motion planner's lower-dimensional roadmap back to the ambient space"""
-        V,E = MotionPlan.getRoadmap(self)
+        V,E = KinematicPlanner.getRoadmap(self)
         return [self.lift(v) for v in V],E
 
 
 
-class EmbeddedMotionPlan (MotionPlan):
+class EmbeddedKinematicPlanner (KinematicPlanner):
     """An adaptor that "lifts" a motion planner in an :class:`EmbeddedCSpace`
     or :class:`AffineEmbeddedCSpace` to a higher dimensional ambient space. 
 
@@ -500,8 +500,8 @@ class EmbeddedMotionPlan (MotionPlan):
             if not hasattr(space,'project') or not hasattr(space,'lift'):
                 raise ValueError("space argument must have the project and lift methods")
             else:
-                warnings.warn("EmbeddedMotionPlan has not been tested with classes other than EmbeddedCSpace and AffineEmbeddedCSpace")
-        MotionPlan.__init__(self,space,type,**options)
+                warnings.warn("EmbeddedKinematicPlanner has not been tested with classes other than EmbeddedCSpace and AffineEmbeddedCSpace")
+        KinematicPlanner.__init__(self,space,type,**options)
         
     def setEndpoints(self,start,goal):
         """Takes care of projecting the start and goal (represented in the ambient
@@ -527,21 +527,21 @@ class EmbeddedMotionPlan (MotionPlan):
             def goaltest(x,goal=goal):
                 return goal(self.space.lift(x))
             embgoal = goaltest
-        MotionPlan.setEndpoints(self,embstart,embgoal)
+        KinematicPlanner.setEndpoints(self,embstart,embgoal)
         
     def addMilestone(self,x):
         """Manually adds a milestone from the ambient space, and returns its index"""
-        return MotionPlan.addMilestone(self,self.space.project(x))
+        return KinematicPlanner.addMilestone(self,self.space.project(x))
 
     def getPath(self,milestone1=None,milestone2=None):
         """Lifts the motion planner's lower-dimensional path back to the ambient space"""
-        spath = MotionPlan.getPath(self,milestone1,milestone2)
+        spath = KinematicPlanner.getPath(self,milestone1,milestone2)
         if spath == None: return None
         return [self.space.lift(q) for q in spath]
 
     def getRoadmap(self):
         """Lifts the motion planner's lower-dimensional roadmap back to the ambient space"""
-        V,E = MotionPlan.getRoadmap(self)
+        V,E = KinematicPlanner.getRoadmap(self)
         return [self.space.lift(v) for v in V],E
        
     def setCostFunction(self, edgeCost=None, terminalCost=None):
@@ -554,8 +554,12 @@ class EmbeddedMotionPlan (MotionPlan):
             projectedTerminalCost = lambda a:terminalCost(self.space.lift(a))
         else:
             projectedTerminalCost = None
-        MotionPlan.setCostFunction(self,projectedEdgeCost,projectedTerminalCost)
+        KinematicPlanner.setCostFunction(self,projectedEdgeCost,projectedTerminalCost)
 
     def pathCost(self,p):
         """Calculates the cost of a path in the ambient space."""
-        return MotionPlan.pathCost(self,[self.space.project(x) for x in p])
+        return KinematicPlanner.pathCost(self,[self.space.project(x) for x in p])
+    
+    def pathLength(self,p):
+        """Calculates the length of a path in the ambient space."""
+        return KinematicPlanner.pathLength(self,[self.space.project(x) for x in p])

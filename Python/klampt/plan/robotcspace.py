@@ -2,10 +2,11 @@ from .cspace import CSpace
 from .. import robotsim
 from ..model import collide
 from .cspaceutils import EmbeddedCSpace
-from ..robotsim import RobotModel,IKObjective
+from ..robotsim import RobotModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..math import se3
 import math
 import random
-from ..model.typing import Config,Configs
+from ..model.typing import Config,Configs,RigidTransform
 from typing import Optional,Union,List,Callable
 
 class RobotCSpace(CSpace):
@@ -26,6 +27,11 @@ class RobotCSpace(CSpace):
         floating base or continuously rotating (spin) joints, you may need to
         overload the :meth:`sample` method.  The default implementation
         assumes that everything with unbounded limits is a rotational joint.
+    
+    .. warning::
+
+        This implementation does NOT respect driver definitions.  Use
+        :func:`~klampt.plan.robotplanning.make_space` instead.
         
     """
     def __init__(self,robot : RobotModel, collider : Optional[collide.WorldCollider]=None):
@@ -363,8 +369,9 @@ class EmbeddedRobotCSpace(EmbeddedCSpace):
             self.sampleneighborhood = sampleneighborhood
 
     def disableInactiveCollisions(self):
-        """This modifies the collider in ambientspace to only check collisions
-        between moving pairs.  Should be called before `setup()` in most cases.
+        """Modifies the collider in ambientspace to only check self-collisions
+        between moving link pairs, and one moving link vs a static link. 
+        Should be called before `setup()` in most cases.
         """
         robot = self.robot
         collider = self.ambientspace.collider
@@ -416,3 +423,110 @@ class EmbeddedRobotCSpace(EmbeddedCSpace):
 
 
 
+class RobotCSpaceWithObject(RobotCSpace):
+    """A robot cspace that attaches one or more objects to one or more robot
+    links.  This is used for grasped objects.
+
+    By default, collisions between the attached object and its link are ignored.
+    If the attached link does not have an enabled self collision with another link,
+    then collisions between the object and that link are also ignored.  This is
+    useful for finger links that are grasping the object, since they will usually
+    be overlapping the object in the model but these should be ignored as far as
+    feasibility goes.  
+
+    If you would NOT like to ignore collisions between the object and one of these
+    disabled links, you must add this as an extra feasibility test.
+    """
+    def __init__(self,robot : RobotModel, collider : Optional[collide.WorldCollider]=None):
+        RobotCSpace.__init__(self,robot,collider)
+        self.attachments = []  #list of (objectIndex, linkIndex, relTransform)
+        setconfig_index = self.feasibilityTestNames.index("setconfig")
+        assert setconfig_index >= 0, "setconfig feasibility test not found"
+        self.feasibilityTests[setconfig_index] = self.updateConfig  #replace old setconfig with new one that sets object transforms
+
+    def updateConfig(self,x):
+        """Updates the robot's configuration and sets the transforms of
+        attached objects to the correct relative transforms."""
+        self.robot.setConfig(x)
+        for obj,link,relTransform in self.attachments:
+            obj.setTransform(*se3.mul(self.robot.link(link).getTransform(),relTransform))
+        return True
+
+    def attachObject(self,objectIndex : int, linkIndex : int, relTransform : Optional[RigidTransform]=None):
+        """Attaches the object with index objectIndex to the link with index
+        linkIndex.  The object will be moved with the robot, and collisions
+        between the robot and the object will be checked.
+        
+        Note: collisions will be ignored between objectIndex and linkIndex.
+        If you want to ignore collisions between other links, such as finger
+        links, you must set the collider's collision mask appropriately.
+        """
+        if not self.collider:
+            raise ValueError("Cannot attach objects without a collider")
+        obj = self.collider.world.rigidObject(objectIndex)
+        if obj.id < 0:
+            raise ValueError("Object %d is not in the world"%(objectIndex,))
+        link = self.robot.link(linkIndex)
+        if relTransform is None:
+            relTransform = se3.mul(se3.inv(link.getTransform()),obj.getTransform())
+        for a in self.attachments:
+            if a[0].id == obj.id:
+                raise ValueError("Object %d is already attached to the robot"%(objectIndex,))
+        self.attachments.append((obj, linkIndex, relTransform))
+        try:
+            obj_collision_index = self.feasibilityTestNames.index("obj collision "+str(objectIndex)+" "+obj.getName())
+        except ValueError:
+            print("Object collision feasibility test not found")
+            print("Options:",self.feasibilityTestNames)
+            raise
+        self.feasibilityTests[obj_collision_index] = lambda x:not self.objSelfCollision(obj,link)
+
+    def selfCollision(self, x : Optional[Config]=None) -> bool:
+        """Checks whether the robot at its current configuration is in
+        self collision.  Ignores the object attached to the robot."""
+        #This should be faster than going through the collider... 
+        if x is not None: self.updateConfig(x)
+        if self.robot.selfCollides(): 
+            return True
+        return False
+        
+    def objSelfCollision(self,obj:RigidObjectModel, link:RobotModelLink):
+        """Checks whether the object attached to the link collides with the
+        rest of the robot."""
+        for alt_link in range(self.robot.numLinks()):
+            if alt_link == link.index: continue
+            if not self.robot.selfCollisionEnabled(link.index,alt_link):
+                #ignore collisions with links that are not enabled for self-collision
+                continue
+            if self.collider is not None and not self.collider.isCollisionEnabled((self.robot.link(alt_link),obj)):
+                continue
+            if obj.geometry().collides(self.robot.link(alt_link).geometry()):
+                return True
+        return False
+
+    def envCollision(self,x : Optional[Config]=None) -> bool:
+        """Checks whether the robot and attached objects at its current configuration is in
+        collision with the environment."""
+        if not self.collider: return False
+        if x is not None: self.updateConfig(x)
+        attached_objects = set(obj.index for obj,_,_ in self.attachments)
+        for o in range(self.collider.world.numRigidObjects()):
+            if obj.index in attached_objects:
+                #ignore collisions with attached objects
+                continue
+            if any(self.collider.robotObjectCollisions(self.robot.index,o)):
+                return True
+        for o in range(self.collider.world.numTerrains()):
+            if any(self.collider.robotTerrainCollisions(self.robot.index,o)):
+                return True
+        #collide attached objects with the rest of the world
+        for obj,_,_ in self.attachments:
+            for o in range(self.collider.world.numRigidObjects()):
+                if obj.index in attached_objects: continue
+                if any(self.collider.objectObjectCollisions(obj.index,o)):
+                    return True
+            for o in range(self.collider.world.numTerrains()):
+                if any(self.collider.objectTerrainCollisions(obj.index,o)):
+                    return True
+        return False
+    

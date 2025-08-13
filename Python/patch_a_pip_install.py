@@ -2,14 +2,9 @@ import os
 import glob
 import sys
 
-pip_klampt_version = '0.9.0'
+pip_klampt_version = '0.10.1'
 root_py_folder = "klampt"
-if sys.version_info[0] == 2:
-    #python2 version has drifted from current Python3 version... maintain separate packages list for compatibility
-    root_py_folder = "python2_version/klampt"
-    subpackages = ['apps','io','math','model','model/create','plan','plan/kinetrajopt','sim','vis','vis/backends','vis/ipython']
-else:
-    subpackages = ['apps','control','control/blocks','control/io','io','math','math/autodiff','model','model/create','plan','plan/kinetrajopt','sim','vis','vis/backends','vis/ipython']
+subpackages = ['apps','control','control/blocks','control/io','io','manip','math','math/autodiff','model','model/create','plan','plan/kinetrajopt','sim','vis','vis/backends','vis/ipython']
 
 #find the klampt install path...
 
