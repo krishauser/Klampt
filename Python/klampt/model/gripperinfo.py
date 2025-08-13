@@ -511,7 +511,7 @@ class GripperInfo:
             p = GeometricPrimitive()
             p.setSphere(outer_point,self.maximumSpan)
             g = Geometry3D()
-            g.set(p)
+            g.setGeometricPrimitive(p)
             vis.add(prefix+"_opening",g,color=(0,1,0,0.25))
         #TODO: add finger box
 
