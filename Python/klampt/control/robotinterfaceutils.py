@@ -4865,6 +4865,7 @@ class RobotInterfaceEmulator:
         self.promote(indices,'setPosition')
         for (i,v) in zip(indices,q):
             self.jointData[i].commandedPosition = v
+            self.jointData[i].commandedVelocity = 0
 
     def moveToPosition(self,indices,q,speed):
         """Backup: runs a position command using a piecewise linear trajectory"""
@@ -4876,6 +4877,7 @@ class RobotInterfaceEmulator:
             self.promote(indices,'setPosition')
             for (i,v) in zip(indices,q):
                 self.jointData[i].commandedPosition = v
+                self.jointData[i].commandedVelocity = 0
         else:
             #move to command emulation using bounded velocity curve 
             xmin, xmax = [], []
@@ -5078,6 +5080,8 @@ class RobotInterfaceEmulator:
             elif j.controlMode == 'setPosition':
                 if abs(j.commandedPosition - j.sensedPosition) > 1e-3:
                     return True
+                if self.jointData[i].commandedVelocity != 0:  #this is nonzero during cartesian control
+                    return True
             elif j.controlMode == 'setPID':
                 if j.commandedVelocity != 0:
                     return True
@@ -5161,6 +5165,8 @@ class RobotInterfaceEmulator:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
         for i,j in enumerate(self.jointData):
+            if j.sensedPosition is None:
+                raise RuntimeError("Can't move to cartesian position before first controller clock cycle")
             self.klamptModel.driver(i).setValue(j.sensedPosition if j.commandedPosition is None else j.commandedPosition)
         c.active = False
         qKlamptNext = c.solveIK(xparams,frame)
@@ -5176,6 +5182,8 @@ class RobotInterfaceEmulator:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
         for i,j in enumerate(self.jointData):
+            if j.sensedPosition is None:
+                raise RuntimeError("Can't move to cartesian position before first controller clock cycle")
             self.klamptModel.driver(i).setValue(j.sensedPosition if j.commandedPosition is None else j.commandedPosition)
         c.active = False
         qKlamptNext = c.solveIK(xparams,frame)
@@ -5191,6 +5199,8 @@ class RobotInterfaceEmulator:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
         for i,j in enumerate(self.jointData):
+            if j.sensedPosition is None:
+                raise RuntimeError("Can't move to cartesian position before first controller clock cycle")
             self.klamptModel.driver(i).setValue(j.sensedPosition if j.commandedPosition is None else j.commandedPosition)
         qstart = [j.sensedPosition if j.commandedPosition is None else j.commandedPosition for j in self.jointData]
         c.moveToCartesianPositionLinear(qstart,xparams,speed,frame)
