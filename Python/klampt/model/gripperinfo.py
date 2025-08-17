@@ -342,7 +342,7 @@ class GripperInfo:
             return SubRobotModel(robot,[baseLink] + self.descendantLinks(robot))
         return SubRobotModel(robot,[baseLink]+list(self.fingerLinks))
 
-    def getGeometry(self, robot : RobotModel, qfinger=None,type='Group') -> Geometry3D:
+    def getGeometry(self, robot : RobotModel, qfinger:Optional[Vector]=None,type='Group') -> Geometry3D:
         """Returns a Geometry of the gripper frozen at its configuration.
         If qfinger = None, the current configuration is used.  Otherwise,
         qfinger is a finger configuration.
@@ -418,7 +418,12 @@ class GripperInfo:
         from klampt import vis
         vis.loop(lambda: self.addToVis())
 
-    def addToVis(self, robot : RobotModel=None, animate : bool=True, base_xform : Optional[RigidTransform]=None) -> None:
+    def addToVis(self,
+                 robot : RobotModel=None,
+                 animate : bool=True,
+                 base_xform : Optional[RigidTransform]=None,
+                 prefix : Optional[str] = None,
+                 hide_label: bool = True) -> None:
         """Adds the gripper to the klampt.vis scene.
         
         Args:
@@ -428,19 +433,24 @@ class GripperInfo:
                 gripper.
             base_xform (se3 element, optional): if given and robot=False, poses 
                 the gripper base at this transform.
+            prefix (str, optional): if given, this is the prefix for the
+                visualization names.  If None, defaults to "gripper_" + self.name.
+            hide_label (bool): if True, the visualization objects' labels will
+                not be shown.
         """
         from klampt import vis
         from klampt import WorldModel,Geometry3D,GeometricPrimitive
         from klampt.model.trajectory import Trajectory
-        prefix = "gripper_"+self.name
+        if prefix is None:
+            prefix = "gripper_"+self.name
         if robot is None and self.klamptModel is not None:
             w = WorldModel()
             if w.readFile(self.klamptModel):
                 robot = w.robot(0)
-                vis.add(prefix+"_gripper",w)
+                vis.add(prefix+"_gripper",w,hide_label=hide_label)
                 robotPath = (prefix+"_gripper",robot.getName())
         elif robot is not None:
-            vis.add(prefix+"_gripper",robot)
+            vis.add(prefix+"_gripper",robot,hide_label=hide_label)
             robotPath = prefix+"_gripper"
         if robot is not None:
             baseLink = robot.link(self.baseLink)
@@ -457,7 +467,7 @@ class GripperInfo:
                     baseLink.setParentTransform(*base_rel_xform)
                 else:
                     baseLink.setParentTransform(*base_xform)
-                robot.setConfig(robot.getConfig())
+                robot.setConfig(robot.getConfig())  #update forward kinematics
             for l in self.fingerLinks:
                 assert l >= 0 and l < robot.numLinks()
                 robot.link(l).appearance().setColor(1,1,0.5)
@@ -492,7 +502,7 @@ class GripperInfo:
             vis.animate(robotPath,traj)
             robot.setConfig(q0)
         if self.center is not None:
-            vis.add(prefix+"_center",se3.apply(base_xform,self.center))
+            vis.add(prefix+"_center",se3.apply(base_xform,self.center),hide_label=hide_label)
         center_point = (0,0,0) if self.center is None else self.center
         outer_point = (0,0,0)
         if self.primaryAxis is not None:
@@ -500,24 +510,27 @@ class GripperInfo:
             outer_point = vectorops.madd(self.center,self.primaryAxis,length)
             line = Trajectory([0,1],[self.center,outer_point])
             line.milestones = [se3.apply(base_xform,m) for m in line.milestones]
-            vis.add(prefix+"_primary",line,color=(1,0,0,1))
+            vis.add(prefix+"_primary",line,color=(1,0,0,1),hide_label=hide_label)
         if self.secondaryAxis is not None:
             width = 0.1 if self.maximumSpan is None else self.maximumSpan
             line = Trajectory([0,1],[vectorops.madd(outer_point,self.secondaryAxis,-0.5*width),vectorops.madd(outer_point,self.secondaryAxis,0.5*width)])
             line.milestones = [se3.apply(base_xform,m) for m in line.milestones]
-            vis.add(prefix+"_secondary",line,color=(0,1,0,1))
+            vis.add(prefix+"_secondary",line,color=(0,1,0,1),hide_label=hide_label)
         elif self.maximumSpan is not None:
             #assume vacuum gripper?
             p = GeometricPrimitive()
             p.setSphere(outer_point,self.maximumSpan)
             g = Geometry3D()
             g.setGeometricPrimitive(p)
-            vis.add(prefix+"_opening",g,color=(0,1,0,0.25))
+            if base_xform is not None:
+                g.setCurrentTransform(*base_xform)
+            vis.add(prefix+"_opening",g,color=(0,1,0,0.25),hide_label=hide_label)
         #TODO: add finger box
 
-    def removeFromVis(self) -> None:
+    def removeFromVis(self, prefix: Optional[str] = None) -> None:
         """Removes a previously-added gripper from the klampt.vis scene."""
-        prefix = "gripper_"+self.name
+        if prefix is None:
+            prefix = "gripper_"+self.name
         from klampt import vis
         try:
             vis.remove(prefix+"_gripper")

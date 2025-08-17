@@ -4,13 +4,12 @@ from .grasp_sampler import GraspSamplerBase
 from .. import Geometry3D,PointCloud,RigidObjectModel,IKObjective
 from ..math import vectorops,so3,se3
 from ..model.geometry import fit_plane,fit_plane_centroid
-from ..io import numpy_convert
 import math
 import numpy as np
 from typing import Union,Optional,Callable
 
 
-class GraspFlatAreaSampler(GraspSamplerBase):
+class FlatAreaGraspSampler(GraspSamplerBase):
     """A GraspSamplerBase subclass that will find flat areas in a
     point cloud for a vacuum gripper.
 
@@ -45,7 +44,7 @@ class GraspFlatAreaSampler(GraspSamplerBase):
     def gripper(self):
         return self._gripper
 
-    def init(self,scene,object:Union[RigidObjectModel,Geometry3D,PointCloud],hints) -> bool:
+    def init(self,scene,object:Union[RigidObjectModel,Geometry3D,PointCloud],hints=None) -> bool:
         """Needs object to contain a structured PointCloud."""
         if not isinstance(object,(RigidObjectModel,Geometry3D,PointCloud)):
             print("Need to pass an object as a RigidObjectModel, Geometry3D, or PointCloud")
@@ -67,14 +66,14 @@ class GraspFlatAreaSampler(GraspSamplerBase):
         #do a spatial hash
         from collections import defaultdict
         estimation_knn = 6
-        pts = numpy_convert.to_numpy(pc)
+        pts = pc.points
         N = pts.shape[0]
         positions = pts[:,:3]
         normals = np.zeros((N,3))
         indices = (positions * (1.0/self._gripper.maximumSpan)).astype(int)
         pt_hash = defaultdict(list)
         for i,(ind,p) in enumerate(zip(indices,positions)):
-            pt_hash[ind].append((i,p))
+            pt_hash[tuple(ind)].append((i,p))
         options = []
         for (ind,iplist) in pt_hash.items():
             if len(iplist) < estimation_knn:
@@ -82,13 +81,19 @@ class GraspFlatAreaSampler(GraspSamplerBase):
             else:
                 pindices = [ip[0] for ip in iplist]
                 pts = [ip[1] for ip in iplist]
-                c,n = fit_plane_centroid(pts)
-                if n[2] < 0:
-                    n = vectorops.mul(n,-1)
-                verticality = self.vertical_penalty(math.acos(n[2]))
+                try:
+                    c,n = fit_plane_centroid(pts)
+                except ValueError:
+                    # print("Have less than 3 points to fit a plane at index",ind,":",len(pts))
+                    continue  # not enough points to fit a plane
+                cw = se3.apply(xform,c)
+                nw = so3.apply(xform[0],n) 
+                if nw[2] < 0:
+                    nw = vectorops.mul(nw,-1)
+                verticality = self.vertical_penalty(math.acos(nw[2]))
                 var = sum(vectorops.dot(vectorops.sub(p,c),n)**2 for p in pts)
                 roughness = self.roughness_penalty(var)
-                options.append((c,n,verticality + roughness))
+                options.append((cw,nw,verticality + roughness))
         if len(options) == 0:
             return False
         self.options = sorted(options,key=lambda x:x[2])
@@ -104,13 +109,13 @@ class GraspFlatAreaSampler(GraspSamplerBase):
             self.options = None
             return None
 
-        c,n,score = self.options[self.index]
+        cworld,nworld,score = self.options[self.index]
         self.index += 1
-        cworld = se3.apply(self.pc_xform,c)
-        nworld = so3.apply(self.pc_xform[0],n)
+        # cworld = se3.apply(self.pc_xform,c)
+        # nworld = so3.apply(self.pc_xform[0],n)
         objective = IKObjective()
         objective.setLinks(self._gripper.baseLink)
-        objective.setFixedPoint(self._gripper.center,cworld)
+        objective.setFixedPosConstraint(self._gripper.center,cworld)
         objective.setAxialRotConstraint(self._gripper.primaryAxis,vectorops.mul(nworld,-1))
         score = math.exp(-score)
         return Grasp(objective,score=score)
@@ -129,10 +134,10 @@ class GraspFlatAreaSampler(GraspSamplerBase):
         if self.options is None: return
         if self.index >= len(self.options):
             return
-        for i,(c,n,score) in enumerate(self.options[self.index:]):
-            cworld = se3.apply(self.pc_xform,c)
-            nworld = so3.apply(self.pc_xform[0],n)
+        for i,(cworld,nworld,score) in enumerate(self.options[self.index:]):
+            # cworld = se3.apply(self.pc_xform,c)
+            # nworld = so3.apply(self.pc_xform[0],n)
             score = math.exp(-score)
             opacity = score
-            vis.add(f"flat_contact_{i+self.index}",cworld,color=(1,0,0,opacity),size=9)
-            vis.add(f"flat_contact_n_{i+self.index}",[cworld,vectorops.add(cworld,vectorops.mul(nworld,0.05))],color=(1,0,0,opacity))
+            #vis.add(f"flat_contact_{i+self.index}",cworld,color=(1,0,0,opacity),size=9,hide_label=True)
+            vis.add(f"flat_contact_n_{i+self.index}",[cworld,vectorops.add(cworld,vectorops.mul(nworld,0.05))],color=(1,0,0,opacity),hide_label=True)

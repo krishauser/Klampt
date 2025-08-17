@@ -166,7 +166,6 @@ class Grasp:
             w = gripper.openingToWidth(opening_amount)
             T = self.asFixedGrasp().ikConstraint.getTransform()
             if gripper.primaryAxis is not None and gripper.secondaryAxis is not None:
-                print("Drawing parallel gripper grasp with width",w)
                 outer_point = vectorops.madd(gripper.center,gripper.primaryAxis,gripper.fingerLength)
                 top = [vectorops.madd(outer_point,gripper.secondaryAxis,-w/2), vectorops.madd(outer_point,gripper.secondaryAxis,w/2)]
                 middle = [gripper.center, outer_point]
@@ -179,7 +178,8 @@ class Grasp:
         elif gripper is not None and gripper.type == 'vacuum':
             T = self.asFixedGrasp().ikConstraint.getTransform()
             if gripper.primaryAxis is not None:
-                outer_point = vectorops.madd(gripper.center,gripper.primaryAxis,gripper.fingerLength)
+                #draw a line as though the gripper would be pressing down into the object
+                outer_point = vectorops.madd(gripper.center,gripper.primaryAxis,-gripper.fingerLength)
                 vis.add(prefix+"_primary",[se3.apply(T,gripper.center),se3.apply(T,outer_point)],hide_label=hide_label,color=(1,0,0,1))
             else:
                 vis.add(prefix+"_ik",self.ikConstraint,hide_label=hide_label)
