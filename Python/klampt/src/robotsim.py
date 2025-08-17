@@ -7384,7 +7384,7 @@ class RobotModel(object):
         """
         A frozen dictionary mapping link names to RobotModelLink instances.
         """
-        return types.MappingProxyType({l.name:l for l in self.getLinks()})
+        return types.MappingProxyType({l.name:l for l in self.links})
 
     @property
     def drivers(self) -> Sequence[RobotModelDriver]:
@@ -7398,7 +7398,7 @@ class RobotModel(object):
         """
         A frozen dictionary mapping driver names to RobotModelDriver instances.
         """
-        return types.MappingProxyType({d.name:d for d in self.getDrivers()})
+        return types.MappingProxyType({d.name:d for d in self.drivers})
 
     def sensor(self, index_or_name : Union[int,str]) -> 'SensorModel':
         """
@@ -7422,7 +7422,7 @@ class RobotModel(object):
         """
         A frozen dictionary mapping sensor names to SensorModel instances.
         """
-        return types.MappingProxyType({s.name:s for s in self.getSensors()})
+        return types.MappingProxyType({s.name:s for s in self.sensors})
 
     name = property(getName, setName)
     id = property(getID)
@@ -8130,7 +8130,7 @@ class WorldModel(object):
         WorldModel during their operation.
 
         To keep around some "authoritative" world, you can keep around a copy
-        (use ``WorldModel.copy()``) or ``config.getConfig(world)`` using the
+        (use ``WorldModel.copy()``) or ``config.get_config(world)`` using the
         :mod:`klampt.model.config` module.  
 
     Every robot/robot link/terrain/rigid object is given a unique ID in the world.
@@ -8533,7 +8533,7 @@ class WorldModel(object):
         """
         A frozen dictionary mapping robot names to RobotModel instances.
         """
-        return types.MappingProxyType({r.name:r for r in self.getRobots()})
+        return types.MappingProxyType({r.name:r for r in self.robots})
 
     @property
     def rigidObjects(self) -> Sequence[RigidObjectModel]:
@@ -8547,7 +8547,7 @@ class WorldModel(object):
         """
         A frozen dictionary mapping rigid object names to RigidObjectModel instances.
         """
-        return types.MappingProxyType({r.name:r for r in self.getRigidObjects()})
+        return types.MappingProxyType({r.name:r for r in self.rigidObjects})
 
     @property
     def terrains(self) -> Sequence[TerrainModel]:
@@ -8561,7 +8561,7 @@ class WorldModel(object):
         """
         A frozen dictionary mapping terrain names to TerrainModel instances.
         """
-        return types.MappingProxyType({r.name:r for r in self.getTerrains()})
+        return types.MappingProxyType({r.name:r for r in self.terrains})
 
     def entity(self, id_or_name: Union[int,str]) -> Union[RobotModel,RobotModelLink,RigidObjectModel,TerrainModel]:
         """
@@ -10005,7 +10005,7 @@ class SimRobotController(object):
         """
         A frozen dictionary mapping sensor names to SensorModel instances.
         """
-        return types.MappingProxyType({s.name:s for s in self.getSensors()})
+        return types.MappingProxyType({s.name:s for s in self.sensors})
 
     rate = property(getRate, setRate)
     """The controller's update rate in Hz."""

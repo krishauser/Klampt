@@ -509,7 +509,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          A frozen dictionary mapping link names to RobotModelLink instances.
          """
-         return types.MappingProxyType({l.name:l for l in self.getLinks()})
+         return types.MappingProxyType({l.name:l for l in self.links})
 
      @property
      def drivers(self) -> Sequence[RobotModelDriver]:
@@ -523,7 +523,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          A frozen dictionary mapping driver names to RobotModelDriver instances.
          """
-         return types.MappingProxyType({d.name:d for d in self.getDrivers()})
+         return types.MappingProxyType({d.name:d for d in self.drivers})
 
      def sensor(self, index_or_name : Union[int,str]) -> 'SensorModel':
          """
@@ -547,7 +547,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          A frozen dictionary mapping sensor names to SensorModel instances.
          """
-         return types.MappingProxyType({s.name:s for s in self.getSensors()})
+         return types.MappingProxyType({s.name:s for s in self.sensors})
 
      name = property(getName, setName)
      id = property(getID)
@@ -627,7 +627,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          A frozen dictionary mapping robot names to RobotModel instances.
          """
-         return types.MappingProxyType({r.name:r for r in self.getRobots()})
+         return types.MappingProxyType({r.name:r for r in self.robots})
 
      @property
      def rigidObjects(self) -> Sequence[RigidObjectModel]:
@@ -641,7 +641,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          A frozen dictionary mapping rigid object names to RigidObjectModel instances.
          """
-         return types.MappingProxyType({r.name:r for r in self.getRigidObjects()})
+         return types.MappingProxyType({r.name:r for r in self.rigidObjects})
 
      @property
      def terrains(self) -> Sequence[TerrainModel]:
@@ -655,7 +655,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          A frozen dictionary mapping terrain names to TerrainModel instances.
          """
-         return types.MappingProxyType({r.name:r for r in self.getTerrains()})
+         return types.MappingProxyType({r.name:r for r in self.terrains})
 
      def entity(self, id_or_name: Union[int,str]) -> Union[RobotModel,RobotModelLink,RigidObjectModel,TerrainModel]:
          """
@@ -726,7 +726,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          A frozen dictionary mapping sensor names to SensorModel instances.
          """
-         return types.MappingProxyType({s.name:s for s in self.getSensors()})
+         return types.MappingProxyType({s.name:s for s in self.sensors})
 
      rate = property(getRate, setRate)
      """The controller's update rate in Hz."""

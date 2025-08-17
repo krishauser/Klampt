@@ -5813,7 +5813,7 @@ Attributes:
     WorldModel during their operation.
 
     To keep around some \"authoritative\" world, you can keep around a copy
-    (use ``WorldModel.copy()``) or ``config.getConfig(world)`` using the
+    (use ``WorldModel.copy()``) or ``config.get_config(world)`` using the
     :mod:`klampt.model.config` module.  
 
 Every robot/robot link/terrain/rigid object is given a unique ID in the world.
