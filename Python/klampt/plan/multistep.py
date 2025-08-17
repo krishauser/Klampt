@@ -104,6 +104,7 @@ So, you will need to implement the `get_state()` and `set_state()` methods.
 Nodes have a `properties` dictionary that holds any annotations that can
 help the multi-step planner optimize the planning process.  Common properties
 include:
+
 - `deterministic` (bool): the node implements a deterministic function.
 - `procedural` (bool): the node is a procedural function that terminates
     with a single iteration of `plan()`.
@@ -112,6 +113,9 @@ include:
     a valid result.
 - `prior_strength` (float): a prior for how strong the node's priors are.
 
+For optimal performance, it is recommended to set these properties
+appropriately for each node.
+
 
 Context
 -------
@@ -119,11 +123,25 @@ Context
 Every node's `plan()` method will take in a first argument that is the
 *context* of the planner. This is any object that you would like, and using it
 is best practice for passing in a world, robot, objects, algorithm parameters,
-etc.  It is recommended to refrain from using global variables, as this will
-make your planning graph more modular and reusable.
+etc.  This is one of a few ways to manage contextual information in your node:
+
+1. Passing information through a context object.  This is the preferred method,
+    since it allows you to reuse the planning graph in multiple contexts
+    without modification.  (see :class:`IKSolverNode` for an example)
+2. Passing objects to the node's constructor.  This is OK, since it makes no
+    assumptions about the context object.  However, you would need to recreate
+    the node for each context.  (See :class:`KinematicMotionPlannerNode`)
+3. Using partial functions to bind the context to a planning function.  This is
+    OK, since it makes no assumptions about the context object, but you would
+    need to recreate the function for each context.
+4. Using global variables.  This is NOT recommended, as it makes your code less
+    modular and harder to test.
 
 Many built-in nodes assume the following context attributes:
 - robot: the robot model to plan for, which is a :class:`RobotModel`.  
+- world: the world model to plan for, which is a :class:`WorldModel`.
+- object: an object to manipulate, which is a :class:`RigidObjectModel`.
+
 
 Current world state
 -------------------
@@ -152,6 +170,38 @@ the 'plan_path' node is called.  You can set multiple objects at once, e.g.,::
 
 The first argument in each pair is a Klampt object and the second argument can
 either be a constant or a PlanItem that is generated from another step.
+
+
+Validity checking
+------------------
+
+There is an option to check for validity of planned items either 1) in the node
+or 2) in the item's validity checks.  A multi-step planner will always perform
+the item's validity checks after the node returns a value, so you can delay
+validity checking until the node returns a value.  This is useful if you would
+like to implement reusable nodes but with custom validity checks that are
+specific to a given planning graph.
+
+As an example, consider producing a collision-free IK solution.  You could
+implement a subclass of :class:`IKSolverNode` that checks for collisions
+during the IK solving process, as follows::
+
+    class MyIKSolverNode(IKSolverNode):
+        def plan(self, context):
+            for q in super().plan(context):
+                if not context.world.robotCollides(context.robot, q):
+                    yield q
+                else:
+                    yield None
+
+Or, you could implement a custom validity check for the item that is produced 
+by the IKSolverNode, as follows::
+
+    ik_solution = node('ik_solution', IKSolverNode())
+    ik_solution.add_constraint(lambda q: not context.world.robotCollides(context.robot, q))
+
+This latter approach is a bit more readable and flexible, but for complex validity
+checking logic it may be better to follow the customized node approach.
 
 
 Performance Notes
