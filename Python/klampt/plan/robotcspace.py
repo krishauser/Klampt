@@ -452,7 +452,7 @@ class RobotCSpaceWithObject(RobotCSpace):
             obj.setTransform(*se3.mul(self.robot.link(link).getTransform(),relTransform))
         return True
 
-    def attachObject(self,objectIndex : int, linkIndex : int, relTransform : Optional[RigidTransform]=None):
+    def attachObject(self, objectIndex : int, linkIndex : int, relTransform : Optional[RigidTransform]=None):
         """Attaches the object with index objectIndex to the link with index
         linkIndex.  The object will be moved with the robot, and collisions
         between the robot and the object will be checked.
@@ -471,10 +471,10 @@ class RobotCSpaceWithObject(RobotCSpace):
             relTransform = se3.mul(se3.inv(link.getTransform()),obj.getTransform())
         for a in self.attachments:
             if a[0].id == obj.id:
-                raise ValueError("Object %d is already attached to the robot"%(objectIndex,))
+                raise ValueError("Object {} is already attached to the robot".format(objectIndex))
         self.attachments.append((obj, linkIndex, relTransform))
         try:
-            obj_collision_index = self.feasibilityTestNames.index("obj collision "+str(objectIndex)+" "+obj.getName())
+            obj_collision_index = self.feasibilityTestNames.index("obj collision "+str(obj.index)+" "+obj.getName())
         except ValueError:
             print("Object collision feasibility test not found")
             print("Options:",self.feasibilityTestNames)
