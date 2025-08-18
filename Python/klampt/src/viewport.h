@@ -31,7 +31,7 @@ class Viewport
   /// Returns the vertical FOV. 
   double getVFOV() const;
   /// Sets the pose of the camera
-  void setPose(const double R[9],const double t[3]);
+  void _setPose(const double R[9],const double t[3]);
   /// Gets the pose of the camera
   ///
   ///Return type: RigidTransform

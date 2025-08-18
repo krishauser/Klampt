@@ -81,9 +81,9 @@ void IKObjective::setFixedPoints(int link,PyObject* plocals,PyObject* pworlds)
   setRelativePoints(link,-1,plocals,pworlds);
 }
 
-void IKObjective::setFixedTransform(int link,const double R[9],const double t[3])
+void IKObjective::_setFixedTransform(int link,const double R[9],const double t[3])
 {
-  setRelativeTransform(link,-1,R,t);
+  _setRelativeTransform(link,-1,R,t);
 }
 
 void IKObjective::setRelativePoint(int link1,int link2,const double p1[3],const double p2[3])
@@ -110,7 +110,7 @@ void IKObjective::setRelativePoints(int link1,int link2,PyObject* p1s,PyObject* 
   goal.SetFromPoints(localPos,worldPos);
 }
 
-void IKObjective::setRelativeTransform(int link,int linkTgt,const double R[9],const double t[3])
+void IKObjective::_setRelativeTransform(int link,int linkTgt,const double R[9],const double t[3])
 {
   goal.link = link;
   goal.destLink = linkTgt;
@@ -220,7 +220,7 @@ void IKObjective::getTransform(double out[9],double out2[3]) const
     PyException("getTransform called on non-fixed transform");
   }
 }
-void IKObjective::transform(const double R[9],const double t[3])
+void IKObjective::_transform(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -228,7 +228,7 @@ void IKObjective::transform(const double R[9],const double t[3])
   goal.Transform(T);
 }
 
-void IKObjective::transformLocal(const double R[9],const double t[3]) 
+void IKObjective::_transformLocal(const double R[9],const double t[3]) 
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -236,7 +236,7 @@ void IKObjective::transformLocal(const double R[9],const double t[3])
   goal.TransformLocal(T);
 }
 
-void IKObjective::matchDestination(const double R[9],const double t[3])
+void IKObjective::_matchDestination(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -244,7 +244,7 @@ void IKObjective::matchDestination(const double R[9],const double t[3])
   goal.MatchGoalTransform(T);
 }
 
-void IKObjective::closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const
+void IKObjective::_closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const
 {
   RigidTransform T,Tout;
   T.R = Matrix3(R);

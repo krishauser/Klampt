@@ -1462,7 +1462,7 @@ bool Geometry3D::saveFile(const char* fn)
   return geom->Save(fn);
 }
 
-void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
+void Geometry3D::_setCurrentTransform(const double R[9],const double t[3])
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return;
@@ -1495,22 +1495,22 @@ void Geometry3D::scale(double sx,double sy,double sz)
 {
   double R[9]={sx,0,0,0,sy,0,0,0,sz};
   const double t[3]={0,0,0};
-  transform(R,t);
+  _transform(R,t);
 }
 
 void Geometry3D::rotate(const double R[9])
 {
   const double t[3]={0,0,0};
-  transform(R,t);
+  _transform(R,t);
 }
 
 void Geometry3D::translate(const double t[3])
 {
   const double R[9]={1,0,0,0,1,0,0,0,1};
-  transform(R,t);
+  _transform(R,t);
 }
 
-void Geometry3D::transform(const double R[9],const double t[3])
+void Geometry3D::_transform(const double R[9],const double t[3])
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   RigidTransform T;
@@ -2954,7 +2954,7 @@ void TriangleMesh::translate(const double t[3])
   }
 }
 
-void TriangleMesh::transform(const double R[9],const double t[3])
+void TriangleMesh::_transform(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -3025,7 +3025,7 @@ void ConvexHull::translate(const double t[3])
   }
 }
 
-void ConvexHull::transform(const double R[9],const double t[3])
+void ConvexHull::_transform(const double R[9],const double t[3])
 {
   GET_GEOMDATA_DATA(this, ConvexHull, ch);
   if(ch.type != Geometry::ConvexHull3D::Polytope) {
@@ -3296,7 +3296,7 @@ void PointCloud::translate(const double t[3])
   }
 }
 
-void PointCloud::transform(const double R[9],const double t[3])
+void PointCloud::_transform(const double R[9],const double t[3])
 {
   GET_GEOMDATA_DATA(this, PointCloud, pc);
   RigidTransform T;
@@ -4746,7 +4746,7 @@ void RobotModelLink::getTransform(double R[9],double t[3])
   link.T_World.t.get(t);
 }
 
-void RobotModelLink::setTransform(const double R[9],const double t[3])
+void RobotModelLink::_setTransform(const double R[9],const double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -4766,7 +4766,7 @@ void RobotModelLink::getParentTransform(double R[9],double t[3])
   link.T0_Parent.t.get(t);
 }
 
-void RobotModelLink::setParentTransform(const double R[9],const double t[3])
+void RobotModelLink::_setParentTransform(const double R[9],const double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -5810,7 +5810,7 @@ void RobotModel::reduce(const RobotModel& fullRobot,std::vector<int>& out)
   fullRobot.robot->Reduce(*robot,out);
 }
 
-void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],const double t[3])
+void RobotModel::_mount(int link,const RobotModel& subRobot,const double R[9],const double t[3])
 {
   if(!robot) throw PyException("RobotModel is empty");
   RigidTransform T;
@@ -6035,7 +6035,7 @@ void RigidObjectModel::getTransform(double R[9],double t[3])
   obj->T.t.get(t);
 }
 
-void RigidObjectModel::setTransform(const double R[9],const double t[3])
+void RigidObjectModel::_setTransform(const double R[9],const double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   Klampt::RigidObjectModel* obj=object;
@@ -6681,7 +6681,7 @@ void SimBody::getObjectVelocity(double out[3],double out2[3])
 }
 
 
-void SimBody::setTransform(const double R[9],const double t[3])
+void SimBody::_setTransform(const double R[9],const double t[3])
 {
   //out matrix is 3x3 column major, ODE matrices are 4x4 row major
   if(!body) return;
@@ -6710,12 +6710,12 @@ void SimBody::getTransform(double out[9],double out2[3])
       out[i+j*3] = R[i*4+j];
 }
 
-void SimBody::setObjectTransform(const double R[9],const double t[3])
+void SimBody::_setObjectTransform(const double R[9],const double t[3])
 {
   Klampt::ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) sim->sim->odesim.object(id.index)->SetTransform(RigidTransform(Matrix3(R),Vector3(t)));
   else if(id.IsRobot()) sim->sim->odesim.robot(id.index)->SetLinkTransform(id.bodyIndex,RigidTransform(Matrix3(R),Vector3(t)));
-  else setTransform(R,t);
+  else _setTransform(R,t);
 }
 
 void SimBody::getObjectTransform(double out[9],double out2[3])
@@ -7216,7 +7216,7 @@ void SensorModel::getTransformWorld(double out[9],double out2[3])
   Tworld.t.get(out2);
 }
 
-void SensorModel::setTransform(const double R[9],const double t[3])
+void SensorModel::_setTransform(const double R[9],const double t[3])
 {
   if(!sensor) return;
   string temp;
@@ -7761,7 +7761,7 @@ double Viewport::getVFOV() const
   }
 }
 
-void Viewport::setPose(const double R[9],const double t[3])
+void Viewport::_setPose(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);

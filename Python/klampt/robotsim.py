@@ -985,7 +985,7 @@ class TriangleMesh(object):
         """
         return _robotsim.TriangleMesh_translate(self, t)
 
-    def transform(self, R: Rotation, t: Point) -> None:
+    def _transform(self, R: Rotation, t: Point) -> None:
         r"""
         Transforms all the vertices by the rigid transform v=R*v+t.  
 
@@ -993,13 +993,19 @@ class TriangleMesh(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.TriangleMesh_transform(self, R, t)
+        return _robotsim.TriangleMesh__transform(self, R, t)
     dataPtr = property(_robotsim.TriangleMesh_dataPtr_get, _robotsim.TriangleMesh_dataPtr_set, doc=r"""dataPtr : p.void""")
     isStandalone = property(_robotsim.TriangleMesh_isStandalone_get, _robotsim.TriangleMesh_isStandalone_set, doc=r"""isStandalone : bool""")
 
-    vertices = property(getVertices, setVertices)
+    def transform(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """
+        Transforms all the vertices by the rigid transform v=R*v+t
 
-    indices = property(getIndices, setIndices)
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
 
     def triangle(self, i) ->  Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
         """
@@ -1064,16 +1070,24 @@ class TriangleMesh(object):
         jsonobj = loader.to_json(self,'TriangleMesh')
         return (loader.from_json,(jsonobj,'TriangleMesh'))
 
+    vertices = property(getVertices, setVertices)
+    """An Nx3 matrix of vertex positions"""
+    indices = property(getIndices, setIndices)
+    """An Mx3 matrix of indices into the vertices array, where M is the number of triangles.
+    Each row is a triangle, with the 3 columns giving the indices of the vertices."""
+
+
 
 # Register TriangleMesh in _robotsim:
 _robotsim.TriangleMesh_swigregister(TriangleMesh)
 
 class ConvexHull(object):
     r"""
+
+
     Stores a set of points to be set into a ConvexHull type. Note: These may not
     actually be the vertices of the convex hull; the actual convex hull may be
     computed internally for some datatypes.  
-
 
     Attributes:  
 
@@ -1083,94 +1097,117 @@ class ConvexHull(object):
     C++ includes: geometry.h
 
     """
-
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
     __swig_destroy__ = _robotsim.delete_ConvexHull
 
+
     def __init__(self, *args):
         r"""
-        __init__ (): :class:`~klampt.ConvexHull`
+        __init__(ConvexHull self) -> ConvexHull
+        __init__(ConvexHull self, ConvexHull rhs) -> ConvexHull
 
-        __init__ (rhs): :class:`~klampt.ConvexHull`
 
-
-        Args:
-            rhs (:class:`~klampt.ConvexHull`, optional): 
         """
         _robotsim.ConvexHull_swiginit(self, _robotsim.new_ConvexHull(*args))
 
-    def copy(self) ->  "ConvexHull":
+
+    def copy(self) -> "ConvexHull":
         r"""
+        copy(ConvexHull self) -> ConvexHull
+
+
         Creates a standalone object that is a copy of this.  
 
-
-        Returns:
-            ConvexHull:
         """
         return _robotsim.ConvexHull_copy(self)
 
-    def set(self, arg2:  "ConvexHull") -> None:
+
+    def set(self, arg2: "ConvexHull") -> "void":
         r"""
+        set(ConvexHull self, ConvexHull arg2)
+
+
         Copies the data of the argument into this.  
 
-        Args:
-            arg2 (:class:`~klampt.ConvexHull`)
         """
         return _robotsim.ConvexHull_set(self, arg2)
 
-    def getPoints(self) -> "np.ndarray":
-        r"""
-        Retrieves a view of the points.  
 
+    def getPoints(self) -> "void":
+        r"""
+        getPoints(ConvexHull self)
+
+
+        Retrieves a view of the points.  
 
         Returns:  
 
             ndarray: an nx3 Numpy array. Setting elements of this array will
             immediately take effect.
+         Return type: np.ndarray  
+
         """
         return _robotsim.ConvexHull_getPoints(self)
 
-    def setPoints(self, np_array2: "np.ndarray") -> None:
+
+    def setPoints(self, np_array2: "double *") -> "void":
         r"""
+        setPoints(ConvexHull self, double * np_array2)
+
+
         Sets all points to the given nx3 Numpy array.  
 
-        Args:
-            np_array2 (:obj:`2D Numpy array of floats`)
         """
         return _robotsim.ConvexHull_setPoints(self, np_array2)
 
-    def addPoint(self, pt: Point) -> None:
+
+    def addPoint(self, pt: "double const [3]") -> "void":
         r"""
+        addPoint(ConvexHull self, double const [3] pt)
+
+
         Adds a point.  
 
-        Args:
-            pt (:obj:`list of 3 floats`)
         """
         return _robotsim.ConvexHull_addPoint(self, pt)
 
-    def translate(self, t: Point) -> None:
+
+    def translate(self, t: "double const [3]") -> "void":
         r"""
+        translate(ConvexHull self, double const [3] t)
+
+
         Translates all the vertices by v=v+t.  
 
-        Args:
-            t (:obj:`list of 3 floats`)
         """
         return _robotsim.ConvexHull_translate(self, t)
 
-    def transform(self, R: Rotation, t: Point) -> None:
+
+    def _transform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
+        _transform(ConvexHull self, double const [9] R, double const [3] t)
+
+
         Transforms all the vertices by the rigid transform v=R*v+t.  
 
-        Args:
-            R (:obj:`list of 9 floats (so3 element)`)
-            t (:obj:`list of 3 floats`)
         """
-        return _robotsim.ConvexHull_transform(self, R, t)
+        return _robotsim.ConvexHull__transform(self, R, t)
     dataPtr = property(_robotsim.ConvexHull_dataPtr_get, _robotsim.ConvexHull_dataPtr_set, doc=r"""dataPtr : p.void""")
     isStandalone = property(_robotsim.ConvexHull_isStandalone_get, _robotsim.ConvexHull_isStandalone_set, doc=r"""isStandalone : bool""")
 
+
     points = property(getPoints, setPoints)
+
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Transforms all the vertices by the rigid transform v=R*v+t
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
+
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1183,8 +1220,9 @@ _robotsim.ConvexHull_swigregister(ConvexHull)
 
 class PointCloud(object):
     r"""
-    A 3D point cloud class.  
 
+
+    A 3D point cloud class.  
 
     Attributes:  
 
@@ -1239,400 +1277,435 @@ class PointCloud(object):
     C++ includes: geometry.h
 
     """
-
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
     __swig_destroy__ = _robotsim.delete_PointCloud
 
+
     def __init__(self, *args):
         r"""
-        __init__ (): :class:`~klampt.PointCloud`
+        __init__(PointCloud self) -> PointCloud
+        __init__(PointCloud self, PointCloud rhs) -> PointCloud
 
-        __init__ (rhs): :class:`~klampt.PointCloud`
 
-
-        Args:
-            rhs (:class:`~klampt.PointCloud`, optional): 
         """
         _robotsim.PointCloud_swiginit(self, _robotsim.new_PointCloud(*args))
 
-    def copy(self) ->  "PointCloud":
+
+    def copy(self) -> "PointCloud":
         r"""
+        copy(PointCloud self) -> PointCloud
+
+
         Creates a standalone object that is a copy of this.  
 
-
-        Returns:
-            PointCloud:
         """
         return _robotsim.PointCloud_copy(self)
 
-    def set(self, arg2:  "PointCloud") -> None:
+
+    def set(self, arg2: "PointCloud") -> "void":
         r"""
+        set(PointCloud self, PointCloud arg2)
+
+
         Copies the data of the argument into this.  
 
-        Args:
-            arg2 (:class:`~klampt.PointCloud`)
         """
         return _robotsim.PointCloud_set(self, arg2)
 
-    def getPoints(self) -> "np.ndarray":
-        r"""
-        Returns a view of the points.  
 
+    def getPoints(self) -> "void":
+        r"""
+        getPoints(PointCloud self)
+
+
+        Returns a view of the points.  
 
         Returns:  
 
             ndarray: an nx3 Numpy array. Setting elements of this array will
             change the points.
+         Return type: np.ndarray  
+
         """
         return _robotsim.PointCloud_getPoints(self)
 
-    def setPoints(self, np_array2: "np.ndarray") -> None:
+
+    def setPoints(self, np_array2: "double *") -> "void":
         r"""
+        setPoints(PointCloud self, double * np_array2)
+
+
         Sets all the points to the given nx3 Numpy array.  
 
-        Args:
-            np_array2 (:obj:`2D Numpy array of floats`)
         """
         return _robotsim.PointCloud_setPoints(self, np_array2)
 
-    def addPoint(self, p: Point) -> int:
-        r"""
-        Adds a point. Sets all its properties to 0.  
 
-        Args:
-            p (:obj:`list of 3 floats`)
+    def addPoint(self, p: "double const [3]") -> "int":
+        r"""
+        addPoint(PointCloud self, double const [3] p) -> int
+
+
+        Adds a point. Sets all its properties to 0.  
 
         Slow if properties are already set. Setting the points and properties as
         matrices is faster.  
 
         Returns the point's index.  
+
         """
         return _robotsim.PointCloud_addPoint(self, p)
 
-    def setPoint(self, index: int, p: Point) -> None:
+
+    def setPoint(self, index: "int", p: "double const [3]") -> "void":
         r"""
+        setPoint(PointCloud self, int index, double const [3] p)
+
+
         Sets the position of the point at the given index to p.  
 
-        Args:
-            index (int)
-            p (:obj:`list of 3 floats`)
         """
         return _robotsim.PointCloud_setPoint(self, index, p)
 
-    def getPoint(self, index: int) -> Vector3:
+
+    def getPoint(self, index: "int") -> "void":
         r"""
+        getPoint(PointCloud self, int index)
+
+
         Returns the position of the point at the given index.  
 
-        Args:
-            index (int)
+        Return type: Vector3  
+
         """
         return _robotsim.PointCloud_getPoint(self, index)
 
-    def numProperties(self) -> int:
+
+    def numProperties(self) -> "int":
         r"""
+        numProperties(PointCloud self) -> int
+
+
         Returns the number of properties.  
 
         """
         return _robotsim.PointCloud_numProperties(self)
 
-    def setPointsAndProperties(self, np_array2: "np.ndarray") -> None:
+
+    def setPointsAndProperties(self, np_array2: "double *") -> "void":
         r"""
+        setPointsAndProperties(PointCloud self, double * np_array2)
+
+
         Sets all the points and m properties from the given n x (3+k) array.  
 
-        Args:
-            np_array2 (:obj:`2D Numpy array of floats`)
         """
         return _robotsim.PointCloud_setPointsAndProperties(self, np_array2)
 
-    def setProperties(self, np_array2: "np.ndarray") -> None:
+
+    def setProperties(self, np_array2: "double *") -> "void":
         r"""
+        setProperties(PointCloud self, double * np_array2)
+
+
         Sets all the properties of all points to the given nxk array.  
 
-        Args:
-            np_array2 (:obj:`2D Numpy array of floats`)
         """
         return _robotsim.PointCloud_setProperties(self, np_array2)
 
-    def getProperties(self) -> "np.ndarray":
-        r"""
-        Returns all the properties of all points as an array view.  
 
+    def getProperties(self) -> "void":
+        r"""
+        getProperties(PointCloud self)
+
+
+        Returns all the properties of all points as an array view.  
 
         Returns:  
 
             ndarray: an nxk Numpy array. Setting elements of this array will
             change the vertices.
+         Return type: np.ndarray  
+
         """
         return _robotsim.PointCloud_getProperties(self)
 
-    def addProperty(self, *args) -> int:
+
+    def addProperty(self, *args) -> "int":
         r"""
+        addProperty(PointCloud self, std::string const & pname) -> int
+        addProperty(PointCloud self, std::string const & pname, double * np_array) -> int
+
+
         Adds a new property with name pname, and sets values for this property to the
         given length-n array.  
 
-        addProperty (pname): int
-
-        addProperty (pname,np_array): int
-
-
-        Args:
-            pname (str): 
-            np_array (:obj:`1D Numpy array of floats`, optional): 
         """
         return _robotsim.PointCloud_addProperty(self, *args)
 
-    def setPropertyName(self, pindex: int, pname: str) -> None:
+
+    def setPropertyName(self, pindex: "int", pname: "std::string const &") -> "void":
         r"""
+        setPropertyName(PointCloud self, int pindex, std::string const & pname)
+
+
         Sets the name of a given property.  
 
-        Args:
-            pindex (int)
-            pname (str)
         """
         return _robotsim.PointCloud_setPropertyName(self, pindex, pname)
 
-    def getPropertyName(self, pindex: int) -> str:
+
+    def getPropertyName(self, pindex: "int") -> "std::string":
         r"""
+        getPropertyName(PointCloud self, int pindex) -> std::string
+
+
         Returns the name of a given property.  
 
-        Args:
-            pindex (int)
         """
         return _robotsim.PointCloud_getPropertyName(self, pindex)
 
-    def propertyIndex(self, pname: str) -> int:
+
+    def propertyIndex(self, pname: "std::string const &") -> "int":
         r"""
+        propertyIndex(PointCloud self, std::string const & pname) -> int
+
+
         Returns the index of a named property or -1 if it does not exist.  
 
-        Args:
-            pname (str)
         """
         return _robotsim.PointCloud_propertyIndex(self, pname)
 
-    def setProperty(self, *args) -> None:
+
+    def setProperty(self, *args) -> "void":
         r"""
+        setProperty(PointCloud self, int index, int pindex, double value)
+        setProperty(PointCloud self, int index, std::string const & pname, double value)
+
+
         Sets the property named pname of point index to the given value.  
 
-        setProperty (index,pindex,value)
-
-        setProperty (index,pname,value)
-
-
-        Args:
-            index (int): 
-            pindex (int, optional): 
-            value (float): 
-            pname (str, optional): 
         """
         return _robotsim.PointCloud_setProperty(self, *args)
 
-    def getProperty(self, *args) -> float:
+
+    def getProperty(self, *args) -> "double":
         r"""
+        getProperty(PointCloud self, int index, int pindex) -> double
+        getProperty(PointCloud self, int index, std::string const & pname) -> double
+
+
         Returns the property named pname of point index.  
 
-        getProperty (index,pindex): float
-
-        getProperty (index,pname): float
-
-
-        Args:
-            index (int): 
-            pindex (int, optional): 
-            pname (str, optional): 
         """
         return _robotsim.PointCloud_getProperty(self, *args)
 
-    def translate(self, t: Point) -> None:
+
+    def translate(self, t: "double const [3]") -> "void":
         r"""
+        translate(PointCloud self, double const [3] t)
+
+
         Translates all the points by v=v+t.  
 
-        Args:
-            t (:obj:`list of 3 floats`)
         """
         return _robotsim.PointCloud_translate(self, t)
 
-    def transform(self, R: Rotation, t: Point) -> None:
+
+    def _transform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
+        _transform(PointCloud self, double const [9] R, double const [3] t)
+
+
         Transforms all the points by the rigid transform v=R*v+t.  
 
-        Args:
-            R (:obj:`list of 9 floats (so3 element)`)
-            t (:obj:`list of 3 floats`)
         """
-        return _robotsim.PointCloud_transform(self, R, t)
+        return _robotsim.PointCloud__transform(self, R, t)
 
-    def join(self, pc:  "PointCloud") -> None:
+
+    def join(self, pc: "PointCloud") -> "void":
         r"""
+        join(PointCloud self, PointCloud pc)
+
+
         Adds the given point cloud to this one. They must share the same properties or
         else an exception is raised.  
 
-        Args:
-            pc (:class:`~klampt.PointCloud`)
         """
         return _robotsim.PointCloud_join(self, pc)
 
-    def setSetting(self, key: str, value: str) -> None:
+
+    def setSetting(self, key: "std::string const &", value: "std::string const &") -> "void":
         r"""
+        setSetting(PointCloud self, std::string const & key, std::string const & value)
+
+
         Sets the given setting.  
 
-        Args:
-            key (str)
-            value (str)
         """
         return _robotsim.PointCloud_setSetting(self, key, value)
 
-    def getSetting(self, key: str) -> str:
+
+    def getSetting(self, key: "std::string const &") -> "std::string":
         r"""
+        getSetting(PointCloud self, std::string const & key) -> std::string
+
+
         Returns the given setting.  
 
-        Args:
-            key (str)
         """
         return _robotsim.PointCloud_getSetting(self, key)
 
-    def setDepthImage_d(self, intrinsics: Sequence[float], np_array2: "np.ndarray", depth_scale: float) -> None:
+
+    def setDepthImage_d(self, intrinsics: "double const [4]", np_array2: "double *", depth_scale: "double") -> "void":
         r"""
+        setDepthImage_d(PointCloud self, double const [4] intrinsics, double * np_array2, double depth_scale)
+
+
         Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
         intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_array2 (:obj:`2D Numpy array of floats`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setDepthImage_d(self, intrinsics, np_array2, depth_scale)
 
-    def setDepthImage_f(self, intrinsics: Sequence[float], np_depth2: Vector, depth_scale: float) -> None:
+
+    def setDepthImage_f(self, intrinsics: "double const [4]", np_depth2: "float *", depth_scale: "double") -> "void":
         r"""
+        setDepthImage_f(PointCloud self, double const [4] intrinsics, float * np_depth2, double depth_scale)
+
+
         Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
         intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_depth2 (:obj:`float *`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setDepthImage_f(self, intrinsics, np_depth2, depth_scale)
 
-    def setDepthImage_s(self, intrinsics: Sequence[float], np_depth2: "np.ndarray", depth_scale: float) -> None:
+
+    def setDepthImage_s(self, intrinsics: "double const [4]", np_depth2: "unsigned short *", depth_scale: "double") -> "void":
         r"""
+        setDepthImage_s(PointCloud self, double const [4] intrinsics, unsigned short * np_depth2, double depth_scale)
+
+
         Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
         intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_depth2 (:obj:`unsigned short *`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setDepthImage_s(self, intrinsics, np_depth2, depth_scale)
 
-    def setRGBDImages_i_d(self, intrinsics: Sequence[float], np_array2: "np.ndarray", np_depth2: Vector, depth_scale: float) -> None:
+
+    def setRGBDImages_i_d(self, intrinsics: "double const [4]", np_array2: "unsigned int *", np_depth2: "double *", depth_scale: "double") -> "void":
         r"""
+        setRGBDImages_i_d(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, double * np_depth2, double depth_scale)
+
+
         Sets a structured point cloud from an RGBD (color,depth) image pair.
         [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
         0xrrggbb order, size hxw, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_array2 (:obj:`unsigned int *`)
-            np_depth2 (:obj:`double *`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setRGBDImages_i_d(self, intrinsics, np_array2, np_depth2, depth_scale)
 
-    def setRGBDImages_i_f(self, intrinsics: Sequence[float], np_array2: "np.ndarray", np_depth2: Vector, depth_scale: float) -> None:
+
+    def setRGBDImages_i_f(self, intrinsics: "double const [4]", np_array2: "unsigned int *", np_depth2: "float *", depth_scale: "double") -> "void":
         r"""
+        setRGBDImages_i_f(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, float * np_depth2, double depth_scale)
+
+
         Sets a structured point cloud from an RGBD (color,depth) image pair.
         [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
         0xrrggbb order, size hxw, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_array2 (:obj:`unsigned int *`)
-            np_depth2 (:obj:`float *`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setRGBDImages_i_f(self, intrinsics, np_array2, np_depth2, depth_scale)
 
-    def setRGBDImages_i_s(self, intrinsics: Sequence[float], np_array2: "np.ndarray", np_depth2: "np.ndarray", depth_scale: float) -> None:
+
+    def setRGBDImages_i_s(self, intrinsics: "double const [4]", np_array2: "unsigned int *", np_depth2: "unsigned short *", depth_scale: "double") -> "void":
         r"""
+        setRGBDImages_i_s(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, unsigned short * np_depth2, double depth_scale)
+
+
         Sets a structured point cloud from an RGBD (color,depth) image pair.
         [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
         0xrrggbb order, size hxw, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_array2 (:obj:`unsigned int *`)
-            np_depth2 (:obj:`unsigned short *`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setRGBDImages_i_s(self, intrinsics, np_array2, np_depth2, depth_scale)
 
-    def setRGBDImages_b_d(self, intrinsics: Sequence[float], np_array3: "np.ndarray", np_depth2: Vector, depth_scale: float) -> None:
+
+    def setRGBDImages_b_d(self, intrinsics: "double const [4]", np_array3: "unsigned char *", np_depth2: "double *", depth_scale: "double") -> "void":
         r"""
+        setRGBDImages_b_d(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, double * np_depth2, double depth_scale)
+
+
         Sets a structured point cloud from an RGBD (color,depth) image pair.
         [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
         0xrrggbb order, size hxw, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_array3 (:obj:`unsigned char *`)
-            np_depth2 (:obj:`double *`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setRGBDImages_b_d(self, intrinsics, np_array3, np_depth2, depth_scale)
 
-    def setRGBDImages_b_f(self, intrinsics: Sequence[float], np_array3: "np.ndarray", np_depth2: Vector, depth_scale: float) -> None:
+
+    def setRGBDImages_b_f(self, intrinsics: "double const [4]", np_array3: "unsigned char *", np_depth2: "float *", depth_scale: "double") -> "void":
         r"""
+        setRGBDImages_b_f(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, float * np_depth2, double depth_scale)
+
+
         Sets a structured point cloud from an RGBD (color,depth) image pair.
         [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
         array, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_array3 (:obj:`unsigned char *`)
-            np_depth2 (:obj:`float *`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setRGBDImages_b_f(self, intrinsics, np_array3, np_depth2, depth_scale)
 
-    def setRGBDImages_b_s(self, intrinsics: Sequence[float], np_array3: "np.ndarray", np_depth2: "np.ndarray", depth_scale: float) -> None:
+
+    def setRGBDImages_b_s(self, intrinsics: "double const [4]", np_array3: "unsigned char *", np_depth2: "unsigned short *", depth_scale: "double") -> "void":
         r"""
+        setRGBDImages_b_s(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, unsigned short * np_depth2, double depth_scale)
+
+
         Sets a structured point cloud from an RGBD (color,depth) image pair.
         [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
         array, top to bottom.  
 
-        Args:
-            intrinsics (:obj:`list of 4 floats`)
-            np_array3 (:obj:`unsigned char *`)
-            np_depth2 (:obj:`unsigned short *`)
-            depth_scale (float)
         """
         return _robotsim.PointCloud_setRGBDImages_b_s(self, intrinsics, np_array3, np_depth2, depth_scale)
     dataPtr = property(_robotsim.PointCloud_dataPtr_get, _robotsim.PointCloud_dataPtr_set, doc=r"""dataPtr : p.void""")
     isStandalone = property(_robotsim.PointCloud_isStandalone_get, _robotsim.PointCloud_isStandalone_set, doc=r"""isStandalone : bool""")
 
+
     points = property(getPoints, setPoints)
-
+    """An Nx3 matrix of point positions, where N is the number of points."""
     properties = property(getProperties, setProperties)
+    """An NxM matrix of point properties, where N is the number of points and M is
+    the number of properties."""
 
-    def getPropertyNames(self) ->  List[str]:
+
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Transforms all the points by the rigid transform p=R*p+t
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
+
+
+    def getPropertyNames(self) -> List[str]:
         """
         Returns the names of the properties.
-
         """
         return [self.getPropertyName(i) for i in range(self.numProperties())]
+
 
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'PointCloud')
         return (loader.from_json,(jsonobj,'PointCloud'))
 
-    def setDepthImage(self,intrinsics: Union[Sequence[float],Dict[str,float]], depth :  np.ndarray, depth_scale: float=1.0):
+    def setDepthImage(self,intrinsics:Union[Sequence[float],Dict[str,float]], depth : np.ndarray, depth_scale:float=1.0):
         """
         Sets a structured point cloud from a depth image.
-
 
         Args:
             intrinsics (list or dict): intrinsics parameters [fx,fy,cx,cy] or a
@@ -1658,10 +1731,10 @@ class PointCloud(object):
         else:
             return self.setDepthImage_d(intrinsics,depth,depth_scale)
 
-    def setRGBDImages(self,intrinsics: Union[Sequence[float],Dict[str,float]], color :  np.ndarray, depth :  np.ndarray, depth_scale: float=1.0):
+
+    def setRGBDImages(self,intrinsics:Union[Sequence[float],Dict[str,float]], color : np.ndarray, depth : np.ndarray, depth_scale:float=1.0):
         """
         Sets a structured point cloud from a color,depth image pair.
-
 
         Args:
             intrinsics (list or dict): intrinsics parameters [fx,fy,cx,cy] or a
@@ -1708,12 +1781,12 @@ class PointCloud(object):
             else:
                 return self.setRGBDImages_i_d(intrinsics,color,depth,depth_scale)
 
-    def getColors(self, format='rgb') ->  np.ndarray:
+
+    def getColors(self, format='rgb') -> np.ndarray:
         """
         Returns the colors of the point cloud in the given format.  If the
         point cloud has no colors, this returns None.  If the point cloud has no
         colors but has opacity, this returns white colors.
-
 
         Args:
             format: describes the output color format, either:
@@ -1740,10 +1813,10 @@ class PointCloud(object):
         from klampt.model.geometry import point_cloud_colors
         return point_cloud_colors(self,format)
 
-    def setColors(self, colors :  Union[list,np.ndarray], color_format='rgb',pc_property='auto'):
+
+    def setColors(self, colors : Union[list,np.ndarray], color_format='rgb',pc_property='auto'):
         """
         Sets the colors of the point cloud.
-
 
         Args:
             colors (list or numpy.ndarray): the array of colors, and each color 
@@ -1772,9 +1845,11 @@ class PointCloud(object):
                 set.  'auto' determines chooses the property from the point cloud
                 if it's already colored, or color_format if not.  'channels' sets
                 the 'r', 'g', 'b', and optionally 'a' properties.
+
         """
         from klampt.model.geometry import point_cloud_set_colors
         return point_cloud_set_colors(self,colors,color_format,pc_property)
+
 
 
 
@@ -1783,9 +1858,10 @@ _robotsim.PointCloud_swigregister(PointCloud)
 
 class GeometricPrimitive(object):
     r"""
+
+
     A geometric primitive. So far only points, spheres, segments, and AABBs can be
     constructed manually in the Python API.  
-
 
     Attributes:  
 
@@ -1799,128 +1875,152 @@ class GeometricPrimitive(object):
     C++ includes: geometry.h
 
     """
-
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
     __swig_destroy__ = _robotsim.delete_GeometricPrimitive
 
+
     def __init__(self, *args):
         r"""
-        __init__ (): :class:`~klampt.GeometricPrimitive`
+        __init__(GeometricPrimitive self) -> GeometricPrimitive
+        __init__(GeometricPrimitive self, GeometricPrimitive rhs) -> GeometricPrimitive
 
-        __init__ (rhs): :class:`~klampt.GeometricPrimitive`
 
-
-        Args:
-            rhs (:class:`~klampt.GeometricPrimitive`, optional): 
         """
         _robotsim.GeometricPrimitive_swiginit(self, _robotsim.new_GeometricPrimitive(*args))
 
-    def copy(self) ->  "GeometricPrimitive":
+
+    def copy(self) -> "GeometricPrimitive":
         r"""
+        copy(GeometricPrimitive self) -> GeometricPrimitive
+
+
         Creates a standalone object that is a copy of this.  
 
-
-        Returns:
-            GeometricPrimitive:
         """
         return _robotsim.GeometricPrimitive_copy(self)
 
-    def set(self, arg2:  "GeometricPrimitive") -> None:
+
+    def set(self, arg2: "GeometricPrimitive") -> "void":
         r"""
+        set(GeometricPrimitive self, GeometricPrimitive arg2)
+
+
         Copies the data of the argument into this.  
 
-        Args:
-            arg2 (:class:`~klampt.GeometricPrimitive`)
         """
         return _robotsim.GeometricPrimitive_set(self, arg2)
 
-    def setPoint(self, pt: Point) -> None:
+
+    def setPoint(self, pt: "double const [3]") -> "void":
         r"""
-        Args:
-            pt (:obj:`list of 3 floats`)
+        setPoint(GeometricPrimitive self, double const [3] pt)
+
+
         """
         return _robotsim.GeometricPrimitive_setPoint(self, pt)
 
-    def setSphere(self, c: Point, r: float) -> None:
+
+    def setSphere(self, c: "double const [3]", r: "double") -> "void":
         r"""
-        Args:
-            c (:obj:`list of 3 floats`)
-            r (float)
+        setSphere(GeometricPrimitive self, double const [3] c, double r)
+
+
         """
         return _robotsim.GeometricPrimitive_setSphere(self, c, r)
 
-    def setSegment(self, a: Point, b: Point) -> None:
+
+    def setSegment(self, a: "double const [3]", b: "double const [3]") -> "void":
         r"""
-        Args:
-            a (:obj:`list of 3 floats`)
-            b (:obj:`list of 3 floats`)
+        setSegment(GeometricPrimitive self, double const [3] a, double const [3] b)
+
+
         """
         return _robotsim.GeometricPrimitive_setSegment(self, a, b)
 
-    def setTriangle(self, a: Point, b: Point, c: Point) -> None:
+
+    def setTriangle(self, a: "double const [3]", b: "double const [3]", c: "double const [3]") -> "void":
         r"""
-        Args:
-            a (:obj:`list of 3 floats`)
-            b (:obj:`list of 3 floats`)
-            c (:obj:`list of 3 floats`)
+        setTriangle(GeometricPrimitive self, double const [3] a, double const [3] b, double const [3] c)
+
+
         """
         return _robotsim.GeometricPrimitive_setTriangle(self, a, b, c)
 
-    def setPolygon(self, verts: Vector) -> None:
+
+    def setPolygon(self, verts: "doubleVector") -> "void":
         r"""
-        Args:
-            verts (:obj:`list of floats`)
+        setPolygon(GeometricPrimitive self, doubleVector verts)
+
+
         """
         return _robotsim.GeometricPrimitive_setPolygon(self, verts)
 
-    def setAABB(self, bmin: Point, bmax: Point) -> None:
+
+    def setAABB(self, bmin: "double const [3]", bmax: "double const [3]") -> "void":
         r"""
-        Args:
-            bmin (:obj:`list of 3 floats`)
-            bmax (:obj:`list of 3 floats`)
+        setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)
+
+
         """
         return _robotsim.GeometricPrimitive_setAABB(self, bmin, bmax)
 
-    def setBox(self, ori: Point, R: Rotation, dims: Point) -> None:
+
+    def setBox(self, ori: "double const [3]", R: "double const [9]", dims: "double const [3]") -> "void":
         r"""
-        Args:
-            ori (:obj:`list of 3 floats`)
-            R (:obj:`list of 9 floats (so3 element)`)
-            dims (:obj:`list of 3 floats`)
+        setBox(GeometricPrimitive self, double const [3] ori, double const [9] R, double const [3] dims)
+
+
         """
         return _robotsim.GeometricPrimitive_setBox(self, ori, R, dims)
 
-    def getType(self) -> str:
+
+    def getType(self) -> "std::string":
         r"""
+        getType(GeometricPrimitive self) -> std::string
+
+
         """
         return _robotsim.GeometricPrimitive_getType(self)
 
-    def getProperties(self) -> None:
+
+    def getProperties(self) -> "void":
         r"""
+        getProperties(GeometricPrimitive self)
+
+
         """
         return _robotsim.GeometricPrimitive_getProperties(self)
 
-    def setProperties(self, np_array: "np.ndarray") -> None:
+
+    def setProperties(self, np_array: "double *") -> "void":
         r"""
-        Args:
-            np_array (:obj:`1D Numpy array of floats`)
+        setProperties(GeometricPrimitive self, double * np_array)
+
+
         """
         return _robotsim.GeometricPrimitive_setProperties(self, np_array)
 
-    def loadString(self, str: str) -> bool:
+
+    def loadString(self, str: "char const *") -> "bool":
         r"""
-        Args:
-            str (str)
+        loadString(GeometricPrimitive self, char const * str) -> bool
+
+
         """
         return _robotsim.GeometricPrimitive_loadString(self, str)
 
-    def saveString(self) -> str:
+
+    def saveString(self) -> "std::string":
         r"""
+        saveString(GeometricPrimitive self) -> std::string
+
+
         """
         return _robotsim.GeometricPrimitive_saveString(self)
     dataPtr = property(_robotsim.GeometricPrimitive_dataPtr_get, _robotsim.GeometricPrimitive_dataPtr_set, doc=r"""dataPtr : p.void""")
     isStandalone = property(_robotsim.GeometricPrimitive_isStandalone_get, _robotsim.GeometricPrimitive_isStandalone_set, doc=r"""isStandalone : bool""")
+
 
     type = property(getType)
     """The type of the geometric primitive."""
@@ -3162,7 +3262,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.ConvexHull` or :obj:`Heightmap` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.ImplicitSurface`, optional): 
+            arg2 (:class:`~klampt.ConvexHull` or :obj:`Heightmap` or :class:`~klampt.ImplicitSurface` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh` or :class:`~klampt.OccupancyGrid` or :class:`~klampt.PointCloud`, optional): 
             fn (str, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
@@ -3434,7 +3534,7 @@ class Geometry3D(object):
         """
         return _robotsim.Geometry3D_saveFile(self, fn)
 
-    def setCurrentTransform(self, R: Rotation, t: Point) -> None:
+    def _setCurrentTransform(self, R: Rotation, t: Point) -> None:
         r"""
         Sets the current transformation (not modifying the underlying data)  
 
@@ -3442,7 +3542,7 @@ class Geometry3D(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.Geometry3D_setCurrentTransform(self, R, t)
+        return _robotsim.Geometry3D__setCurrentTransform(self, R, t)
 
     def getCurrentTransform(self) -> RigidTransform:
         r"""
@@ -3489,16 +3589,16 @@ class Geometry3D(object):
         """
         return _robotsim.Geometry3D_rotate(self, R)
 
-    def transform(self, R: Rotation, t: Point) -> None:
+    def _transform(self, R: Rotation, t: Point) -> None:
         r"""
-        Translates/rotates/scales the geometry data. Permanently modifies the data and
+        Translates/rotates/scales the geometry data. Modifies the underlying data and
         resets any collision data structures.  
 
         Args:
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.Geometry3D_transform(self, R, t)
+        return _robotsim.Geometry3D__transform(self, R, t)
 
     def setAppearance(self, appearance:  "Appearance") -> None:
         r"""
@@ -3977,10 +4077,32 @@ class Geometry3D(object):
     id = property(_robotsim.Geometry3D_id_get, _robotsim.Geometry3D_id_set, doc=r"""id : int""")
     geomPtr = property(_robotsim.Geometry3D_geomPtr_get, _robotsim.Geometry3D_geomPtr_set, doc=r"""geomPtr : p.void""")
 
+    def transform(self, R_or_T:  Union[Matrix3, RigidTransform], t:  Optional[Vector3] = None):
+        """
+        Translates/rotates/scales the geometry data.
+        Modifies the underlying data and resets any collision data structures.
+
+                """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T)
+
+    def setCurrentTransform(self, R_or_T:  Union[Matrix3, RigidTransform], t:  Optional[Vector3] = None):
+        """
+        """
+        if t is not None:
+            self._setCurrentTransform(R_or_T,t)
+        else:
+            self._setCurrentTransform(*R_or_T)
+
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'Geometry3D')
         return (loader.from_json,(jsonobj,'Geometry3D'))
+
+    currentTransform = property(getCurrentTransform, setCurrentTransform)
+    """Convenience accessor for the current transform of the geometry."""
 
 
 # Register Geometry3D in _robotsim:
@@ -5132,7 +5254,7 @@ class Viewport(object):
         """
         return _robotsim.Viewport_getVFOV(self)
 
-    def setPose(self, R: Rotation, t: Point) -> None:
+    def _setPose(self, R: Rotation, t: Point) -> None:
         r"""
         Sets the pose of the camera.  
 
@@ -5140,7 +5262,7 @@ class Viewport(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.Viewport_setPose(self, R, t)
+        return _robotsim.Viewport__setPose(self, R, t)
 
     def getPose(self) -> RigidTransform:
         r"""
@@ -5222,8 +5344,18 @@ class Viewport(object):
         warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
         return (self.n, self.f)
 
+    def setPose(self, R_or_T:  Union[Matrix3, RigidTransform], t:  Optional[Vector3] = None):
+        """Sets the pose of the camera."""
+        if t is not None:
+            self._setPose(R_or_T,t)
+        else:
+            self._setPose(*R_or_T)
+
     fov = property(getFOV, setFOV)
     """Convenience accessor for the field of view, in radians."""
+
+    pose = property(getPose, setPose)
+    """The camera pose, as a rigid transform (R,t) in world coordinates."""
 
     clippingPlanes = property(getClippingPlanes, setClippingPlanes)
     """Klampt 0.9 backwards compatibility accessor for the (n, f) pair."""
@@ -5551,7 +5683,7 @@ class RobotModelLink(object):
         """
         return _robotsim.RobotModelLink_getParentTransform(self)
 
-    def setParentTransform(self, R: Rotation, t: Point) -> None:
+    def _setParentTransform(self, R: Rotation, t: Point) -> None:
         r"""
         Sets transformation (R,t) to the parent link.  
 
@@ -5559,7 +5691,7 @@ class RobotModelLink(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.RobotModelLink_setParentTransform(self, R, t)
+        return _robotsim.RobotModelLink__setParentTransform(self, R, t)
 
     def getAxis(self) -> Vector3:
         r"""
@@ -5665,7 +5797,7 @@ class RobotModelLink(object):
         """
         return _robotsim.RobotModelLink_getTransform(self)
 
-    def setTransform(self, R: Rotation, t: Point) -> None:
+    def _setTransform(self, R: Rotation, t: Point) -> None:
         r"""
         Sets the link's current transformation (R,t) to the world frame.  
 
@@ -5678,7 +5810,7 @@ class RobotModelLink(object):
             This does NOT perform inverse kinematics.  The transform is
             overwritten when the robot's setConfig() method is called.
         """
-        return _robotsim.RobotModelLink_setTransform(self, R, t)
+        return _robotsim.RobotModelLink__setTransform(self, R, t)
 
     def getVelocity(self) -> Vector3:
         r"""
@@ -5933,10 +6065,28 @@ class RobotModelLink(object):
     robotPtr = property(_robotsim.RobotModelLink_robotPtr_get, _robotsim.RobotModelLink_robotPtr_set, doc=r"""robotPtr : p.Klampt::RobotModel""")
     index = property(_robotsim.RobotModelLink_index_get, _robotsim.RobotModelLink_index_set, doc=r"""index : int""")
 
+    def setTransform(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """
+        .. note::
+
+
+            This does NOT perform inverse kinematics.  The transform is
+            overwritten when the robot's setConfig() method is called.
+        """
+        if t is not None:
+            self._setTransform(R_or_T,t)
+        else:
+            self._setTransform(*R_or_T)
+
+    def setParentTransform(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """Sets transformation (R,t) to the parent link"""
+        if t is not None:
+            self._setParentTransform(R_or_T,t)
+        else:
+            self._setParentTransform(*R_or_T)
+
     def setParent(self, index_or_link :  Union[int,'RobotModelLink']):
         """
-        Args:
-            robot (:obj:`must be on same`)
         """
         if isinstance(index_or_link, int):
             self.setParentIndex(index_or_link)
@@ -5945,18 +6095,16 @@ class RobotModelLink(object):
 
     def getParent(self) -> int:
         """
-        Args:
-            robot (:obj:`on its`)
         """
         return self.getParentIndex()
 
     name = property(getName, setName)
     parent = property(getParentIndex, setParent)
     mass = property(getMass, setMass)
-    parentTransform = property(getParentTransform)
+    parentTransform = property(getParentTransform,setParentTransform)
     axis = property(getAxis,setAxis)
     prismatic = property(isPrismatic,setPrismatic)
-    transform = property(getTransform)
+    transform = property(getTransform,setTransform)
 
     __swig_destroy__ = _robotsim.delete_RobotModelLink
 
@@ -6813,7 +6961,7 @@ class RobotModel(object):
         """
         return _robotsim.RobotModel_reduce(self, robot)
 
-    def mount(self, link: int, subRobot:  "RobotModel", R: Rotation, t: Point) -> None:
+    def _mount(self, link: int, subRobot:  "RobotModel", R: Rotation, t: Point) -> None:
         r"""
         Mounts a sub-robot onto a link, with its origin at a given local transform
         (R,t). The sub-robot's links will be renamed to subRobot.getName() + ':' +
@@ -6826,7 +6974,7 @@ class RobotModel(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.RobotModel_mount(self, link, subRobot, R, t)
+        return _robotsim.RobotModel__mount(self, link, subRobot, R, t)
 
     def numSensors(self) -> int:
         r"""
@@ -6927,6 +7075,21 @@ class RobotModel(object):
 
         """
         return types.MappingProxyType({s.name:s for s in self.sensors})
+
+    def mount(self, link:  Union[int,str,'RobotModelLink'], subRobot:  'RobotModel', R_or_T:  Union[Matrix3,RigidTransform], t :  Optional[Vector3]):
+        """
+        The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
+        unless subRobot.getName() is '', in which case the link names are preserved.
+
+        """
+        if isinstance(link,str):
+           link = self.link(link).index
+        elif isinstance(link,RobotModelLink):
+           link = link.index
+        if t is not None:
+            self._mount(link, subRobot, R_or_T, t)
+        else:
+            self._mount(link, subRobot, *R_or_T)
 
     name = property(getName, setName)
     id = property(getID)
@@ -7145,7 +7308,7 @@ class SensorModel(object):
         """
         return _robotsim.SensorModel_getTransformWorld(self)
 
-    def setTransform(self, R: Rotation, t: Point) -> None:
+    def _setTransform(self, R: Rotation, t: Point) -> None:
         r"""
         Sets the local transform of the sensor on the robot's link. (helper for
         setSetting)  
@@ -7157,7 +7320,7 @@ class SensorModel(object):
         If the sensor doesn't have a transform (such as a joint position or torque
         sensor) an exception will be raised.  
         """
-        return _robotsim.SensorModel_setTransform(self, R, t)
+        return _robotsim.SensorModel__setTransform(self, R, t)
 
     def drawGL(self, *args) -> None:
         r"""
@@ -7196,6 +7359,19 @@ class SensorModel(object):
         return _robotsim.SensorModel_kinematicReset(self)
     robotModel = property(_robotsim.SensorModel_robotModel_get, _robotsim.SensorModel_robotModel_set, doc=r"""robotModel : RobotModel""")
     sensor = property(_robotsim.SensorModel_sensor_get, _robotsim.SensorModel_sensor_set, doc=r"""sensor : p.Klampt::SensorBase""")
+
+    def setTransform(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """Sets the local transform of the sensor on the robot's link.
+        If the sensor doesn't have a transform (such as a joint position or
+        torque sensor) an exception will be raised.
+
+        Args:
+            setSetting (:obj:`helper for`)
+        """
+        if t is not None:
+            self._setTransform(R_or_T,t)
+        else:
+            self._setTransform(*R_or_T)
 
     def getLink(self) ->  Optional[RobotModelLink]:
         """
@@ -7379,7 +7555,7 @@ class RigidObjectModel(object):
         """
         return _robotsim.RigidObjectModel_getTransform(self)
 
-    def setTransform(self, R: Rotation, t: Point) -> None:
+    def _setTransform(self, R: Rotation, t: Point) -> None:
         r"""
         Sets the rotation / translation (R,t) of the rigid object.  
 
@@ -7387,7 +7563,7 @@ class RigidObjectModel(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.RigidObjectModel_setTransform(self, R, t)
+        return _robotsim.RigidObjectModel__setTransform(self, R, t)
 
     def getVelocity(self) -> "Tuple[Vector3,Vector3]":
         r"""
@@ -7428,6 +7604,12 @@ class RigidObjectModel(object):
     world = property(_robotsim.RigidObjectModel_world_get, _robotsim.RigidObjectModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.RigidObjectModel_index_get, _robotsim.RigidObjectModel_index_set, doc=r"""index : int""")
     object = property(_robotsim.RigidObjectModel_object_get, _robotsim.RigidObjectModel_object_set, doc=r"""object : p.Klampt::RigidObjectModel""")
+
+    def setTransform(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        if t is not None:
+            self._setTransform(R_or_T,t)
+        else:
+            self._setTransform(*R_or_T)
 
     name = property(getName, setName)
     id = property(getID)
@@ -7892,7 +8074,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -8196,7 +8378,7 @@ class IKObjective(object):
         """
         return _robotsim.IKObjective_setFixedPoints(self, link, plocals, pworlds)
 
-    def setFixedTransform(self, link: int, R: Rotation, t: Point) -> None:
+    def _setFixedTransform(self, link: int, R: Rotation, t: Point) -> None:
         r"""
         Sets a fixed-transform constraint (R,t)  
 
@@ -8205,7 +8387,7 @@ class IKObjective(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.IKObjective_setFixedTransform(self, link, R, t)
+        return _robotsim.IKObjective__setFixedTransform(self, link, R, t)
 
     def setRelativePoint(self, link1: int, link2: int, p1: Point, p2: Point) -> None:
         r"""
@@ -8231,7 +8413,7 @@ class IKObjective(object):
         """
         return _robotsim.IKObjective_setRelativePoints(self, link1, link2, p1s, p2s)
 
-    def setRelativeTransform(self, link: int, linkTgt: int, R: Rotation, t: Point) -> None:
+    def _setRelativeTransform(self, link: int, linkTgt: int, R: Rotation, t: Point) -> None:
         r"""
         Sets a fixed-transform constraint (R,t) relative to linkTgt.  
 
@@ -8241,7 +8423,7 @@ class IKObjective(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.IKObjective_setRelativeTransform(self, link, linkTgt, R, t)
+        return _robotsim.IKObjective__setRelativeTransform(self, link, linkTgt, R, t)
 
     def setLinks(self, link: int, link2: int=-1) -> None:
         r"""
@@ -8361,27 +8543,27 @@ class IKObjective(object):
         """
         return _robotsim.IKObjective_getTransform(self)
 
-    def transform(self, R: Rotation, t: Point) -> None:
+    def _transform(self, R: Rotation, t: Point) -> None:
         r"""
-        Tranforms the target position/rotation of this IK constraint by transform (R,t)  
+        Transforms the target position/rotation of this IK constraint by transform (R,t)  
 
         Args:
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.IKObjective_transform(self, R, t)
+        return _robotsim.IKObjective__transform(self, R, t)
 
-    def transformLocal(self, R: Rotation, t: Point) -> None:
+    def _transformLocal(self, R: Rotation, t: Point) -> None:
         r"""
-        Tranforms the local position/rotation of this IK constraint by transform (R,t)  
+        Transforms the local position/rotation of this IK constraint by transform (R,t)  
 
         Args:
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.IKObjective_transformLocal(self, R, t)
+        return _robotsim.IKObjective__transformLocal(self, R, t)
 
-    def matchDestination(self, R: Rotation, t: Point) -> None:
+    def _matchDestination(self, R: Rotation, t: Point) -> None:
         r"""
         Sets the destination coordinates of this constraint to fit the given target
         transform. In other words, if (R,t) is the current link transform, this sets the
@@ -8392,9 +8574,9 @@ class IKObjective(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.IKObjective_matchDestination(self, R, t)
+        return _robotsim.IKObjective__matchDestination(self, R, t)
 
-    def closestMatch(self, R: Rotation, t: Point) -> RigidTransform:
+    def _closestMatch(self, R: Rotation, t: Point) -> RigidTransform:
         r"""
         Gets the transform T that's closest to the transform (R,t) and that satisfies
         the IK goal's constraints.  
@@ -8403,7 +8585,7 @@ class IKObjective(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.IKObjective_closestMatch(self, R, t)
+        return _robotsim.IKObjective__closestMatch(self, R, t)
 
     def sampleTransform(self) -> RigidTransform:
         r"""
@@ -8435,6 +8617,75 @@ class IKObjective(object):
     goal = property(_robotsim.IKObjective_goal_get, _robotsim.IKObjective_goal_set, doc=r"""goal : IKGoal""")
     positionScale = property(_robotsim.IKObjective_positionScale_get, _robotsim.IKObjective_positionScale_set, doc=r"""positionScale : float""")
     rotationScale = property(_robotsim.IKObjective_rotationScale_get, _robotsim.IKObjective_rotationScale_set, doc=r"""rotationScale : float""")
+
+    def setFixedTransform(self, link : int, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """
+        Sets the objective to constrain a link's frame to a fixed transform.
+
+
+        Args:
+            link (int): the index of the link to constrain.
+            R_or_T (Matrix3 or RigidTransform): the rotation matrix or rigid transform
+                to set.
+            t (Vector3, optional): if R_or_T is a Matrix3, this is the translation
+                vector to set.
+        """
+        if t is not None:
+            self._setFixedTransform(link,R_or_T,t)
+        else:
+            self._setFixedTransform(link,*R_or_T);
+
+    def setRelativeTransform(self, link : int, linkTgt, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """
+        Args:
+            link (int): the index of the link to constrain.
+            linkTgt (int): the index of the target link that the transform is relative to.
+            R_or_T (Matrix3 or RigidTransform): the rotation matrix or rigid transform
+                to set.
+            t (Vector3, optional): if R_or_T is a Matrix3, this is the translation
+                vector to set.
+
+        """
+        if t is not None:
+            self._setRelativeTransform(link,R_or_T,t)
+        else:
+            self._setRelativeTransform(link,*R_or_T);
+
+    def transform(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """Transforms the target position/rotation of this IK constraint by transform (R,t)."""
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
+
+    def transformLocal(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """Transforms the local position/rotation of this IK constraint by transform (R,t)"""
+        if t is not None:
+            self._transformLocal(R_or_T,t)
+        else:
+            self._transformLocal(*R_or_T);
+
+    def matchDestination(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None):
+        """Sets the destination coordinates of this constraint to fit the given target transform.
+        In other words, if (R,t) is the current link transform, this sets the 
+        destination position / orientation so that this objective has zero error.  The
+        current position/rotation constraint types are kept.
+
+        """
+        if t is not None:
+            self._matchDestination(R_or_T,t)
+        else:
+            self._matchDestination(*R_or_T);
+
+    def closestMatch(self, R_or_T :  Union[Matrix3,RigidTransform], t : Optional[Vector3] = None) ->  RigidTransform:
+        """
+        that satisfies the constraints of the IK goal.
+
+        """
+        if t is not None:
+            return self._closestMatch(R_or_T,t)
+        else:
+            return self._closestMatch(*R_or_T);
 
     def __reduce__(self):
         from klampt.io import loader
@@ -9500,7 +9751,7 @@ class SimBody(object):
         """
         return _robotsim.SimBody_applyForceAtLocalPoint(self, f, plocal_com)
 
-    def setTransform(self, R: Rotation, t: Point) -> None:
+    def _setTransform(self, R: Rotation, t: Point) -> None:
         r"""
         Sets the body's transformation at the current simulation time step (in center-
         of-mass centered coordinates).  
@@ -9509,7 +9760,7 @@ class SimBody(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.SimBody_setTransform(self, R, t)
+        return _robotsim.SimBody__setTransform(self, R, t)
 
     def getTransform(self) -> RigidTransform:
         r"""
@@ -9519,7 +9770,7 @@ class SimBody(object):
         """
         return _robotsim.SimBody_getTransform(self)
 
-    def setObjectTransform(self, R: Rotation, t: Point) -> None:
+    def _setObjectTransform(self, R: Rotation, t: Point) -> None:
         r"""
         Sets the body's transformation at the current simulation time step (in object-
         native coordinates)  
@@ -9528,7 +9779,7 @@ class SimBody(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
-        return _robotsim.SimBody_setObjectTransform(self, R, t)
+        return _robotsim.SimBody__setObjectTransform(self, R, t)
 
     def getObjectTransform(self) -> RigidTransform:
         r"""
@@ -9624,6 +9875,30 @@ class SimBody(object):
     objectID = property(_robotsim.SimBody_objectID_get, _robotsim.SimBody_objectID_set, doc=r"""objectID : int""")
     geometry = property(_robotsim.SimBody_geometry_get, _robotsim.SimBody_geometry_set, doc=r"""geometry : p.Klampt::ODEGeometry""")
     body = property(_robotsim.SimBody_body_get, _robotsim.SimBody_body_set, doc=r"""body : dBodyID""")
+
+    def setTransform(self, R_or_T:  Union[Matrix3, RigidTransform], t:  Optional[Vector3] = None):
+        """
+        Sets the body's transformation at the current simulation time step
+        (in center-of-mass centered coordinates).
+
+        """
+        if t is not None:
+            self._setTransform(R_or_T, t)
+        else:
+            self._setTransform(*R_or_T)
+
+    def setObjectTransform(self, R_or_T:  Union[Matrix3, RigidTransform], t:  Optional[Vector3] = None):
+        """
+        Sets the body's transformation at the current simulation time step
+        (in object-native coordinates).
+
+        """
+        if t is not None:
+            self._setObjectTransform(R_or_T, t)
+        else:
+            self._setObjectTransform(*R_or_T)
+
+
 
     def __init__(self):
         r"""

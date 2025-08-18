@@ -459,6 +459,28 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend RobotModelLink { 
 %pythoncode {
+     def setTransform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+         """
+         Sets the link's current transformation (R,t) to the world frame. 
+         
+         .. note::
+         
+             This does NOT perform inverse kinematics.  The transform is
+             overwritten when the robot's setConfig() method is called.
+         
+         """
+         if t is not None:
+             self._setTransform(R_or_T,t)
+         else:
+             self._setTransform(*R_or_T)
+
+     def setParentTransform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+         """Sets transformation (R,t) to the parent link"""
+         if t is not None:
+             self._setParentTransform(R_or_T,t)
+         else:
+             self._setParentTransform(*R_or_T)
+
      def setParent(self, index_or_link : Union[int,'RobotModelLink']):
          """
          Sets the link's parent to an index or link (must be on same robot).
@@ -477,10 +499,10 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
      name = property(getName, setName)
      parent = property(getParentIndex, setParent)
      mass = property(getMass, setMass)
-     parentTransform = property(getParentTransform)
+     parentTransform = property(getParentTransform,setParentTransform)
      axis = property(getAxis,setAxis)
      prismatic = property(isPrismatic,setPrismatic)
-     transform = property(getTransform)
+     transform = property(getTransform,setTransform)
 }
 }
 
@@ -549,6 +571,22 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
          """
          return types.MappingProxyType({s.name:s for s in self.sensors})
 
+     def mount(self, link: Union[int,str,'RobotModelLink'], subRobot: 'RobotModel', R_or_T: Union[Matrix3,RigidTransform], t : Optional[Vector3]):
+         """
+         Mounts a sub-robot onto a link, with its origin at a given local transform (R,t).
+         
+         The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
+         unless subRobot.getName() is '', in which case the link names are preserved.
+         """
+         if isinstance(link,str):
+            link = self.link(link).index
+         elif isinstance(link,RobotModelLink):
+            link = link.index
+         if t is not None:
+             self._mount(link, subRobot, R_or_T, t)
+         else:
+             self._mount(link, subRobot, *R_or_T)
+
      name = property(getName, setName)
      id = property(getID)
      config = property(getConfig,setConfig)
@@ -562,6 +600,12 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend RigidObjectModel { 
 %pythoncode {
+     def setTransform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+         if t is not None:
+             self._setTransform(R_or_T,t)
+         else:
+             self._setTransform(*R_or_T)
+
      name = property(getName, setName)
      id = property(getID)
      mass = property(getMass, setMass)
@@ -578,6 +622,18 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend SensorModel { 
 %pythoncode {
+     def setTransform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+         """Sets the local transform of the sensor on the robot's link.
+         (helper for setSetting)
+         
+         If the sensor doesn't have a transform (such as a joint position or
+         torque sensor) an exception will be raised.
+         """
+         if t is not None:
+             self._setTransform(R_or_T,t)
+         else:
+             self._setTransform(*R_or_T)
+
      def getLink(self) -> Optional[RobotModelLink]:
          """
          Retrieves the link that this sensor is mounted on, or None for
@@ -701,6 +757,30 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 }
 
+%extend SimBody {
+%pythoncode {
+    def setTransform(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """
+        Sets the body's transformation at the current simulation time step
+        (in center-of-mass centered coordinates).
+        """
+        if t is not None:
+            self._setTransform(R_or_T, t)
+        else:
+            self._setTransform(*R_or_T)
+
+    def setObjectTransform(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """
+        Sets the body's transformation at the current simulation time step
+        (in object-native coordinates).
+        """
+        if t is not None:
+            self._setObjectTransform(R_or_T, t)
+        else:
+            self._setObjectTransform(*R_or_T)
+
+}
+}
 
 %extend SimRobotController { 
 %pythoncode {
@@ -736,6 +816,75 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend IKObjective {
 %pythoncode {
+    def setFixedTransform(self, link : int, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Sets the objective to constrain a link's frame to a fixed transform.
+        
+        Args:
+            link (int): the index of the link to constrain.
+            R_or_T (Matrix3 or RigidTransform): the rotation matrix or rigid transform
+                to set.
+            t (Vector3, optional): if R_or_T is a Matrix3, this is the translation
+                vector to set.
+        """
+        if t is not None:
+            self._setFixedTransform(link,R_or_T,t)
+        else:
+            self._setFixedTransform(link,*R_or_T);
+
+    def setRelativeTransform(self, link : int, linkTgt, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Sets a fixed-transform constraint (R,t) relative to linkTgt
+        
+        Args:
+            link (int): the index of the link to constrain.
+            linkTgt (int): the index of the target link that the transform is relative to.
+            R_or_T (Matrix3 or RigidTransform): the rotation matrix or rigid transform
+                to set.
+            t (Vector3, optional): if R_or_T is a Matrix3, this is the translation
+                vector to set.
+        """
+        if t is not None:
+            self._setRelativeTransform(link,R_or_T,t)
+        else:
+            self._setRelativeTransform(link,*R_or_T);
+
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """Transforms the target position/rotation of this IK constraint by transform (R,t)."""
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
+
+    def transformLocal(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """Transforms the local position/rotation of this IK constraint by transform (R,t)"""
+        if t is not None:
+            self._transformLocal(R_or_T,t)
+        else:
+            self._transformLocal(*R_or_T);
+
+    def matchDestination(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """Sets the destination coordinates of this constraint to fit the given target transform.
+        
+        In other words, if (R,t) is the current link transform, this sets the 
+        destination position / orientation so that this objective has zero error.  The
+        current position/rotation constraint types are kept.
+        """
+        if t is not None:
+            self._matchDestination(R_or_T,t)
+        else:
+            self._matchDestination(*R_or_T);
+
+    def closestMatch(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None) -> RigidTransform:
+        """
+        Gets the transform T that is closest to the transform (R,t) and 
+        that satisfies the constraints of the IK goal.
+        """
+        if t is not None:
+            return self._closestMatch(R_or_T,t)
+        else:
+            return self._closestMatch(*R_or_T);
+
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'IKObjective')
@@ -841,9 +990,14 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %extend TriangleMesh {
 %pythoncode {
-    vertices = property(getVertices, setVertices)
-
-    indices = property(getIndices, setIndices)
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Transforms all the vertices by the rigid transform v=R*v+t
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
 
     def triangle(self, i) -> Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
         """
@@ -904,14 +1058,31 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         from klampt.io import loader
         jsonobj = loader.to_json(self,'TriangleMesh')
         return (loader.from_json,(jsonobj,'TriangleMesh'))
+
+    vertices = property(getVertices, setVertices)
+    """An Nx3 matrix of vertex positions"""
+    indices = property(getIndices, setIndices)
+    """An Mx3 matrix of indices into the vertices array, where M is the number of triangles.
+    Each row is a triangle, with the 3 columns giving the indices of the vertices."""
 }
 }
 
 %extend PointCloud {
 %pythoncode {
     points = property(getPoints, setPoints)
-
+    """An Nx3 matrix of point positions, where N is the number of points."""
     properties = property(getProperties, setProperties)
+    """An NxM matrix of point properties, where N is the number of points and M is
+    the number of properties."""
+
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Transforms all the points by the rigid transform p=R*p+t
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
 
     def getPropertyNames(self) -> List[str]:
         """
@@ -1074,6 +1245,15 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %extend ConvexHull {
 %pythoncode {
     points = property(getPoints, setPoints)
+
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Transforms all the vertices by the rigid transform v=R*v+t
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1302,11 +1482,33 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 
 %extend Geometry3D {
-%pythoncode {        
+%pythoncode {
+    def transform(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """
+        Translates/rotates/scales the geometry data.
+        Modifies the underlying data and resets any collision data structures.
+                """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T)
+    
+    def setCurrentTransform(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """
+        Sets the current transformation (not modifying the underlying data)
+        """
+        if t is not None:
+            self._setCurrentTransform(R_or_T,t)
+        else:
+            self._setCurrentTransform(*R_or_T)
+
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'Geometry3D')
         return (loader.from_json,(jsonobj,'Geometry3D'))
+    
+    currentTransform = property(getCurrentTransform, setCurrentTransform)
+    """Convenience accessor for the current transform of the geometry."""
 }
 }
 
@@ -1331,9 +1533,19 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         import warnings
         warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
         return (self.n, self.f)
+    
+    def setPose(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """Sets the pose of the camera."""
+        if t is not None:
+            self._setPose(R_or_T,t)
+        else:
+            self._setPose(*R_or_T)
 
     fov = property(getFOV, setFOV)
     """Convenience accessor for the field of view, in radians."""
+
+    pose = property(getPose, setPose)
+    """The camera pose, as a rigid transform (R,t) in world coordinates."""
 
     clippingPlanes = property(getClippingPlanes, setClippingPlanes)
     """Klampt 0.9 backwards compatibility accessor for the (n, f) pair."""

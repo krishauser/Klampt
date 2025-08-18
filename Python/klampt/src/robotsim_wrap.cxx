@@ -19061,7 +19061,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_TriangleMesh_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_TriangleMesh__transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   TriangleMesh *arg1 = (TriangleMesh *) 0 ;
   double *arg2 ;
@@ -19072,10 +19072,10 @@ SWIGINTERN PyObject *_wrap_TriangleMesh_transform(PyObject *SWIGUNUSEDPARM(self)
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "TriangleMesh_transform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "TriangleMesh__transform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_transform" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh__transform" "', argument " "1"" of type '" "TriangleMesh *""'"); 
   }
   arg1 = reinterpret_cast< TriangleMesh * >(argp1);
   {
@@ -19092,7 +19092,7 @@ SWIGINTERN PyObject *_wrap_TriangleMesh_transform(PyObject *SWIGUNUSEDPARM(self)
   }
   {
     try {
-      (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_transform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -19625,7 +19625,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ConvexHull_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_ConvexHull__transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ConvexHull *arg1 = (ConvexHull *) 0 ;
   double *arg2 ;
@@ -19636,10 +19636,10 @@ SWIGINTERN PyObject *_wrap_ConvexHull_transform(PyObject *SWIGUNUSEDPARM(self), 
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "ConvexHull_transform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "ConvexHull__transform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ConvexHull, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHull_transform" "', argument " "1"" of type '" "ConvexHull *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHull__transform" "', argument " "1"" of type '" "ConvexHull *""'"); 
   }
   arg1 = reinterpret_cast< ConvexHull * >(argp1);
   {
@@ -19656,7 +19656,7 @@ SWIGINTERN PyObject *_wrap_ConvexHull_transform(PyObject *SWIGUNUSEDPARM(self), 
   }
   {
     try {
-      (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_transform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -21193,7 +21193,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_PointCloud_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_PointCloud__transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   double *arg2 ;
@@ -21204,10 +21204,10 @@ SWIGINTERN PyObject *_wrap_PointCloud_transform(PyObject *SWIGUNUSEDPARM(self), 
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "PointCloud_transform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud__transform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_transform" "', argument " "1"" of type '" "PointCloud *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud__transform" "', argument " "1"" of type '" "PointCloud *""'"); 
   }
   arg1 = reinterpret_cast< PointCloud * >(argp1);
   {
@@ -21224,7 +21224,7 @@ SWIGINTERN PyObject *_wrap_PointCloud_transform(PyObject *SWIGUNUSEDPARM(self), 
   }
   {
     try {
-      (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_transform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -31132,7 +31132,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_setCurrentTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D__setCurrentTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   double *arg2 ;
@@ -31143,10 +31143,10 @@ SWIGINTERN PyObject *_wrap_Geometry3D_setCurrentTransform(PyObject *SWIGUNUSEDPA
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_setCurrentTransform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D__setCurrentTransform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setCurrentTransform" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D__setCurrentTransform" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   {
@@ -31163,7 +31163,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_setCurrentTransform(PyObject *SWIGUNUSEDPA
   }
   {
     try {
-      (arg1)->setCurrentTransform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_setCurrentTransform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -31501,7 +31501,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D__transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   double *arg2 ;
@@ -31512,10 +31512,10 @@ SWIGINTERN PyObject *_wrap_Geometry3D_transform(PyObject *SWIGUNUSEDPARM(self), 
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_transform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D__transform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_transform" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D__transform" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   {
@@ -31532,7 +31532,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_transform(PyObject *SWIGUNUSEDPARM(self), 
   }
   {
     try {
-      (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_transform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -41200,7 +41200,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Viewport_setPose(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Viewport__setPose(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Viewport *arg1 = (Viewport *) 0 ;
   double *arg2 ;
@@ -41211,10 +41211,10 @@ SWIGINTERN PyObject *_wrap_Viewport_setPose(PyObject *SWIGUNUSEDPARM(self), PyOb
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "Viewport_setPose", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "Viewport__setPose", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport_setPose" "', argument " "1"" of type '" "Viewport *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Viewport__setPose" "', argument " "1"" of type '" "Viewport *""'"); 
   }
   arg1 = reinterpret_cast< Viewport * >(argp1);
   {
@@ -41231,7 +41231,7 @@ SWIGINTERN PyObject *_wrap_Viewport_setPose(PyObject *SWIGUNUSEDPARM(self), PyOb
   }
   {
     try {
-      (arg1)->setPose((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_setPose((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -43894,7 +43894,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_setParentTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModelLink__setParentTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   double *arg2 ;
@@ -43905,10 +43905,10 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_setParentTransform(PyObject *SWIGUNUSE
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_setParentTransform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink__setParentTransform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_setParentTransform" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink__setParentTransform" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
   {
@@ -43925,7 +43925,7 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_setParentTransform(PyObject *SWIGUNUSE
   }
   {
     try {
-      (arg1)->setParentTransform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_setParentTransform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -44495,7 +44495,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModelLink__setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   double *arg2 ;
@@ -44506,10 +44506,10 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_setTransform(PyObject *SWIGUNUSEDPARM(
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_setTransform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink__setTransform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_setTransform" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink__setTransform" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
   {
@@ -44526,7 +44526,7 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_setTransform(PyObject *SWIGUNUSEDPARM(
   }
   {
     try {
-      (arg1)->setTransform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_setTransform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -50873,7 +50873,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModel_mount(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModel__mount(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
   int arg2 ;
@@ -50890,23 +50890,23 @@ SWIGINTERN PyObject *_wrap_RobotModel_mount(PyObject *SWIGUNUSEDPARM(self), PyOb
   double temp5[3] ;
   PyObject *swig_obj[5] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "RobotModel_mount", 5, 5, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "RobotModel__mount", 5, 5, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_mount" "', argument " "1"" of type '" "RobotModel *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel__mount" "', argument " "1"" of type '" "RobotModel *""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_mount" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel__mount" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModel_mount" "', argument " "3"" of type '" "RobotModel const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModel__mount" "', argument " "3"" of type '" "RobotModel const &""'"); 
   }
   if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModel_mount" "', argument " "3"" of type '" "RobotModel const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModel__mount" "', argument " "3"" of type '" "RobotModel const &""'"); 
   }
   arg3 = reinterpret_cast< RobotModel * >(argp3);
   {
@@ -50923,7 +50923,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_mount(PyObject *SWIGUNUSEDPARM(self), PyOb
   }
   {
     try {
-      (arg1)->mount(arg2,(RobotModel const &)*arg3,(double const (*))arg4,(double const (*))arg5);
+      (arg1)->_mount(arg2,(RobotModel const &)*arg3,(double const (*))arg4,(double const (*))arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -52265,7 +52265,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SensorModel_setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SensorModel__setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SensorModel *arg1 = (SensorModel *) 0 ;
   double *arg2 ;
@@ -52276,10 +52276,10 @@ SWIGINTERN PyObject *_wrap_SensorModel_setTransform(PyObject *SWIGUNUSEDPARM(sel
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "SensorModel_setTransform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "SensorModel__setTransform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SensorModel, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SensorModel_setTransform" "', argument " "1"" of type '" "SensorModel *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SensorModel__setTransform" "', argument " "1"" of type '" "SensorModel *""'"); 
   }
   arg1 = reinterpret_cast< SensorModel * >(argp1);
   {
@@ -52296,7 +52296,7 @@ SWIGINTERN PyObject *_wrap_SensorModel_setTransform(PyObject *SWIGUNUSEDPARM(sel
   }
   {
     try {
-      (arg1)->setTransform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_setTransform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -53418,7 +53418,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RigidObjectModel_setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RigidObjectModel__setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RigidObjectModel *arg1 = (RigidObjectModel *) 0 ;
   double *arg2 ;
@@ -53429,10 +53429,10 @@ SWIGINTERN PyObject *_wrap_RigidObjectModel_setTransform(PyObject *SWIGUNUSEDPAR
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "RigidObjectModel_setTransform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "RigidObjectModel__setTransform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RigidObjectModel, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RigidObjectModel_setTransform" "', argument " "1"" of type '" "RigidObjectModel *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RigidObjectModel__setTransform" "', argument " "1"" of type '" "RigidObjectModel *""'"); 
   }
   arg1 = reinterpret_cast< RigidObjectModel * >(argp1);
   {
@@ -53449,7 +53449,7 @@ SWIGINTERN PyObject *_wrap_RigidObjectModel_setTransform(PyObject *SWIGUNUSEDPAR
   }
   {
     try {
-      (arg1)->setTransform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_setTransform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -57390,7 +57390,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKObjective_setFixedTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKObjective__setFixedTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKObjective *arg1 = (IKObjective *) 0 ;
   int arg2 ;
@@ -57404,15 +57404,15 @@ SWIGINTERN PyObject *_wrap_IKObjective_setFixedTransform(PyObject *SWIGUNUSEDPAR
   double temp4[3] ;
   PyObject *swig_obj[4] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "IKObjective_setFixedTransform", 4, 4, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "IKObjective__setFixedTransform", 4, 4, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_setFixedTransform" "', argument " "1"" of type '" "IKObjective *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective__setFixedTransform" "', argument " "1"" of type '" "IKObjective *""'"); 
   }
   arg1 = reinterpret_cast< IKObjective * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKObjective_setFixedTransform" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKObjective__setFixedTransform" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   {
@@ -57429,7 +57429,7 @@ SWIGINTERN PyObject *_wrap_IKObjective_setFixedTransform(PyObject *SWIGUNUSEDPAR
   }
   {
     try {
-      (arg1)->setFixedTransform(arg2,(double const (*))arg3,(double const (*))arg4);
+      (arg1)->_setFixedTransform(arg2,(double const (*))arg3,(double const (*))arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -57565,7 +57565,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKObjective_setRelativeTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKObjective__setRelativeTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKObjective *arg1 = (IKObjective *) 0 ;
   int arg2 ;
@@ -57582,20 +57582,20 @@ SWIGINTERN PyObject *_wrap_IKObjective_setRelativeTransform(PyObject *SWIGUNUSED
   double temp5[3] ;
   PyObject *swig_obj[5] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "IKObjective_setRelativeTransform", 5, 5, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "IKObjective__setRelativeTransform", 5, 5, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_setRelativeTransform" "', argument " "1"" of type '" "IKObjective *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective__setRelativeTransform" "', argument " "1"" of type '" "IKObjective *""'"); 
   }
   arg1 = reinterpret_cast< IKObjective * >(argp1);
   ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKObjective_setRelativeTransform" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKObjective__setRelativeTransform" "', argument " "2"" of type '" "int""'");
   } 
   arg2 = static_cast< int >(val2);
   ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "IKObjective_setRelativeTransform" "', argument " "3"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "IKObjective__setRelativeTransform" "', argument " "3"" of type '" "int""'");
   } 
   arg3 = static_cast< int >(val3);
   {
@@ -57612,7 +57612,7 @@ SWIGINTERN PyObject *_wrap_IKObjective_setRelativeTransform(PyObject *SWIGUNUSED
   }
   {
     try {
-      (arg1)->setRelativeTransform(arg2,arg3,(double const (*))arg4,(double const (*))arg5);
+      (arg1)->_setRelativeTransform(arg2,arg3,(double const (*))arg4,(double const (*))arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58489,7 +58489,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKObjective_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKObjective__transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKObjective *arg1 = (IKObjective *) 0 ;
   double *arg2 ;
@@ -58500,10 +58500,10 @@ SWIGINTERN PyObject *_wrap_IKObjective_transform(PyObject *SWIGUNUSEDPARM(self),
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "IKObjective_transform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "IKObjective__transform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_transform" "', argument " "1"" of type '" "IKObjective *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective__transform" "', argument " "1"" of type '" "IKObjective *""'"); 
   }
   arg1 = reinterpret_cast< IKObjective * >(argp1);
   {
@@ -58520,7 +58520,7 @@ SWIGINTERN PyObject *_wrap_IKObjective_transform(PyObject *SWIGUNUSEDPARM(self),
   }
   {
     try {
-      (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_transform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58538,7 +58538,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKObjective_transformLocal(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKObjective__transformLocal(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKObjective *arg1 = (IKObjective *) 0 ;
   double *arg2 ;
@@ -58549,10 +58549,10 @@ SWIGINTERN PyObject *_wrap_IKObjective_transformLocal(PyObject *SWIGUNUSEDPARM(s
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "IKObjective_transformLocal", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "IKObjective__transformLocal", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_transformLocal" "', argument " "1"" of type '" "IKObjective *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective__transformLocal" "', argument " "1"" of type '" "IKObjective *""'"); 
   }
   arg1 = reinterpret_cast< IKObjective * >(argp1);
   {
@@ -58569,7 +58569,7 @@ SWIGINTERN PyObject *_wrap_IKObjective_transformLocal(PyObject *SWIGUNUSEDPARM(s
   }
   {
     try {
-      (arg1)->transformLocal((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_transformLocal((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58587,7 +58587,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKObjective_matchDestination(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKObjective__matchDestination(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKObjective *arg1 = (IKObjective *) 0 ;
   double *arg2 ;
@@ -58598,10 +58598,10 @@ SWIGINTERN PyObject *_wrap_IKObjective_matchDestination(PyObject *SWIGUNUSEDPARM
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "IKObjective_matchDestination", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "IKObjective__matchDestination", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_matchDestination" "', argument " "1"" of type '" "IKObjective *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective__matchDestination" "', argument " "1"" of type '" "IKObjective *""'"); 
   }
   arg1 = reinterpret_cast< IKObjective * >(argp1);
   {
@@ -58618,7 +58618,7 @@ SWIGINTERN PyObject *_wrap_IKObjective_matchDestination(PyObject *SWIGUNUSEDPARM
   }
   {
     try {
-      (arg1)->matchDestination((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_matchDestination((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58636,7 +58636,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKObjective_closestMatch(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKObjective__closestMatch(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKObjective *arg1 = (IKObjective *) 0 ;
   double *arg2 ;
@@ -58657,10 +58657,10 @@ SWIGINTERN PyObject *_wrap_IKObjective_closestMatch(PyObject *SWIGUNUSEDPARM(sel
   {
     arg5 = &temp5[0];
   }
-  if (!SWIG_Python_UnpackTuple(args, "IKObjective_closestMatch", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "IKObjective__closestMatch", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_closestMatch" "', argument " "1"" of type '" "IKObjective const *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective__closestMatch" "', argument " "1"" of type '" "IKObjective const *""'"); 
   }
   arg1 = reinterpret_cast< IKObjective * >(argp1);
   {
@@ -58677,7 +58677,7 @@ SWIGINTERN PyObject *_wrap_IKObjective_closestMatch(PyObject *SWIGUNUSEDPARM(sel
   }
   {
     try {
-      ((IKObjective const *)arg1)->closestMatch((double const (*))arg2,(double const (*))arg3,arg4,arg5);
+      ((IKObjective const *)arg1)->_closestMatch((double const (*))arg2,(double const (*))arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -65663,7 +65663,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SimBody_setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SimBody__setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimBody *arg1 = (SimBody *) 0 ;
   double *arg2 ;
@@ -65674,10 +65674,10 @@ SWIGINTERN PyObject *_wrap_SimBody_setTransform(PyObject *SWIGUNUSEDPARM(self), 
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "SimBody_setTransform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "SimBody__setTransform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_setTransform" "', argument " "1"" of type '" "SimBody *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody__setTransform" "', argument " "1"" of type '" "SimBody *""'"); 
   }
   arg1 = reinterpret_cast< SimBody * >(argp1);
   {
@@ -65694,7 +65694,7 @@ SWIGINTERN PyObject *_wrap_SimBody_setTransform(PyObject *SWIGUNUSEDPARM(self), 
   }
   {
     try {
-      (arg1)->setTransform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_setTransform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -65794,7 +65794,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SimBody_setObjectTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SimBody__setObjectTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimBody *arg1 = (SimBody *) 0 ;
   double *arg2 ;
@@ -65805,10 +65805,10 @@ SWIGINTERN PyObject *_wrap_SimBody_setObjectTransform(PyObject *SWIGUNUSEDPARM(s
   double temp3[3] ;
   PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "SimBody_setObjectTransform", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "SimBody__setObjectTransform", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_setObjectTransform" "', argument " "1"" of type '" "SimBody *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody__setObjectTransform" "', argument " "1"" of type '" "SimBody *""'"); 
   }
   arg1 = reinterpret_cast< SimBody * >(argp1);
   {
@@ -65825,7 +65825,7 @@ SWIGINTERN PyObject *_wrap_SimBody_setObjectTransform(PyObject *SWIGUNUSEDPARM(s
   }
   {
     try {
-      (arg1)->setObjectTransform((double const (*))arg2,(double const (*))arg3);
+      (arg1)->_setObjectTransform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -72407,8 +72407,8 @@ static PyMethodDef SwigMethods[] = {
 		"Translates all the vertices by v=v+t.  \n"
 		"\n"
 		""},
-	 { "TriangleMesh_transform", _wrap_TriangleMesh_transform, METH_VARARGS, "\n"
-		"TriangleMesh_transform(TriangleMesh self, double const [9] R, double const [3] t)\n"
+	 { "TriangleMesh__transform", _wrap_TriangleMesh__transform, METH_VARARGS, "\n"
+		"TriangleMesh__transform(TriangleMesh self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Transforms all the vertices by the rigid transform v=R*v+t.  \n"
@@ -72479,8 +72479,8 @@ static PyMethodDef SwigMethods[] = {
 		"Translates all the vertices by v=v+t.  \n"
 		"\n"
 		""},
-	 { "ConvexHull_transform", _wrap_ConvexHull_transform, METH_VARARGS, "\n"
-		"ConvexHull_transform(ConvexHull self, double const [9] R, double const [3] t)\n"
+	 { "ConvexHull__transform", _wrap_ConvexHull__transform, METH_VARARGS, "\n"
+		"ConvexHull__transform(ConvexHull self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Transforms all the vertices by the rigid transform v=R*v+t.  \n"
@@ -72652,8 +72652,8 @@ static PyMethodDef SwigMethods[] = {
 		"Translates all the points by v=v+t.  \n"
 		"\n"
 		""},
-	 { "PointCloud_transform", _wrap_PointCloud_transform, METH_VARARGS, "\n"
-		"PointCloud_transform(PointCloud self, double const [9] R, double const [3] t)\n"
+	 { "PointCloud__transform", _wrap_PointCloud__transform, METH_VARARGS, "\n"
+		"PointCloud__transform(PointCloud self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Transforms all the points by the rigid transform v=R*v+t.  \n"
@@ -73666,8 +73666,8 @@ static PyMethodDef SwigMethods[] = {
 		"Saves to file. Standard mesh types, PCD files, and .geom files are supported.  \n"
 		"\n"
 		""},
-	 { "Geometry3D_setCurrentTransform", _wrap_Geometry3D_setCurrentTransform, METH_VARARGS, "\n"
-		"Geometry3D_setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)\n"
+	 { "Geometry3D__setCurrentTransform", _wrap_Geometry3D__setCurrentTransform, METH_VARARGS, "\n"
+		"Geometry3D__setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets the current transformation (not modifying the underlying data)  \n"
@@ -73707,11 +73707,11 @@ static PyMethodDef SwigMethods[] = {
 		"collision data structures.  \n"
 		"\n"
 		""},
-	 { "Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, "\n"
-		"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)\n"
+	 { "Geometry3D__transform", _wrap_Geometry3D__transform, METH_VARARGS, "\n"
+		"Geometry3D__transform(Geometry3D self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
-		"Translates/rotates/scales the geometry data. Permanently modifies the data and\n"
+		"Translates/rotates/scales the geometry data. Modifies the underlying data and\n"
 		"resets any collision data structures.  \n"
 		"\n"
 		""},
@@ -74879,8 +74879,8 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the vertical FOV.  \n"
 		"\n"
 		""},
-	 { "Viewport_setPose", _wrap_Viewport_setPose, METH_VARARGS, "\n"
-		"Viewport_setPose(Viewport self, double const [9] R, double const [3] t)\n"
+	 { "Viewport__setPose", _wrap_Viewport__setPose, METH_VARARGS, "\n"
+		"Viewport__setPose(Viewport self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets the pose of the camera.  \n"
@@ -75167,8 +75167,8 @@ static PyMethodDef SwigMethods[] = {
 		" Return type: RigidTransform  \n"
 		"\n"
 		""},
-	 { "RobotModelLink_setParentTransform", _wrap_RobotModelLink_setParentTransform, METH_VARARGS, "\n"
-		"RobotModelLink_setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)\n"
+	 { "RobotModelLink__setParentTransform", _wrap_RobotModelLink__setParentTransform, METH_VARARGS, "\n"
+		"RobotModelLink__setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets transformation (R,t) to the parent link.  \n"
@@ -75273,8 +75273,8 @@ static PyMethodDef SwigMethods[] = {
 		" Return type: RigidTransform  \n"
 		"\n"
 		""},
-	 { "RobotModelLink_setTransform", _wrap_RobotModelLink_setTransform, METH_VARARGS, "\n"
-		"RobotModelLink_setTransform(RobotModelLink self, double const [9] R, double const [3] t)\n"
+	 { "RobotModelLink__setTransform", _wrap_RobotModelLink__setTransform, METH_VARARGS, "\n"
+		"RobotModelLink__setTransform(RobotModelLink self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets the link's current transformation (R,t) to the world frame.  \n"
@@ -76254,8 +76254,8 @@ static PyMethodDef SwigMethods[] = {
 		"Return type: List[int]  \n"
 		"\n"
 		""},
-	 { "RobotModel_mount", _wrap_RobotModel_mount, METH_VARARGS, "\n"
-		"RobotModel_mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)\n"
+	 { "RobotModel__mount", _wrap_RobotModel__mount, METH_VARARGS, "\n"
+		"RobotModel__mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Mounts a sub-robot onto a link, with its origin at a given local transform\n"
@@ -76427,8 +76427,8 @@ static PyMethodDef SwigMethods[] = {
 		"Return type: RigidTransform  \n"
 		"\n"
 		""},
-	 { "SensorModel_setTransform", _wrap_SensorModel_setTransform, METH_VARARGS, "\n"
-		"SensorModel_setTransform(SensorModel self, double const [9] R, double const [3] t)\n"
+	 { "SensorModel__setTransform", _wrap_SensorModel__setTransform, METH_VARARGS, "\n"
+		"SensorModel__setTransform(SensorModel self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets the local transform of the sensor on the robot's link. (helper for\n"
@@ -76574,8 +76574,8 @@ static PyMethodDef SwigMethods[] = {
 		" Return type: RigidTransform  \n"
 		"\n"
 		""},
-	 { "RigidObjectModel_setTransform", _wrap_RigidObjectModel_setTransform, METH_VARARGS, "\n"
-		"RigidObjectModel_setTransform(RigidObjectModel self, double const [9] R, double const [3] t)\n"
+	 { "RigidObjectModel__setTransform", _wrap_RigidObjectModel__setTransform, METH_VARARGS, "\n"
+		"RigidObjectModel__setTransform(RigidObjectModel self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets the rotation / translation (R,t) of the rigid object.  \n"
@@ -77047,8 +77047,8 @@ static PyMethodDef SwigMethods[] = {
 		"Sets a multiple fixed-point constraint.  \n"
 		"\n"
 		""},
-	 { "IKObjective_setFixedTransform", _wrap_IKObjective_setFixedTransform, METH_VARARGS, "\n"
-		"IKObjective_setFixedTransform(IKObjective self, int link, double const [9] R, double const [3] t)\n"
+	 { "IKObjective__setFixedTransform", _wrap_IKObjective__setFixedTransform, METH_VARARGS, "\n"
+		"IKObjective__setFixedTransform(IKObjective self, int link, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets a fixed-transform constraint (R,t)  \n"
@@ -77068,8 +77068,8 @@ static PyMethodDef SwigMethods[] = {
 		"Sets a multiple fixed-point constraint relative to link2.  \n"
 		"\n"
 		""},
-	 { "IKObjective_setRelativeTransform", _wrap_IKObjective_setRelativeTransform, METH_VARARGS, "\n"
-		"IKObjective_setRelativeTransform(IKObjective self, int link, int linkTgt, double const [9] R, double const [3] t)\n"
+	 { "IKObjective__setRelativeTransform", _wrap_IKObjective__setRelativeTransform, METH_VARARGS, "\n"
+		"IKObjective__setRelativeTransform(IKObjective self, int link, int linkTgt, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets a fixed-transform constraint (R,t) relative to linkTgt.  \n"
@@ -77184,22 +77184,22 @@ static PyMethodDef SwigMethods[] = {
 		"Return type: RigidTransform  \n"
 		"\n"
 		""},
-	 { "IKObjective_transform", _wrap_IKObjective_transform, METH_VARARGS, "\n"
-		"IKObjective_transform(IKObjective self, double const [9] R, double const [3] t)\n"
+	 { "IKObjective__transform", _wrap_IKObjective__transform, METH_VARARGS, "\n"
+		"IKObjective__transform(IKObjective self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
-		"Tranforms the target position/rotation of this IK constraint by transform (R,t)  \n"
-		"\n"
-		""},
-	 { "IKObjective_transformLocal", _wrap_IKObjective_transformLocal, METH_VARARGS, "\n"
-		"IKObjective_transformLocal(IKObjective self, double const [9] R, double const [3] t)\n"
-		"\n"
-		"\n"
-		"Tranforms the local position/rotation of this IK constraint by transform (R,t)  \n"
+		"Transforms the target position/rotation of this IK constraint by transform (R,t)  \n"
 		"\n"
 		""},
-	 { "IKObjective_matchDestination", _wrap_IKObjective_matchDestination, METH_VARARGS, "\n"
-		"IKObjective_matchDestination(IKObjective self, double const [9] R, double const [3] t)\n"
+	 { "IKObjective__transformLocal", _wrap_IKObjective__transformLocal, METH_VARARGS, "\n"
+		"IKObjective__transformLocal(IKObjective self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"\n"
+		"Transforms the local position/rotation of this IK constraint by transform (R,t)  \n"
+		"\n"
+		""},
+	 { "IKObjective__matchDestination", _wrap_IKObjective__matchDestination, METH_VARARGS, "\n"
+		"IKObjective__matchDestination(IKObjective self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets the destination coordinates of this constraint to fit the given target\n"
@@ -77208,8 +77208,8 @@ static PyMethodDef SwigMethods[] = {
 		"current position/rotation constraint types are kept.  \n"
 		"\n"
 		""},
-	 { "IKObjective_closestMatch", _wrap_IKObjective_closestMatch, METH_VARARGS, "\n"
-		"IKObjective_closestMatch(IKObjective self, double const [9] R, double const [3] t)\n"
+	 { "IKObjective__closestMatch", _wrap_IKObjective__closestMatch, METH_VARARGS, "\n"
+		"IKObjective__closestMatch(IKObjective self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Gets the transform T that's closest to the transform (R,t) and that satisfies\n"
@@ -77993,8 +77993,8 @@ static PyMethodDef SwigMethods[] = {
 		"Deprecated: use applyForceAtCOMLocalPoint instead to match old behavior.  \n"
 		"\n"
 		""},
-	 { "SimBody_setTransform", _wrap_SimBody_setTransform, METH_VARARGS, "\n"
-		"SimBody_setTransform(SimBody self, double const [9] R, double const [3] t)\n"
+	 { "SimBody__setTransform", _wrap_SimBody__setTransform, METH_VARARGS, "\n"
+		"SimBody__setTransform(SimBody self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets the body's transformation at the current simulation time step (in center-\n"
@@ -78011,8 +78011,8 @@ static PyMethodDef SwigMethods[] = {
 		"Return type: RigidTransform  \n"
 		"\n"
 		""},
-	 { "SimBody_setObjectTransform", _wrap_SimBody_setObjectTransform, METH_VARARGS, "\n"
-		"SimBody_setObjectTransform(SimBody self, double const [9] R, double const [3] t)\n"
+	 { "SimBody__setObjectTransform", _wrap_SimBody__setObjectTransform, METH_VARARGS, "\n"
+		"SimBody__setObjectTransform(SimBody self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"Sets the body's transformation at the current simulation time step (in object-\n"

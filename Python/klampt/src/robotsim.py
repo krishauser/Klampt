@@ -992,21 +992,26 @@ class TriangleMesh(object):
         """
         return _robotsim.TriangleMesh_translate(self, t)
 
-    def transform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _transform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        transform(TriangleMesh self, double const [9] R, double const [3] t)
+        _transform(TriangleMesh self, double const [9] R, double const [3] t)
 
 
         Transforms all the vertices by the rigid transform v=R*v+t.  
 
         """
-        return _robotsim.TriangleMesh_transform(self, R, t)
+        return _robotsim.TriangleMesh__transform(self, R, t)
     dataPtr = property(_robotsim.TriangleMesh_dataPtr_get, _robotsim.TriangleMesh_dataPtr_set, doc=r"""dataPtr : p.void""")
     isStandalone = property(_robotsim.TriangleMesh_isStandalone_get, _robotsim.TriangleMesh_isStandalone_set, doc=r"""isStandalone : bool""")
 
-    vertices = property(getVertices, setVertices)
-
-    indices = property(getIndices, setIndices)
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Transforms all the vertices by the rigid transform v=R*v+t
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
 
     def triangle(self, i) -> Tuple[Tuple[float,float,float],Tuple[float,float,float],Tuple[float,float,float]]:
         """
@@ -1067,6 +1072,12 @@ class TriangleMesh(object):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'TriangleMesh')
         return (loader.from_json,(jsonobj,'TriangleMesh'))
+
+    vertices = property(getVertices, setVertices)
+    """An Nx3 matrix of vertex positions"""
+    indices = property(getIndices, setIndices)
+    """An Mx3 matrix of indices into the vertices array, where M is the number of triangles.
+    Each row is a triangle, with the 3 columns giving the indices of the vertices."""
 
 
 # Register TriangleMesh in _robotsim:
@@ -1168,19 +1179,28 @@ class ConvexHull(object):
         """
         return _robotsim.ConvexHull_translate(self, t)
 
-    def transform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _transform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        transform(ConvexHull self, double const [9] R, double const [3] t)
+        _transform(ConvexHull self, double const [9] R, double const [3] t)
 
 
         Transforms all the vertices by the rigid transform v=R*v+t.  
 
         """
-        return _robotsim.ConvexHull_transform(self, R, t)
+        return _robotsim.ConvexHull__transform(self, R, t)
     dataPtr = property(_robotsim.ConvexHull_dataPtr_get, _robotsim.ConvexHull_dataPtr_set, doc=r"""dataPtr : p.void""")
     isStandalone = property(_robotsim.ConvexHull_isStandalone_get, _robotsim.ConvexHull_isStandalone_set, doc=r"""isStandalone : bool""")
 
     points = property(getPoints, setPoints)
+
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Transforms all the vertices by the rigid transform v=R*v+t
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
 
     def __reduce__(self):
         from klampt.io import loader
@@ -1467,15 +1487,15 @@ class PointCloud(object):
         """
         return _robotsim.PointCloud_translate(self, t)
 
-    def transform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _transform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        transform(PointCloud self, double const [9] R, double const [3] t)
+        _transform(PointCloud self, double const [9] R, double const [3] t)
 
 
         Transforms all the points by the rigid transform v=R*v+t.  
 
         """
-        return _robotsim.PointCloud_transform(self, R, t)
+        return _robotsim.PointCloud__transform(self, R, t)
 
     def join(self, pc: "PointCloud") -> "void":
         r"""
@@ -1616,8 +1636,19 @@ class PointCloud(object):
     isStandalone = property(_robotsim.PointCloud_isStandalone_get, _robotsim.PointCloud_isStandalone_set, doc=r"""isStandalone : bool""")
 
     points = property(getPoints, setPoints)
-
+    """An Nx3 matrix of point positions, where N is the number of points."""
     properties = property(getProperties, setProperties)
+    """An NxM matrix of point properties, where N is the number of points and M is
+    the number of properties."""
+
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Transforms all the points by the rigid transform p=R*p+t
+        """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
 
     def getPropertyNames(self) -> List[str]:
         """
@@ -3524,15 +3555,15 @@ class Geometry3D(object):
         """
         return _robotsim.Geometry3D_saveFile(self, fn)
 
-    def setCurrentTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _setCurrentTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)
+        _setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)
 
 
         Sets the current transformation (not modifying the underlying data)  
 
         """
-        return _robotsim.Geometry3D_setCurrentTransform(self, R, t)
+        return _robotsim.Geometry3D__setCurrentTransform(self, R, t)
 
     def getCurrentTransform(self) -> "void":
         r"""
@@ -3580,16 +3611,16 @@ class Geometry3D(object):
         """
         return _robotsim.Geometry3D_rotate(self, R)
 
-    def transform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _transform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        transform(Geometry3D self, double const [9] R, double const [3] t)
+        _transform(Geometry3D self, double const [9] R, double const [3] t)
 
 
-        Translates/rotates/scales the geometry data. Permanently modifies the data and
+        Translates/rotates/scales the geometry data. Modifies the underlying data and
         resets any collision data structures.  
 
         """
-        return _robotsim.Geometry3D_transform(self, R, t)
+        return _robotsim.Geometry3D__transform(self, R, t)
 
     def setAppearance(self, appearance: "Appearance") -> "void":
         r"""
@@ -4063,10 +4094,32 @@ class Geometry3D(object):
     id = property(_robotsim.Geometry3D_id_get, _robotsim.Geometry3D_id_set, doc=r"""id : int""")
     geomPtr = property(_robotsim.Geometry3D_geomPtr_get, _robotsim.Geometry3D_geomPtr_set, doc=r"""geomPtr : p.void""")
 
+    def transform(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """
+        Translates/rotates/scales the geometry data.
+        Modifies the underlying data and resets any collision data structures.
+                """
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T)
+
+    def setCurrentTransform(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """
+        Sets the current transformation (not modifying the underlying data)
+        """
+        if t is not None:
+            self._setCurrentTransform(R_or_T,t)
+        else:
+            self._setCurrentTransform(*R_or_T)
+
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'Geometry3D')
         return (loader.from_json,(jsonobj,'Geometry3D'))
+
+    currentTransform = property(getCurrentTransform, setCurrentTransform)
+    """Convenience accessor for the current transform of the geometry."""
 
 
 # Register Geometry3D in _robotsim:
@@ -5356,15 +5409,15 @@ class Viewport(object):
         """
         return _robotsim.Viewport_getVFOV(self)
 
-    def setPose(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _setPose(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setPose(Viewport self, double const [9] R, double const [3] t)
+        _setPose(Viewport self, double const [9] R, double const [3] t)
 
 
         Sets the pose of the camera.  
 
         """
-        return _robotsim.Viewport_setPose(self, R, t)
+        return _robotsim.Viewport__setPose(self, R, t)
 
     def getPose(self) -> "void":
         r"""
@@ -5459,8 +5512,18 @@ class Viewport(object):
         warnings.warn("Viewport. clippingPlanes will be deprecated in favor of n,f attributes in a future version of Klampt",DeprecationWarning)
         return (self.n, self.f)
 
+    def setPose(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """Sets the pose of the camera."""
+        if t is not None:
+            self._setPose(R_or_T,t)
+        else:
+            self._setPose(*R_or_T)
+
     fov = property(getFOV, setFOV)
     """Convenience accessor for the field of view, in radians."""
+
+    pose = property(getPose, setPose)
+    """The camera pose, as a rigid transform (R,t) in world coordinates."""
 
     clippingPlanes = property(getClippingPlanes, setClippingPlanes)
     """Klampt 0.9 backwards compatibility accessor for the (n, f) pair."""
@@ -5837,15 +5900,15 @@ class RobotModelLink(object):
         """
         return _robotsim.RobotModelLink_getParentTransform(self)
 
-    def setParentTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _setParentTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)
+        _setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)
 
 
         Sets transformation (R,t) to the parent link.  
 
         """
-        return _robotsim.RobotModelLink_setParentTransform(self, R, t)
+        return _robotsim.RobotModelLink__setParentTransform(self, R, t)
 
     def getAxis(self) -> "void":
         r"""
@@ -5976,9 +6039,9 @@ class RobotModelLink(object):
         """
         return _robotsim.RobotModelLink_getTransform(self)
 
-    def setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setTransform(RobotModelLink self, double const [9] R, double const [3] t)
+        _setTransform(RobotModelLink self, double const [9] R, double const [3] t)
 
 
         Sets the link's current transformation (R,t) to the world frame.  
@@ -5990,7 +6053,7 @@ class RobotModelLink(object):
 
 
         """
-        return _robotsim.RobotModelLink_setTransform(self, R, t)
+        return _robotsim.RobotModelLink__setTransform(self, R, t)
 
     def getVelocity(self) -> "void":
         r"""
@@ -6280,6 +6343,28 @@ class RobotModelLink(object):
     robotPtr = property(_robotsim.RobotModelLink_robotPtr_get, _robotsim.RobotModelLink_robotPtr_set, doc=r"""robotPtr : p.Klampt::RobotModel""")
     index = property(_robotsim.RobotModelLink_index_get, _robotsim.RobotModelLink_index_set, doc=r"""index : int""")
 
+    def setTransform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Sets the link's current transformation (R,t) to the world frame. 
+
+        .. note::
+
+            This does NOT perform inverse kinematics.  The transform is
+            overwritten when the robot's setConfig() method is called.
+
+        """
+        if t is not None:
+            self._setTransform(R_or_T,t)
+        else:
+            self._setTransform(*R_or_T)
+
+    def setParentTransform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """Sets transformation (R,t) to the parent link"""
+        if t is not None:
+            self._setParentTransform(R_or_T,t)
+        else:
+            self._setParentTransform(*R_or_T)
+
     def setParent(self, index_or_link : Union[int,'RobotModelLink']):
         """
         Sets the link's parent to an index or link (must be on same robot).
@@ -6298,10 +6383,10 @@ class RobotModelLink(object):
     name = property(getName, setName)
     parent = property(getParentIndex, setParent)
     mass = property(getMass, setMass)
-    parentTransform = property(getParentTransform)
+    parentTransform = property(getParentTransform,setParentTransform)
     axis = property(getAxis,setAxis)
     prismatic = property(isPrismatic,setPrismatic)
-    transform = property(getTransform)
+    transform = property(getTransform,setTransform)
 
     __swig_destroy__ = _robotsim.delete_RobotModelLink
 
@@ -7321,9 +7406,9 @@ class RobotModel(object):
         """
         return _robotsim.RobotModel_reduce(self, robot)
 
-    def mount(self, link: "int", subRobot: "RobotModel", R: "double const [9]", t: "double const [3]") -> "void":
+    def _mount(self, link: "int", subRobot: "RobotModel", R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)
+        _mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)
 
 
         Mounts a sub-robot onto a link, with its origin at a given local transform
@@ -7332,7 +7417,7 @@ class RobotModel(object):
         preserved.  
 
         """
-        return _robotsim.RobotModel_mount(self, link, subRobot, R, t)
+        return _robotsim.RobotModel__mount(self, link, subRobot, R, t)
 
     def numSensors(self) -> "int":
         r"""
@@ -7423,6 +7508,22 @@ class RobotModel(object):
         A frozen dictionary mapping sensor names to SensorModel instances.
         """
         return types.MappingProxyType({s.name:s for s in self.sensors})
+
+    def mount(self, link: Union[int,str,'RobotModelLink'], subRobot: 'RobotModel', R_or_T: Union[Matrix3,RigidTransform], t : Optional[Vector3]):
+        """
+        Mounts a sub-robot onto a link, with its origin at a given local transform (R,t).
+
+        The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
+        unless subRobot.getName() is '', in which case the link names are preserved.
+        """
+        if isinstance(link,str):
+           link = self.link(link).index
+        elif isinstance(link,RobotModelLink):
+           link = link.index
+        if t is not None:
+            self._mount(link, subRobot, R_or_T, t)
+        else:
+            self._mount(link, subRobot, *R_or_T)
 
     name = property(getName, setName)
     id = property(getID)
@@ -7665,9 +7766,9 @@ class SensorModel(object):
         """
         return _robotsim.SensorModel_getTransformWorld(self)
 
-    def setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setTransform(SensorModel self, double const [9] R, double const [3] t)
+        _setTransform(SensorModel self, double const [9] R, double const [3] t)
 
 
         Sets the local transform of the sensor on the robot's link. (helper for
@@ -7677,7 +7778,7 @@ class SensorModel(object):
         sensor) an exception will be raised.  
 
         """
-        return _robotsim.SensorModel_setTransform(self, R, t)
+        return _robotsim.SensorModel__setTransform(self, R, t)
 
     def drawGL(self, *args) -> "void":
         r"""
@@ -7712,6 +7813,18 @@ class SensorModel(object):
         return _robotsim.SensorModel_kinematicReset(self)
     robotModel = property(_robotsim.SensorModel_robotModel_get, _robotsim.SensorModel_robotModel_set, doc=r"""robotModel : RobotModel""")
     sensor = property(_robotsim.SensorModel_sensor_get, _robotsim.SensorModel_sensor_set, doc=r"""sensor : p.Klampt::SensorBase""")
+
+    def setTransform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """Sets the local transform of the sensor on the robot's link.
+        (helper for setSetting)
+
+        If the sensor doesn't have a transform (such as a joint position or
+        torque sensor) an exception will be raised.
+        """
+        if t is not None:
+            self._setTransform(R_or_T,t)
+        else:
+            self._setTransform(*R_or_T)
 
     def getLink(self) -> Optional[RobotModelLink]:
         """
@@ -7914,15 +8027,15 @@ class RigidObjectModel(object):
         """
         return _robotsim.RigidObjectModel_getTransform(self)
 
-    def setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setTransform(RigidObjectModel self, double const [9] R, double const [3] t)
+        _setTransform(RigidObjectModel self, double const [9] R, double const [3] t)
 
 
         Sets the rotation / translation (R,t) of the rigid object.  
 
         """
-        return _robotsim.RigidObjectModel_setTransform(self, R, t)
+        return _robotsim.RigidObjectModel__setTransform(self, R, t)
 
     def getVelocity(self) -> "void":
         r"""
@@ -7968,6 +8081,12 @@ class RigidObjectModel(object):
     world = property(_robotsim.RigidObjectModel_world_get, _robotsim.RigidObjectModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.RigidObjectModel_index_get, _robotsim.RigidObjectModel_index_set, doc=r"""index : int""")
     object = property(_robotsim.RigidObjectModel_object_get, _robotsim.RigidObjectModel_object_set, doc=r"""object : p.Klampt::RigidObjectModel""")
+
+    def setTransform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        if t is not None:
+            self._setTransform(R_or_T,t)
+        else:
+            self._setTransform(*R_or_T)
 
     name = property(getName, setName)
     id = property(getID)
@@ -8711,15 +8830,15 @@ class IKObjective(object):
         """
         return _robotsim.IKObjective_setFixedPoints(self, link, plocals, pworlds)
 
-    def setFixedTransform(self, link: "int", R: "double const [9]", t: "double const [3]") -> "void":
+    def _setFixedTransform(self, link: "int", R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setFixedTransform(IKObjective self, int link, double const [9] R, double const [3] t)
+        _setFixedTransform(IKObjective self, int link, double const [9] R, double const [3] t)
 
 
         Sets a fixed-transform constraint (R,t)  
 
         """
-        return _robotsim.IKObjective_setFixedTransform(self, link, R, t)
+        return _robotsim.IKObjective__setFixedTransform(self, link, R, t)
 
     def setRelativePoint(self, link1: "int", link2: "int", p1: "double const [3]", p2: "double const [3]") -> "void":
         r"""
@@ -8741,15 +8860,15 @@ class IKObjective(object):
         """
         return _robotsim.IKObjective_setRelativePoints(self, link1, link2, p1s, p2s)
 
-    def setRelativeTransform(self, link: "int", linkTgt: "int", R: "double const [9]", t: "double const [3]") -> "void":
+    def _setRelativeTransform(self, link: "int", linkTgt: "int", R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setRelativeTransform(IKObjective self, int link, int linkTgt, double const [9] R, double const [3] t)
+        _setRelativeTransform(IKObjective self, int link, int linkTgt, double const [9] R, double const [3] t)
 
 
         Sets a fixed-transform constraint (R,t) relative to linkTgt.  
 
         """
-        return _robotsim.IKObjective_setRelativeTransform(self, link, linkTgt, R, t)
+        return _robotsim.IKObjective__setRelativeTransform(self, link, linkTgt, R, t)
 
     def setLinks(self, link: "int", link2: "int"=-1) -> "void":
         r"""
@@ -8902,29 +9021,29 @@ class IKObjective(object):
         """
         return _robotsim.IKObjective_getTransform(self)
 
-    def transform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _transform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        transform(IKObjective self, double const [9] R, double const [3] t)
+        _transform(IKObjective self, double const [9] R, double const [3] t)
 
 
-        Tranforms the target position/rotation of this IK constraint by transform (R,t)  
+        Transforms the target position/rotation of this IK constraint by transform (R,t)  
 
         """
-        return _robotsim.IKObjective_transform(self, R, t)
+        return _robotsim.IKObjective__transform(self, R, t)
 
-    def transformLocal(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _transformLocal(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        transformLocal(IKObjective self, double const [9] R, double const [3] t)
+        _transformLocal(IKObjective self, double const [9] R, double const [3] t)
 
 
-        Tranforms the local position/rotation of this IK constraint by transform (R,t)  
+        Transforms the local position/rotation of this IK constraint by transform (R,t)  
 
         """
-        return _robotsim.IKObjective_transformLocal(self, R, t)
+        return _robotsim.IKObjective__transformLocal(self, R, t)
 
-    def matchDestination(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _matchDestination(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        matchDestination(IKObjective self, double const [9] R, double const [3] t)
+        _matchDestination(IKObjective self, double const [9] R, double const [3] t)
 
 
         Sets the destination coordinates of this constraint to fit the given target
@@ -8933,11 +9052,11 @@ class IKObjective(object):
         current position/rotation constraint types are kept.  
 
         """
-        return _robotsim.IKObjective_matchDestination(self, R, t)
+        return _robotsim.IKObjective__matchDestination(self, R, t)
 
-    def closestMatch(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _closestMatch(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        closestMatch(IKObjective self, double const [9] R, double const [3] t)
+        _closestMatch(IKObjective self, double const [9] R, double const [3] t)
 
 
         Gets the transform T that's closest to the transform (R,t) and that satisfies
@@ -8946,7 +9065,7 @@ class IKObjective(object):
         Return type: RigidTransform  
 
         """
-        return _robotsim.IKObjective_closestMatch(self, R, t)
+        return _robotsim.IKObjective__closestMatch(self, R, t)
 
     def sampleTransform(self) -> "void":
         r"""
@@ -8987,6 +9106,75 @@ class IKObjective(object):
     goal = property(_robotsim.IKObjective_goal_get, _robotsim.IKObjective_goal_set, doc=r"""goal : IKGoal""")
     positionScale = property(_robotsim.IKObjective_positionScale_get, _robotsim.IKObjective_positionScale_set, doc=r"""positionScale : float""")
     rotationScale = property(_robotsim.IKObjective_rotationScale_get, _robotsim.IKObjective_rotationScale_set, doc=r"""rotationScale : float""")
+
+    def setFixedTransform(self, link : int, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Sets the objective to constrain a link's frame to a fixed transform.
+
+        Args:
+            link (int): the index of the link to constrain.
+            R_or_T (Matrix3 or RigidTransform): the rotation matrix or rigid transform
+                to set.
+            t (Vector3, optional): if R_or_T is a Matrix3, this is the translation
+                vector to set.
+        """
+        if t is not None:
+            self._setFixedTransform(link,R_or_T,t)
+        else:
+            self._setFixedTransform(link,*R_or_T);
+
+    def setRelativeTransform(self, link : int, linkTgt, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """
+        Sets a fixed-transform constraint (R,t) relative to linkTgt
+
+        Args:
+            link (int): the index of the link to constrain.
+            linkTgt (int): the index of the target link that the transform is relative to.
+            R_or_T (Matrix3 or RigidTransform): the rotation matrix or rigid transform
+                to set.
+            t (Vector3, optional): if R_or_T is a Matrix3, this is the translation
+                vector to set.
+        """
+        if t is not None:
+            self._setRelativeTransform(link,R_or_T,t)
+        else:
+            self._setRelativeTransform(link,*R_or_T);
+
+    def transform(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """Transforms the target position/rotation of this IK constraint by transform (R,t)."""
+        if t is not None:
+            self._transform(R_or_T,t)
+        else:
+            self._transform(*R_or_T);
+
+    def transformLocal(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """Transforms the local position/rotation of this IK constraint by transform (R,t)"""
+        if t is not None:
+            self._transformLocal(R_or_T,t)
+        else:
+            self._transformLocal(*R_or_T);
+
+    def matchDestination(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None):
+        """Sets the destination coordinates of this constraint to fit the given target transform.
+
+        In other words, if (R,t) is the current link transform, this sets the 
+        destination position / orientation so that this objective has zero error.  The
+        current position/rotation constraint types are kept.
+        """
+        if t is not None:
+            self._matchDestination(R_or_T,t)
+        else:
+            self._matchDestination(*R_or_T);
+
+    def closestMatch(self, R_or_T : Union[Matrix3,RigidTransform], t :Optional[Vector3] = None) -> RigidTransform:
+        """
+        Gets the transform T that is closest to the transform (R,t) and 
+        that satisfies the constraints of the IK goal.
+        """
+        if t is not None:
+            return self._closestMatch(R_or_T,t)
+        else:
+            return self._closestMatch(*R_or_T);
 
     def __reduce__(self):
         from klampt.io import loader
@@ -10150,16 +10338,16 @@ class SimBody(object):
         """
         return _robotsim.SimBody_applyForceAtLocalPoint(self, f, plocal_com)
 
-    def setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _setTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setTransform(SimBody self, double const [9] R, double const [3] t)
+        _setTransform(SimBody self, double const [9] R, double const [3] t)
 
 
         Sets the body's transformation at the current simulation time step (in center-
         of-mass centered coordinates).  
 
         """
-        return _robotsim.SimBody_setTransform(self, R, t)
+        return _robotsim.SimBody__setTransform(self, R, t)
 
     def getTransform(self) -> "void":
         r"""
@@ -10174,16 +10362,16 @@ class SimBody(object):
         """
         return _robotsim.SimBody_getTransform(self)
 
-    def setObjectTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
+    def _setObjectTransform(self, R: "double const [9]", t: "double const [3]") -> "void":
         r"""
-        setObjectTransform(SimBody self, double const [9] R, double const [3] t)
+        _setObjectTransform(SimBody self, double const [9] R, double const [3] t)
 
 
         Sets the body's transformation at the current simulation time step (in object-
         native coordinates)  
 
         """
-        return _robotsim.SimBody_setObjectTransform(self, R, t)
+        return _robotsim.SimBody__setObjectTransform(self, R, t)
 
     def getObjectTransform(self) -> "void":
         r"""
@@ -10300,6 +10488,28 @@ class SimBody(object):
     objectID = property(_robotsim.SimBody_objectID_get, _robotsim.SimBody_objectID_set, doc=r"""objectID : int""")
     geometry = property(_robotsim.SimBody_geometry_get, _robotsim.SimBody_geometry_set, doc=r"""geometry : p.Klampt::ODEGeometry""")
     body = property(_robotsim.SimBody_body_get, _robotsim.SimBody_body_set, doc=r"""body : dBodyID""")
+
+    def setTransform(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """
+        Sets the body's transformation at the current simulation time step
+        (in center-of-mass centered coordinates).
+        """
+        if t is not None:
+            self._setTransform(R_or_T, t)
+        else:
+            self._setTransform(*R_or_T)
+
+    def setObjectTransform(self, R_or_T: Union[Matrix3, RigidTransform], t: Optional[Vector3] = None):
+        """
+        Sets the body's transformation at the current simulation time step
+        (in object-native coordinates).
+        """
+        if t is not None:
+            self._setObjectTransform(R_or_T, t)
+        else:
+            self._setObjectTransform(*R_or_T)
+
+
 
     def __init__(self):
         r"""

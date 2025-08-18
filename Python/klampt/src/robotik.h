@@ -46,13 +46,13 @@ class IKObjective
   ///Sets a multiple fixed-point constraint
   void setFixedPoints(int link,PyObject* plocals,PyObject* pworlds);
   ///Sets a fixed-transform constraint (R,t)
-  void setFixedTransform(int link,const double R[9],const double t[3]);
+  void _setFixedTransform(int link,const double R[9],const double t[3]);
   ///Sets a fixed-point constraint relative to link2
   void setRelativePoint(int link1,int link2,const double p1[3],const double p2[3]);
   ///Sets a multiple fixed-point constraint relative to link2
   void setRelativePoints(int link1,int link2,PyObject* p1s,PyObject* p2s);
   ///Sets a fixed-transform constraint (R,t) relative to linkTgt
-  void setRelativeTransform(int link,int linkTgt,const double R[9],const double t[3]);
+  void _setRelativeTransform(int link,int linkTgt,const double R[9],const double t[3]);
   ///Manual construction
   void setLinks(int link,int link2=-1);
   ///Deprecated: use setFreePosConstraint
@@ -93,22 +93,22 @@ class IKObjective
   ///
   ///Return type: RigidTransform
   void getTransform(double out[9],double out2[3]) const;
-  ///Tranforms the target position/rotation of this IK constraint by transform (R,t)
-  void transform(const double R[9],const double t[3]);
-  ///Tranforms the local position/rotation of this IK constraint by transform (R,t)
-  void transformLocal(const double R[9],const double t[3]);
+  ///Transforms the target position/rotation of this IK constraint by transform (R,t)
+  void _transform(const double R[9],const double t[3]);
+  ///Transforms the local position/rotation of this IK constraint by transform (R,t)
+  void _transformLocal(const double R[9],const double t[3]);
 
   ///Sets the destination coordinates of this constraint to fit the given target 
   ///transform.  In other words, if (R,t) is the current link transform, this sets the 
   ///destination position / orientation so that this objective has zero error.  The
   ///current position/rotation constraint types are kept.
-  void matchDestination(const double R[9],const double t[3]);
+  void _matchDestination(const double R[9],const double t[3]);
 
   ///Gets the transform T that's closest to the transform (R,t) and 
   ///that satisfies the IK goal's constraints.
   ///
   ///Return type: RigidTransform
-  void closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const;
+  void _closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const;
 
   ///Returns a transformation (R,t) from link relative to link2, sampled at random from
   ///the space of transforms that satisfies the objective obj.

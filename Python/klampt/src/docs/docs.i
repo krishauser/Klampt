@@ -528,7 +528,7 @@ Adds a point.
 Translates all the vertices by v=v+t.  
 ";
 
-%feature("docstring") ConvexHull::transform "
+%feature("docstring") ConvexHull::_transform "
 
 Transforms all the vertices by the rigid transform v=R*v+t.  
 ";
@@ -1274,7 +1274,7 @@ Returns:
 Saves to file. Standard mesh types, PCD files, and .geom files are supported.  
 ";
 
-%feature("docstring") Geometry3D::setCurrentTransform "
+%feature("docstring") Geometry3D::_setCurrentTransform "
 
 Sets the current transformation (not modifying the underlying data)  
 ";
@@ -1310,9 +1310,9 @@ Rotates the geometry data. Permanently modifies the data and resets any
 collision data structures.  
 ";
 
-%feature("docstring") Geometry3D::transform "
+%feature("docstring") Geometry3D::_transform "
 
-Translates/rotates/scales the geometry data. Permanently modifies the data and
+Translates/rotates/scales the geometry data. Modifies the underlying data and
 resets any collision data structures.  
 ";
 
@@ -2012,7 +2012,7 @@ Sets a fixed-point constraint.
 Sets a multiple fixed-point constraint.  
 ";
 
-%feature("docstring") IKObjective::setFixedTransform "
+%feature("docstring") IKObjective::_setFixedTransform "
 
 Sets a fixed-transform constraint (R,t)  
 ";
@@ -2027,7 +2027,7 @@ Sets a fixed-point constraint relative to link2.
 Sets a multiple fixed-point constraint relative to link2.  
 ";
 
-%feature("docstring") IKObjective::setRelativeTransform "
+%feature("docstring") IKObjective::_setRelativeTransform "
 
 Sets a fixed-transform constraint (R,t) relative to linkTgt.  
 ";
@@ -2113,17 +2113,17 @@ For fixed-transform constraints, returns the transform (R,t)
 Return type: RigidTransform  
 ";
 
-%feature("docstring") IKObjective::transform "
+%feature("docstring") IKObjective::_transform "
 
-Tranforms the target position/rotation of this IK constraint by transform (R,t)  
+Transforms the target position/rotation of this IK constraint by transform (R,t)  
 ";
 
-%feature("docstring") IKObjective::transformLocal "
+%feature("docstring") IKObjective::_transformLocal "
 
-Tranforms the local position/rotation of this IK constraint by transform (R,t)  
+Transforms the local position/rotation of this IK constraint by transform (R,t)  
 ";
 
-%feature("docstring") IKObjective::matchDestination "
+%feature("docstring") IKObjective::_matchDestination "
 
 Sets the destination coordinates of this constraint to fit the given target
 transform. In other words, if (R,t) is the current link transform, this sets the
@@ -2131,7 +2131,7 @@ destination position / orientation so that this objective has zero error. The
 current position/rotation constraint types are kept.  
 ";
 
-%feature("docstring") IKObjective::closestMatch "
+%feature("docstring") IKObjective::_closestMatch "
 
 Gets the transform T that's closest to the transform (R,t) and that satisfies
 the IK goal's constraints.  
@@ -3054,7 +3054,7 @@ Returns the property named pname of point index.
 Translates all the points by v=v+t.  
 ";
 
-%feature("docstring") PointCloud::transform "
+%feature("docstring") PointCloud::_transform "
 
 Transforms all the points by the rigid transform v=R*v+t.  
 ";
@@ -3253,7 +3253,7 @@ Returns:
  Return type: RigidTransform  
 ";
 
-%feature("docstring") RigidObjectModel::setTransform "
+%feature("docstring") RigidObjectModel::_setTransform "
 
 Sets the rotation / translation (R,t) of the rigid object.  
 ";
@@ -3832,7 +3832,7 @@ Note that any geometries fixed to the world will disappear.
 Return type: List[int]  
 ";
 
-%feature("docstring") RobotModel::mount "
+%feature("docstring") RobotModel::_mount "
 
 Mounts a sub-robot onto a link, with its origin at a given local transform
 (R,t). The sub-robot's links will be renamed to subRobot.getName() + ':' +
@@ -4098,7 +4098,7 @@ Returns:
  Return type: RigidTransform  
 ";
 
-%feature("docstring") RobotModelLink::setParentTransform "
+%feature("docstring") RobotModelLink::_setParentTransform "
 
 Sets transformation (R,t) to the parent link.  
 ";
@@ -4182,7 +4182,7 @@ Returns:
  Return type: RigidTransform  
 ";
 
-%feature("docstring") RobotModelLink::setTransform "
+%feature("docstring") RobotModelLink::_setTransform "
 
 Sets the link's current transformation (R,t) to the world frame.  
 
@@ -4572,7 +4572,7 @@ sensor) an exception will be raised.
 Return type: RigidTransform  
 ";
 
-%feature("docstring") SensorModel::setTransform "
+%feature("docstring") SensorModel::_setTransform "
 
 Sets the local transform of the sensor on the robot's link. (helper for
 setSetting)  
@@ -4691,7 +4691,7 @@ duration of the next Simulator.simulate(t) call.
 Deprecated: use applyForceAtCOMLocalPoint instead to match old behavior.  
 ";
 
-%feature("docstring") SimBody::setTransform "
+%feature("docstring") SimBody::_setTransform "
 
 Sets the body's transformation at the current simulation time step (in center-
 of-mass centered coordinates).  
@@ -4705,7 +4705,7 @@ of-mass centered coordinates).
 Return type: RigidTransform  
 ";
 
-%feature("docstring") SimBody::setObjectTransform "
+%feature("docstring") SimBody::_setObjectTransform "
 
 Sets the body's transformation at the current simulation time step (in object-
 native coordinates)  
@@ -5636,7 +5636,7 @@ Adds a new triangle.
 Translates all the vertices by v=v+t.  
 ";
 
-%feature("docstring") TriangleMesh::transform "
+%feature("docstring") TriangleMesh::_transform "
 
 Transforms all the vertices by the rigid transform v=R*v+t.  
 ";
@@ -5690,7 +5690,7 @@ Returns the horizontal FOV.
 Returns the vertical FOV.  
 ";
 
-%feature("docstring") Viewport::setPose "
+%feature("docstring") Viewport::_setPose "
 
 Sets the pose of the camera.  
 ";

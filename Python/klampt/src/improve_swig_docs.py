@@ -272,6 +272,8 @@ def print_signature(siglist,indent0,docstring):
         #parse arguments
         s = parts[0]
         fn = s[:s.find("(")]
+        if ' ' in fn: #not a SWIG docstring?
+            continue
         sargs = s[s.find("(")+1:s.find(")")]
         if len(sargs.strip()) > 0:
             for arg in smart_split(sargs,',',['<','>']):
@@ -280,7 +282,7 @@ def print_signature(siglist,indent0,docstring):
                 try:
                     atype,aname = arg.rsplit(' ',1)
                 except Exception:
-                    eprint("Couldnt parse argument '{}' ?".format(arg))
+                    eprint("Couldn't parse argument '{}' in {}?".format(arg,siglist))
                     eprint(sargs)
                     raise
                 if aname == 'self':
@@ -306,7 +308,10 @@ def print_signature(siglist,indent0,docstring):
                     print(indent0+indentstr,aname,'(%s)'%(to_type_doc(atype),))
                 else:
                     print(indent0+indentstr,aname,'(%s, optional): default value %s'%(to_type_doc(atype),adef))
-        if ret[0] != 'None' and fn != '__init__'and print_return:
+        if len(ret) == 0:
+            #maybe not a SWIG-parsed function
+            pass
+        elif ret[0] != 'None' and fn != '__init__'and print_return:
             pass  #The type hints will already document the type
             #print(indent0+"Returns:")
             #print(indent0+indentstr,"%s:"%(to_type_doc(ret[0])))

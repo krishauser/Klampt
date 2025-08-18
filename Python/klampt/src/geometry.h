@@ -71,7 +71,7 @@ struct TriangleMesh
   ///Translates all the vertices by v=v+t
   void translate(const double t[3]);
   ///Transforms all the vertices by the rigid transform v=R*v+t
-  void transform(const double R[9],const double t[3]);
+  void _transform(const double R[9],const double t[3]);
 
   void* dataPtr;
   bool isStandalone;
@@ -114,7 +114,7 @@ struct ConvexHull
   ///Translates all the vertices by v=v+t
   void translate(const double t[3]);
   ///Transforms all the vertices by the rigid transform v=R*v+t
-  void transform(const double R[9],const double t[3]);
+  void _transform(const double R[9],const double t[3]);
 
   void* dataPtr;
   bool isStandalone;
@@ -247,7 +247,7 @@ struct PointCloud
   ///Translates all the points by v=v+t
   void translate(const double t[3]);
   ///Transforms all the points by the rigid transform v=R*v+t
-  void transform(const double R[9],const double t[3]);
+  void _transform(const double R[9],const double t[3]);
   ///Adds the given point cloud to this one.  They must share the same
   ///properties or else an exception is raised
   void join(const PointCloud& pc);
@@ -898,7 +898,7 @@ class Geometry3D
   ///supported.
   bool saveFile(const char* fn);
   ///Sets the current transformation (not modifying the underlying data)
-  void setCurrentTransform(const double R[9],const double t[3]);
+  void _setCurrentTransform(const double R[9],const double t[3]);
   ///Gets the current transformation 
   ///
   ///Return type: RigidTransform
@@ -916,8 +916,8 @@ class Geometry3D
   ///Permanently modifies the data and resets any collision data structures.
   void rotate(const double R[9]);
   ///Translates/rotates/scales the geometry data.
-  ///Permanently modifies the data and resets any collision data structures.
-  void transform(const double R[9],const double t[3]);
+  ///Modifies the underlying data and resets any collision data structures.
+  void _transform(const double R[9],const double t[3]);
   ///Attaches appearance data to the geometry.  This is only supported by
   ///triangle meshes.
   void setAppearance(const Appearance& appearance);

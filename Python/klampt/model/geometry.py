@@ -44,6 +44,9 @@ Other utilities
 :func:`merge` can put together TriangleMesh and PointCloud geometries into
 unified geometries.
 
+:func:`split` can break apart a Geometry3D into segmented parts.
+.. versionadded:: 0.10.2
+
 :func:`triangle_normals` computes triangle normals for a TriangleMesh.
 Note: should be replaced with TriangleMesh.triangle_normals() for future
 code.
@@ -58,14 +61,16 @@ code.
 
 :func:`convert` converts all geometries in a world, robot, etc to another
 type.
+.. versionadded:: 0.10.1
+
 
 """
 
-from ..robotsim import WorldModel,RobotModel,RigidObjectModel,RobotModelLink,TerrainModel,Geometry3D,PointCloud,Heightmap,TriangleMesh,Appearance
+from ..robotsim import WorldModel,RobotModel,RigidObjectModel,RobotModelLink,TerrainModel,Geometry3D,PointCloud,ImplicitSurface,OccupancyGrid,Heightmap,TriangleMesh,Appearance
 import math
 from .create import primitives
 from ..math import vectorops,so3,se3
-from typing import Union, Tuple, Sequence, List
+from typing import Union, Tuple, Sequence, List, Callable
 from .typing import Vector3, Rotation, RigidTransform
 import numpy as np
 
@@ -970,6 +975,183 @@ def merge(*items) -> Geometry3D:
         return merged_geom
     else:
         return Geometry3D()
+
+
+def split(item : Union[Geometry3D,TriangleMesh,PointCloud,ImplicitSurface,OccupancyGrid,Heightmap],
+          by : Union[List[int],Callable]) -> List[Union[Geometry3D,TriangleMesh,PointCloud,ImplicitSurface,OccupancyGrid,Heightmap]]:
+    """Splits a geometry into multiple geometries based on a segmentation
+    criterion.  The criterion can be a list of segment indices, or a function
+    that segments the elements of the geometry.
+
+    Args:
+        item: The geometry to split.  Does not work for primitives.
+        by: A list of segment indices, or a function that takes an element
+            of the geometry in local coordinates and returns a segment index or
+            boolean mask. 
+    
+    For `by` a callable, the element type is a vertex for PointCloud, ImplicitSurface,
+    Heightmap, and OccupancyGrid.  For TriangleMesh, the element type is a triangle
+    of the form (v0,v1,v2) where v0,v1,v2 are 3-vectors.  All elements are in local
+    coordinates of the geometry.
+
+    Returns:
+        A list of geometries.  The type of the geometries will match that of
+        the input geometry.
+    """
+    elements = None
+    indices = None
+    if isinstance(item,Geometry3D):
+        gtype = item.type()
+        if gtype == 'PointCloud':
+            res = [Geometry3D(pc) for pc in split(item.getPointCloud(),by)]
+            for g in res:
+                g.setCurrentTransform(*item.getCurrentTransform())
+            return res
+        elif gtype == 'TriangleMesh':
+            res = [Geometry3D(tm) for tm in split(item.getTriangleMesh(),by)]
+            for g in res:
+                g.setCurrentTransform(*item.getCurrentTransform())
+            return res
+        elif gtype == 'ImplicitSurface':
+            res = [Geometry3D(isurf) for isurf in split(item.getImplicitSurface(),by)]
+            for g in res:
+                g.setCurrentTransform(*item.getCurrentTransform())
+            return res
+        elif gtype == 'OccupancyGrid':
+            res = [Geometry3D(og) for og in split(item.getOccupancyGrid(),by)]
+            for g in res:
+                g.setCurrentTransform(*item.getCurrentTransform())
+            return res
+        elif gtype == 'Heightmap':
+            res = [Geometry3D(hm) for hm in split(item.getHeightmap(),by)]
+            for g in res:
+                g.setCurrentTransform(*item.getCurrentTransform())
+            return res
+        elif gtype == 'Group':
+            n = item.numElements()
+            elements = [item.getElement(i) for i in range(n)]
+        else:
+            raise ValueError("Geometry type {} not supported for splitting".format(gtype))
+    elif isinstance(item,PointCloud):
+        elements = item.points
+    elif isinstance(item,TriangleMesh):
+        elements = [(item.vertices[a],item.vertices[b],item.vertices[c]) for (a,b,c) in item.indices]
+        indices = item.indices
+    elif isinstance(item,ImplicitSurface):
+        #elements are points at the centers of each voxel
+        elements = []
+        indices = []
+        dims = item.bmax - item.bmin
+        resolution = [d/s for (d,s) in zip(dims,item.values.shape)]
+        for i in range(item.values.shape[0]):
+            for j in range(item.values.shape[1]):
+                for k in range(item.values.shape[2]):
+                    elements.append((item.bmin[0] + (i+0.5)*resolution[0],
+                                        item.bmin[1] + (j+0.5)*resolution[1],
+                                        item.bmin[2] + (k+0.5)*resolution[2]))
+                    indices.append((i,j,k))
+    elif isinstance(item,OccupancyGrid):
+        #elements are points at the centers of each voxel
+        elements = []
+        indices = []
+        dims = item.bmax - item.bmin
+        resolution = [d/s for (d,s) in zip(dims,item.values.shape)]
+        for i in range(item.values.shape[0]):
+            for j in range(item.values.shape[1]):
+                for k in range(item.values.shape[2]):
+                    elements.append((item.bmin[0] + (i+0.5)*resolution[0],
+                                        item.bmin[1] + (j+0.5)*resolution[1],
+                                        item.bmin[2] + (k+0.5)*resolution[2]))
+                    indices.append((i,j,k))
+    elif isinstance(item,Heightmap):
+        #elements are points at the centers of each voxel
+        elements = []
+        indices = []
+        dims = item.getSize()
+        lower = [-d/2 for d in dims]
+        resolution = [d/(s-1) for (d,s) in zip(dims,item.heights.shape)]
+        for i in range(item.heights.shape[0]):
+            for j in range(item.heights.shape[1]):
+                elements.append((lower[0] + i*resolution[0],
+                                    lower[1] + j*resolution[1],
+                                    item.heights[i,j]))
+                indices.append((i,j))
+    else:
+        raise ValueError("Geometry type {} not supported for splitting".format(type(item)))
+    if callable(by):
+        by = [by(e) for e in elements]
+    elif not hasattr(by,'__iter__'):
+        raise ValueError("by must be a list of segment indices or a callable function")
+    if len(by) != len(elements):
+        raise ValueError("by must have the same length as the number of elements in the geometry")
+    segments = {}
+    for i,seg in enumerate(by):
+        if seg not in segments:
+            segments[seg] = []
+        segments[seg].append(i)
+    if len(segments) == 1:
+        return [item]  #no need to split, only one segment
+    keys = sorted(segments.keys())
+    result = []
+    for key in keys:
+        inds = segments[key]
+        if isinstance(item,PointCloud):
+            new_pc = PointCloud()
+            new_pc.points=item.points[inds]
+            if len(item.properties) > 0:
+                new_pc.properties = item.properties[inds,:]
+            result.append(new_pc)
+        elif isinstance(item,TriangleMesh):
+            new_inds = indices[inds]
+            vinds = set()
+            for (a,b,c) in new_inds:
+                vinds.add(a)
+                vinds.add(b)
+                vinds.add(c)
+            vinds = sorted(vinds)
+            vindmap = {v:i for i,v in enumerate(vinds)}
+            new_inds = np.array([[vindmap[a],vindmap[b],vindmap[c]] for (a,b,c) in new_inds],dtype=np.int32)
+            new_verts = item.vertices[vinds]
+            new_tm = TriangleMesh()
+            new_tm.vertices = new_verts
+            new_tm.indices = new_inds
+            result.append(new_tm)
+        elif isinstance(item,ImplicitSurface):
+            new_vals = np.full_like(item.values,np.inf)
+            for (i,j,k) in inds:
+                new_vals[i,j,k] = item.values[i,j,k]
+            new_isurf = ImplicitSurface()
+            new_isurf.values = new_vals
+            new_isurf.bmin = item.bmin
+            new_isurf.bmax = item.bmax
+            result.append(new_isurf)
+        elif isinstance(item,OccupancyGrid):
+            new_vals = np.full_like(item.values,0)
+            for (i,j,k) in inds:
+                new_vals[i,j,k] = item.values[i,j,k]
+            new_og = OccupancyGrid()
+            new_og.values = new_vals
+            new_og.bmin = item.bmin
+            new_og.bmax = item.bmax
+            result.append(new_og)
+        elif isinstance(item,Heightmap):
+            new_heights = np.full_like(item.heights,-np.inf)
+            for (i,j) in inds:
+                new_heights[i,j] = item.heights[i,j]
+            new_hm = Heightmap()
+            new_hm.heights = new_heights
+            new_hm.viewport = item.viewport
+            result.append(new_hm)
+        elif isinstance(item,Geometry3D):
+            assert item.type() == 'Group'
+            new_group = Geometry3D()
+            new_group.setGroup()
+            for i,j in enumerate(inds):
+                new_group.setElement(i,item.getElement(j))
+            result.append(new_group)
+        else:
+            raise ValueError("Geometry type {} not supported for splitting".format(gtype))
+    return result
 
 
 def vertex_colors(geom : Geometry3D, app : Appearance = None) -> np.ndarray:

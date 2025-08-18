@@ -176,7 +176,7 @@ class RobotModelLink
   ///Return type: RigidTransform
   void getParentTransform(double out[9],double out2[3]);
   ///Sets transformation (R,t) to the parent link
-  void setParentTransform(const double R[9],const double t[3]);
+  void _setParentTransform(const double R[9],const double t[3]);
   ///Gets the local rotational / translational axis
   ///
   ///Return type: Vector3
@@ -239,7 +239,7 @@ class RobotModelLink
   ///    This does NOT perform inverse kinematics.  The transform is
   ///    overwritten when the robot's setConfig() method is called.
   ///
-  void setTransform(const double R[9],const double t[3]);
+  void _setTransform(const double R[9],const double t[3]);
   ///Computes the velocity of the link's origin given the robot's current joint
   ///configuration and velocities.  Equivalent to getPointVelocity([0,0,0]).
   ///
@@ -872,7 +872,7 @@ class RobotModel
   ///Mounts a sub-robot onto a link, with its origin at a given local transform (R,t).
   ///The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
   ///unless subRobot.getName() is '', in which case the link names are preserved.
-  void mount(int link,const RobotModel& subRobot,const double R[9],const double t[3]);
+  void _mount(int link,const RobotModel& subRobot,const double R[9],const double t[3]);
 
   ///Returns the number of sensors
   int numSensors() const; 
@@ -990,7 +990,7 @@ class SensorModel
   ///
   ///If the sensor doesn't have a transform (such as a joint position or
   ///torque sensor) an exception will be raised.
-  void setTransform(const double R[9],const double t[3]);
+  void _setTransform(const double R[9],const double t[3]);
   //note: only the last overload docstring is added to the documentation
   ///Draws a sensor indicator using OpenGL.  If measurements are given,
   ///the indicator is drawn as though these are the latest measurements,
@@ -1072,7 +1072,7 @@ class RigidObjectModel
   ///Return type: RigidTransform
   void getTransform(double out[9],double out2[3]);
   ///Sets the rotation / translation (R,t) of the rigid object
-  void setTransform(const double R[9],const double t[3]);
+  void _setTransform(const double R[9],const double t[3]);
   ///Retrieves the (angular velocity, velocity) of the rigid object.
   ///
   ///Returns:
