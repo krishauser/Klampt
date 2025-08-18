@@ -1497,6 +1497,104 @@ except ImportError:
     _SMOOTHING_OPTIONS = str
     _SMOOTHING_OPTIONS2 = str
 
+def _assign_path_durations(path : Union[Sequence[Vector],Trajectory],
+                            timing : Union[_TIMING_OPTIONS,List[float],MetricType],
+                            vmax : Union[float,Vector]=None,
+                            amax : Union[float,Vector]=None) -> List[float]:
+    if isinstance(path,Trajectory):
+        milestones = path.milestones
+    else:
+        milestones = path
+    if len(milestones) <= 1:
+        raise ValueError("Path must have at least 1 milestone")
+    if isinstance(timing,(list,tuple)):
+        assert len(timing) == len(milestones)-1, "Timing must have one fewer element than the number of milestones"
+        return timing
+    elif callable(timing):
+        return [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
+    elif timing == 'path':
+        if isinstance(path,Trajectory):
+            return [(b-a) for a,b in zip(path.times[:-1],path.times[1:])]
+        else:
+            raise ValueError("Path must be a Trajectory to use 'path' timing")
+    elif timing == 'limited':
+        if vmax is None and amax is None:
+            raise ValueError("vmax and/or amax must be specified for 'limited' timing")
+        if vmax is not None:
+            if hasattr(vmax,'__iter__'):
+                if not all(v >= 0 for v in vmax):
+                    raise ValueError("Invalid value for vmax, must be positive")
+            else:
+                if not vmax >= 0:
+                    raise ValueError("Invalid value for vmax, must be positive")
+        if amax is not None:
+            if hasattr(amax,'__iter__'):
+                if not all(v >= 0 for v in amax):
+                    raise ValueError("Invalid value for amax, must be positive")
+            else:
+                if not amax >= 0:
+                    raise ValueError("Invalid value for amax, must be positive")
+        _durations = [0.0]*(len(milestones)-1)
+        for i in range(len(milestones)-1):
+            q,n = milestones[i],milestones[i+1]
+            if i == 0: p = q
+            else: p = milestones[i-1]
+            if i+2 == len(milestones): nn = n
+            else: nn = milestones[i+2]
+            if isinstance(path,Trajectory):
+                v = vectorops.mul(path.difference_state(p,n,0.5,1.0),0.5)
+                a1 = vectorops.sub(path.difference_state(q,n,0.,1.),path.difference_state(p,q,1.,1.))
+                a2 = vectorops.sub(path.difference_state(n,nn,0.,1.),path.difference_state(q,n,1.,1.))
+            else:
+                v = vectorops.mul(vectorops.sub(n,p),0.5)
+                a1 = vectorops.madd(vectorops.add(p,n),q,-2.0)
+                a2 = vectorops.madd(vectorops.add(q,nn),n,-2.0)
+            if vmax is not None:
+                if hasattr(vmax,'__iter__'):
+                    for j,(x,lim) in enumerate(zip(v,vmax)):
+                        if abs(x) > lim*_durations[i]:
+                            _durations[i] = abs(x)/lim
+                            #print("Segment",i,"limited on axis",j,"path velocity",x,"limit",lim)
+                else:
+                    _durations[i] = vectorops.norm(v)/vmax
+            if amax is None:
+                if hasattr(amax,'__iter__'):
+                    if i > 0:
+                        for j,(x,lim) in enumerate(zip(a1,amax)):
+                            if abs(x) > lim*_durations[i]**2:
+                                _durations[i] = math.sqrt(abs(x)/lim)
+                                #print("Segment",i,"limited on axis",j,"path accel",x,"limit",lim)
+                    if i+2 < len(milestones):
+                        for j,(x,lim) in enumerate(zip(a2,amax)):
+                            if abs(x) > lim*_durations[i]**2:
+                                _durations[i] = math.sqrt(abs(x)/lim)
+                                #print("Segment",i,"limited on axis",j,"outgoing path accel",x,"limit",lim)
+                else:
+                    if i > 0:
+                        n = vectorops.norm(a1)
+                        if n > amax*_durations[i]**2:
+                            _durations[i] = math.sqrt(n/amax)
+                    if i+2 < len(milestones):
+                        n = vectorops.norm(a2)
+                        if n > amax*_durations[i]**2:
+                            _durations[i] = math.sqrt(n/amax)
+        return _durations
+    elif timing == 'uniform':
+        return [1.0]*(len(milestones)-1)
+    else:
+        durationfuncs = dict()
+        durationfuncs['L2'] = vectorops.distance
+        durationfuncs['Linf'] = lambda a,b:max(abs(u-v) for (u,v) in zip(a,b))
+        durationfuncs['sqrt-L2'] = lambda a,b:math.sqrt(vectorops.distance(a,b))
+        durationfuncs['sqrt-Linf'] = lambda a,b:math.sqrt(max(abs(u-v) for (u,v) in zip(a,b)))
+        if hasattr(path,'robot'):
+            durationfuncs['robot'] = path.robot.distance
+            durationfuncs['sqrt-robot'] = lambda a,b:math.sqrt(path.robot.distance(a,b))
+        assert timing in durationfuncs,"Invalid duration function specified, valid values are: "+", ".join(list(durationfuncs.keys()))
+        timing = durationfuncs[timing]
+        return [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
+
+
 def path_to_trajectory(
         path: Union[Sequence[Vector],Trajectory,RobotTrajectory],
         velocities: _VELOCITIES_OPTIONS = 'auto',
@@ -1516,14 +1614,15 @@ def path_to_trajectory(
     The resulting trajectory passes through each of the milestones **without
     stopping**, except for "stop" milestones.  Stop milestones by default are
     only the first and last milestone, but if ``stoptol`` is given, then the
-    trajectory will be stopped if the curvature of the path exceeds this value.
+    trajectory will be stopped at milestones at which the path curvature
+    exceeds this threshold.
 
     The first step is to assign each segment a 'distance' d[i] suggesting how
     much time it would take to traverse that much spatial distance.  This
     distance assignment method is controlled by the ``timing`` parameter.
 
-    The second step is to smooth the spline, if smoothing='spline' is given
-    (default).
+    The second step, if smoothing='spline' is given, is to smooth the path
+    using a spline fit (active by default).
 
     The third step creates the trajectory, assigning the times and velocity
     profile as specified by the ``velocities`` parameter.  ``velocities``
@@ -1536,8 +1635,9 @@ def path_to_trajectory(
     - For trapezoidal, triangular, parabolic, and cosine, T = sqrt(L). 
     - For minimum-jerk, T = L^(1/3). 
 
-    The fourth step is to time scale the result to respect limits velocity /
-    acceleration limits, if timing=='limited' or speed=='limited'.
+    The fourth step, if timing=='limited' or speed=='limited', is to time
+    scale the result to respect velocity and acceleration limits (active by
+    default).
 
     The fifth step is to time scale the result by speed.
 
@@ -1561,7 +1661,7 @@ def path_to_trajectory(
           The sqrt values lead to somewhat better tangents for smoothed splines with
           nonuniform distances between milestones.
 
-          In these cases, vmax and amax are ignored.
+          When velocities and timing are not 'limited', vmax and amax are ignored.
 
         - If path uses non-Euclidean interpolation, then smoothing=None should be
           provided.  Smoothing is not yet supported for non-Euclidean spaces (e.g.,
@@ -1615,7 +1715,7 @@ def path_to_trajectory(
 
         smoothing (str, optional): if 'spline', the geometric path is first
             smoothed before assigning times.  Otherwise, the geometric path
-            is interpreted as a piecewise linear path.
+            is followed in a piecewise linear fashion.
 
         stoptol (float, optional): determines how start/stop segments are
             determined.  If None, the trajectory only pauses at the start and
@@ -1691,84 +1791,7 @@ def path_to_trajectory(
     if isinstance(path,Trajectory):
         milestones = path.milestones
 
-    _durations = None
-    if isinstance(timing,(list,tuple)):
-        _durations = timing
-    elif callable(timing):
-        _durations = [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
-    else:
-        if isinstance(path,Trajectory):
-            if timing == 'path':
-                _durations = [(b-a) for a,b in zip(path.times[:-1],path.times[1:])]
-        if _durations is None:
-            if timing == 'limited':
-                if hasattr(vmax,'__iter__'):
-                    if not all(v >= 0 for v in vmax):
-                        raise ValueError("Invalid value for vmax, must be positive")
-                else:
-                    if not vmax >= 0:
-                        raise ValueError("Invalid value for vmax, must be positive")
-
-                if hasattr(amax,'__iter__'):
-                    if not all(v >= 0 for v in amax):
-                        raise ValueError("Invalid value for amax, must be positive")
-                else:
-                    if not amax >= 0:
-                        raise ValueError("Invalid value for amax, must be positive")
-                _durations = [0.0]*(len(milestones)-1)
-                for i in range(len(milestones)-1):
-                    q,n = milestones[i],milestones[i+1]
-                    if i == 0: p = q
-                    else: p = milestones[i-1]
-                    if i+2 == len(milestones): nn = n
-                    else: nn = milestones[i+2]
-                    if isinstance(path,Trajectory):
-                        v = vectorops.mul(path.difference_state(p,n,0.5,1.0),0.5)
-                        a1 = vectorops.sub(path.difference_state(q,n,0.,1.),path.difference_state(p,q,1.,1.))
-                        a2 = vectorops.sub(path.difference_state(n,nn,0.,1.),path.difference_state(q,n,1.,1.))
-                    else:
-                        v = vectorops.mul(vectorops.sub(n,p),0.5)
-                        a1 = vectorops.madd(vectorops.add(p,n),q,-2.0)
-                        a2 = vectorops.madd(vectorops.add(q,nn),n,-2.0)
-                    if hasattr(vmax,'__iter__'):
-                        for j,(x,lim) in enumerate(zip(v,vmax)):
-                            if abs(x) > lim*_durations[i]:
-                                _durations[i] = abs(x)/lim
-                                #print("Segment",i,"limited on axis",j,"path velocity",x,"limit",lim)
-                    else:
-                        _durations[i] = vectorops.norm(v)/vmax
-                    if hasattr(amax,'__iter__'):
-                        if i > 0:
-                            for j,(x,lim) in enumerate(zip(a1,amax)):
-                                if abs(x) > lim*_durations[i]**2:
-                                    _durations[i] = math.sqrt(abs(x)/lim)
-                                    #print("Segment",i,"limited on axis",j,"path accel",x,"limit",lim)
-                        if i+2 < len(milestones):
-                            for j,(x,lim) in enumerate(zip(a2,amax)):
-                                if abs(x) > lim*_durations[i]**2:
-                                    _durations[i] = math.sqrt(abs(x)/lim)
-                                    #print("Segment",i,"limited on axis",j,"outgoing path accel",x,"limit",lim)
-                    else:
-                        if i > 0:
-                            n = vectorops.norm(a1)
-                            if n > amax*_durations[i]**2:
-                                _durations[i] = math.sqrt(n/amax)
-                        if i+2 < len(milestones):
-                            n = vectorops.norm(a2)
-                            if n > amax*_durations[i]**2:
-                                _durations[i] = math.sqrt(n/amax)
-            else:
-                durationfuncs = dict()
-                durationfuncs['L2'] = vectorops.distance
-                durationfuncs['Linf'] = lambda a,b:max(abs(u-v) for (u,v) in zip(a,b))
-                durationfuncs['sqrt-L2'] = lambda a,b:math.sqrt(vectorops.distance(a,b))
-                durationfuncs['sqrt-Linf'] = lambda a,b:math.sqrt(max(abs(u-v) for (u,v) in zip(a,b)))
-                if hasattr(path,'robot'):
-                    durationfuncs['robot'] = path.robot.distance
-                    durationfuncs['sqrt-robot'] = lambda a,b:math.sqrt(path.robot.distance(a,b))
-                assert timing in durationfuncs,"Invalid duration function specified, valid values are: "+", ".join(list(durationfuncs.keys()))
-                timing = durationfuncs[timing]
-                _durations = [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
+    _durations = _assign_path_durations(path, timing, vmax, amax)
     assert _durations is not None,"Hmm... didn't assign durations properly?"
     if verbose >= 1:
         print("path_to_trajectory(): Segment durations are",_durations)
@@ -1981,6 +2004,7 @@ def execute_path(
         controller: Union['SimRobotController','RobotInterfaceBase'],
         speed: float = 1.0,
         smoothing: Optional[_SMOOTHING_OPTIONS] = None,
+        timing: Union[_TIMING_OPTIONS,List[float],MetricType] = 'uniform',
         activeDofs: Optional[List[Union[int,str]]] = None
     ):
     """Sends an untimed trajectory to a controller.
@@ -2013,6 +2037,26 @@ def execute_path(
             velocity.
           - 'ramp': starts / stops at each milestone, moves in minimum-time / 
             minimum-acceleration paths.  Trapezoidal velocity profile used.
+        
+        timing (optional): affects how path timing between milestones is
+            determined, ignored if smoothing=one or 'ramp'. The base duration
+            between milestones is given by:
+
+            - 'uniform' (default): base timing between milestones is 1
+            - 'path': only valid if path is a Trajectory object.  Uses the
+              timing in path.times as the base timing.
+            - 'L2': base timing is the L2 distance between milestones
+            - 'Linf': base timing is the L-infinity distance between milestones
+            - 'robot': base timing is the robot's distance function between
+                milestones
+            - 'sqrt-L2', 'sqrt-Linf', or 'sqrt-robot': base timing is set
+                to the square root of the L2, Linf, or robot distance between
+                milestones
+            - a list or tuple: the base timing is given in this list
+            - callable function f(a,b): sets base timing to the function
+              f(a,b).
+
+            Ultimately, the duration of each segment is divided by speed.
 
         activeDofs (list, optional): if not None, a list of dofs that are moved
             by the trajectory. Each entry may be an integer or a string.
@@ -2043,6 +2087,10 @@ def execute_path(
                 q[i] = v
             liftedMilestones.append(q)
         return execute_path(liftedMilestones,controller,speed,smoothing)
+    milestones_from_start = [q0]
+    if path[0] != q0:
+        milestones_from_start.append(path[0])
+    milestones_from_start = milestones_from_start + path[1:]  #ensure the first milestone is q
 
     if smoothing == None:
         if isinstance(controller,SimRobotController):
@@ -2057,52 +2105,40 @@ def execute_path(
                 vmax = vectorops.mul(vmax,speed)
                 amax = vectorops.mul(amax,speed**2)
             htraj = HermiteTrajectory()
-            if q0 != path[0]:
-                mpath = [q0] + path
-            else:
-                mpath = path
-            htraj.makeMinTimeSpline(mpath,vmax=vmax,amax=amax)
+            htraj.makeMinTimeSpline(milestones_from_start,vmax=vmax,amax=amax)
             return execute_trajectory(htraj,controller)
     elif smoothing == 'linear':
-        dt = 1.0/speed
+        durations = _assign_path_durations(milestones_from_start,timing)
         if isinstance(controller,SimRobotController):
-            controller.setLinear(dt,path[0])
-            for i in range(1,len(path)):
-                controller.addLinear(dt,path[i])
+            controller.setLinear(durations[0]/speed,milestones_from_start[1])
+            for i in range(1,len(milestones_from_start)-1):
+                controller.addLinear(durations[i]/speed,milestones_from_start[i+1])
         else:
             traj = Trajectory()
-            traj.times,traj.milestones = [0],[q0]
-            for i in range(len(path)):
-                if i==0 and q0 == path[i]: continue  #skip first milestone
-                traj.times.append(traj.times[-1]+dt)
-                traj.milestones.append(path[i])
+            traj.times,traj.milestones = [0], milestones_from_start
+            for i in range(len(milestones_from_start)-1):
+                traj.times.append(traj.times[-1]+durations[i]/speed)
             return execute_trajectory(traj,controller)
     elif smoothing == 'cubic':
-        dt = 1.0/speed
+        durations = _assign_path_durations(milestones_from_start,timing)
+        zero = [0.0]*len(q0)
         if isinstance(controller,SimRobotController):
-            zero = [0.0]*len(path[0])
-            controller.setCubic(dt,path[0],zero)
-            for i in range(1,len(path)):
-                controller.addCubic(dt,path[i],zero)
+            controller.setCubic(durations[0]/speed,milestones_from_start[1],zero)
+            for i in range(1,len(milestones_from_start)-1):
+                controller.addCubic(durations[i]/speed,milestones_from_start[i+1],zero)
         else:
-            zero = [0.0]*controller.numJoints()
-            times,milestones = [0],[q0]
-            for i in range(len(path)):
-                if i==0 and q0 == path[i]: continue  #skip first milestone
-                times.append(times[-1]+dt)
-                milestones.append(path[i])
+            times,milestones = [0],milestones_from_start
+            for i in range(len(milestones_from_start)-1):
+                times.append(times[-1]+max(1e-3,durations[i]/speed))
             htraj = HermiteTrajectory(times,milestones,[zero]*len(milestones))
             return execute_trajectory(htraj,controller)
     elif smoothing == 'spline':
-        dt = 1.0/speed
+        durations = _assign_path_durations(milestones_from_start,timing)
         times = [0]
-        mpath = [q0]
-        for i in range(len(path)):
-            if i==0 and path[0]==q0: continue
-            times.append(times[-1]+dt)
-            mpath.append(path[i])
+        for i in range(len(durations)):
+            times.append(times[-1]+max(1e-3,durations[i]/speed))
         hpath = HermiteTrajectory()
-        hpath.makeSpline(Trajectory(times,mpath))
+        hpath.makeSpline(Trajectory(times,milestones_from_start))
         return execute_trajectory(hpath,controller)
     elif smoothing == 'ramp':
         if isinstance(controller,SimRobotController):
@@ -2114,7 +2150,7 @@ def execute_path(
             cv0 = controller.commandedVelocity()
             if cv0[0] == None:
                 cv0 = controller.sensedVelocity()
-            v0 = controller.velocityFromKlampt(cv0)
+            v0 = controller.velocityToKlampt(cv0)
             xmin,xmax = robot_model.getJointLimits()
             vmax = robot_model.getVelocityLimits()
             amax = robot_model.getAccelerationLimits()
@@ -2145,6 +2181,10 @@ def execute_trajectory(
     ):
     """Sends a timed trajectory to a controller.
 
+    If the current configuration is not the first milestone, the robot will
+    be moved to the first milestone at max speed before executing the
+    trajectory.
+
     Args:
         trajectory (Trajectory): a Trajectory, RobotTrajectory, or
             HermiteTrajectory instance.
@@ -2152,11 +2192,12 @@ def execute_trajectory(
             to execute the trajectory.
         speed (float, optional): modulates the speed of the path.
         smoothing (str, optional): any smoothing applied to the path.  Only
-            valid for piecewise linear trajectories.  Valid values are
+            valid for piecewise linear trajectories.  Possible values for this
+            parameter are:
 
-            * None: no smoothing, just do a piecewise linear trajectory
-            * 'spline': interpolate tangents to the curve
-            * 'pause': smoothly speed up and slow down
+            * None: no smoothing, just follows the piecewise linear trajectory.
+            * 'spline': interpolate tangents to the curve at each milestone.
+            * 'pause': smoothly speed up and slow down at each milestone.
 
         activeDofs (list, optional): if not None, a list of dofs that are moved
             by the trajectory.  Each entry may be an integer or a string.
