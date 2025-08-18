@@ -892,7 +892,7 @@ class RobotInterfaceBase(object):
         if model is None:
             return klamptConfig
         if len(klamptConfig) != model.numLinks():
-            raise ValueError("Length of klamptConfig is invalid for "+str(self))
+            raise ValueError("Length of klamptConfig is invalid for {}, expected {}, got {}".format(self, model.numLinks(), len(klamptConfig)))
         qdrivers = model.configToDrivers(klamptConfig)
         if part is None and joint_idx is None:
             return qdrivers
@@ -909,7 +909,7 @@ class RobotInterfaceBase(object):
         if model is None:
             return klamptVelocity
         if len(klamptVelocity) != model.numLinks():
-            raise ValueError("Length of klamptVelocity is invalid for "+str(self))
+            raise ValueError("Length of klamptVelocity is invalid for {}, expected {}, got {}".format(self, model.numLinks(), len(klamptVelocity)))
         vdrivers = model.velocityToDrivers(klamptVelocity)
         if part is None and joint_idx is None:
             return vdrivers
@@ -937,7 +937,7 @@ class RobotInterfaceBase(object):
             return config
         dofs = self.indices(part,joint_idx)
         if len(dofs) != len(config):
-            raise ValueError("Length of config is invalid for "+str(self))
+            raise ValueError("Length of config is invalid for {}, expected {}, got {}".format(self, len(dofs), len(config)))
         if klamptConfig is not None:
             model.setConfig(klamptConfig)
         if part is None and joint_idx is None:
@@ -968,7 +968,7 @@ class RobotInterfaceBase(object):
             return velocity
         dofs = self.indices(part,joint_idx)
         if len(dofs) != len(velocity):
-            raise ValueError("Length of velocity is invalid for "+str(self))
+            raise ValueError("Length of velocity is invalid for {}, expected {}, got {}".format(self, len(dofs), len(velocity)))
         if klamptVelocity is not None:
             model.setVelocity(klamptVelocity)
         if part is None and joint_idx is None:
