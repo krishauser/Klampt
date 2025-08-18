@@ -180,8 +180,10 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
                  equalityTolerance : float = 1e-3,
                  ignoreCollisions=[],
                  movingSubset : Optional[Union[str,List[int]]] = 'auto',
+                 attachedObjects : Optional[List[Tuple[RigidObjectModel,RobotModelLink]]]=None,
+                 attachedObjectRelTransforms : Optional[List[RigidTransform]]=None,
                  verbose=True,
-                 **planOptions):
+                 **planOptions) -> KinematicPlanner:
     """Creates a KinematicPlanner object that can be called to solve a standard motion
     planning problem for a robot in a world.  The plan starts from the robot's
     current configuration and ends in a target configuration.
@@ -217,6 +219,13 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
             be allowed to move.  Otherwise, if this is None or 'all', all
             joints will be allowed to move.  If this is a list, then only these
             joint indices will be allowed to move.
+        attachedObjects (list of (RigidObjectModel,RobotModelLink), optional): a
+            list of rigid objects and the links to which they are attached. 
+            This is used to model grasped objects.
+        attachedObjectRelTransforms (list of RigidTransform, optional): if
+            any objects are attached, the relative transform from the object to
+            the target link.  If not provided, the current transforms are used
+            to determine the relative transforms.
         planOptions (keywords): keyword options that will be sent to the
             planner.  See the documentation for KinematicPlanner.setOptions for more
             details.
@@ -251,8 +260,10 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
                       equalityConstraints=equalityConstraints,
                       equalityTolerance=equalityTolerance,
                       ignoreCollisions=ignoreCollisions,
-                      movingSubset=subset)
-    
+                      movingSubset=subset,
+                      attachedObjects=attachedObjects,
+                      attachedObjectRelTransforms=attachedObjectRelTransforms)
+
     if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
         plan = EmbeddedKinematicPlanner(space,q0,**planOptions)
     else:
@@ -268,7 +279,7 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
         gfailures = space.cspace.feasibilityFailures(target_raw)
         if sfailures:
             warnings.warn("Start configuration fails {}".format(sfailures))
-            if 'self collision' in sfailures:
+            if verbose and 'self collision' in sfailures:
                 robot.setConfig(q0)
                 for i in range(robot.numLinks()):
                     for j in range(i):
@@ -277,14 +288,14 @@ def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
                                 print("  Links {} and {} collide".format(robot.link(i).getName(),robot.link(j).getName()))
         if gfailures:
             warnings.warn("Goal configuration fails {}".format(gfailures))
-            if 'self collision' in gfailures:
+            if verbose and 'self collision' in gfailures:
                 robot.setConfig(target)
                 for i in range(robot.numLinks()):
                     for j in range(i):
                         if robot.selfCollisionEnabled(i,j):
                             if robot.link(i).geometry().collides(robot.link(j).geometry()):
                                 print("  Links {} and {} collide".format(robot.link(i).getName(),robot.link(j).getName()))
-        return None
+        raise
     return plan
 
 
@@ -295,6 +306,8 @@ def plan_to_set(world : WorldModel, robot : RobotModel, target : Union[Callable,
               equalityTolerance : float = 1e-3,
               ignoreCollisions=[],
               movingSubset : Optional[Union[str,List[int]]] = None,
+              attachedObjects : Optional[List[Tuple[RigidObjectModel,RobotModelLink]]]=None,
+              attachedObjectRelTransforms : Optional[List[RigidTransform]]=None,
               **planOptions) -> KinematicPlanner:
     """
     Creates a KinematicPlanner object that can be called to solve a standard motion
@@ -337,6 +350,13 @@ def plan_to_set(world : WorldModel, robot : RobotModel, target : Union[Callable,
         movingSubset (optional): if 'auto', 'all', or None (default), all joints
             will be allowed to move.  If this is a list, then only these joint
             indices will be allowed to move.
+        attachedObjects (list of (RigidObjectModel,RobotModelLink), optional): a
+            list of rigid objects and the links to which they are attached. 
+            This is used to model grasped objects.
+        attachedObjectRelTransforms (list of RigidTransform, optional): if
+            any objects are attached, the relative transform from the object to
+            the target link.  If not provided, the current transforms are used
+            to determine the relative transforms.
         planOptions (keywords): keyword options that will be sent to the planner.  See
             the documentation for KinematicPlanner.setOptions for more details.
     
@@ -361,7 +381,9 @@ def plan_to_set(world : WorldModel, robot : RobotModel, target : Union[Callable,
                       equalityConstraints=equalityConstraints,
                       equalityTolerance=equalityTolerance,
                       ignoreCollisions=ignoreCollisions,
-                      movingSubset=subset)
+                      movingSubset=subset,
+                      attachedObjects=attachedObjects,
+                      attachedObjectRelTransforms=attachedObjectRelTransforms)
 
     if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
         plan = EmbeddedKinematicPlanner(space,q0,**planOptions)
@@ -479,6 +501,7 @@ def run_plan(plan : KinematicPlanner,
             return None
     
     #this is helpful to slightly speed up collision queries
+    assert plan.space.cspace is not None, "plan.space.setup() must be called before running the planner"
     plan.space.cspace.enableAdaptiveQueries(True)
 
     t0 = time.time()
@@ -530,7 +553,7 @@ def run_plan(plan : KinematicPlanner,
         if verbose:
             print("run_plan: Failed to find feasible path")
             stats = plan.space.getStats()
-            limiting_constraint = min([(float(p),k) for k,p in stats.items() if k.endswith('probability')],key=lambda x: x[0],default=(1,'none'))
+            limiting_constraint = min([(float(p),k) for k,p in stats.items() if k.endswith('probability') and k != 'visible_probability'],key=lambda x: x[0],default=(1,'none'))
             if limiting_constraint[0] < 1:
                 print("   Least likely constraint to be satisfied: {} at probability {}".format(limiting_constraint[1],limiting_constraint[0]))
             else:
