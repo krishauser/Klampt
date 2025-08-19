@@ -5,7 +5,8 @@ from ..math import vectorops,so3,se3
 from .. import RobotModel,RigidObjectModel
 import json
 import os
-from typing import Dict,List,Optional
+from ..model.typing import RigidTransform
+from typing import Dict,List,Union,Optional
 
 def _object_name(obj):
     if isinstance(obj,str):
@@ -61,7 +62,7 @@ class GraspDatabase:
             json.dump(jsonobj,f)
         return True
 
-    def loadfolder(self,fn : str) -> bool:
+    def loadFolder(self,fn : str) -> bool:
         """Reads from a folder containing object folders, each of which contains
         some set of grasp json files."""
         for obj in os.listdir(fn):
@@ -86,25 +87,50 @@ class GraspDatabase:
                             print("Unable to load",os.path.join(fn,obj,gfn),"as a Grasp")
                             raise
 
-    def addObject(self,name : str):
+    def addObject(self, name : str):
         if name in self.objects:
             raise ValueError("Object {} already exists".format(name))
         self.objects.append(name)
         self.object_to_grasps[name] = []
 
-    def addGrasp(self,object,grasp):
-        """Adds a new Grasp (assumed object centric) to the database for the
-        given object.
-        """
-        if isinstance(grasp,Grasp):
-            oname = _object_name(object)
-            if oname not in self.object_to_grasps:
-                self.addObject(oname)
-            self.object_to_grasps[oname].append(grasp)
-        else:
-            raise ValueError("grasp needs to be a Grasp")
+    def addGrasp(self, object : Union[str, RigidObjectModel], grasp : Grasp):
+        """Adds a new Grasp to the database for the given object.
 
-    def sampler(self,robot : RobotModel) -> GraspSamplerBase:
+        If the object is not at the origin, the grasp will be transformed
+        to the object's local frame.
+        """
+        if not isinstance(grasp,Grasp):
+            raise ValueError("grasp needs to be a Grasp")
+        oname = _object_name(object)
+        if oname not in self.object_to_grasps:
+            self.addObject(oname)
+        if isinstance(object, RigidObjectModel):
+            Tinv = se3.inv(object.getTransform())
+            grasp = grasp.getTransformed(Tinv)
+        self.object_to_grasps[oname].append(grasp)
+    
+    def addGraspSamples(self, object : Union[str, RigidObjectModel], sampler : GraspSamplerBase, max_samples : int = 100):
+        """Adds samples from a GraspSamplerBase to the database for the given object.
+
+        Assumes that the grasp sampler is initialized for the object and gripper.
+
+        If the object is not at the origin, grasps will be transformed
+        to the object's local frame.
+        """
+        if not isinstance(sampler,GraspSamplerBase):
+            raise ValueError("sampler needs to be a GraspSamplerBase")
+        if max_samples <= 0:
+            return
+        oname = _object_name(object)
+        if oname not in self.object_to_grasps:
+            self.addObject(oname)
+        for i in range(max_samples):
+            g = sampler.next()
+            if g is None:
+                break
+            self.addGrasp(oname,g)
+
+    def sampler(self, robot : RobotModel) -> GraspSamplerBase:
         """Returns a GraspDatabaseSampler for this robot."""
         return GraspDatabaseSampler(robot,self.gripper,self.object_to_grasps)
 
@@ -122,22 +148,30 @@ class GraspDatabaseSampler(GraspSamplerBase):
     def __init__(self,robot : RobotModel, gripper : GripperInfo, object_to_grasps : Dict[str, List[Grasp]]):
         self._robot = robot
         self._gripper = gripper
-        self._object_to_grasps = object_to_grasps
+        self._object_to_grasps = object_to_grasps  # type: Dict[str, List[Grasp]]
         self._target_object = None
         self._matching_object = None
         self._matching_xform = None
-        self._grasp_index = None
+        self._grasp_index = 0
 
-    def object_match(self,object_source,object_target):
+    def object_match(self, object_source: Union[str, RigidObjectModel], object_target: Union[str, RigidObjectModel]) -> Optional[RigidTransform]:
         """Determine whether object_source is a match to object_target.
         If they match, return a transform from the reference frame of
         object_source to object_target.  Otherwise, return None.
 
-        Default implementation: determine whether the name of
+        Default implementation: determines whether the name of
         object_source matches object_target.name or object_target.getName()
         exactly.
+
+        Subclasses can override this to provide more sophisticated
+        matching, such as checking for similarity between object types
+        within an object class.
         """
-        if object_source != _object_name(object_target):
+        if _object_name(object_source) == _object_name(object_target):
+            if isinstance(object_source, RigidObjectModel) and isinstance(object_target, RigidObjectModel):
+                return se3.mul(se3.inv(object_source.getTransform()), object_target.getTransform())
+            elif isinstance(object_source, str) and isinstance(object_target, RigidObjectModel):
+                return object_target.getTransform()
             return se3.identity()
         return None
 
@@ -167,7 +201,7 @@ class GraspDatabaseSampler(GraspSamplerBase):
         """Returns the next Grasp from the database."""
         if self._matching_object is None:
             return None
-        grasps = self._object_to_grasps[self._matching_object]
+        grasps = self._object_to_grasps[self._matching_object]  # type: List[Grasp]
         if self._grasp_index >= len(grasps):
             self._matching_object = None
             return None
@@ -183,6 +217,9 @@ class GraspDatabaseSampler(GraspSamplerBase):
         grasps = self._object_to_grasps[self._matching_object]
         if self._grasp_index >= len(grasps):
             return 0
+        if grasps[self._grasp_index].score is not None:
+            return grasps[self._grasp_index].score
+        #if no score, return a linear score
         return 1.0 - self._grasp_index/float(len(grasps))
 
 
