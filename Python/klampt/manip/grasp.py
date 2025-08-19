@@ -125,6 +125,13 @@ class Grasp:
         ik2 = self.ikConstraint.copy()
         ik2.setFixedTransform(self.ikConstraint.link(),*Tfixed)
         return Grasp(ik2,self.fingerLinks,self.fingerConfig,self.contacts,self.score)
+    
+    def fixedBaseTransform(self) -> RigidTransform:
+        """Returns a fixed transform of the base that satisfies the grasp's
+        IK constraint."""
+        if self.ikConstraint is None:
+            raise ValueError("Cannot get fixed transform of a non-fixed grasp")
+        return self.ikConstraint.closestMatch(se3.identity())
 
     def transfer(self,gripper_source : GripperInfo, gripper_dest : GripperInfo) -> Grasp:
         """Creates a copy of this Grasp so that it can be used for another
