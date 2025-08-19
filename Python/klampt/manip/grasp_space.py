@@ -33,7 +33,7 @@ class GraspParameterSpace:
             - 'robotConfig'
 
             Item strings can also refer to sub-indices, like
-            ['ikConstraint']['endPosition'][0] or ['transform'][3].  See the
+            ['ikConstraint','endPosition',0] or ['transform',3].  See the
             :mod:`klampt.io.features` module for more information on how to
             specify items.
     
