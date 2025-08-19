@@ -212,6 +212,20 @@ class GripperInfo:
         a = vectorops.sub(self.openConfig,self.closedConfig)
         return min(1,max(0,vectorops.dot(a,b)/vectorops.normSquared(a)))
 
+    def estimatedContactCentroid(self) -> Vector3:
+        """Estimates the centroid of points of contact are normally made with
+        an object. This is just a heuristic, which works best with vacuum and
+        parallel-jaw grippers.
+        """
+        if self.center is None:
+            raise ValueError("Gripper does not have a center defined")
+        if self.type == 'parallel':
+            if self.primaryAxis is not None:
+                return vectorops.madd(self.center,self.primaryAxis,self.fingerLength-self.fingerWidth*0.5)
+        elif self.primaryAxis is not None:
+            return vectorops.madd(self.center, self.primaryAxis * 2.0/3.0)  #assume fingers partway closed
+        return self.center
+
     def evalSynergy(self, synergy_name : str, parameters : Vector) -> Vector:
         """Maps from a set of parameters to a full gripper configuration
         according to the given synergy."""
