@@ -104,6 +104,7 @@ Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the 
 -   Fixed OpenGL warnings for specular highlights out of OpenGL's range.
 -   Fixed error in geometry conversion to ImplicitSurface type after collision data initialized.
 -   Fixed error in fy / cy properties of cameras not being read properly.
+-   Python API: new `klampt.manip` module for basic grasp and manipulation planning.
 -   Python API: can now pass se3 transform objects directly to base classes, rather than requiring the asterisk like `setTransform(*T)`.  A major quality of life improvement!
 -   Python API: Renamed `MotionPlan` to `KinematicPlanner` to distinguish from optimizers, kinodynamic planners, etc.  `MotionPlan` is still available as an alias; will be deprecated in some future version.
 -   Python API: Added cost function queries and isOptimizing query for `MotionPlan` objects.
