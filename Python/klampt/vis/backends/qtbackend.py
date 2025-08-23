@@ -255,10 +255,14 @@ class QtGLWindow(QOpenGLWidget):
         self.setMouseTracking(True)
         self.setFocusPolicy(Focus.StrongFocus)
         def idleCallback():
-            self.nextIdleEvent = 0
-            if self.program: self.program.idlefunc()
-            if self.nextIdleEvent == 0:
-                self.idleTimer.start(0)
+            try:
+                self.nextIdleEvent = 0
+                if self.program: self.program.idlefunc()
+                if self.nextIdleEvent == 0:
+                    self.idleTimer.start(0)
+            except KeyboardInterrupt:
+                print("Klamp't Qt program killed by interrupt")
+                exit(0)
         self.idleTimer = QTimer(self)
         self.idleTimer.timeout.connect(idleCallback)
         self.idleTimer.setSingleShot(True)
@@ -447,6 +451,9 @@ class QtGLWindow(QOpenGLWidget):
             print("QtGLWindow.paintGL: hit an exception?")
             traceback.print_exc()
             exit(-1)
+        except KeyboardInterrupt:
+            print("Klamp't Qt program killed by interrupt")
+            exit(0)
         self.inpaint = False
         return
     #QWidget bindings
