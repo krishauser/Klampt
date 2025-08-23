@@ -324,7 +324,13 @@ from typing import Dict,List,Tuple,Union,Any,Optional,Callable,Generator
 class PlanItem:
     """A placeholder that declares metadata for items in a multi-step plan.
 
-    Can include name, type, validity checks, and generating node.
+    Can include name, type, validity checks, and generating node.  Usually,
+    a PlanItem is created by calling a node on values or other PlanItems,
+    or the constant() function.
+
+    You can operate on PlanItems with some standard accessors, such as `[IDX]`
+    if the underlying value is a sequence or dict and `.ATTRIBUTE` if the
+    underlying value is a class instance. The result is another PlanItem.
     """
     def __init__(self,
                  name : Optional[str] = None,
@@ -397,11 +403,15 @@ class PlanItem:
             raise RuntimeError("Validity checking failed on {}, value {}: {}".format(self,value,e))
         return True
 
-    def __getitem__(self, item : Any) -> Any:
+    def __getitem__(self, item : Any) -> PlanItem:
         """Allows indexed access to the results of this node."""
         def index(arr,idx):
             return arr[idx]
         return LambdaProcedureNode(index,include_context=False)(self,item)
+
+    def __getattr__(self, attr : str) -> PlanItem:
+        """Allows attribute access to the results of this node."""
+        return LambdaProcedureNode(getattr,include_context=False)(self,attr)
     
 
 class NodeBase:
@@ -412,12 +422,16 @@ class NodeBase:
     for its outputs.  Or, it can be a simple process that terminates with a
     result.
     
-    The plan() method must be a generator function, returning a sequence of
+    The `plan(...)` method must be a generator function, returning a sequence of
     iterates using `yield`.  Use `yield None` to indicate that planning is
     still proceeding but the multi-step planner can give time to consider
     other plans. The multi-step planner will keep track of progress by storing
     the iterator with a candidate plan, and may resume an iterator on a future
     steps.
+
+    If `signature()` returns `(input_types,output_type)`, then the signature of
+    `plan` must match `plan(context, *inputs) -> Generator[Optional[output_type]]`
+    where `inputs[k]` matches type `input_types[k]`.
 
     `properties` stores annotations about the node's behavior, and typical
     properties of a node include:
@@ -491,7 +505,7 @@ class NodeBase:
                 print("{} reached max time of {}".format(self.__class__.__name__,max_time))
                 return None        
             
-    def plan(self, context : Any) -> Generator:
+    def plan(self, context : Any, *inputs) -> Generator:
         """Returns a generator that performs increments of planning."""
         raise NotImplementedError
 
