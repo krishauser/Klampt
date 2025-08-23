@@ -3216,6 +3216,10 @@ class SelfCollisionFilter:
             raise ValueError("Only supports stop and warn")
         self.op = op
         self.robot = robot
+        for i in range(robot.numLinks()):
+            g = robot.link(i).geometry()
+            if not g.empty():
+                g.contains_point([0,0,0]) # do a query now to initialize collision acceleration and avoid delays inside control loop
     def __call__(self,q):
         self.robot.setConfig(self.robot.configFromDrivers(q))
         if self.robot.selfCollides():
@@ -3237,7 +3241,10 @@ class CollisionFilter:
             g = robot.link(i).geometry()
             if not g.empty():
                 self.robotGeoms.append(g)
+                g.contains_point([0,0,0])   # do a query now to initialize collision acceleration and avoid delays inside control loop
         self.obstacles = obstacles
+        for o in obstacles:
+            o.contains_point([0,0,0])   # do a query now to initialize collision acceleration and avoid delays inside control loop
     def __call__(self,q):
         self.robot.setConfig(self.robot.configFromDrivers(q))
         for o in self.obstacles:

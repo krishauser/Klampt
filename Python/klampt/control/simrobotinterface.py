@@ -24,6 +24,7 @@ from klampt.model import robotinfo
 from klampt import RobotModel,Simulator,SimRobotController
 from typing import Optional
 import functools
+import time
 import warnings
 
 class _SimControlInterface(RobotInterfaceBase):
@@ -46,6 +47,7 @@ class _SimControlInterface(RobotInterfaceBase):
             assert isinstance(robotInfo,RobotInfo)
             if robotInfo.modelFile is not None:
                 self.properties['klamptModelFile'] = robotInfo.modelFile
+        self._beginStepTime = None
     
     def klamptModel(self):
         return self.robot
@@ -84,7 +86,13 @@ class _SimControlInterface(RobotInterfaceBase):
     def sensorMeasurements(self,name):
         return self.sim_controller.sensor(name).getMeasurements()
 
+    def beginStep(self):
+        self._beginStepTime = time.time()
+
     def endStep(self):
+        assert self._beginStepTime is not None,"endStep() called without corresponding beginStep()"
+        if time.time() - self._beginStepTime > self.sim_controller.getRate() * 5:
+            print("Warning, processing took an exceptionally long time inside simulated controller. \nErrors or poor performance are likely to occur if your code is run on an actual robot")
         if self.simulator is not None:
             self.simulator.simulate(self.sim_controller.getRate())
             if self.simulator.getStatus() >= Simulator.STATUS_UNSTABLE:
@@ -263,11 +271,12 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     Also performs joint limit testing and self collision checking. These change
     the status of the interface to non-'ok' error codes.
     """
-    def __init__(self, robot : RobotModel, robotInfo : Optional[RobotInfo] = None):
+    def __init__(self, robot : RobotModel, robotInfo : Optional[RobotInfo] = None, rate : float = 200.0):
         RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
         assert isinstance(robot,RobotModel)
         self.robot = robot
         self._status = 'ok'
+        self._rate = rate
         self.robotInfo = robotInfo
         if robotInfo is not None:
             assert isinstance(robotInfo,RobotInfo)
@@ -299,7 +308,7 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         return res
 
     def controlRate(self):
-        return 200.0
+        return self._rate
 
     def sensors(self):
         sensorNames = [s.name for s in self.robot.sensors]
@@ -311,9 +320,12 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     def sensorMeasurements(self,name):
         self.robot.setConfig(self.configToKlampt(self.q))
         return self.robot.sensor(name).getMeasurements()
-
-    def endStep(self):
-        pass
+    
+    def initialize(self) -> bool:
+        #initialize collision checking data structures so this doesn't take too long inside begin/endStep()
+        for l in self.robot.links:
+            l.geometry().contains_point([0,0,0])
+        return True
 
     def status(self,joint_idx=None):
         return self._status
@@ -343,6 +355,14 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     
     def commandedPosition(self):
         return self.q
+
+    def beginStep(self):
+        self._beginStepTime = time.time()
+
+    def endStep(self):
+        assert self._beginStepTime is not None,"endStep() called without corresponding beginStep()"
+        if time.time() - self._beginStepTime > 1.0 / self.controlRate() * 5:
+            print("Warning, processing took an exceptionally long time inside simulated controller. \nErrors or poor performance are likely to occur if your code is run on an actual robot")
 
 
 def make(robotModel : RobotModel):
