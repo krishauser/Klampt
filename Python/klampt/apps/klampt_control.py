@@ -79,25 +79,11 @@ class ControllerStepContext:
 
 
 class ControllerGLPlugin(GLWidgetPlugin):
-    def __init__(self, world : WorldModel, controller : RobotInterfaceBase, gui : 'ControllerGUI'):
+    def __init__(self, world : WorldModel, gui : 'ControllerGUI'):
         GLWidgetPlugin.__init__(self)
 
         self.world = world
-        self.controller = controller
         self.gui = gui
-        #read commanded configuration
-        self.controller.beginStep()
-        try:
-            q = self.controller.commandedPosition()
-        except Exception as e:
-            try:
-                q = self.controller.sensedPosition()
-            except Exception:
-                q = None
-        self.controller.endStep()
-        if q is not None and all(v is not None for v in q):
-            qklampt = self.controller.configToKlampt(q)
-            world.robot(0).setConfig(qklampt)
         self.robotPoser = RobotPoser(world.robot(0))
         self.toolCoordinatesPoser = PointPoser()
         self.toolCoordinatesPoser.set([0,0,0])
@@ -113,14 +99,16 @@ class ControllerGLPlugin(GLWidgetPlugin):
         self.endEffectorLink = None
 
         robot = world.robot(0)
+        #initialize collision checking data structures for visualization widgets
+        print("Initializing collision checking data structures before controller init...")
+        for r in world.robots:
+            for l in r.links:
+                l.geometry().contains_point([0,0,0])
+
         self.qcmd = None
         self.qsns = None
         self.Tcmd = None
         self.Tsns = None
-        try:
-            self.dt = 1.0/controller.controlRate()
-        except NotImplementedError:
-            self.dt = 0.1
         self.tNextIdle = 0
         self.showPreset = False
         self.preset = None
@@ -319,11 +307,11 @@ class ControllerGLPlugin(GLWidgetPlugin):
         t = time.time()
         if t < self.tNextIdle:
             self.idlesleep(self.tNextIdle-t)
-        if t > self.tNextIdle + self.dt:
+        if t > self.tNextIdle + self.gui.dt:
             self.tNextIdle = t  #overrun, immediate refresh
             self.idlesleep(0)
         else:
-            self.tNextIdle += self.dt
+            self.tNextIdle += self.gui.dt
         return GLWidgetPlugin.idle(self)
 
 
@@ -346,6 +334,10 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.cartesianTrajectoryPresets = dict()
         assert self.robot is not None,"klamptModel() method must be implemented for klampt_control to work"
         self.idleCount = 0
+        try:
+            self.dt = 1.0/controller.controlRate()
+        except NotImplementedError:
+            self.dt = 0.1   #requested onIdle rate
         # Splitter to show 2 views in same widget
         self.splitter = QtWidgets.QSplitter()
         self.panel = QtWidgets.QWidget()
@@ -445,10 +437,34 @@ class ControllerGUI(QtWidgets.QMainWindow):
         #find map from parts to RobotInfo's end effectors
         self.partsToEEs = {}
         self.unmatchedEEs = []
-        for part in controller.parts():
+   
+    def initializeController(self):                
+        res = self.controller.initialize()
+        if not res:
+            #TODO: display error message
+            print("Error starting up controller")
+            exit(1)
+
+        #read commanded configuration
+        self.controller.beginStep()
+        try:
+            q = self.controller.commandedPosition()
+        except Exception as e:
+            try:
+                q = self.controller.sensedPosition()
+            except Exception:
+                q = None
+        self.controller.endStep()
+        if q is not None and all(v is not None for v in q):
+            qklampt = self.controller.configToKlampt(q)
+            self.plugin.setTargetConfig(qklampt)
+
+        self.partsToEEs = {}
+        self.unmatchedEEs = []
+        for part in self.controller.parts():
             self.partsToEEs[part] = []
         try:
-            eesToParts,self.unmatchedEEs = robotinfo.configureControllerEndEffectors(controller)
+            eesToParts,self.unmatchedEEs = self.robotinfo.configureControllerEndEffectors(self.controller)
             for ee,part in eesToParts.items():
                 self.partsToEEs[part].append(ee)
         except NotImplementedError as e:
@@ -456,10 +472,9 @@ class ControllerGUI(QtWidgets.QMainWindow):
             self.addException("setToolCoordinates",e)
             pass
 
-        self.updateActiveController(None,controller)
+        self.updateActiveController(None,self.controller)
         for ee in self.unmatchedEEs:
             self.addError("End effector {} in RobotInfo does not match a part".format(ee))
-   
 
     def onTabChange(self,index):
         if index == 3:
@@ -620,6 +635,11 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.plugin.enableCartesianWidget(cartesianEnabled,cartesianLink)
     
     def onIdle(self):
+        if self.idleCount < 20:
+            self.idleCount += 1
+            if self.idleCount == 20:
+                self.initializeController()  #initialize controller on first idle
+            return
         with ControllerStepContext(self):
             if not self.advancing:
                 return
@@ -1362,12 +1382,7 @@ def main():
         print("Press Ctrl+C to exit...")
         server.serve()
         exit(0)
-
-    res = controller.initialize()
-    if not res:
-        print("Error starting up controller")
-        exit(1)
-
+    
     import atexit
     def close_controller():
         controller.close()
@@ -1384,14 +1399,22 @@ def main():
     if world.numRobots()==0:
         print("No robot models loaded, can't run the visualization")
         exit(1)
+    
+    #make simpler appearance for faster visualization initialization?
+    # if world.numRobots() > 0:
+    #     for l in world.robot(0).links:
+    #         if l.geometry().numElements() > 10000:
+    #             l.appearance().setSilhouette(0)
+    #             l.appearance().setCreaseAngle(0)
 
     g_gui = None
-    g_plugin = ControllerGLPlugin(world,controller,None)
+    g_plugin = ControllerGLPlugin(world,None)
     def makefunc(gl_backend):
         global g_gui
         gui = ControllerGUI(gl_backend,info,controller,g_plugin)
         g_plugin.gui = weakref.proxy(gui)
         g_gui = gui
+        vis.nativeWindow().dt = gui.dt
         screen_geom = QtGui.QGuiApplication.primaryScreen().availableGeometry()
         x=int(screen_geom.width()*0.8)
         y=int(screen_geom.height()*0.8)
@@ -1399,7 +1422,6 @@ def main():
         return gui
     vis.customUI(makefunc)
     vis.pushPlugin(g_plugin)
-    vis.nativeWindow().dt = g_plugin.dt
     vis.setWindowTitle("klampt_control {}".format(info.name))
     vis.run()
     del g_gui
