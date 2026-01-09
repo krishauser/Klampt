@@ -112,6 +112,13 @@ class SO2Space(GeodesicSpace):
         return [so2.normalize(x[0]+d[0])]
 
 
+class SE2Space(MultiGeodesicSpace):
+    """The space of 2D transforms SE(2).  Elements are of the form (x,y,theta)
+    with theta in radians."""
+    def __init__(self):
+        MultiGeodesicSpace.__init__(self,CartesianSpace(2),SO2Space())
+
+
 class SO3Space(GeodesicSpace):
     """The space of 3D rotations SO(3).  The representation is 9 entries of the
     rotation matrix, laid out in column-major form, like the math.so3 module.

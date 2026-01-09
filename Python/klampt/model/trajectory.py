@@ -8,14 +8,15 @@
 
 import bisect
 
-from ..math import so3,se3,vectorops
+from ..math import so2,so3,se3,vectorops
 from ..math import spline
-from ..math.geodesic import *
+from ..math.geodesic import GeodesicSpace,SE2Space,SE3Space,SO3Space
 import warnings
 from ..robotsim import RobotModel,RobotModelLink
 from .subrobot import SubRobotModel
-from typing import Iterable,Optional,Union,Sequence,List,Tuple,Callable,Literal
+import math
 from .typing import Vector3,Vector,Rotation,RigidTransform
+from typing import Iterable,Optional,Union,Sequence,List,Tuple,Callable,Literal
 MetricType = Callable[[Vector,Vector],float]
 
 class Trajectory:
@@ -1483,6 +1484,73 @@ class SE3HermiteTrajectory(GeodesicHermiteTrajectory):
         return SE3Trajectory(res.times,[m[:n] for m in res.milestones])
     def constructor(self):
         return SE3HermiteTrajectory
+
+
+
+class SE2Trajectory(GeodesicTrajectory):
+    """A piecewise linear trajectory in SE(2).
+    
+    Milestones are of the form (x,y,theta) with theta in radians.
+    """
+    def __init__(self,times=None,milestones=None):
+        GeodesicTrajectory.__init__(self,SE2Space(),times,milestones)
+
+    def constructor(self):
+        return SE2Trajectory
+    
+    def preTransform(self, pose : Vector) -> None:
+        """Premultiplies every pose in here by (x,y,theta)"""
+        x,y,theta = pose
+        for i,m in enumerate(self.milestones):
+            self.milestones[i] = vectorops.add(so2.apply(theta,m[:2]),[x,y]) + [theta+m[2]]
+
+    def postTransform(self, pose : Vector) -> None:
+        """Postmultiplies every pose in here by (x,y,theta)"""
+        x,y,theta = pose
+        for i,m in enumerate(self.milestones):
+            self.milestones[i] = vectorops.add(so2.apply(m[2],[x,y]),m[:2]) + [theta+m[2]]
+    
+    def convert_se3(self) -> SE3Trajectory:
+        """Converts this SE(2) trajectory to an SE(3) trajectory by treating the
+        SE(2) pose (x,y,theta) as an SE(3) pose with rotation about the z-axis
+        and zero z-translation."""
+        rotations = [so3.rotation((0,0,1),m[2]) for m in self.milestones]
+        translations = [[m[0],m[1],0] for m in self.milestones]
+        return SE3Trajectory(self.times[:],list(zip(rotations,translations)))
+
+
+class SE2HermiteTrajectory(GeodesicHermiteTrajectory):
+    """A smoothed piecewise linear trajectory in SE(2).
+
+    Milestones encode lie derivatives in elements 3-6, i.e., milestones are
+    6D vectors consisting of [x,y,theta,vx,vy,w].
+    """
+    def __init__(self,times=None,milestones=None,outgoingLieDerivatives=None):
+        GeodesicHermiteTrajectory.__init__(self,SE2Space(),times,milestones,outgoingLieDerivatives)
+
+    def constructor(self):
+        return SE2HermiteTrajectory
+
+    def preTransform(self, pose : Vector) -> None:
+        """Premultiplies every pose in here by (x,y,theta)"""
+        x,y,theta = pose
+        for i,m in enumerate(self.milestones):
+            self.milestones[i] = vectorops.add(so2.apply(theta,m[:2]),[x,y]) + [theta+m[2]] + so2.apply(theta,m[3:5]) + [m[5]]
+    
+    def postTransform(self, pose : Vector) -> None:
+        """Postmultiplies every pose in here by (x,y,theta)"""
+        x,y,theta = pose
+        for i,m in enumerate(self.milestones):
+            self.milestones[i] = vectorops.add(so2.apply(m[2],[x,y]),m[:2]) + [theta+m[2]] + m[3:6]
+
+    def convert_se3(self) -> SE3HermiteTrajectory:
+        rotations = [so3.rotation((0,0,1),m[2]) for m in self.milestones]
+        translations = [[m[0],m[1],0] for m in self.milestones]
+        angvels = [so3.cross_product([0,0,m[5]]) for m in self.milestones]
+        velocities = [[m[3],m[4],0] for m in self.milestones]
+        return SE3HermiteTrajectory(self.times[:],list(zip(rotations,translations)),list(zip(angvels,velocities)))
+
+
 
 
 try:
