@@ -27,10 +27,10 @@ class TrajectoryPositionController(RobotControllerBlock):
             return {self.outputType:self.traj.eval(t)}
 
     def __getstate__(self):
-        return {'startTime':self.startTime,'traj':loader.toJson(self.traj)}
+        return {'startTime':self.startTime,'traj':loader.to_json(self.traj)}
     def __setstate__(self,state):
         self.startTime = state['startTime']
-        self.traj = loader.fromJson(state['traj'],'Trajectory')
+        self.traj = loader.from_json(state['traj'],'Trajectory')
     def signal(self,type,*inputs):
         if type=='reset':
             self.startTime = None
@@ -54,11 +54,11 @@ class TrajectoryWithFeedforwardTorqueController(RobotControllerBlock):
         return api.makeFeedforwardPIDCommand(self.traj.eval(t),self.traj.deriv(t),self.torquetraj.eval(t))
 
     def __getstate__(self):
-        return {'startTime':self.startTime,'traj':loader.toJson(self.traj),'torquetraj':loader.toJson(self.torqueTraj)}
+        return {'startTime':self.startTime,'traj':loader.to_json(self.traj),'torquetraj':loader.to_json(self.torquetraj)}
     def __setstate__(self,state):
         self.startTime = state['startTime']
-        self.traj = loader.fromJson(state['traj'],'Trajectory')
-        self.torquetraj = loader.fromJson(state['torquetraj'],'Trajectory')
+        self.traj = loader.from_json(state['traj'],'Trajectory')
+        self.torquetraj = loader.from_json(state['torquetraj'],'Trajectory')
     def signal(self,type,**inputs):
         if type=='reset':
             self.startTime = None

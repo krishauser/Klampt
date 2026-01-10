@@ -45,11 +45,12 @@ class TimedLooper:
     """
 
     def __init__(self, dt=None, rate=None, warning_frequency="auto", warning_printer="auto", name=None):
-        self.dt = dt
         if dt is None:
             if rate is None:
                 raise AttributeError("One of dt or rate must be specified")
             self.dt = 1.0 / rate
+        else:
+            self.dt = dt
         if self.dt < 0:
             raise ValueError("dt must be positive")
         if warning_frequency == "auto":

@@ -1137,7 +1137,7 @@ def shown() -> bool:
         res = _window_manager.shown()
     return res
 
-def customUI(func : Callable) -> None:
+def customUI(func : Optional[Callable]) -> None:
     """Tells the next created window/dialog to use a custom UI function. Only
     available in PyQT mode.
 
@@ -1170,7 +1170,7 @@ def threadCall(func : Callable) -> None:
 
 
 ######### CONVENIENCE ALIASES FOR VisualizationScene methods ###########
-def addAction(hook : Callable, short_text : str, key : str=None, description : str=None) -> None:
+def addAction(hook : Callable, short_text : str, key : Optional[str]=None, description : Optional[str]=None) -> None:
     """Adds a callback to the window that can be triggered by menu choice or
     keyboard. Alias for nativeWindow().addAction().
 
@@ -1221,7 +1221,7 @@ def listItems(name=None,indent=0) -> None:
     _init()
     scene().listItems(name,indent)
 
-def getItemName(object) -> ItemPath:
+def getItemName(object) -> Optional[ItemPath]:
     """Retrieves the name / path of a given object in the scene, or returns
     None if the object doesnt exist.
     """

@@ -389,7 +389,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         glcommon.GLWidgetPlugin.closefunc(self)
         _globalLock.release()
 
-    def idle(self):
+    def idle(self) -> bool:
         global _globalLock
         _globalLock.acquire()
         VisualizationScene.updateTime(self)

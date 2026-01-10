@@ -496,7 +496,7 @@ class _BlockOutputChannel(object):
         return res
 
 class _BlockInputs(object):
-    def __init__(self,block,inputs) -> None:
+    def __init__(self, block : 'Block', inputs : Union[int,list]) -> None:
         self._block = block
         if isinstance(inputs,int):
             self._channels = [_BlockInputChannel(block,i) for i in range(inputs)]
