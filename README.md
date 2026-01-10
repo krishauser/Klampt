@@ -95,7 +95,8 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the latest Python API updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the updates listed below that are prefixed with "Python API:" without needing to build from source.
 
-**master** (8/6/2025)
+**master** (1/8/2026)
+-   Minor bug fixes.
 -   Fixed sensor saving / loading within robot files.
 -   Fixed crashing with Group geometry rendering after the geometry is transformed.
 -   Fixed improper collision geometry when a geometry is updated.
@@ -118,6 +119,7 @@ Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the 
 -   Python API: `vis` item attributes are now consistently in *snake_case*.  Old camelCase attributes are still supported, for now. 
 -   Python API: added geometry editor option in visualization to update the geometry's current transform along with the geometry.
 -   Python API: fixed screwy AABBEditor behavior with non-identity frames.
+-   Python API: Trajectory discretization is slightly faster due to seekIndex linear time argument.
 
 **0.10.1** (4/20/2025)
 -   C++ API: Can use `KrisLibrary::setLogLevel()` function to control logging verbosity, with or without use of LOG4CXX library.

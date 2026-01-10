@@ -22,13 +22,13 @@ dependencies = [
 classifiers = [
     "Programming Language :: Python :: 3",
     "Development Status :: 4 - Beta",
-    "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
     "Topic :: Scientific/Engineering"
 ]
+license = "BSD-3-Clause"
 
 [project.scripts]
 klampt_browser='klampt.apps.klampt_browser:main'
