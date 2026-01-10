@@ -39,6 +39,7 @@ from .. import vis
 from ..vis import editors
 from ..vis.backends import vis_gl
 import warnings
+from typing import Union, List, Tuple, Optional, Any
 
 global _directory
 global _editTemporaryWorlds
@@ -70,22 +71,22 @@ class _LRUCache:
         self.cache[key] = value
 _editTemporaryWorlds = _LRUCache(10)
 
-def get_directory():
+def get_directory() -> str:
     """Returns the current resource directory."""
     return _directory
 
-def set_directory(value):
+def set_directory(value : str):
     """Sets the current resource directory."""
     global _directory
     _directory = value
 
-def _ensure_dir(f):
+def _ensure_dir(f : str):
     d = os.path.dirname(f)
     if len(d)==0: return
     if not os.path.exists(d):
         os.makedirs(d)
 
-def _get_world(world):
+def _get_world(world : Optional[Union[str, WorldModel]]) -> Optional[WorldModel]:
     if isinstance(world,str):
         #a single argument, e.g., a robot file
         global _editTemporaryWorlds
@@ -99,19 +100,26 @@ def _get_world(world):
             return w
     return world
 
-def known_extensions():
+def known_extensions() -> List[str]:
     """Returns all known resource file extensions"""
     return list(loader.EXTENSION_TO_TYPES.keys())
 
-def known_types():
+def known_types() -> List[str]:
     """Returns all known resource types"""
     return list(loader.TYPE_TO_EXTENSIONS.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
 
-def visual_edit_types():
+def visual_edit_types() -> List[str]:
     """Returns types that can be visually edited"""
     return ['Config','Configs','Trajectory','Vector3','Point','RigidTransform','Rotation','WorldModel']
 
-def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
+def get(name : str,
+        type : str = 'auto',
+        directory : Optional[str] = None,
+        default = None,
+        doedit : Union[bool,str]='auto',
+        description : Optional[str]=None,
+        editor : str = 'visual', world : Optional[Union[str,WorldModel]]=None,
+        referenceObject=None, frame=None) -> Any:
     """Retrieve a resource of the given name from the current resources
     directory.  If the resource does not already exist, an edit prompt will be
     shown, and the result from the prompt will be saved to disk under the
@@ -219,16 +227,21 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
             raise RuntimeError("Resource "+name+" does not exist")
     return
 
-def set(name,value,type='auto',directory=None):
+def set(name : str,
+        value,
+        type : str = 'auto',
+        directory : Optional[str]=None) -> bool:
     """Saves a resource to disk under the given name.
 
     Args:
         name (str): the file name.  Please make sure to get the right file
             extension.  .json files are also OK for many types.
         value: a Klamp't resource (see list of compatible types in get())
-        type (str, optional): The resource type.  If 'auto', the type is
+        type (str): The resource type.  If 'auto', the type is
             determined by the file extension.  If this fails, the type is
             determined by the value.
+        directory (str, optional): if given, overrides the current resources
+            directory.
 
     Returns:
         bool: True on success, False otherwise
@@ -306,7 +319,8 @@ class FileGetter:
         if isinstance(self.result,tuple):
             self.result = self.result[0]
 
-def load(type=None,directory=None):
+def load(type : Optional[str] = None,
+         directory : Optional[str] = None) -> Optional[Tuple[str, Any]]:
     """Pops up a dialog that asks the user to load a resource file of a
     given type. 
 
@@ -323,9 +337,9 @@ def load(type=None,directory=None):
     """
     
     fg = FileGetter('Open resource')
+    if directory is None:
+        directory = get_directory()    
     fg.directory = directory
-    if directory==None:
-        fg.directory = get_directory()    
     if type is not None:
         extensions=[v for v in loader.TYPE_TO_EXTENSIONS[type]]
         extensions.append('.json')
@@ -345,12 +359,13 @@ def load(type=None,directory=None):
     vis.dialog()
     vis.customUI(None)
     vis.setWindow(old_window)
-    if len(fg.result) == 0:
+    if fg.result is None or len(fg.result) == 0:
         return None
     fn = str(fg.result)
     return fn,get(fn,('auto' if type is None else type),'',doedit=False)
 
-def save(value,type='auto',directory=None):
+
+def save(value, type : str = 'auto', directory : Optional[str]=None) -> Optional[str]:
     """Pops up a dialog that asks the user to save a resource to a
     file of the correct type. 
 
@@ -366,9 +381,9 @@ def save(value,type='auto',directory=None):
         None if the operation was canceled.
     """
     fg = FileGetter('Save resource')
+    if directory is None:
+        directory = get_directory()    
     fg.directory = directory
-    if directory==None:
-        fg.directory = get_directory()    
     if type == 'auto':
         typelist = types.object_to_types(value)
         if isinstance(typelist,str):
@@ -395,7 +410,7 @@ def save(value,type='auto',directory=None):
     vis.dialog()
     vis.customUI(None)
     vis.setWindow(old_window)
-    if len(fg.result) == 0:
+    if fg.result is None or len(fg.result) == 0:
         return None
     if set(str(fg.result),value,type,''):
         return str(fg.result)
@@ -513,7 +528,7 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
                 pass
     return plugin.image
 
-def console_edit(name,value,type,description=None,world=None,frame=None):
+def console_edit(name,value,type,description=None,world=None,frame=None) -> Tuple[bool, Any]:
     print("*********************************************************")
     print() 
     print("Editing resource",name,"of type",type)
@@ -545,7 +560,7 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
         if data.startswith('{') or data.startswith('['):
             jsonobj = json.loads(data)
             try:
-                obj = loader.fromJson(jsonobj,type)
+                obj = loader.from_json(jsonobj,type)
                 return True,obj
             except Exception:
                 print("Error loading from JSON, press enter to continue...")
@@ -577,7 +592,11 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
         return False,None
 
 
-def edit(name,value,type='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
+def edit(name : str, value, type : str = 'auto',
+         description : Optional[str]=None,
+         editor : str ='visual',
+         world : Optional[Union[str,WorldModel]] = None,
+         referenceObject=None,frame=None) -> Tuple[bool, Any]:
     """Launches an editor for the given value.
 
     Args:
@@ -631,6 +650,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             
     world = _get_world(world)
     if isinstance(frame,str):
+        assert world is not None,"Cannot resolve named frame without a world"
         try:
             oframe = world.rigidObject(frame)
             frame = oframe
@@ -649,7 +669,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                 except RuntimeError:
                     raise RuntimeError('Named frame "'+frame+'" is not a valid frame')
     if type in ['Config','Configs','Trajectory']:
-        if world==None and referenceObject==None:
+        if world is None and referenceObject is None:
             raise RuntimeError("Cannot visually edit a "+type+" resource without a world/referenceObject argument")
         if referenceObject==None and world.numRobots() > 0:
             referenceObject = world.robot(0)
