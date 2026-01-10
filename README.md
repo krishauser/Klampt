@@ -119,7 +119,7 @@ Note: If you have a `pip` installed Klampt from version 0.10.1, you may get the 
 -   Python API: `vis` item attributes are now consistently in *snake_case*.  Old camelCase attributes are still supported, for now. 
 -   Python API: added geometry editor option in visualization to update the geometry's current transform along with the geometry.
 -   Python API: fixed screwy AABBEditor behavior with non-identity frames.
--   Python API: Trajectory discretization is slightly faster due to seekIndex linear time argument.
+-   Python API: Trajectory discretization is slightly faster due to seekIndex linear time argument.  Hermite trajectory time warping is fixed using new `timeWarp` method.
 
 **0.10.1** (4/20/2025)
 -   C++ API: Can use `KrisLibrary::setLogLevel()` function to control logging verbosity, with or without use of LOG4CXX library.
