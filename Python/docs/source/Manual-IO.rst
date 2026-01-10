@@ -114,14 +114,14 @@ As an example with an IK Objective:
 
     #method 4: serializing and deserializing in the JSON format
     import json
-    jsonobj = loader.toJson(obj)  #converts to a data structure compatible with JSON I/O routines
+    jsonobj = loader.to_json(obj)  #converts to a data structure compatible with JSON I/O routines
     s = json.dumps(jsonobj) #converts to a JSON string
     print(s)
     jsonobj2 = json.parse(s)  #converts from a JSON string
     obj2 = loader.fromJson(jsonobj2)  #converts from a JSON-compatible data structure
 
     #method 5: saving and loading in the JSON format
-    jsonobj = loader.toJson(obj)  #converts to a data structure compatible with JSON I/O routines
+    jsonobj = loader.to_json(obj)  #converts to a data structure compatible with JSON I/O routines
     with open("test_ik_objective.json",'w') as f:
         json.dump(f,jsonobj)  #saves to a JSON file on disk
     with open("test_ik_objective.json",'r') as f:
