@@ -666,7 +666,7 @@ class KlamptContext(Context):
             if isinstance(object,(list,dict)):
                 jsonobj = object
             else:
-                jsonobj = loader.toJson(object)
+                jsonobj = loader.to_json(object)
             if isinstance(path,str):
                 path = str_to_path(path)
                 return getJson(jsonobj,path)
@@ -681,7 +681,7 @@ class KlamptContext(Context):
             if isinstance(object,(list,dict)):
                 jsonobj = object
             else:
-                jsonobj = loader.toJson(object)
+                jsonobj = loader.to_json(object)
             if isinstance(path,str):
                 path = str_to_path(path)
                 return setJson(jsonobj,path,val)

@@ -178,7 +178,7 @@ def _to_jsonobj(val):
         return [_to_jsonobj(x) for x in val]
     else:
         try:
-            return loader.toJson(val)
+            return loader.to_json(val)
         except:
             raise ValueError("Unable to convert object "+repr(val)+" to JSON object")
     return None
