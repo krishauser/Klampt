@@ -5,6 +5,9 @@
 #include <string.h>
 #include <KrisLibrary/meshing/IO.h>
 #include "IO/XmlWorld.h"
+#include <KrisLibrary/Logger.h>
+
+DEFINE_LOGGER(World)
 
 namespace Klampt {
 
@@ -25,11 +28,11 @@ bool WorldModel::LoadXML(const char* fn)
 {
   XmlWorld xmlWorld;
   if(!xmlWorld.Load(fn)) {
-    printf("WorldModel::LoadXML: Error loading world file %s\n",fn);
+    LOG4CXX_ERROR(GET_LOGGER(World),"WorldModel::LoadXML: Error loading world file "<<fn);
     return false;
   }
   if(!xmlWorld.GetWorld(*this)) {
-    printf("WorldModel::LoadXML: Error extracting world data from %s\n",fn);
+    LOG4CXX_ERROR(GET_LOGGER(World),"WorldModel::LoadXML: Error extracting world data from "<<fn);
     return false;
   }
   return true;
@@ -316,7 +319,7 @@ void WorldModel::DrawGL()
 int WorldModel::LoadRobot(const string& fn)
 {
   RobotModel* robot = new RobotModel;
-  printf("WorldModel::LoadRobot: %s\n",fn.c_str());
+  LOG4CXX_INFO(GET_LOGGER(World),"WorldModel::LoadRobot: "<<fn);
   if(!robot->Load(fn.c_str())) {
     delete robot;
     return -1;
@@ -755,7 +758,7 @@ int WorldModel::LoadElement(const string& sfn)
   if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
     int res=LoadRobot(fn);
     if(res<0) {
-      printf("Error loading robot file %s\n",fn);
+      LOG4CXX_ERROR(GET_LOGGER(World),"Error loading robot file "<<fn);
       return -1;
     }
     return RobotID(res);
@@ -767,7 +770,7 @@ int WorldModel::LoadElement(const string& sfn)
 	res = LoadTerrain(fn);
 	if(res >= 0) return TerrainID(res);
       }
-      printf("Error loading rigid object file %s\n",fn);
+      LOG4CXX_ERROR(GET_LOGGER(World),"Error loading rigid object file "<<fn);
       return -1;
     }
     return RigidObjectID(res);
@@ -775,13 +778,13 @@ int WorldModel::LoadElement(const string& sfn)
   else if(0==strcmp(ext,"env") || Geometry::AnyGeometry3D::CanLoadExt(ext)) {
     int res=LoadTerrain(fn);
     if(res < 0) {
-      printf("Error loading terrain file %s\n",fn);
+      LOG4CXX_ERROR(GET_LOGGER(World),"Error loading terrain file "<<fn);
       return -1;
     }
     return TerrainID(res);
   }
   else {
-    printf("WorldModel::Load: Unknown file extension %s on file %s\n",ext,fn);
+    LOG4CXX_ERROR(GET_LOGGER(World),"WorldModel::Load: Unknown file extension "<<ext<<" on file "<<fn);
     return -1;
   }
 }
